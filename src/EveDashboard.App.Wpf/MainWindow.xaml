@@ -1,0 +1,277 @@
+<Window x:Class="EveDashboard.App.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:session="clr-namespace:EveDashboard.App.Wpf.Widgets.Session"
+        xmlns:pilot="clr-namespace:EveDashboard.App.Wpf.Widgets.Pilot"
+        xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+        xmlns:layout="clr-namespace:EveDashboard.App.Wpf.Layout"
+        xmlns:sc="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
+        xmlns:dd="urn:gong-wpf-dragdrop"
+        mc:Ignorable="d"
+        Title="EVE Dashboard"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <!--
+        Plan 19 layout: outer 2-row Grid.
+        Row 0 = chrome row (Auto height); session controls (left) + Hidden-widgets popup
+                trigger + Settings (right).
+        Row 1 = a single ScrollViewer + ItemsControl + WrapPanel containing
+                ALL widgets (Session + per-pilots) in user-definable order.
+                Drag-and-drop reorder via GongSolutions; per-widget hide via the
+                chrome-template "x" button (plan 19 Generic.xaml).
+        The previous plan-22.1 3-column row 1 (Session column | GridSplitter |
+        per-pilot UniformGrid) is gone — replaced by the unified flow.
+    -->
+    <Window.Resources>
+        <session:SessionModeToVisibilityConverter x:Key="ModeToVis" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Implicit DataTemplates for the heterogeneous flow.
+             ItemsSource is ObservableCollection<WidgetItem> bound to Layout.Items;
+             each WidgetItem is rendered by the WidgetItem template below, which
+             switches on ViewModel type via implicit DataType=. Post-plan-25
+             follow-up: the SessionConfig widget moved to a modal dialog
+             (SessionConfigDialog), so only the SessionStats VM template
+             remains here. -->
+        <DataTemplate DataType="{x:Type session:SessionStatsViewModel}">
+            <session:SessionStatsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pilot:PerPilotWidgetViewModel}">
+            <pilot:PerPilotWidgetView />
+        </DataTemplate>
+
+        <!-- Plan 20: implicit DataTemplate for the cog popup VM. The chrome's
+             Popup ContentPresenter resolves StatConfigPopupViewModel through this. -->
+        <DataTemplate DataType="{x:Type sc:StatConfigPopupViewModel}">
+            <sc:StatConfigPopupView />
+        </DataTemplate>
+
+        <!-- Top-level item template for WidgetItem. Wraps the inner VM in a Grid whose
+             Visibility is bound to IsHidden (Hidden -> Collapsed); the inner ContentPresenter
+             dispatches to the matching VM-typed DataTemplate above. -->
+        <DataTemplate DataType="{x:Type layout:WidgetItem}">
+            <Grid Visibility="{Binding IsHidden, Converter={StaticResource InverseBoolToVis}}">
+                <ContentPresenter Content="{Binding ViewModel}" />
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Plan 22.1 chrome row + plan 19 Hidden-widgets dropdown + plan 24 button reshape.
+             ALL session controls (left) + Hidden-widgets popup + Settings (right).
+             Buttons toggle visibility based on Session.Mode:
+                Config  -> Start
+                Running -> Pause + Stop
+                Paused  -> Resume + Stop
+                Stopped -> New Session
+             ModalShadowEffect gives the chrome row a visual lift above the widget grid below.
+             Per MEMORY.md -> feedback_chrome_bar_buttons_only, the chrome row holds buttons ONLY (no status text). -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource BackgroundBrush}"
+                BorderBrush="{DynamicResource WidgetBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,4"
+                Panel.ZIndex="1"
+                Effect="{DynamicResource ModalShadowEffect}">
+            <DockPanel LastChildFill="False">
+                <!-- Settings (right-aligned). Declared FIRST with Dock=Right so it lands at the rightmost edge. -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="SettingsButton"
+                        Content="Settings"
+                        Width="84"
+                        Height="24"
+                        Click="SettingsButton_Click"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Plan 25 Reports button. Declared AFTER Settings so it lands to Settings' left.
+                     Modeless: Show() rather than ShowDialog() — user can keep mining while reviewing. -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="ReportsButton"
+                        Content="Reports"
+                        Width="84"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Click="ReportsButton_Click"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Crystal Diagram button. Declared AFTER Reports so it lands to Reports' left
+                     (immediate neighbour). Opens a modeless CrystalDiagramWindow that hosts the
+                     ore -> mineral cross-reference image. -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="CrystalDiagramButton"
+                        Content="Crystal Diagram"
+                        Width="110"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Click="CrystalDiagramButton_Click"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Plan 19 Hidden-widgets dropdown. Declared AFTER Reports so it lands further to the left.
+                     Visible only when at least one widget is hidden. Toggles the popup containing the list of hidden widgets. -->
+                <ToggleButton DockPanel.Dock="Right"
+                              x:Name="HiddenWidgetsButton"
+                              Width="140"
+                              Height="24"
+                              Margin="0,0,8,0"
+                              Content="Hidden widgets ▾"
+                              Visibility="{Binding Layout.HasHiddenWidgets, Converter={StaticResource BoolToVis}}"
+                              Background="{DynamicResource ButtonBackgroundBrush}"
+                              Foreground="{DynamicResource ButtonForegroundBrush}">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="MainBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    Effect="{DynamicResource CardShadowEffect}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource HoverOverlayBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource ActiveOverlayBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+                <Popup PlacementTarget="{Binding ElementName=HiddenWidgetsButton}"
+                       Placement="Bottom"
+                       StaysOpen="False"
+                       AllowsTransparency="True"
+                       IsOpen="{Binding IsChecked, ElementName=HiddenWidgetsButton, Mode=TwoWay}">
+                    <Border Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Padding="6"
+                            Effect="{DynamicResource ModalShadowEffect}">
+                        <ItemsControl ItemsSource="{Binding Layout.HiddenItems}"
+                                      MinWidth="180">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type layout:WidgetItem}">
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding DisplayName}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0"
+                                                   Foreground="{DynamicResource ForegroundBrush}" />
+                                        <Button Grid.Column="1"
+                                                Content="Show"
+                                                Width="60"
+                                                Height="28"
+                                                Click="HiddenItemShowButton_Click"
+                                                Tag="{Binding Descriptor}"
+                                                Background="{DynamicResource ButtonBackgroundBrush}"
+                                                Foreground="{DynamicResource ButtonForegroundBrush}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </Popup>
+
+                <!-- Pause (Running mode, left-aligned). Plan 24 split the prior toggle into
+                     two separate buttons (Pause + Resume) with literal Content; the
+                     BoolToPauseLabelConverter is gone with the IsPaused field. -->
+                <Button DockPanel.Dock="Left"
+                        x:Name="PauseButton"
+                        Content="Pause"
+                        Width="84"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Command="{Binding Session.PauseCommand}"
+                        Visibility="{Binding Session.Mode, Converter={StaticResource ModeToVis}, ConverterParameter=Running}"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Continue (Paused mode, left-aligned). Plan 37 renamed Resume -> Continue
+                     so the first action on a brand-new session (which now lands in Paused
+                     mode per Start-as-paused) reads naturally. Covers manual Pause,
+                     Start-as-paused, auto-pause (plan 37), and app-launch-with-open-session-row.
+                     SessionController.ResumeAsync dispatches between the light path (in-session,
+                     including Start-as-paused) and heavy path (app-launch) via the
+                     _sessionStartUtc null-check; the binding to Session.ResumeCommand is
+                     unchanged — only the literal button label flipped. -->
+                <Button DockPanel.Dock="Left"
+                        x:Name="ResumeButton"
+                        Content="Continue"
+                        Width="84"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Command="{Binding Session.ResumeCommand}"
+                        Visibility="{Binding Session.Mode, Converter={StaticResource ModeToVis}, ConverterParameter=Paused}"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Stop (Running OR Paused mode, left-aligned). Plan 24 broadened
+                     visibility to cover both modes; the merged StopAsync always shows
+                     the confirm dialog regardless of source. -->
+                <Button DockPanel.Dock="Left"
+                        x:Name="StopButton"
+                        Content="Stop"
+                        Width="84"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Command="{Binding Session.StopCommand}"
+                        Visibility="{Binding Session.Mode, Converter={StaticResource ModeToVis}, ConverterParameter=Running|Paused}"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- New Session (Config or Stopped mode, left-aligned). Visible when no active session.
+                     Click opens the SessionConfigDialog modal (plan 25 follow-up); the dialog hosts
+                     the pilot list + name editor + Start button. Width 100 because "New Session"
+                     doesn't fit in the 84-px standard. -->
+                <Button DockPanel.Dock="Left"
+                        x:Name="NewSessionButton"
+                        Content="New Session"
+                        Width="100"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Click="NewSessionButton_Click"
+                        Visibility="{Binding Session.Mode, Converter={StaticResource ModeToVis}, ConverterParameter=Config|Stopped}"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+            </DockPanel>
+        </Border>
+
+        <!-- Plan 19 unified dashboard flow. One ScrollViewer + one ItemsControl + one WrapPanel
+             holding ALL widgets (Session + per-pilots) in user-definable order. Drag-drop
+             reorder via GongSolutions DefaultDropHandler (insert semantics, decision 19.E). -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Layout.Items}"
+                          dd:DragDrop.IsDragSource="True"
+                          dd:DragDrop.IsDropTarget="True"
+                          dd:DragDrop.UseDefaultDragAdorner="True">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <!-- ItemTemplate is implicit via the WidgetItem DataTemplate in Window.Resources. -->
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

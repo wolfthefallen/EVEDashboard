@@ -1,0 +1,17 @@
+<widgets:WidgetBase x:Class="EveDashboard.App.Wpf.Widgets.Session.SessionStatsView"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+                    mc:Ignorable="d">
+    <!--
+        Plan 20: replaced the previous header-TextBlocks + 7-row Grid with one
+        ItemsControl bound to Stats. DisplaySessionName (default Header1 emphasis),
+        TotalTimeMined (default Hero emphasis), and the 7 numeric stats all flow
+        as StatRowViewModel rows via the implicit DataTemplate in
+        Themes/StatRowTemplates.xaml. WidgetBase chrome handles the LastUpdated
+        line with Visibility bound to IsLastUpdatedVisible.
+    -->
+    <ItemsControl ItemsSource="{Binding Stats}" />
+</widgets:WidgetBase>

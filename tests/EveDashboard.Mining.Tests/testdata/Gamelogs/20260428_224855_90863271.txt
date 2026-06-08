@@ -1,0 +1,960 @@
+------------------------------------------------------------
+  Gamelog
+  Listener: Fierro Fallen
+  Session Started: 2026.04.28 22:48:55
+------------------------------------------------------------
+[ 2026.04.28 22:48:59 ] (hint) Attempting to join a channel
+[ 2026.04.28 22:48:59 ] (hint) Attempting to join a channel
+[ 2026.04.28 22:48:59 ] (hint) Attempting to join a channel
+[ 2026.04.28 23:28:52 ] (notify) Please wait...
+[ 2026.04.28 23:29:20 ] (notify) Ship stopping
+[ 2026.04.28 23:30:28 ] (notify) External factors are preventing your Multispectrum Shield Hardener II from responding to this command
+[ 2026.04.28 23:30:28 ] (notify) External factors are preventing your Multispectrum Shield Hardener II from responding to this command
+[ 2026.04.28 23:40:24 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>3</b> fleet members.
+[ 2026.04.28 23:40:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>3</b> fleet members.
+[ 2026.04.28 23:41:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:41:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:41:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:41:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:41:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:41:45 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:41:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:41:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:41:46 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:42:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:42:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:42:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:42:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:42:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:42:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:42:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:43:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:43:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:44:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:44:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:44:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:44:10 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:44:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:44:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:44:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:44:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:45:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:45:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:45:17 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:45:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:45:23 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:45:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:45:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:45:25 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:45:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:45:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:46:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:46:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:46:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:46:27 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:46:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:46:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:46:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:46:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:47:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:47:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:47:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:47:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:47:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:47:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:47:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:48:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:48:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:48:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:48:47 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:48:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:49:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:49:00 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:49:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:49:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:49:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:49:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:49:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:50:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:50:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:50:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:50:14 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:50:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:50:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:50:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:51:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:51:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:51:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:51:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:51:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:51:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:51:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:17 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:52:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:52:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:52:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:52:53 ] (notify) All drones returning to drone bay
+[ 2026.04.28 23:52:56 ] (notify) Successfully compressed Nocxite III-Grade into 1519 Compressed Nocxite III-Grade.
+[ 2026.04.28 23:52:57 ] (notify) Successfully compressed Nocxite III-Grade into 32 Compressed Nocxite III-Grade.
+[ 2026.04.28 23:52:57 ] (notify) Successfully compressed Nocxite III-Grade into 32 Compressed Nocxite III-Grade.
+[ 2026.04.28 23:52:58 ] (notify) Verka Fallen compressed 5629 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:52:59 ] (notify) Felicity Fallen compressed 6254 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:52:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>10<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:53:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>13<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:53:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>15<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:53:00 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>15<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:53:01 ] (notify) Gothy Fallen compressed 5619 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:53:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>9<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:53:03 ] (notify) Sadie Fallen compressed 6199 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:53:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>27<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:53:05 ] (notify) Jenn Fallen compressed 5132 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:06 ] (notify) Jenn Fallen compressed 101 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:06 ] (notify) Jenn Fallen compressed 101 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:07 ] (notify) Cassandra Fallen compressed 5078 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:08 ] (notify) Successfully compressed Nocxite III-Grade into 74 Compressed Nocxite III-Grade.
+[ 2026.04.28 23:53:20 ] (notify) Verka Fallen compressed 192 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:22 ] (notify) Felicity Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:24 ] (notify) Vera Fallen compressed 6145 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:53:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:53:25 ] (notify) Gothy Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:53:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:53:31 ] (notify) Cassandra Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:06 ] (notify) Verka Fallen compressed 192 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:07 ] (notify) Felicity Fallen compressed 403 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:08 ] (notify) Vera Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:08 ] (notify) Gothy Fallen compressed 403 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:54:09 ] (notify) Sadie Fallen compressed 690 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:54:10 ] (notify) Jenn Fallen compressed 101 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:10 ] (notify) Jenn Fallen compressed 303 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:11 ] (notify) Cassandra Fallen compressed 403 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:12 ] (notify) Verka Fallen compressed 192 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:17 ] (notify) Vera Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.28 23:54:18 ] (notify) Sadie Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.28 23:54:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:54:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:54:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:54:26 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:54:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:54:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:54:29 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:54:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:54:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:54:47 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.28 23:55:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:55:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:55:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:55:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:55:39 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:55:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:55:40 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:55:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:55:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:55:42 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:56:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:56:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:56:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:56:48 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:56:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:56:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:56:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:56:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:57:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:57:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:57:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:57:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:58:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:58:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:58:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:58:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:58:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:59:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:59:09 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.28 23:59:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:59:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:59:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:59:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.28 23:59:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.28 23:59:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:00:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:00:19 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:00:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:00:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:00:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:00:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:00:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:00:29 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:00:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:00:34 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:00:42 ] (notify) Successfully compressed Nocxite III-Grade into 951 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:00:43 ] (notify) Verka Fallen compressed 3240 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:44 ] (notify) Felicity Fallen compressed 3419 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:44 ] (notify) Vera Fallen compressed 3127 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:45 ] (notify) Gothy Fallen compressed 3397 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:00:46 ] (notify) Jenn Fallen compressed 2821 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:47 ] (notify) Cassandra Fallen compressed 3065 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:52 ] (notify) Felicity Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:54 ] (notify) Sadie Fallen compressed 3113 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:00:55 ] (notify) Jenn Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:00:56 ] (notify) Cassandra Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:01:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:01:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:01:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:01:29 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:01:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:01:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:01:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:01:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:01:47 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:01:56 ] (notify) Verka Fallen compressed 576 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:02:00 ] (notify) Felicity Fallen compressed 403 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:02:00 ] (notify) Vera Fallen compressed 603 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:02:02 ] (notify) Sadie Fallen compressed 604 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:02:02 ] (notify) Jenn Fallen compressed 403 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:02:04 ] (notify) Successfully compressed Nocxite III-Grade into 48 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:02:04 ] (notify) Successfully compressed Nocxite III-Grade into 191 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:02:05 ] (notify) Gothy Fallen compressed 606 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:02:07 ] (notify) Cassandra Fallen compressed 402 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:02:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:02:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:02:37 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:02:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:02:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:02:38 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:02:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:02:39 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:02:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:02:51 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:02:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:02:59 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:03:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:03:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:03:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:03:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:03:49 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:03:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:04:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:04:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:04:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:04:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:04:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:05:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:05:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:05:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:05:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:05:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:05:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:06:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:06:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:06:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:06:12 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:06:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:06:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:06:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:06:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:06:31 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:07:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:07:21 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:07:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:07:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:07:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:07:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:07:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:07:32 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:07:41 ] (notify) Successfully compressed Nocxite III-Grade into 727 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:07:41 ] (notify) Successfully compressed Nocxite III-Grade into 32 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:07:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:07:41 ] (notify) Verka Fallen compressed 2858 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:42 ] (notify) Felicity Fallen compressed 2619 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:43 ] (notify) Vera Fallen compressed 2724 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:44 ] (notify) Gothy Fallen compressed 2706 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:07:45 ] (notify) Sadie Fallen compressed 3579 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:07:46 ] (notify) Jenn Fallen compressed 101 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:46 ] (notify) Jenn Fallen compressed 2808 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:48 ] (notify) Cassandra Fallen compressed 2860 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:50 ] (notify) Verka Fallen compressed 192 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:07:53 ] (notify) Gothy Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:07:56 ] (notify) Successfully compressed Nocxite III-Grade into 31 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:07:58 ] (notify) Vera Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:08:00 ] (notify) Sadie Fallen compressed 201 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:08:04 ] (notify) Felicity Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:08:10 ] (notify) Jenn Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:08:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:08:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:08:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:08:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:08:31 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:08:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:08:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:08:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:09:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:09:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:09:37 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:09:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:09:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:09:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:09:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:09:51 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:10:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:10:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:10:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:10:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:10:50 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:10:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:10:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:10:52 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:11:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:11:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:11:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:11:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:12:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:12:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:12:02 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:12:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:12:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:12:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:12:23 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:12:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:12:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:13:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:13:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:13:12 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:13:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:13:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:13:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:13:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:13:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:14:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:14:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:14:23 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:14:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:14:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:14:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:14:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:14:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:15:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:15:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:15:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:15:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:15:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:15:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:15:45 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:15:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:16:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:16:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:16:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:16:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:16:45 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:16:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:16:49 ] (notify) Verka Fallen compressed 4201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:16:51 ] (notify) Felicity Fallen compressed 4437 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:16:55 ] (notify) Vera Fallen compressed 4438 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:16:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:16:55 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:16:56 ] (notify) Gothy Fallen compressed 4899 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:16:57 ] (notify) Sadie Fallen compressed 3830 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:17:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:17:03 ] (notify) Jenn Fallen compressed 3828 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:17:05 ] (notify) Cassandra Fallen compressed 4517 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:17:06 ] (notify) Successfully compressed Nocxite III-Grade into 1376 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:17:07 ] (notify) Verka Fallen compressed 192 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:17:09 ] (notify) Vera Fallen compressed 200 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:17:10 ] (notify) Sadie Fallen compressed 493 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:17:10 ] (notify) Jenn Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:17:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:17:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:17:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:17:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:17:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:18:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:18:06 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:18:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:18:18 ] (notify) Successfully compressed Nocxite III-Grade into 222 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:18:19 ] (notify) Verka Fallen compressed 576 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:20 ] (notify) Felicity Fallen compressed 603 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:21 ] (notify) Vera Fallen compressed 604 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:22 ] (notify) Gothy Fallen compressed 897 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:18:23 ] (notify) Sadie Fallen compressed 503 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:18:24 ] (notify) Jenn Fallen compressed 404 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:25 ] (notify) Cassandra Fallen compressed 847 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:18:26 ] (notify) Felicity Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:18:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:18:27 ] (notify) Sadie Fallen compressed 101 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:18:47 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:19:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:19:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:19:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:19:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:19:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:19:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:19:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:20:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:20:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:20:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:20:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:20:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:20:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:20:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:20:33 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:21:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:21:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:21:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:21:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:21:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:21:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:21:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:22:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:22:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:38 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:22:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:22:55 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:23:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:23:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:23:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:23:46 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:23:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:23:47 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:23:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:24:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:24:00 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:24:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:24:06 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:24:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:24:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:24:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:24:56 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:24:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:25:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:25:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:25:11 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:25:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:25:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:25:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:26:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:26:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:26:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:26:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:26:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:26:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:26:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:27:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:27:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:27:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:27:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:27:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:27:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:27:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:28:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:26 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:28:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:28:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:43 ] (notify) Successfully compressed Nocxite III-Grade into 32 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:28:44 ] (notify) Successfully compressed Nocxite III-Grade into 1365 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:28:45 ] (notify) Verka Fallen compressed 5523 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:28:46 ] (notify) Felicity Fallen compressed 5645 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:28:47 ] (notify) Vera Fallen compressed 5040 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:28:48 ] (notify) Gothy Fallen compressed 5505 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:28:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:28:49 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:28:50 ] (notify) Sadie Fallen compressed 4436 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:28:51 ] (notify) Jenn Fallen compressed 4633 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:28:53 ] (notify) Cassandra Fallen compressed 5604 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:29:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:29:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:29:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:29:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:29:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:29:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:29:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:30:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:30:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:30:39 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:30:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:30:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:31:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:31:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:31:05 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:31:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:31:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:31:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:32:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:32:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:32:03 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:32:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:32:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:32:18 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:32:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:32:21 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:32:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:32:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:33:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:33:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:33:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:33:24 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:33:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:33:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:33:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:33:31 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:33:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:22 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:34:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:34:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:34:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:44 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:35:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:35:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:35:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:34 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:35:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:36:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:36:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:54 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:37:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:37:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:37:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:59 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:38:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:06 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:38:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:38:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:39:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:15 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:39:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:39:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:39:27 ] (notify) Verka Fallen compressed 1919 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:39:27 ] (notify) Verka Fallen compressed 2304 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:28 ] (notify) Felicity Fallen compressed 2016 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:39:29 ] (notify) Felicity Fallen compressed 2721 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:30 ] (notify) Vera Fallen compressed 2428 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:39:30 ] (notify) Vera Fallen compressed 2419 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:32 ] (notify) Gothy Fallen compressed 5802 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:33 ] (notify) Sadie Fallen compressed 5132 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:34 ] (notify) Jenn Fallen compressed 2423 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:35 ] (notify) Jenn Fallen compressed 2593 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:39:36 ] (notify) Cassandra Fallen compressed 2256 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:39:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:36 ] (notify) Cassandra Fallen compressed 2419 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:39 ] (notify) Successfully compressed Nocxite III-Grade into 1573 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:39:40 ] (notify) Verka Fallen compressed 192 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:41 ] (notify) Felicity Fallen compressed 201 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:42 ] (notify) Vera Fallen compressed 201 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:43 ] (notify) Gothy Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:46 ] (notify) Jenn Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:39:47 ] (notify) Cassandra Fallen compressed 202 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:40:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:40:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:40:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:31 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:40:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:34 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:40:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:04 ] (notify) Successfully compressed Nocxite III-Grade into 221 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:41:05 ] (notify) Verka Fallen compressed 576 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:06 ] (notify) Felicity Fallen compressed 604 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:06 ] (notify) Vera Fallen compressed 605 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:07 ] (notify) Gothy Fallen compressed 895 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:08 ] (notify) Sadie Fallen compressed 893 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:09 ] (notify) Jenn Fallen compressed 895 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:09 ] (notify) Cassandra Fallen compressed 606 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:41:22 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:41:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:41:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:41:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:02 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:42:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:42:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:42:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:43:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:44:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:44:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:44:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:44:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:44:09 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:44:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:44:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:44:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:45:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:45:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:45:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:45:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:45:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:45:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:45:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:45:35 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:46:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:46:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:46:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:46:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:46:27 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:46:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:46:31 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:46:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:46:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:47:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:47:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:47:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:47:39 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:47:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:47:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:47:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:47:48 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:47:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:48:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:48:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:48:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:48:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:48:53 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:48:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:49:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:49:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:49:05 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:49:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:49:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:50:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:50:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:50:06 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:50:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:50:10 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:50:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:50:13 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:50:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:50:25 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:50:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:51:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:51:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:51:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:51:22 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:51:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:51:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:51:25 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:51:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:51:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:52:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:52:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:52:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:52:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:52:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:52:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:52:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:53:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:53:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:44 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:53:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:44 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:53:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:53:48 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:54:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:54:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:54:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:54:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:54:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:54:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:55:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:55:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:55:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:56:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:56:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:56:06 ] (notify) Successfully compressed Nocxite III-Grade into 1967 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:56:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:56:06 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:56:07 ] (notify) Verka Fallen compressed 2174 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:07 ] (notify) Verka Fallen compressed 4501 Nocxite using your compression services.
+[ 2026.04.29 00:56:08 ] (notify) Felicity Fallen compressed 1339 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:08 ] (notify) Felicity Fallen compressed 5037 Nocxite using your compression services.
+[ 2026.04.29 00:56:09 ] (notify) Vera Fallen compressed 1210 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:56:09 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:56:09 ] (notify) Vera Fallen compressed 5037 Nocxite using your compression services.
+[ 2026.04.29 00:56:10 ] (notify) Gothy Fallen compressed 5596 Nocxite using your compression services.
+[ 2026.04.29 00:56:11 ] (notify) Gothy Fallen compressed 1211 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:12 ] (notify) Sadie Fallen compressed 1411 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:12 ] (notify) Sadie Fallen compressed 4724 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:13 ] (notify) Jenn Fallen compressed 1209 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:13 ] (notify) Jenn Fallen compressed 4436 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:56:13 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:56:14 ] (notify) Cassandra Fallen compressed 4440 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:15 ] (notify) Cassandra Fallen compressed 1210 Nocxite III-Grade using your compression services.
+[ 2026.04.29 00:56:16 ] (notify) Successfully compressed Nocxite III-Grade into 111 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:56:17 ] (notify) Verka Fallen compressed 192 Nocxite using your compression services.
+[ 2026.04.29 00:56:18 ] (notify) Felicity Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:56:20 ] (notify) Vera Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:56:21 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:56:23 ] (notify) Sadie Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:24 ] (notify) Jenn Fallen compressed 493 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:56:26 ] (notify) Cassandra Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:56:40 ] (notify) Verka Fallen compressed 192 Nocxite using your compression services.
+[ 2026.04.29 00:56:43 ] (notify) Felicity Fallen compressed 501 Nocxite using your compression services.
+[ 2026.04.29 00:56:46 ] (notify) Vera Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:56:50 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:56:51 ] (notify) Sadie Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:52 ] (notify) Jenn Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:56:54 ] (notify) Cassandra Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:10 ] (notify) Verka Fallen compressed 192 Nocxite using your compression services.
+[ 2026.04.29 00:57:11 ] (notify) Felicity Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:57:12 ] (notify) Vera Fallen compressed 201 Nocxite using your compression services.
+[ 2026.04.29 00:57:13 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:57:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:57:13 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:57:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:57:15 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:57:16 ] (notify) Successfully compressed Nocxite III-Grade into 94 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:57:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:57:16 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:57:21 ] (notify) Sadie Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:21 ] (notify) Jenn Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:57:21 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:57:22 ] (notify) Cassandra Fallen compressed 444 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:22 ] (notify) Successfully compressed Nocxite III-Grade into 95 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:57:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:57:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:57:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:57:37 ] (notify) Successfully compressed Nocxite III-Grade into 48 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:57:38 ] (notify) Verka Fallen compressed 192 Nocxite using your compression services.
+[ 2026.04.29 00:57:39 ] (notify) Felicity Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:57:43 ] (notify) Vera Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:57:44 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 00:57:45 ] (notify) Sadie Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:47 ] (notify) Jenn Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:57:48 ] (notify) Cassandra Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 00:58:00 ] (notify) Verka Fallen compressed 192 Nocxite using your compression services.
+[ 2026.04.29 00:58:02 ] (notify) Felicity Fallen compressed 201 Nocxite using your compression services.
+[ 2026.04.29 00:58:04 ] (notify) Vera Fallen compressed 201 Nocxite using your compression services.
+[ 2026.04.29 00:58:04 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 00:58:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:58:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:58:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:58:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:58:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:58:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:58:34 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:58:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:59:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:59:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 00:59:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:59:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:59:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:59:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:59:47 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 00:59:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:00:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:00:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:00:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:00:43 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:00:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:00:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:00:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:00:59 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:01:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:01:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:01:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:01:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:01:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:02:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:02:00 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:02:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:02:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:02:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:02:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:03:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:03:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:03:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:03:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:03:20 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:03:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:03:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:03:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:04:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:04:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:04:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:04:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:04:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:04:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:04:30 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:04:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:05:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:05:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:05:26 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:05:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:05:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:05:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:05:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:05:40 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:05:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:06:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:06:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:06:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:06:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:06:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:06:42 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:06:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:06:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:07:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:07:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:07:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:07:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:07:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:07:57 ] (notify) Successfully compressed Nocxite III-Grade into 1363 Compressed Nocxite III-Grade.
+[ 2026.04.29 01:07:58 ] (notify) Verka Fallen compressed 4585 Nocxite using your compression services.
+[ 2026.04.29 01:07:59 ] (notify) Felicity Fallen compressed 4842 Nocxite using your compression services.
+[ 2026.04.29 01:08:00 ] (notify) Vera Fallen compressed 4534 Nocxite using your compression services.
+[ 2026.04.29 01:08:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:08:00 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:08:01 ] (notify) Gothy Fallen compressed 5017 Nocxite using your compression services.
+[ 2026.04.29 01:08:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:08:01 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:08:02 ] (notify) Sadie Fallen compressed 4434 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:08:04 ] (notify) Jenn Fallen compressed 4436 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:08:05 ] (notify) Cassandra Fallen compressed 4683 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:08:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:08:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:08:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:08:57 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:09:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:09:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:09:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:09:10 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:09:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>47<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:09:12 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:09:13 ] (notify) Successfully compressed Nocxite III-Grade into 315 Compressed Nocxite III-Grade.
+[ 2026.04.29 01:09:13 ] (notify) Verka Fallen compressed 576 Nocxite using your compression services.
+[ 2026.04.29 01:09:14 ] (notify) Felicity Fallen compressed 908 Nocxite using your compression services.
+[ 2026.04.29 01:09:16 ] (notify) Vera Fallen compressed 604 Nocxite using your compression services.
+[ 2026.04.29 01:09:17 ] (notify) Gothy Fallen compressed 606 Nocxite using your compression services.
+[ 2026.04.29 01:09:19 ] (notify) Sadie Fallen compressed 897 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:09:20 ] (notify) Jenn Fallen compressed 603 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:09:21 ] (notify) Cassandra Fallen compressed 603 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:09:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:09:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:09:55 ] (notify) Medium Asteroid Ore Compressor I cannot be activated unless the ship has an active Industrial Core module.
+[ 2026.04.29 01:10:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:10:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:10:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:10:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:10:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:10:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:10:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:11:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:11:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:11:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:11:25 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:11:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:11:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:11:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:11:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:12:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:12:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:12:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:12:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>31<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:12:33 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:12:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:12:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:12:43 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>31<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:12:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:13:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:13:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:13:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:13:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:13:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:13:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:13:54 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>32<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:13:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:14:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:14:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:14:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:14:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:14:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:15:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:15:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>32<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:15:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:15:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:15:28 ] (notify) Successfully compressed Nocxite III-Grade into 796 Compressed Nocxite III-Grade.
+[ 2026.04.29 01:15:30 ] (notify) Verka Fallen compressed 2688 Nocxite using your compression services.
+[ 2026.04.29 01:15:32 ] (notify) Felicity Fallen compressed 3430 Nocxite using your compression services.
+[ 2026.04.29 01:15:33 ] (notify) Vera Fallen compressed 3128 Nocxite using your compression services.
+[ 2026.04.29 01:15:34 ] (notify) Gothy Fallen compressed 3696 Nocxite using your compression services.
+[ 2026.04.29 01:15:35 ] (notify) Sadie Fallen compressed 2826 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:15:37 ] (notify) Jenn Fallen compressed 2825 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:15:38 ] (notify) Cassandra Fallen compressed 2820 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:15:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:15:58 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>48<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:16:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:04 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:16:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:13 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:16:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>48<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:13 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>47<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:16:13 ] (notify) Successfully compressed Nocxite III-Grade into 240 Compressed Nocxite III-Grade.
+[ 2026.04.29 01:16:14 ] (notify) Verka Fallen compressed 384 Nocxite using your compression services.
+[ 2026.04.29 01:16:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>3<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:15 ] (mining) <color=0x77ffffff>Additional <font size=12><color=#ffff454b>3<color=0x77ffffff><font size=10> units depleted from asteroid as residue
+[ 2026.04.29 01:16:15 ] (notify) Felicity Fallen compressed 403 Nocxite using your compression services.
+[ 2026.04.29 01:16:16 ] (notify) Vera Fallen compressed 201 Nocxite using your compression services.
+[ 2026.04.29 01:16:17 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 01:16:18 ] (notify) Sadie Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:18 ] (notify) Jenn Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:19 ] (notify) Cassandra Fallen compressed 202 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>8<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 01:16:19 ] (notify) Successfully compressed Nocxite III-Grade into 11 Compressed Nocxite III-Grade.
+[ 2026.04.29 01:16:21 ] (notify) Vera Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 01:16:21 ] (notify) Gothy Fallen compressed 202 Nocxite using your compression services.
+[ 2026.04.29 01:16:22 ] (notify) Sadie Fallen compressed 201 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:26 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:16:26 ] (notify) Verka Fallen compressed 90 Nocxite using your compression services.
+[ 2026.04.29 01:16:27 ] (notify) Your <b>Mining Foreman Burst II</b> has applied bonuses to <b>7</b> fleet members.
+[ 2026.04.29 01:16:28 ] (notify) Felicity Fallen compressed 98 Nocxite using your compression services.
+[ 2026.04.29 01:16:31 ] (notify) Vera Fallen compressed 102 Nocxite using your compression services.
+[ 2026.04.29 01:16:34 ] (notify) Gothy Fallen compressed 96 Nocxite using your compression services.
+[ 2026.04.29 01:16:37 ] (notify) Sadie Fallen compressed 117 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:40 ] (notify) Jenn Fallen compressed 322 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:16:42 ] (notify) Cassandra Fallen compressed 325 Nocxite II-Grade using your compression services.
+[ 2026.04.29 01:19:54 ] (notify) The station denies you permission to dock for the moment due to your recent acts of aggression.
+[ 2026.04.29 01:21:18 ] (notify) External factors are preventing your Multispectrum Shield Hardener II from responding to this command
+[ 2026.04.29 01:21:19 ] (notify) External factors are preventing your Multispectrum Shield Hardener II from responding to this command

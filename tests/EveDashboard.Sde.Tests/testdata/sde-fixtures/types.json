@@ -1,0 +1,64 @@
+{
+  "0": {
+    "type_id": 0, "group_id": 0, "name": { "en": "#System" },
+    "published": false,
+    "volume": 0, "portion_size": 1, "is_ore": false,
+    "type_materials": {}
+  },
+  "34": {
+    "type_id": 34, "group_id": 18, "name": { "en": "Tritanium" },
+    "published": true,
+    "volume": 0.01, "portion_size": 1, "is_ore": false,
+    "icon_id": 100
+  },
+  "35": {
+    "type_id": 35, "group_id": 18, "name": { "en": "Pyerite" },
+    "published": true,
+    "volume": 0.01, "portion_size": 1, "is_ore": false,
+    "icon_id": 101,
+    "type_materials": {}
+  },
+  "36": {
+    "type_id": 36, "group_id": 18, "name": { "en": "Mexallon" },
+    "published": true,
+    "volume": 0.01, "portion_size": 1, "is_ore": false,
+    "icon_id": 102
+  },
+  "1230": {
+    "type_id": 1230, "group_id": 462, "name": { "en": "Veldspar" },
+    "published": true,
+    "volume": 0.1, "portion_size": 100, "is_ore": true,
+    "icon_id": 1234,
+    "type_materials": {
+      "34": { "material_type_id": 34, "quantity": 415 }
+    }
+  },
+  "16633": {
+    "type_id": 16633, "group_id": 18, "name": { "en": "Hydrocarbons" },
+    "published": true,
+    "volume": 0.2, "portion_size": 1, "is_ore": false,
+    "icon_id": 103
+  },
+  "25268": {
+    "type_id": 25268, "group_id": 711, "name": { "en": "Fullerite-C28" },
+    "published": true,
+    "volume": 5.0, "portion_size": 1, "is_ore": false,
+    "icon_id": 5678
+  },
+  "45492": {
+    "type_id": 45492, "group_id": 1884, "name": { "en": "Bitumens" },
+    "published": true,
+    "volume": 10, "portion_size": 100, "is_ore": true,
+    "icon_id": 21792,
+    "type_materials": {
+      "35":    { "material_type_id": 35,    "quantity": 6000 },
+      "36":    { "material_type_id": 36,    "quantity": 400 },
+      "16633": { "material_type_id": 16633, "quantity": 65 }
+    }
+  },
+  "99999": {
+    "type_id": 99999, "group_id": 18, "name": { "en": "Café Mocha (test)" },
+    "published": true,
+    "volume": 1.0, "portion_size": 1, "is_ore": false
+  }
+}

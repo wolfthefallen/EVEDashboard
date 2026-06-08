@@ -1,0 +1,91 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Dark theme. Default per ISettingsRepository.GetThemeAsync default and
+        plan 14 round-2 1.6. Keys mirror Themes/Light.xaml exactly so theme
+        swap (plan 17's Settings UI) is a one-dictionary-replace operation.
+
+        Palette (user-supplied 2026-05-03):
+          background      #1F2125    deeper neutral
+          panel_secondary #2A2C30    widget body / clear separation
+          card_background #32353A    elevated surfaces (widget interior, buttons)
+          primary_accent  #5B6CFF    interactive accent
+          primary_font    #F5F7FA    softer than pure white
+          secondary_font  #A8ACB5    muted text
+          light_blue      #2EC5FF
+          mint_green      #5FE0B8    also status_ok
+          coral_pink      #FF7A8A    also status_error
+          border_color    #3A3D44
+          divider_color   #34373D
+          hover_overlay   rgba(255,255,255,0.05) becomes #0DFFFFFF
+          active_overlay  rgba(255,255,255,0.08) becomes #14FFFFFF
+          focus_ring      rgba(91,108,255,0.40)  becomes #665B6CFF
+        card_shadow / modal_shadow are CSS box-shadow constructs; in WPF
+        these are DropShadowEffect resources, not brushes; out of scope here.
+    -->
+
+    <!-- Existing keys (consumed by current XAML) -->
+    <Color x:Key="BackgroundColor">#FF1F2125</Color>
+    <Color x:Key="ForegroundColor">#FFF5F7FA</Color>
+    <Color x:Key="BorderColor">#FF3A3D44</Color>
+    <Color x:Key="WidgetBackgroundColor">#FF32353A</Color>
+    <Color x:Key="WidgetBorderColor">#FF34373D</Color>
+    <Color x:Key="ButtonBackgroundColor">#FF32353A</Color>
+    <Color x:Key="ButtonForegroundColor">#FFF5F7FA</Color>
+    <Color x:Key="ButtonHoverColor">#FF3A3D44</Color>
+    <Color x:Key="AccentColor">#FF5B6CFF</Color>
+
+    <!-- New palette additions (no current consumers; reserved for future widgets) -->
+    <Color x:Key="PanelSecondaryColor">#FF2A2C30</Color>
+    <Color x:Key="SecondaryFontColor">#FFA8ACB5</Color>
+    <Color x:Key="LightBlueColor">#FF2EC5FF</Color>
+    <Color x:Key="MintGreenColor">#FF5FE0B8</Color>
+    <Color x:Key="CoralPinkColor">#FFFF7A8A</Color>
+    <Color x:Key="StatusOkColor">#FF5FE0B8</Color>
+    <Color x:Key="StatusErrorColor">#FFFF7A8A</Color>
+    <Color x:Key="HoverOverlayColor">#0DFFFFFF</Color>
+    <Color x:Key="ActiveOverlayColor">#14FFFFFF</Color>
+    <Color x:Key="FocusRingColor">#665B6CFF</Color>
+
+    <SolidColorBrush x:Key="BackgroundBrush"        Color="{StaticResource BackgroundColor}" />
+    <SolidColorBrush x:Key="ForegroundBrush"        Color="{StaticResource ForegroundColor}" />
+    <SolidColorBrush x:Key="BorderBrush"            Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="WidgetBackgroundBrush"  Color="{StaticResource WidgetBackgroundColor}" />
+    <SolidColorBrush x:Key="WidgetBorderBrush"      Color="{StaticResource WidgetBorderColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundBrush"  Color="{StaticResource ButtonBackgroundColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundBrush"  Color="{StaticResource ButtonForegroundColor}" />
+    <SolidColorBrush x:Key="ButtonHoverBrush"       Color="{StaticResource ButtonHoverColor}" />
+    <SolidColorBrush x:Key="AccentBrush"            Color="{StaticResource AccentColor}" />
+
+    <SolidColorBrush x:Key="PanelSecondaryBrush"    Color="{StaticResource PanelSecondaryColor}" />
+    <SolidColorBrush x:Key="SecondaryFontBrush"     Color="{StaticResource SecondaryFontColor}" />
+    <SolidColorBrush x:Key="LightBlueBrush"         Color="{StaticResource LightBlueColor}" />
+    <SolidColorBrush x:Key="MintGreenBrush"         Color="{StaticResource MintGreenColor}" />
+    <SolidColorBrush x:Key="CoralPinkBrush"         Color="{StaticResource CoralPinkColor}" />
+    <SolidColorBrush x:Key="StatusOkBrush"          Color="{StaticResource StatusOkColor}" />
+    <SolidColorBrush x:Key="StatusErrorBrush"       Color="{StaticResource StatusErrorColor}" />
+    <SolidColorBrush x:Key="HoverOverlayBrush"      Color="{StaticResource HoverOverlayColor}" />
+    <SolidColorBrush x:Key="ActiveOverlayBrush"     Color="{StaticResource ActiveOverlayColor}" />
+    <SolidColorBrush x:Key="FocusRingBrush"         Color="{StaticResource FocusRingColor}" />
+
+    <!--
+        Elevation effects (palette: card_shadow / modal_shadow).
+        Approximated from CSS box-shadow: BlurRadius = CSS blur, ShadowDepth =
+        CSS y-offset, Opacity = CSS rgba alpha. Direction = 270 (downward).
+    -->
+    <DropShadowEffect x:Key="CardShadowEffect"
+                      Color="Black"
+                      BlurRadius="16"
+                      ShadowDepth="4"
+                      Direction="270"
+                      Opacity="0.35" />
+    <DropShadowEffect x:Key="ModalShadowEffect"
+                      Color="Black"
+                      BlurRadius="32"
+                      ShadowDepth="8"
+                      Direction="270"
+                      Opacity="0.50" />
+
+</ResourceDictionary>

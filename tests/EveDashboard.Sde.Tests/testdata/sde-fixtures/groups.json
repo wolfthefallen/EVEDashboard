@@ -1,0 +1,7 @@
+{
+  "0":    { "group_id": 0,    "category_id": 0,  "name": { "en": "#System" },           "published": false, "type_ids": [] },
+  "18":   { "group_id": 18,   "category_id": 4,  "name": { "en": "Mineral" },           "published": true,  "type_ids": [34, 35, 36, 16633] },
+  "462":  { "group_id": 462,  "category_id": 25, "name": { "en": "Veldspar" },          "published": true,  "type_ids": [1230] },
+  "711":  { "group_id": 711,  "category_id": 2,  "name": { "en": "Harvestable Cloud" }, "published": true,  "type_ids": [25268] },
+  "1884": { "group_id": 1884, "category_id": 25, "name": { "en": "Bitumens" },          "published": true,  "type_ids": [45492] }
+}

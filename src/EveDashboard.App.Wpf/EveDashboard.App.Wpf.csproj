@@ -1,0 +1,102 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EveDashboard.Core\EveDashboard.Core.csproj" />
+    <ProjectReference Include="..\EveDashboard.Mining\EveDashboard.Mining.csproj" />
+    <ProjectReference Include="..\EveDashboard.MarketData\EveDashboard.MarketData.csproj" />
+    <ProjectReference Include="..\EveDashboard.Sde\EveDashboard.Sde.csproj" />
+    <ProjectReference Include="..\EveDashboard.Persistence\EveDashboard.Persistence.csproj" />
+    <ProjectReference Include="..\EveDashboard.Stats\EveDashboard.Stats.csproj" />
+    <ProjectReference Include="..\EveDashboard.Reporting\EveDashboard.Reporting.csproj" />
+    <ProjectReference Include="..\EveDashboard.SessionIO\EveDashboard.SessionIO.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- User-facing exe name. Project / namespace stay as EveDashboard.App.Wpf
+         so internal wiring is unchanged; only the produced binary is renamed. -->
+    <AssemblyName>EVEDashboard</AssemblyName>
+    <!-- App-icon embedded in the executable. Used by Windows shell (File
+         Explorer, taskbar, Alt-Tab) and inherited by every Window's title bar
+         that does not override Window.Icon explicitly. -->
+    <ApplicationIcon>EveDashboard.App.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- In-UI logo asset. Build Action = Resource so it embeds in the assembly
+         and is reachable from XAML via "/Assets/logo.png" or the longer
+         "pack://application:,,,/Assets/logo.png". -->
+    <Resource Include="Assets\logo.png" />
+    <!-- Plan 34 (revised) orbital loading spinner assets. Two transparent
+         PNGs linked from images/ (single source of truth): the asteroid
+         stays static in the centre of the spinner, the mining barge orbits
+         around it via a render-thread RotateTransform animation. Replaces
+         the earlier 4x4 sprite atlas, which was vulnerable to UI-dispatcher
+         saturation (frame-cycling via DispatcherTimer froze under load). -->
+    <Resource Include="..\..\images\asteroid.png">
+      <Link>Assets\asteroid.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\mining_barge.png">
+      <Link>Assets\mining_barge.png</Link>
+    </Resource>
+    <!-- Ore -> mineral cross-reference diagram displayed by the chrome
+         "Crystal Diagram" button on MainWindow. Linked from images/
+         (single source of truth) into the assembly as a Resource so XAML
+         can reference it via pack URI. -->
+    <Resource Include="..\..\images\Mineral_to_asteroid_crystal.png">
+      <Link>Assets\Mineral_to_asteroid_crystal.png</Link>
+    </Resource>
+    <!-- Plan 35: per-anomaly cropped images for the Crystal Diagram window
+         dropdown. One PNG per nullsec SOV asteroid deposit, cropped from
+         the same Mineral_to_asteroid_crystal.png source by the user. Pack
+         URIs are pack://application:,,,/Assets/anomaly_<id>.png. -->
+    <Resource Include="..\..\images\anomaly_griemeer.png">
+      <Link>Assets\anomaly_griemeer.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_veldspar.png">
+      <Link>Assets\anomaly_veldspar.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_kylixium.png">
+      <Link>Assets\anomaly_kylixium.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_hezorime.png">
+      <Link>Assets\anomaly_hezorime.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_ueganite.png">
+      <Link>Assets\anomaly_ueganite.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_nocxite.png">
+      <Link>Assets\anomaly_nocxite.png</Link>
+    </Resource>
+    <Resource Include="..\..\images\anomaly_mordunium.png">
+      <Link>Assets\anomaly_mordunium.png</Link>
+    </Resource>
+    <!-- Plan 37: auto-pause / auto-resume notification sounds. Linked from
+         audio/ (single source of truth) so System.Media.SoundPlayer can reach
+         them via pack URIs:
+           pack://application:,,,/Assets/Miners_have_stopped.wav (auto-pause)
+           pack://application:,,,/Assets/Mining_detected.wav    (auto-resume)
+         The AutoPauseSoundPlayer loads each into a MemoryStream once and
+         hands the stream to a long-lived SoundPlayer. -->
+    <Resource Include="..\..\audio\Miners_have_stopped.wav">
+      <Link>Assets\Miners_have_stopped.wav</Link>
+    </Resource>
+    <Resource Include="..\..\audio\Mining_detected.wav">
+      <Link>Assets\Mining_detected.wav</Link>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EveDashboard.App.Wpf.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
+  </ItemGroup>
+
+</Project>

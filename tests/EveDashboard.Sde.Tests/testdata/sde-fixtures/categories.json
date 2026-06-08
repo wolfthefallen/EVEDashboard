@@ -1,0 +1,6 @@
+{
+  "0":  { "category_id": 0,  "name": { "en": "#System" },   "published": false, "group_ids": [0] },
+  "2":  { "category_id": 2,  "name": { "en": "Celestial" }, "published": true,  "group_ids": [711] },
+  "4":  { "category_id": 4,  "name": { "en": "Material" },  "published": true,  "group_ids": [18] },
+  "25": { "category_id": 25, "name": { "en": "Asteroid" },  "published": true,  "group_ids": [462, 1884] }
+}

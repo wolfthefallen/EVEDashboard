@@ -1,0 +1,184 @@
+<UserControl x:Class="EveDashboard.App.Wpf.Widgets.StatConfig.StatConfigPopupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:settings="clr-namespace:EveDashboard.Core.Settings.WidgetStats;assembly=EveDashboard.Core"
+             xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             mc:Ignorable="d"
+             MinWidth="280" MaxWidth="360">
+
+    <UserControl.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+
+        <!--
+            Plan 20 popup row template: drag-handle on the right (Reorderable
+            rows only), checkbox on the left, label in the middle (preview-styled
+            via Emphasis), emphasis ComboBox on Reorderable rows.
+        -->
+        <ObjectDataProvider x:Key="EmphasisValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="settings:StatEmphasis" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!-- Reorderable row: 4 cells (CheckBox | Label | EmphasisCombo | Drag handle). -->
+        <DataTemplate x:Key="ReorderableRowTemplate">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0"
+                          Margin="0,0,6,0"
+                          VerticalAlignment="Center"
+                          ToolTip="Hide / show in widget body"
+                          IsChecked="{Binding Hidden, Converter={StaticResource InverseBooleanConverter}}" />
+
+                <!-- Label preview-styled via the same emphasis triggers as the body row. -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding Label}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ForegroundBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontSize" Value="13" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header0}">
+                                    <Setter Property="FontSize" Value="14" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header1}">
+                                    <Setter Property="FontSize" Value="16" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header2}">
+                                    <Setter Property="FontSize" Value="20" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Hero}">
+                                    <Setter Property="FontSize" Value="22" />
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ComboBox Grid.Column="2"
+                          Width="92"
+                          Margin="6,0,6,0"
+                          VerticalAlignment="Center"
+                          ToolTip="Visual emphasis"
+                          ItemsSource="{Binding Source={StaticResource EmphasisValues}}"
+                          SelectedItem="{Binding Emphasis, Mode=TwoWay}" />
+
+                <!-- Drag handle glyph. dd:DragDrop attached props on the parent ItemsControl
+                     handle the actual drag; this is purely a visual affordance. -->
+                <TextBlock Grid.Column="3"
+                           Text="&#x2261;"
+                           ToolTip="Drag to reorder"
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           Margin="2,0,0,0"
+                           Cursor="SizeAll"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Hide-only row: 2 cells (CheckBox | Label). No drag handle, no emphasis picker. -->
+        <DataTemplate x:Key="HideOnlyRowTemplate">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0"
+                          Margin="0,0,6,0"
+                          VerticalAlignment="Center"
+                          ToolTip="Hide / show in widget chrome"
+                          IsChecked="{Binding Hidden, Converter={StaticResource InverseBooleanConverter}}" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding Label}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Customize stats"
+                   FontWeight="Bold"
+                   FontSize="13"
+                   Margin="0,0,0,6"
+                   Foreground="{DynamicResource ForegroundBrush}" />
+
+        <TextBlock Grid.Row="1"
+                   Text="Drag to reorder. Uncheck to hide. Pick emphasis."
+                   FontSize="11"
+                   Opacity="0.7"
+                   Margin="0,0,0,6"
+                   Foreground="{DynamicResource ForegroundBrush}" />
+
+        <ItemsControl Grid.Row="2"
+                      ItemsSource="{Binding Reorderable}"
+                      ItemTemplate="{StaticResource ReorderableRowTemplate}"
+                      dd:DragDrop.IsDragSource="True"
+                      dd:DragDrop.IsDropTarget="True"
+                      dd:DragDrop.UseDefaultDragAdorner="True" />
+
+        <!-- Hide-only zone (Last updated / Last event etc). Visible only when there are entries. -->
+        <Border Grid.Row="3"
+                Margin="0,8,0,0"
+                BorderBrush="{DynamicResource WidgetBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,6,0,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HideOnly.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <ItemsControl ItemsSource="{Binding HideOnly}"
+                          ItemTemplate="{StaticResource HideOnlyRowTemplate}" />
+        </Border>
+
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,8,0,0">
+            <Button Content="Apply"
+                    Command="{Binding ApplyCommand}"
+                    Width="72"
+                    Height="24"
+                    Margin="0,0,6,0"
+                    Background="{DynamicResource ButtonBackgroundBrush}"
+                    Foreground="{DynamicResource ButtonForegroundBrush}" />
+            <Button Content="Close"
+                    Command="{Binding CloseCommand}"
+                    Width="72"
+                    Height="24"
+                    Background="{DynamicResource ButtonBackgroundBrush}"
+                    Foreground="{DynamicResource ButtonForegroundBrush}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

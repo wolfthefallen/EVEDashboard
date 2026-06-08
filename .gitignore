@@ -1,0 +1,35 @@
+# .NET build outputs
+bin/
+obj/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# Test/coverage outputs
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage.*.xml
+
+# Build helpers
+*.swp
+*.tmp
+*.log
+.DS_Store
+
+# Internal working docs - never published to the public repo. The entire plans/ folder
+# (plan files + TODO/BUGS/CLEANUP trackers) and the AI/contributor operating contract
+# stay local-only.
+plans/
+CLAUDE.md
+
+# Claude Code local config (personal settings + runtime lock; not shared).
+.claude/
+
+# Local-only notes (e.g. ESI app registration / secrets); never committed or published.
+*.local.md

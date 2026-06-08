@@ -1,0 +1,93 @@
+<widgets:WidgetBase x:Class="EveDashboard.App.Wpf.Widgets.Pilot.PerPilotWidgetView"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+                    xmlns:pilot="clr-namespace:EveDashboard.App.Wpf.Widgets.Pilot"
+                    xmlns:sessions="clr-namespace:EveDashboard.Core.Sessions;assembly=EveDashboard.Core"
+                    mc:Ignorable="d">
+    <!--
+        Plan 20: replaced the hard-coded 7-row Grid with one ItemsControl bound to
+        Stats. PilotName + the 7 numeric stats now flow as StatRowViewModel rows
+        via the implicit DataTemplate in Themes/StatRowTemplates.xaml. The
+        "Last event" footer line stays as a dedicated TextBlock with Visibility
+        bound to IsLastEventAtVisible (hide-only; the popup's hide-only zone
+        controls it).
+
+        Plan 35: the right-click ContextMenu drives role changes (Miner/Booster/
+        Cyno/Combat). BorderBrush and BorderThickness override the default
+        WidgetBase chrome to encode the role visually. The Style BasedOn the
+        default WidgetBase style inherits all other chrome setters (Background,
+        Foreground, Padding, Margin, Effect, Template).
+    -->
+
+    <widgets:WidgetBase.Resources>
+        <pilot:RoleToBorderBrushConverter x:Key="RoleToBorderBrushConverter" />
+        <pilot:RoleToThicknessConverter   x:Key="RoleToThicknessConverter" />
+        <pilot:RoleEqualsConverter        x:Key="RoleEqualsConverter" />
+    </widgets:WidgetBase.Resources>
+
+    <widgets:WidgetBase.Style>
+        <Style TargetType="widgets:WidgetBase"
+               BasedOn="{StaticResource {x:Type widgets:WidgetBase}}">
+            <Setter Property="BorderBrush"
+                    Value="{Binding Role, Converter={StaticResource RoleToBorderBrushConverter}}" />
+            <Setter Property="BorderThickness"
+                    Value="{Binding Role, Converter={StaticResource RoleToThicknessConverter}}" />
+        </Style>
+    </widgets:WidgetBase.Style>
+
+    <widgets:WidgetBase.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Miner" IsCheckable="True"
+                      IsChecked="{Binding Role, Converter={StaticResource RoleEqualsConverter}, ConverterParameter=Miner, Mode=OneWay}"
+                      Command="{Binding SetRoleCommand}"
+                      CommandParameter="{x:Static sessions:PilotRole.Miner}" />
+            <MenuItem Header="Booster" IsCheckable="True"
+                      IsChecked="{Binding Role, Converter={StaticResource RoleEqualsConverter}, ConverterParameter=Booster, Mode=OneWay}"
+                      Command="{Binding SetRoleCommand}"
+                      CommandParameter="{x:Static sessions:PilotRole.Booster}" />
+            <MenuItem Header="Cyno" IsCheckable="True"
+                      IsChecked="{Binding Role, Converter={StaticResource RoleEqualsConverter}, ConverterParameter=Cyno, Mode=OneWay}"
+                      Command="{Binding SetRoleCommand}"
+                      CommandParameter="{x:Static sessions:PilotRole.Cyno}" />
+            <MenuItem Header="Combat" IsCheckable="True"
+                      IsChecked="{Binding Role, Converter={StaticResource RoleEqualsConverter}, ConverterParameter=Combat, Mode=OneWay}"
+                      Command="{Binding SetRoleCommand}"
+                      CommandParameter="{x:Static sessions:PilotRole.Combat}" />
+        </ContextMenu>
+    </widgets:WidgetBase.ContextMenu>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding Stats}" />
+
+        <!-- Footer: "Last event: HH:mm:ss" or "No events yet" when LastEventAt is null.
+             Visibility bound to IsLastEventAtVisible so the popup's hide-only zone can suppress it. -->
+        <TextBlock Grid.Row="1"
+                   FontSize="10" Opacity="0.6"
+                   HorizontalAlignment="Right" Margin="0,4,0,0"
+                   Foreground="{DynamicResource ForegroundBrush}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Text"
+                            Value="{Binding LastEventAt, StringFormat='Last event: {0:HH:mm:ss}'}" />
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding LastEventAt}" Value="{x:Null}">
+                            <Setter Property="Text" Value="No events yet" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsLastEventAtVisible}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+    </Grid>
+</widgets:WidgetBase>

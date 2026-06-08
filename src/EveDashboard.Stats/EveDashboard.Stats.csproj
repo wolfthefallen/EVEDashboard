@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EveDashboard.Core\EveDashboard.Core.csproj" />
+    <ProjectReference Include="..\EveDashboard.Persistence\EveDashboard.Persistence.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EveDashboard.Stats.Tests" />
+  </ItemGroup>
+
+</Project>

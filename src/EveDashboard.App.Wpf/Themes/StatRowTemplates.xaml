@@ -1,0 +1,101 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sc="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
+    xmlns:settings="clr-namespace:EveDashboard.Core.Settings.WidgetStats;assembly=EveDashboard.Core">
+
+    <!--
+        Plan 20: implicit DataTemplate for StatRowViewModel. ONE template handles
+        all 5 emphasis levels via DataTriggers on the Emphasis property:
+        - None    -> 2-column "Label : right-aligned value" (the original numeric stat row).
+        - Header0 -> 14pt Bold, full-width single line, value only (no label prefix).
+        - Header1 -> 16pt Bold, full-width single line.
+        - Header2 -> 20pt Bold, full-width single line.
+        - Hero    -> 22pt AccentBrush, full-width single line.
+
+        Visual logic: when Emphasis != None, the Label TextBlock is collapsed and
+        the Value TextBlock spans both grid columns. WPF resolves the LAST matching
+        DataTrigger, so individual per-emphasis triggers are stacked; if a future
+        plan adds a 6th emphasis level it just appends another DataTrigger here.
+    -->
+    <DataTemplate DataType="{x:Type sc:StatRowViewModel}">
+        <Grid Margin="0,2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Label cell: Column 0; collapsed when emphasis != None. -->
+            <TextBlock Grid.Column="0"
+                       Text="{Binding Label}"
+                       Foreground="{DynamicResource ForegroundBrush}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header0}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header1}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header2}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Hero}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Value cell: Column 1 by default; spans both columns when emphasis != None.
+                 Style.Triggers swap Grid.Column / Grid.ColumnSpan / FontSize / FontWeight / Foreground / HorizontalAlignment per level. -->
+            <TextBlock Text="{Binding FormattedValue}"
+                       TextWrapping="NoWrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Grid.Column" Value="1" />
+                        <Setter Property="Grid.ColumnSpan" Value="1" />
+                        <Setter Property="HorizontalAlignment" Value="Right" />
+                        <Setter Property="FontSize" Value="13" />
+                        <Setter Property="FontWeight" Value="Normal" />
+                        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header0}">
+                                <Setter Property="Grid.Column" Value="0" />
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="FontSize" Value="14" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header1}">
+                                <Setter Property="Grid.Column" Value="0" />
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Header2}">
+                                <Setter Property="Grid.Column" Value="0" />
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="FontSize" Value="20" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Emphasis}" Value="{x:Static settings:StatEmphasis.Hero}">
+                                <Setter Property="Grid.Column" Value="0" />
+                                <Setter Property="Grid.ColumnSpan" Value="2" />
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="FontSize" Value="22" />
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

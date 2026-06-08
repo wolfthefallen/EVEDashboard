@@ -1,0 +1,29 @@
+<Application x:Class="EveDashboard.App.Wpf.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EveDashboard.App.Wpf">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--
+                    ThemeService.LoadInitialAsync merges the active theme
+                    (Themes/Light.xaml or Themes/Dark.xaml) into this slot at
+                    startup. StartupUri removed so App.OnStartup controls
+                    MainWindow construction via DI.
+
+                    Themes/Controls.xaml is the theme-independent control
+                    style sheet (Button + TextBox templates with hover /
+                    active / focus overlays + card_shadow). Loaded once here
+                    at app start; theme swap replaces only the Dark/Light
+                    dictionary, never this one.
+                -->
+                <ResourceDictionary Source="/Themes/Controls.xaml" />
+                <!--
+                    Plan 20: implicit DataTemplate for StatRowViewModel + emphasis
+                    styling. Loaded once at app start; theme swap leaves it alone.
+                -->
+                <ResourceDictionary Source="/Themes/StatRowTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

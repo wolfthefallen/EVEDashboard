@@ -1,0 +1,332 @@
+namespace EveDashboard.Stats.Queries;
+
+using System.Collections.Immutable;
+using System.Data.Common;
+using System.Globalization;
+using EveDashboard.Core.Pricing;
+using EveDashboard.Core.Sessions;
+using EveDashboard.Core.Settings;
+using EveDashboard.Core.Storage;
+using Microsoft.Extensions.Logging;
+
+/// <summary>
+/// Default <see cref="ISessionStatsRepository"/> implementation backed by an
+/// injected <see cref="ISqliteDatabase"/>. Runs five SQL queries per snapshot
+/// (existence check, active duration, session aggregates, per-pilot
+/// aggregates, per-(pilot,type_id) units totals) and assembles the result into
+/// immutable record snapshots, calling <see cref="IIskCalculator"/> per pilot.
+/// </summary>
+/// <remarks>
+/// Holds no mutable state — safe to register as a singleton in DI alongside
+/// the singleton <see cref="ISqliteDatabase"/> (plan 16 wires both up at
+/// <c>App.xaml.cs OnStartup</c>). Plan 18 replaced the previous <c>0.0</c>
+/// ISK literals with real values computed via <see cref="IIskCalculator"/>;
+/// the <c>EmptySnapshot</c> fallback (8.1 = B) keeps its <c>0.0</c> literals
+/// because no session means no ISK.
+/// </remarks>
+public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
+{
+    private readonly ISqliteDatabase _db;
+    private readonly IIskCalculator _iskCalculator;
+    private readonly ISettingsRepository _settings;
+    private readonly ILogger<SqliteSessionStatsRepository> _log;
+
+    /// <summary>
+    /// Construct a repository over the given SQLite database.
+    /// </summary>
+    /// <param name="db">SQLite database wrapper. Typically the singleton
+    ///     <c>SqliteDatabase</c> registered at app startup against the
+    ///     session SQLite file.</param>
+    /// <param name="iskCalculator">Calculator that turns per-pilot mined units into ISK (plan 18).</param>
+    /// <param name="settings">Settings repository — read once per snapshot for refining yield, price mode, and selected station.</param>
+    /// <param name="log">Logger for diagnostics — Debug per call, Warning
+    ///     when called with a missing <c>sessionId</c>.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if any argument is null.
+    /// </exception>
+    public SqliteSessionStatsRepository(
+        ISqliteDatabase db,
+        IIskCalculator iskCalculator,
+        ISettingsRepository settings,
+        ILogger<SqliteSessionStatsRepository> log)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(iskCalculator);
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(log);
+        _db = db;
+        _iskCalculator = iskCalculator;
+        _settings = settings;
+        _log = log;
+    }
+
+    /// <inheritdoc />
+    public async Task<SessionStats> GetSessionStatsAsync(
+        string sessionId,
+        DateTimeOffset asOf,
+        bool allowLazyFetch,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(sessionId);
+        // Query 0: existence check (decision 8.1 = B - log Warning, return empty SessionStats)
+        var sidOnly = new Dictionary<string, object?> { ["$sid"] = sessionId };
+        var exists = await _db.QueryScalarAsync<long>(SessionExistsSql, sidOnly, ct);
+        if (exists == 0)
+        {
+            _log.LogWarning(
+                "GetSessionStatsAsync called with sessionId={SessionId} but no such row in the session table - returning empty stats. No active session could be found.",
+                sessionId);
+            return EmptySnapshot(sessionId, asOf);
+        }
+
+        var asOfIso = asOf.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
+        var p = new Dictionary<string, object?>
+        {
+            ["$sid"]  = sessionId,
+            ["$asOf"] = asOfIso,
+        };
+
+        // Query 1: active duration in seconds (decision 1.2 = B - QueryAsync<double> with
+        // explicit mapper, since QueryScalarAsync<double> is not in plan 05's tested-types set)
+        var activeRows = await _db.QueryAsync(
+            ActiveDurationSql,
+            static reader => reader.GetDouble(0),
+            p,
+            ct);
+        var activeSeconds = activeRows[0]; // SQL uses COALESCE(SUM(...), 0) - always one row
+        var totalTimeMined = TimeSpan.FromSeconds(activeSeconds);
+
+        // Query 2: session-level aggregates (single row)
+        var sessionRows = await _db.QueryAsync(
+            SessionAggregatesSql,
+            MapAggregateRow,
+            p,
+            ct);
+        var sessionRow = sessionRows[0];
+
+        // 8.2 = A: rates default to 0 when denominator is 0
+        var sessionM3PerSec = activeSeconds > 0
+            ? sessionRow.TotalM3 / activeSeconds
+            : 0.0;
+        var sessionCritChance = (sessionRow.CritCount + sessionRow.TickCount) > 0
+            ? (double)sessionRow.CritCount / (sessionRow.CritCount + sessionRow.TickCount)
+            : 0.0;
+
+        // Query 3: per-pilot aggregates (LEFT JOIN ensures empty pilots show up)
+        var pilotRows = await _db.QueryAsync(
+            PerPilotSql,
+            MapPerPilotRow,
+            p,
+            ct);
+
+        // Query 4 (plan 18, plan 36): per-(pilot, type_id) units totals — drives ISK calc.
+        // Plan 36: single query now returns BOTH total_units and crit_units per
+        // (pilot, type_id) so the two-dict IIskCalculator overload can derive Total
+        // ISK and Crit ISK in one pass per pilot (shared price-cache, exact math).
+        var perPilotPerType = await _db.QueryAsync(
+            PerPilotPerTypeWithCritsSql,
+            static r => (
+                PilotId:    r.GetInt64(0),
+                TypeId:     r.GetInt64(1),
+                Units:      r.GetInt64(2),
+                CritUnits:  r.GetInt64(3)),
+            p,
+            ct);
+
+        // Read settings ONCE per snapshot so every per-pilot ISK call sees the same values.
+        var refiningYieldPercent = await _settings.GetRefiningYieldPercentAsync(ct);
+        var priceMode            = await _settings.GetPriceModeAsync(ct);
+        var stationId            = await _settings.GetSelectedStationIdAsync(ct);
+
+        var pilotIsk     = new Dictionary<long, double>();
+        var pilotCritIsk = new Dictionary<long, double>();
+        foreach (var pilotGroup in perPilotPerType.GroupBy(r => r.PilotId))
+        {
+            var typeIdToUnits     = pilotGroup.ToDictionary(r => r.TypeId, r => r.Units);
+            var typeIdToCritUnits = pilotGroup
+                .Where(r => r.CritUnits > 0)
+                .ToDictionary(r => r.TypeId, r => r.CritUnits);
+            var iskResult = await _iskCalculator
+                .ComputeAsync(typeIdToUnits, typeIdToCritUnits, stationId, sessionId, allowLazyFetch, refiningYieldPercent, priceMode, ct)
+                .ConfigureAwait(false);
+            pilotIsk[pilotGroup.Key]     = iskResult.TotalIsk;
+            pilotCritIsk[pilotGroup.Key] = iskResult.CritIsk;
+        }
+
+        var sessionTotalIsk     = pilotIsk.Values.Sum();
+        var sessionTotalCritIsk = pilotCritIsk.Values.Sum();
+        var sessionCritIskPercent = sessionTotalIsk > 0
+            ? sessionTotalCritIsk / sessionTotalIsk
+            : 0.0;
+        var activeHours = activeSeconds / 3600.0;
+        var sessionIskPerHour = activeHours > 0 ? sessionTotalIsk / activeHours : 0.0;
+
+        var byCharacter = new Dictionary<long, CharacterStats>(pilotRows.Count);
+        foreach (var row in pilotRows)
+        {
+            var pilotM3PerSec = activeSeconds > 0
+                ? row.TotalM3 / activeSeconds
+                : 0.0;
+            var pilotCritChance = (row.CritCount + row.TickCount) > 0
+                ? (double)row.CritCount / (row.CritCount + row.TickCount)
+                : 0.0;
+
+            var pilotTotalIsk = pilotIsk.GetValueOrDefault(row.PilotId, 0.0);
+            var pilotIskPerHour = activeHours > 0 ? pilotTotalIsk / activeHours : 0.0;
+            var pilotTotalCritIsk = pilotCritIsk.GetValueOrDefault(row.PilotId, 0.0);
+            var pilotCritIskPercent = pilotTotalIsk > 0
+                ? pilotTotalCritIsk / pilotTotalIsk
+                : 0.0;
+
+            byCharacter[row.PilotId] = new CharacterStats(
+                PilotId:            row.PilotId,
+                LastEventAt:        row.LastEventAt,
+                TotalM3Mined:       row.TotalM3,
+                M3PerSecond:        pilotM3PerSec,
+                TotalIskMined:      pilotTotalIsk,
+                IskPerHour:         pilotIskPerHour,
+                TotalIskFromCrits:  pilotTotalCritIsk,
+                CritIskPercent:     pilotCritIskPercent,
+                TotalM3FromCrits:   row.CritM3,
+                CritCount:          row.CritCount,
+                CritChance:         pilotCritChance,
+                Role:               PilotRoleExtensions.Parse(row.Role));
+        }
+
+        _log.LogDebug(
+            "GetSessionStatsAsync(sessionId={SessionId}, asOf={AsOf}) -> {PilotCount} pilots, sessionIsk={SessionIsk}",
+            sessionId,
+            asOf,
+            byCharacter.Count,
+            sessionTotalIsk);
+
+        return new SessionStats(
+            SessionId:          sessionId,
+            TotalTimeMined:     totalTimeMined,
+            LastCalculated:     asOf,
+            TotalM3Mined:       sessionRow.TotalM3,
+            M3PerSecond:        sessionM3PerSec,
+            TotalIskMined:      sessionTotalIsk,
+            IskPerHour:         sessionIskPerHour,
+            TotalIskFromCrits:  sessionTotalCritIsk,
+            CritIskPercent:     sessionCritIskPercent,
+            TotalM3FromCrits:   sessionRow.CritM3,
+            CritCount:          sessionRow.CritCount,
+            CritChance:         sessionCritChance,
+            ByCharacter:        byCharacter);
+    }
+
+    /// <summary>Empty snapshot returned when the requested session id is not found (8.1 = B).</summary>
+    private static SessionStats EmptySnapshot(string sessionId, DateTimeOffset asOf) =>
+        new(
+            SessionId:          sessionId,
+            TotalTimeMined:     TimeSpan.Zero,
+            LastCalculated:     asOf,
+            TotalM3Mined:       0.0,
+            M3PerSecond:        0.0,
+            TotalIskMined:      0.0,
+            IskPerHour:         0.0,
+            TotalIskFromCrits:  0.0,
+            CritIskPercent:     0.0,
+            TotalM3FromCrits:   0.0,
+            CritCount:          0,
+            CritChance:         0.0,
+            ByCharacter:        ImmutableDictionary<long, CharacterStats>.Empty);
+
+    private static AggregateRow MapAggregateRow(DbDataReader reader) =>
+        new(
+            TotalM3:    reader.GetDouble(0),
+            CritM3:     reader.GetDouble(1),
+            CritCount:  reader.GetInt64(2),
+            TickCount:  reader.GetInt64(3));
+
+    private static PerPilotRow MapPerPilotRow(DbDataReader reader) =>
+        new(
+            PilotId:    reader.GetInt64(0),
+            TotalM3:    reader.GetDouble(1),
+            CritM3:     reader.GetDouble(2),
+            CritCount:  reader.GetInt64(3),
+            TickCount:  reader.GetInt64(4),
+            LastEventAt: reader.IsDBNull(5)
+                ? null
+                : DateTimeOffset.Parse(
+                    reader.GetString(5),
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal),
+            Role:       reader.GetString(6));   // Plan 35: sp.role appended to PerPilotSql SELECT.
+
+    private const string SessionExistsSql =
+        "SELECT 1 FROM session WHERE session_id = $sid LIMIT 1";
+
+    private const string ActiveDurationSql = """
+        SELECT COALESCE(
+            SUM((julianday(COALESCE(stop_time, $asOf)) - julianday(start_time)) * 86400),
+            0)
+        FROM session_time
+        WHERE session_id = $sid AND is_pause = 0
+        """;
+
+    // Plan 35: log-reading aggregate queries read from eligible_log (the CTE filters
+    // by role per RoleEligibilityCte.Sql). The $sid parameter is consumed by the CTE;
+    // the outer SELECT no longer needs its own WHERE session_id = $sid clause.
+    private const string SessionAggregatesSql = RoleEligibilityCte.Sql + """
+
+        SELECT
+            COALESCE(SUM(volume_m3), 0)                                          AS total_m3,
+            COALESCE(SUM(CASE WHEN event_kind = 'Crit' THEN volume_m3 END), 0)    AS crit_m3,
+            COALESCE(SUM(CASE WHEN event_kind = 'Crit' THEN 1 ELSE 0 END), 0)     AS crit_count,
+            COALESCE(SUM(CASE WHEN event_kind = 'Tick' THEN 1 ELSE 0 END), 0)     AS tick_count
+        FROM eligible_log
+        """;
+
+    // Plan 36: returns per-(pilot, type_id) BOTH the total mined units and the
+    // crit-only subset in a single query so the repository can call the two-dict
+    // IIskCalculator overload once per pilot (shared price-cache; exact crit
+    // ISK with no proportional rounding drift).
+    private const string PerPilotPerTypeWithCritsSql = RoleEligibilityCte.Sql + """
+
+        SELECT
+            pilot_id,
+            type_id,
+            COALESCE(SUM(units), 0)                                              AS total_units,
+            COALESCE(SUM(CASE WHEN event_kind = 'Crit' THEN units ELSE 0 END), 0) AS crit_units
+        FROM eligible_log
+        WHERE type_id IS NOT NULL AND units IS NOT NULL
+        GROUP BY pilot_id, type_id
+        """;
+
+    // Plan 35: outer LEFT JOIN keeps Cyno/Combat pilots visible in byCharacter
+    // (their stats are all zeros because eligible_log filtered their rows out),
+    // and the SELECT carries sp.role so CharacterStats.Role can be populated.
+    private const string PerPilotSql = RoleEligibilityCte.Sql + """
+
+        SELECT
+            sp.pilot_id,
+            COALESCE(SUM(el.volume_m3), 0)                                          AS total_m3,
+            COALESCE(SUM(CASE WHEN el.event_kind = 'Crit' THEN el.volume_m3 END), 0) AS crit_m3,
+            SUM(CASE WHEN el.event_kind = 'Crit' THEN 1 ELSE 0 END)                 AS crit_count,
+            SUM(CASE WHEN el.event_kind = 'Tick' THEN 1 ELSE 0 END)                 AS tick_count,
+            MAX(el.eve_timestamp)                                                   AS last_event,
+            sp.role                                                                  AS role
+        FROM session_pilot sp
+        LEFT JOIN eligible_log el ON el.session_id = sp.session_id AND el.pilot_id = sp.pilot_id
+        WHERE sp.session_id = $sid
+        GROUP BY sp.pilot_id, sp.role
+        ORDER BY sp.pilot_id
+        """;
+
+    private sealed record AggregateRow(
+        double  TotalM3,
+        double  CritM3,
+        long    CritCount,
+        long    TickCount);
+
+    private sealed record PerPilotRow(
+        long             PilotId,
+        double           TotalM3,
+        double           CritM3,
+        long             CritCount,
+        long             TickCount,
+        DateTimeOffset?  LastEventAt,
+        string           Role);   // Plan 35: source role string from session_pilot.role.
+}

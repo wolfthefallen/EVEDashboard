@@ -1,0 +1,6 @@
+{
+  "build_time": "2026-04-30T12:00:00Z",
+  "esi": { "sha256": "test-esi-sha-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+  "sde": { "sha256": "test-sde-sha-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+  "hoboleaks": { "sha256": "test-hobo-sha-cccccccccccccccccccccccccccc" }
+}

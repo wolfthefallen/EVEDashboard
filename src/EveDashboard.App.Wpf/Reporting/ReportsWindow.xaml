@@ -1,0 +1,258 @@
+<Window x:Class="EveDashboard.App.Wpf.Reporting.ReportsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:reporting="clr-namespace:EveDashboard.App.Wpf.Reporting"
+        xmlns:reportingWidgets="clr-namespace:EveDashboard.App.Wpf.Reporting.Widgets"
+        xmlns:compare="clr-namespace:EveDashboard.App.Wpf.Reporting.Compare"
+        xmlns:session="clr-namespace:EveDashboard.App.Wpf.Widgets.Session"
+        xmlns:pilot="clr-namespace:EveDashboard.App.Wpf.Widgets.Pilot"
+        xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Reports - EVE Dashboard"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <!--
+        Plan 25 Reports child window. Modeless (parent calls Window.Show);
+        not Topmost; not transparent. Two-column layout with collapsible left
+        sidebar of saved sessions, GridSplitter, and a scrollable breakdown
+        content pane on the right. Per alignment 1.1=A this is a separate
+        child window from MainWindow; per 3.1=C the sidebar is sortable +
+        collapsible; per 5.1=A the breakdown content uses one PerOreBreakdown
+        widget reused at session-level and per-pilot-level.
+    -->
+    <Window.Resources>
+        <!-- Plan 34: loading-spinner visibility toggles. Key names match the
+             convention used in Dialogs/SettingsDialog.xaml. The inverse one
+             is reused from Plan 22.2 (the Settings dialog's bootstrap-failure
+             mode hides the Display/Pricing/Markets sections by the same rule). -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        <!-- Plan 29: empty status string -> collapsed status row. -->
+        <converters:StringEmptyToVisibilityConverter x:Key="StringEmptyToVisibility" />
+        <!-- Plan 32: BreakdownContentMode -> Visibility (matches converter parameter against the bound mode). -->
+        <converters:BreakdownContentModeToVisibilityConverter x:Key="ModeToVisibility" />
+
+        <!-- Implicit DataTemplates: when an ItemsControl carries one of these
+             VMs, WPF picks the matching View. The saved-data sibling VMs are
+             distinct types from the live VMs so the templates are explicit
+             per type. -->
+        <DataTemplate DataType="{x:Type session:SavedSessionStatsViewModel}">
+            <session:SessionStatsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pilot:SavedPerPilotWidgetViewModel}">
+            <pilot:PerPilotWidgetView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type reportingWidgets:PerOreBreakdownViewModel}">
+            <reportingWidgets:PerOreBreakdownView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type reporting:PerPilotEntry}">
+            <StackPanel Orientation="Vertical" Margin="0,0,0,12">
+                <ContentPresenter Content="{Binding Pilot}" />
+                <ContentPresenter Content="{Binding Ore}" Margin="0,4,0,0" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Plan 36 compare-mode VM <-> View pairing. The prior trio of templates
+             (CompareSessionStats, CompareSavedPerPilot, ComparePerOreBreakdown)
+             collapsed into a single decluttered widget. -->
+        <DataTemplate DataType="{x:Type compare:CompareSessionViewModel}">
+            <compare:CompareSessionView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Plan 29: outer 3-row layout. Row 0 = chrome strip with the Import
+             button. Row 1 = the existing 5-column content grid. Row 2 = the
+             one-line status surface. The status row collapses when StatusMessage
+             is empty. -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Margin="8,4"
+                    Background="{DynamicResource BackgroundBrush}">
+            <Button Content="Import Session..."
+                    Command="{Binding ImportSessionCommand}"
+                    Padding="10,3"
+                    Margin="0,0,8,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="{Binding Sidebar.ExpandedWidth, Mode=OneWay}" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Background="{DynamicResource BackgroundBrush}"
+                BorderBrush="{DynamicResource WidgetBorderBrush}"
+                BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Text="Saved sessions"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Margin="6,6,6,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+
+                <DataGrid Grid.Row="1"
+                          x:Name="SessionsGrid"
+                          ItemsSource="{Binding Sidebar.Rows}"
+                          AutoGenerateColumns="False"
+                          CanUserSortColumns="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="Transparent"
+                          Foreground="{DynamicResource ForegroundBrush}"
+                          RowBackground="Transparent"
+                          AlternatingRowBackground="{DynamicResource HoverOverlayBrush}"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.RowStyle>
+                        <!-- Plan 29: per-row ContextMenu carrying Export to JSON / Excel.
+                             ElementName binding stashes the DataGrid's DataContext (= ReportsWindowViewModel)
+                             on each row's Tag so the menu can reach Sidebar.ExportXxxCommand
+                             via PlacementTarget.Tag (ContextMenu sits outside the visual tree,
+                             so AncestorType=DataGrid does not work; PlacementTarget is the row). -->
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, ElementName=SessionsGrid}" />
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem
+                                            Header="Export to JSON..."
+                                            Command="{Binding PlacementTarget.Tag.Sidebar.ExportJsonCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding PlacementTarget.DataContext.Data, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                        <MenuItem
+                                            Header="Export to Excel..."
+                                            Command="{Binding PlacementTarget.Tag.Sidebar.ExportExcelCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding PlacementTarget.DataContext.Data, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                        <Separator />
+                                        <MenuItem
+                                            Header="Delete..."
+                                            Command="{Binding PlacementTarget.Tag.Sidebar.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding PlacementTarget.DataContext.Data, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <!-- Plan 33: checkbox column drives compare-mode selection.
+                             TemplateColumn (not DataGridCheckBoxColumn) so it
+                             toggles on first click without needing edit-mode
+                             plumbing. -->
+                        <DataGridTemplateColumn Header="" Width="Auto" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name"
+                                            Binding="{Binding Name}"
+                                            Width="*"
+                                            SortMemberPath="Name" />
+                        <DataGridTextColumn Header="Start"
+                                            Binding="{Binding StartTime, StringFormat=yyyy-MM-dd HH:mm}"
+                                            Width="Auto"
+                                            SortMemberPath="StartTime" />
+                        <DataGridTextColumn Header="Duration"
+                                            Binding="{Binding ActiveDuration, StringFormat=hh\\:mm\\:ss}"
+                                            Width="Auto"
+                                            SortMemberPath="ActiveDuration" />
+                        <DataGridTextColumn Header="Pilots"
+                                            Binding="{Binding PilotCount}"
+                                            Width="Auto"
+                                            SortMemberPath="PilotCount" />
+                        <DataGridTextColumn Header="Total ISK"
+                                            Binding="{Binding TotalIskMined, StringFormat=N0}"
+                                            Width="Auto"
+                                            SortMemberPath="TotalIskMined" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <GridSplitter Grid.Column="1"
+                      Width="4"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Background="{DynamicResource WidgetBorderBrush}"
+                      DragCompleted="SidebarGridSplitter_DragCompleted" />
+
+        <ScrollViewer Grid.Column="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="8">
+            <!-- Plan 34: spinner subtree + widget-wrapper subtree, both
+                 visibility-toggled by Content.IsLoading. Inside the wrapper,
+                 the Plan-32 Single/Compare Mode toggle is unchanged. -->
+            <Grid>
+                <!-- Loading spinner: visible only while a LoadAsync is in flight.
+                     Render-thread-animated orbital spinner — the animation is
+                     immune to UI-dispatcher saturation, so it keeps spinning
+                     smoothly even during the heavy binding-update cascade at
+                     the end of a load. -->
+                <ContentControl
+                    Visibility="{Binding Content.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+                    <reporting:OrbitalSpinner
+                        Width="240" Height="240"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </ContentControl>
+
+                <!-- Widget subtrees: hidden while loading; otherwise the inner
+                     StackPanels toggle on Content.Mode as today. -->
+                <Grid Visibility="{Binding Content.IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <!-- Single mode: 1 session selected. -->
+                    <StackPanel Orientation="Vertical"
+                                Visibility="{Binding Content.Mode, Converter={StaticResource ModeToVisibility}, ConverterParameter=Single}">
+                        <ContentPresenter Content="{Binding Content.SessionStats}" />
+                        <ContentPresenter Content="{Binding Content.SessionOreBreakdown}" Margin="0,8,0,0" />
+                        <ItemsControl ItemsSource="{Binding Content.PerPilotEntries}" Margin="0,12,0,0" />
+                    </StackPanel>
+                    <!-- Compare mode: 2+ sessions selected. Plan 36: single
+                         compare widget; no per-pilot stack, no per-ore tables. -->
+                    <StackPanel Orientation="Vertical"
+                                Visibility="{Binding Content.Mode, Converter={StaticResource ModeToVisibility}, ConverterParameter=Compare}">
+                        <ContentPresenter Content="{Binding Content.CompareSession}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+        </Grid>
+
+        <!-- Plan 29: status row. Reads "Imported: ..." / "Exported: ..." /
+             "Import failed: ..." after a sidebar-driven action. Empty string =>
+             collapsed (zero layout space). -->
+        <TextBlock Grid.Row="2"
+                   Text="{Binding StatusMessage}"
+                   Visibility="{Binding StatusMessage, Converter={StaticResource StringEmptyToVisibility}}"
+                   TextTrimming="CharacterEllipsis"
+                   Margin="8,4"
+                   Foreground="{DynamicResource ForegroundBrush}"
+                   Background="{DynamicResource BackgroundBrush}" />
+    </Grid>
+</Window>

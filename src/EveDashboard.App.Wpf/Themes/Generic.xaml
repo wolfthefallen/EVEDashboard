@@ -1,0 +1,198 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+    xmlns:sc="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig">
+
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+    <!--
+        Plan 20: shared chrome-button template for the cog + close buttons in
+        the WidgetBase chrome row. Both buttons want the same hover / active
+        overlay behaviour against a transparent background; defining the
+        ControlTemplate once here saves the duplication that Generic.xaml had
+        before this refactor.
+    -->
+    <Style x:Key="WidgetChromeButton" TargetType="Button">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource WidgetBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Effect" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="MainBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="2"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource HoverOverlayBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource ActiveOverlayBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        Default style + control template for WidgetBase. WPF auto-loads
+        Themes/Generic.xaml via the [ThemeInfo] attribute in AssemblyInfo.cs
+        (ResourceDictionaryLocation.SourceAssembly) and applies this style to
+        every WidgetBase instance whose DefaultStyleKey is typeof(WidgetBase).
+    -->
+    <Style TargetType="{x:Type widgets:WidgetBase}">
+        <Setter Property="Background" Value="{DynamicResource WidgetBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource WidgetBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Margin" Value="6" />
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type widgets:WidgetBase}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Plan 19 + 20 chrome row: LastUpdated text on the left, cog (settings) + x (close) on the right.
+                                 Plan 20 added the cog ToggleButton (between the LastUpdated text and the x button) with Visibility
+                                 bound to HasStatConfig and IsChecked two-way bound to IsStatConfigOpen. The Popup also lives here;
+                                 its IsOpen is two-way bound to IsStatConfigOpen so click-outside (StaysOpen=False) and the popup
+                                 VM's Apply/Close commands all converge on the same flag. -->
+                            <Grid Grid.Row="0" Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- LastUpdated chrome line. Hidden when LastUpdated is null OR when IsLastUpdatedVisible=false (plan 20). -->
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding LastUpdated, StringFormat='Last updated: {0:HH:mm:ss}'}"
+                                           FontSize="10"
+                                           Opacity="0.6"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,4,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <!-- Order matters: WPF applies the LAST matching trigger. Place the
+                                                     IsLastUpdatedVisible=False trigger AFTER the null trigger so
+                                                     "user explicitly hid this row" (Collapsed) wins over
+                                                     "no refresh has happened yet" (Hidden). -->
+                                                <DataTrigger Binding="{Binding LastUpdated}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsLastUpdatedVisible}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- Plan 20 cog button + popup. Visibility bound to HasStatConfig. -->
+                                <ToggleButton Grid.Column="1"
+                                              x:Name="WidgetSettingsButton"
+                                              Content="&#x2699;"
+                                              ToolTip="Customize stats"
+                                              Width="16"
+                                              Height="16"
+                                              Padding="0"
+                                              FontSize="11"
+                                              Margin="0,0,4,0"
+                                              VerticalContentAlignment="Center"
+                                              HorizontalContentAlignment="Center"
+                                              Background="Transparent"
+                                              Foreground="{DynamicResource ForegroundBrush}"
+                                              BorderBrush="{DynamicResource WidgetBorderBrush}"
+                                              BorderThickness="1"
+                                              Effect="{x:Null}"
+                                              IsChecked="{Binding IsStatConfigOpen, Mode=TwoWay}"
+                                              Visibility="{Binding HasStatConfig, Converter={StaticResource BoolToVis}}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="CogBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="2"
+                                                    SnapsToDevicePixels="True">
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  RecognizesAccessKey="True" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="CogBorder" Property="Background" Value="{DynamicResource HoverOverlayBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="CogBorder" Property="Background" Value="{DynamicResource ActiveOverlayBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <Popup PlacementTarget="{Binding ElementName=WidgetSettingsButton}"
+                                       Placement="Bottom"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       IsOpen="{Binding IsStatConfigOpen, Mode=TwoWay}">
+                                    <Border Background="{DynamicResource BackgroundBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="3"
+                                            Padding="6"
+                                            Effect="{DynamicResource ModalShadowEffect}">
+                                        <ContentPresenter Content="{Binding StatConfigPopup}" />
+                                    </Border>
+                                </Popup>
+
+                                <!-- Plan 19 close button. -->
+                                <Button Grid.Column="2"
+                                        x:Name="WidgetCloseButton"
+                                        Style="{StaticResource WidgetChromeButton}"
+                                        Command="{Binding HideCommand}"
+                                        ToolTip="Hide widget"
+                                        FontWeight="Bold"
+                                        Content="x" />
+                            </Grid>
+
+                            <!-- Derived widget projects its body via Content. -->
+                            <ContentPresenter Grid.Row="1" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

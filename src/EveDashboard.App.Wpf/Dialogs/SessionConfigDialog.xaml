@@ -1,0 +1,80 @@
+<Window x:Class="EveDashboard.App.Wpf.Dialogs.SessionConfigDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="New Mining Session"
+        Height="480" Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource BorderBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <Border Margin="6"
+            Background="{DynamicResource BackgroundBrush}"
+            Effect="{DynamicResource ModalShadowEffect}">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="Start a new mining session"
+                       FontSize="16" FontWeight="Bold"
+                       Margin="0,0,0,12"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <TextBlock Grid.Row="1"
+                       Text="Session name (use {{$DATE}}, {{$TIME}}, {{$DATETIME}}, {{$CHARS}})"
+                       FontSize="11" Margin="0,0,0,2" Opacity="0.7"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+            <TextBox Grid.Row="2"
+                     Text="{Binding SessionName, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,12"
+                     Padding="4,2" />
+
+            <TextBlock Grid.Row="3"
+                       Text="Pilots"
+                       FontWeight="Bold"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Pilots}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Character.Name}"
+                                      IsChecked="{Binding IsSelected}"
+                                      Margin="0,2"
+                                      Foreground="{DynamicResource ForegroundBrush}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="5"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,16,0,0">
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        IsCancel="True"
+                        Width="84" Height="28"
+                        Margin="0,0,8,0"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}"
+                        Command="{Binding CancelCommand}" />
+                <Button x:Name="StartButton"
+                        Content="Start"
+                        IsDefault="True"
+                        Width="84" Height="28"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}"
+                        Command="{Binding StartCommand}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

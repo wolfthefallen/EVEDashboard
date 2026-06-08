@@ -1,0 +1,33 @@
+------------------------------------------------------------
+  Gamelog
+  Listener: Fierro Fallen
+  Session Started: 2026.04.28 21:17:13
+------------------------------------------------------------
+[ 2026.04.28 21:17:15 ] (hint) Attempting to join a channel
+[ 2026.04.28 21:17:15 ] (hint) Attempting to join a channel
+[ 2026.04.28 21:17:17 ] (hint) Attempting to join a channel
+[ 2026.04.28 21:20:57 ] (None) Jumping from Walvalin to Otsela
+[ 2026.04.28 21:21:37 ] (None) Jumping from Otsela to Ihakana
+[ 2026.04.28 21:22:17 ] (None) Jumping from Ihakana to Friggi
+[ 2026.04.28 21:22:57 ] (None) Jumping from Friggi to Airmia
+[ 2026.04.28 21:23:24 ] (None) Jumping from Airmia to Ishisomo
+[ 2026.04.28 21:24:06 ] (None) Jumping from Ishisomo to Olo
+[ 2026.04.28 21:24:45 ] (None) Jumping from Olo to Osmon
+[ 2026.04.28 21:25:34 ] (None) Jumping from Osmon to Korsiki
+[ 2026.04.28 21:26:30 ] (None) Jumping from Korsiki to Airaken
+[ 2026.04.28 21:27:09 ] (None) Jumping from Airaken to Oijanen
+[ 2026.04.28 21:27:54 ] (None) Jumping from Oijanen to Akora
+[ 2026.04.28 21:28:29 ] (None) Jumping from Akora to Messoya
+[ 2026.04.28 21:29:08 ] (None) Jumping from Messoya to Tasti
+[ 2026.04.28 21:29:52 ] (None) Jumping from Tasti to Otosela
+[ 2026.04.28 21:30:32 ] (None) Jumping from Otosela to Uemon
+[ 2026.04.28 21:31:16 ] (None) Jumping from Uemon to Paala
+[ 2026.04.28 21:31:55 ] (None) Jumping from Paala to LXQ2-T
+[ 2026.04.28 21:32:40 ] (None) Jumping from LXQ2-T to PX-IHN
+[ 2026.04.28 21:33:22 ] (None) Jumping from PX-IHN to QBZO-R
+[ 2026.04.28 21:33:59 ] (None) Jumping from QBZO-R to CL-IRS
+[ 2026.04.28 21:34:38 ] (None) Jumping from CL-IRS to ZZ5X-M
+[ 2026.04.28 21:35:09 ] (None) Jumping from ZZ5X-M to G-QTSD
+[ 2026.04.28 21:35:52 ] (None) Jumping from G-QTSD to EFM-C4
+[ 2026.04.28 21:37:16 ] (notify) Starting clone jumping
+[ 2026.04.28 21:37:16 ] (notify) Disembarking from ship

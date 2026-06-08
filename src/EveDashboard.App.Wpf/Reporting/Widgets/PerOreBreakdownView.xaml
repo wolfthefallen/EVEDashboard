@@ -1,0 +1,75 @@
+<widgets:WidgetBase x:Class="EveDashboard.App.Wpf.Reporting.Widgets.PerOreBreakdownView"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+                    mc:Ignorable="d">
+    <!--
+        Plan 25 per-ore breakdown widget. Three columns (Type / m^3 / ISK),
+        sortable; default sort by VolumeM3 descending (assigned by the SQL
+        ORDER BY + the VM's post-sort). Used at session-level and per-pilot
+        level inside the Reports window. Theming via the existing dynamic
+        brushes; chrome (border + LastUpdated line) inherited from WidgetBase.
+    -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Title}"
+                   FontWeight="Bold"
+                   Margin="0,0,0,4"
+                   Foreground="{DynamicResource ForegroundBrush}" />
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Rows}"
+                  AutoGenerateColumns="False"
+                  CanUserSortColumns="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeRows="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column"
+                  Background="Transparent"
+                  Foreground="{DynamicResource ForegroundBrush}"
+                  RowBackground="Transparent"
+                  AlternatingRowBackground="{DynamicResource HoverOverlayBrush}"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Type"
+                                    Binding="{Binding TypeName}"
+                                    Width="*"
+                                    SortMemberPath="TypeName" />
+                <DataGridTextColumn Header="m³"
+                                    Binding="{Binding VolumeM3, StringFormat=N1}"
+                                    Width="Auto"
+                                    SortMemberPath="VolumeM3">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ISK"
+                                    Binding="{Binding Isk, StringFormat=N0}"
+                                    Width="Auto"
+                                    SortMemberPath="Isk">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</widgets:WidgetBase>

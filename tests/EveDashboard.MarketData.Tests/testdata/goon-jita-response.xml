@@ -1,0 +1,546 @@
+<goonmetrics method="price_data" version="1.0">
+  <price_data>
+    
+    <type id="34">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>39764531583.2</weekly_movement>
+      </all>
+      <buy>
+        <max>3.59</max>
+        <listed>9082003249</listed>
+      </buy>
+      <sell>
+        <min>3.99</min>
+        <listed>7746505200</listed>
+      </sell>
+    </type>
+    
+    <type id="35">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>17005242695.5</weekly_movement>
+      </all>
+      <buy>
+        <max>16.53</max>
+        <listed>971302153</listed>
+      </buy>
+      <sell>
+        <min>18.10</min>
+        <listed>3439357408</listed>
+      </sell>
+    </type>
+    
+    <type id="36">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>4077762047.1</weekly_movement>
+      </all>
+      <buy>
+        <max>57.08</max>
+        <listed>236840667</listed>
+      </buy>
+      <sell>
+        <min>63.00</min>
+        <listed>1467732423</listed>
+      </sell>
+    </type>
+    
+    <type id="37">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>1961676062.3</weekly_movement>
+      </all>
+      <buy>
+        <max>201.30</max>
+        <listed>185006068</listed>
+      </buy>
+      <sell>
+        <min>219.90</min>
+        <listed>593136150</listed>
+      </sell>
+    </type>
+    
+    <type id="38">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>361106130.9</weekly_movement>
+      </all>
+      <buy>
+        <max>752.10</max>
+        <listed>67470103</listed>
+      </buy>
+      <sell>
+        <min>800.00</min>
+        <listed>257536983</listed>
+      </sell>
+    </type>
+    
+    <type id="39">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>165983436.5</weekly_movement>
+      </all>
+      <buy>
+        <max>1401.00</max>
+        <listed>33431742</listed>
+      </buy>
+      <sell>
+        <min>1499.00</min>
+        <listed>72983608</listed>
+      </sell>
+    </type>
+    
+    <type id="40">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>102241201.5</weekly_movement>
+      </all>
+      <buy>
+        <max>2401.00</max>
+        <listed>6903194</listed>
+      </buy>
+      <sell>
+        <min>2440.00</min>
+        <listed>37445478</listed>
+      </sell>
+    </type>
+    
+    <type id="11399">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>17659422.2</weekly_movement>
+      </all>
+      <buy>
+        <max>20140.00</max>
+        <listed>1135495</listed>
+      </buy>
+      <sell>
+        <min>22370.00</min>
+        <listed>7756883</listed>
+      </sell>
+    </type>
+    
+    <type id="16272">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>272978931.9</weekly_movement>
+      </all>
+      <buy>
+        <max>99.27</max>
+        <listed>65080645</listed>
+      </buy>
+      <sell>
+        <min>112.00</min>
+        <listed>123926466</listed>
+      </sell>
+    </type>
+    
+    <type id="16273">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>193893275.6</weekly_movement>
+      </all>
+      <buy>
+        <max>85.02</max>
+        <listed>74531090</listed>
+      </buy>
+      <sell>
+        <min>93.60</min>
+        <listed>269873612</listed>
+      </sell>
+    </type>
+    
+    <type id="16274">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>404421538.0</weekly_movement>
+      </all>
+      <buy>
+        <max>773.20</max>
+        <listed>27551966</listed>
+      </buy>
+      <sell>
+        <min>828.40</min>
+        <listed>213070959</listed>
+      </sell>
+    </type>
+    
+    <type id="16275">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>12805799.8</weekly_movement>
+      </all>
+      <buy>
+        <max>3540.00</max>
+        <listed>11477812</listed>
+      </buy>
+      <sell>
+        <min>3994.00</min>
+        <listed>9189402</listed>
+      </sell>
+    </type>
+    
+    <type id="16633">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>101984967.2</weekly_movement>
+      </all>
+      <buy>
+        <max>475.00</max>
+        <listed>9331746</listed>
+      </buy>
+      <sell>
+        <min>539.50</min>
+        <listed>61607390</listed>
+      </sell>
+    </type>
+    
+    <type id="16634">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>101775755.7</weekly_movement>
+      </all>
+      <buy>
+        <max>220.50</max>
+        <listed>141159163</listed>
+      </buy>
+      <sell>
+        <min>234.30</min>
+        <listed>88533094</listed>
+      </sell>
+    </type>
+    
+    <type id="16635">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>99170904.7</weekly_movement>
+      </all>
+      <buy>
+        <max>209.50</max>
+        <listed>37081230</listed>
+      </buy>
+      <sell>
+        <min>222.90</min>
+        <listed>88618992</listed>
+      </sell>
+    </type>
+    
+    <type id="16636">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>75320955.7</weekly_movement>
+      </all>
+      <buy>
+        <max>265.10</max>
+        <listed>38382682</listed>
+      </buy>
+      <sell>
+        <min>329.80</min>
+        <listed>95918211</listed>
+      </sell>
+    </type>
+    
+    <type id="16637">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>21904303.9</weekly_movement>
+      </all>
+      <buy>
+        <max>1048.00</max>
+        <listed>4544899</listed>
+      </buy>
+      <sell>
+        <min>1091.00</min>
+        <listed>24399836</listed>
+      </sell>
+    </type>
+    
+    <type id="16638">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>18412600.5</weekly_movement>
+      </all>
+      <buy>
+        <max>713.60</max>
+        <listed>9053317</listed>
+      </buy>
+      <sell>
+        <min>715.90</min>
+        <listed>30748799</listed>
+      </sell>
+    </type>
+    
+    <type id="16639">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>13478764.4</weekly_movement>
+      </all>
+      <buy>
+        <max>435.40</max>
+        <listed>13277294</listed>
+      </buy>
+      <sell>
+        <min>489.60</min>
+        <listed>15270971</listed>
+      </sell>
+    </type>
+    
+    <type id="16640">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>19384898.2</weekly_movement>
+      </all>
+      <buy>
+        <max>479.00</max>
+        <listed>24980753</listed>
+      </buy>
+      <sell>
+        <min>612.30</min>
+        <listed>22611272</listed>
+      </sell>
+    </type>
+    
+    <type id="16641">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>40474074.7</weekly_movement>
+      </all>
+      <buy>
+        <max>6012.00</max>
+        <listed>7784273</listed>
+      </buy>
+      <sell>
+        <min>6128.00</min>
+        <listed>21138223</listed>
+      </sell>
+    </type>
+    
+    <type id="16642">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>29839469.8</weekly_movement>
+      </all>
+      <buy>
+        <max>2059.00</max>
+        <listed>15172081</listed>
+      </buy>
+      <sell>
+        <min>2238.00</min>
+        <listed>16018369</listed>
+      </sell>
+    </type>
+    
+    <type id="16643">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>36654161.1</weekly_movement>
+      </all>
+      <buy>
+        <max>4630.00</max>
+        <listed>17727613</listed>
+      </buy>
+      <sell>
+        <min>4841.00</min>
+        <listed>24692681</listed>
+      </sell>
+    </type>
+    
+    <type id="16644">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>42200315.5</weekly_movement>
+      </all>
+      <buy>
+        <max>6612.00</max>
+        <listed>4210639</listed>
+      </buy>
+      <sell>
+        <min>7170.00</min>
+        <listed>25800063</listed>
+      </sell>
+    </type>
+    
+    <type id="16646">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>13253003.4</weekly_movement>
+      </all>
+      <buy>
+        <max>3666.00</max>
+        <listed>14387178</listed>
+      </buy>
+      <sell>
+        <min>3967.00</min>
+        <listed>6495691</listed>
+      </sell>
+    </type>
+    
+    <type id="16647">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>9397246.1</weekly_movement>
+      </all>
+      <buy>
+        <max>5226.00</max>
+        <listed>7376233</listed>
+      </buy>
+      <sell>
+        <min>5416.00</min>
+        <listed>11362587</listed>
+      </sell>
+    </type>
+    
+    <type id="16648">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>16351650.9</weekly_movement>
+      </all>
+      <buy>
+        <max>8403.00</max>
+        <listed>102864742</listed>
+      </buy>
+      <sell>
+        <min>8778.00</min>
+        <listed>13491564</listed>
+      </sell>
+    </type>
+    
+    <type id="16649">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>10600719.3</weekly_movement>
+      </all>
+      <buy>
+        <max>14570.00</max>
+        <listed>12494550</listed>
+      </buy>
+      <sell>
+        <min>16790.00</min>
+        <listed>8976474</listed>
+      </sell>
+    </type>
+    
+    <type id="16650">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>4133448.7</weekly_movement>
+      </all>
+      <buy>
+        <max>51500.00</max>
+        <listed>1835944</listed>
+      </buy>
+      <sell>
+        <min>54300.00</min>
+        <listed>1897415</listed>
+      </sell>
+    </type>
+    
+    <type id="16651">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>3849812.6</weekly_movement>
+      </all>
+      <buy>
+        <max>67140.00</max>
+        <listed>101732934</listed>
+      </buy>
+      <sell>
+        <min>71290.00</min>
+        <listed>1034616</listed>
+      </sell>
+    </type>
+    
+    <type id="16652">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>3905852.5</weekly_movement>
+      </all>
+      <buy>
+        <max>56550.00</max>
+        <listed>101860868</listed>
+      </buy>
+      <sell>
+        <min>58470.00</min>
+        <listed>2464570</listed>
+      </sell>
+    </type>
+    
+    <type id="16653">
+      <updated>2026-05-03T23:54:14Z</updated>
+      <all>
+        <weekly_movement>3309144.8</weekly_movement>
+      </all>
+      <buy>
+        <max>28270.00</max>
+        <listed>10376075</listed>
+      </buy>
+      <sell>
+        <min>28900.00</min>
+        <listed>5198628</listed>
+      </sell>
+    </type>
+    
+    <type id="17887">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>280178814.3</weekly_movement>
+      </all>
+      <buy>
+        <max>690.10</max>
+        <listed>25726140</listed>
+      </buy>
+      <sell>
+        <min>724.90</min>
+        <listed>306271878</listed>
+      </sell>
+    </type>
+    
+    <type id="17888">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>481636240.4</weekly_movement>
+      </all>
+      <buy>
+        <max>622.50</max>
+        <listed>46038525</listed>
+      </buy>
+      <sell>
+        <min>649.00</min>
+        <listed>228529408</listed>
+      </sell>
+    </type>
+    
+    <type id="17889">
+      <updated>2026-05-03T23:54:44Z</updated>
+      <all>
+        <weekly_movement>335024239.4</weekly_movement>
+      </all>
+      <buy>
+        <max>595.50</max>
+        <listed>46412491</listed>
+      </buy>
+      <sell>
+        <min>614.00</min>
+        <listed>264067464</listed>
+      </sell>
+    </type>
+    
+    <type id="88087">
+      <updated>2026-05-03T23:55:23Z</updated>
+      <all>
+        <weekly_movement>13114567.7</weekly_movement>
+      </all>
+      <buy>
+        <max>16.95</max>
+        <listed>243108856</listed>
+      </buy>
+      <sell>
+        <min>21.57</min>
+        <listed>64524861</listed>
+      </sell>
+    </type>
+    
+  </price_data>
+</goonmetrics>
+

@@ -1,0 +1,469 @@
+------------------------------------------------------------
+  Gamelog
+  Listener: Vera Fallen
+  Session Started: 2026.04.28 22:48:56
+------------------------------------------------------------
+[ 2026.04.28 22:48:59 ] (hint) Attempting to join a channel
+[ 2026.04.28 22:48:59 ] (hint) Attempting to join a channel
+[ 2026.04.28 22:56:38 ] (question) <a href="showinfo:1375//2124289934">Felicity Fallen</a> wants you to join their fleet, do you accept?<br><br>NOTE: Attacking members of your fleet is not a CONCORD sanctioned activity and may result in security status loss and police response.
+
+[ 2026.04.28 23:08:54 ] (None) Jumping from C-J6MT to 4M-QXK
+[ 2026.04.28 23:10:05 ] (None) Jumping from O-9G5Y to TK-DLH
+[ 2026.04.28 23:10:52 ] (None) Jumping from TK-DLH to EKPB-3
+[ 2026.04.28 23:11:40 ] (None) Jumping from EKPB-3 to 5M2-KP
+[ 2026.04.28 23:12:50 ] (notify) Starting clone jumping
+[ 2026.04.28 23:12:50 ] (notify) Disembarking from ship
+[ 2026.04.28 23:39:36 ] (notify) Following Fierro Fallen in warp
+[ 2026.04.28 23:41:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:41:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:42:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:42:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:42:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:42:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:43:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:43:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:43:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:43:40 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>300<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:43:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:44:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:44:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:44:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:44:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:31 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:45:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:46:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:46:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:46:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:46:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:47:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:47:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:47:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:47:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:48:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:48:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:48:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:48:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:48:44 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:49:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:49:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:49:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:49:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:50:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:50:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:50:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:50:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:51:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:52:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:52:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:52:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:52:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:53:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:53:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:53:24 ] (notify) Successfully compressed Nocxite II-Grade into 6145 Compressed Nocxite II-Grade.
+[ 2026.04.28 23:53:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:53:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:54:08 ] (notify) Successfully compressed Nocxite II-Grade into 201 Compressed Nocxite II-Grade.
+[ 2026.04.28 23:54:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:54:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:54:17 ] (notify) Successfully compressed Nocxite II-Grade into 202 Compressed Nocxite II-Grade.
+[ 2026.04.28 23:54:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:54:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:55:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:55:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:55:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:55:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:56:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:57:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:57:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:57:24 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:57:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:57:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:58:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:58:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:58:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:58:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:59:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:59:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:59:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.28 23:59:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:00:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:00:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:00:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:00:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:00:45 ] (notify) Successfully compressed Nocxite II-Grade into 3127 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:01:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:01:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:01:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:01:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:01:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:01:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:02:00 ] (notify) Successfully compressed Nocxite II-Grade into 603 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:02:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:02:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:02:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:02:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:03:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:03:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:03:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:03:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:03:44 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:04:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:04:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:04:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:04:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:05:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:05:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:05:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:05:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:06:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:07:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:07:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:07:43 ] (notify) Successfully compressed Nocxite II-Grade into 2724 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:07:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:07:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:07:58 ] (notify) Successfully compressed Nocxite II-Grade into 201 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:08:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:08:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:08:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:08:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:09:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:09:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:09:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:09:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:10:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:10:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:10:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:10:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:11:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:12:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:12:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:12:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:12:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:13:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:13:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:13:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:13:47 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:13:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:14:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:14:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:14:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:14:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:15:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:15:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:15:10 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:15:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:15:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:16:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:16:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:16:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:16:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:16:55 ] (notify) Successfully compressed Nocxite II-Grade into 4438 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:17:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:17:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:17:09 ] (notify) Successfully compressed Nocxite II-Grade into 200 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:17:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:17:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:17:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:17:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:18:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:18:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:18:21 ] (notify) Successfully compressed Nocxite II-Grade into 604 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:18:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:18:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:19:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:19:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:19:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:19:39 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:20:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:20:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:20:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:20:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:57 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:21:57 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:22:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:22:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:22:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:22:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:23:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:23:20 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:23:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:23:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:24:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:24:15 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:24:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:24:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:25:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:25:11 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:25:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:25:38 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:26:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:26:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:26:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:26:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:01 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:29 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:27:56 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:28:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:28:24 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:28:47 ] (notify) Successfully compressed Nocxite II-Grade into 5040 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:28:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:28:52 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:28:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:29:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:29:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:29:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:29:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:30:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:30:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:30:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:30:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:31:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:31:06 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:31:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:31:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:32:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:33:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:33:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>9<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite II-Grade
+[ 2026.04.29 00:33:23 ] (notify) Strip Miner I deactivates as it finds the resource it was harvesting a pale shadow of its former glory.
+[ 2026.04.29 00:33:32 ] (notify) Strip Miner I deactivates as it finds the resource it was harvesting a pale shadow of its former glory.
+[ 2026.04.29 00:34:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:34:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:35:32 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:36:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:37:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:38:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:30 ] (notify) Successfully compressed Nocxite II-Grade into 2428 Compressed Nocxite II-Grade.
+[ 2026.04.29 00:39:30 ] (notify) Successfully compressed Nocxite III-Grade into 2419 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:39:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:39:43 ] (notify) Successfully compressed Nocxite III-Grade into 201 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:40:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:40:34 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:07 ] (notify) Successfully compressed Nocxite III-Grade into 605 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:41:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:52 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:41:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:19 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:42:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:43:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite III-Grade
+[ 2026.04.29 00:46:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:46:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:46:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:46:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:47:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:48:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:48:26 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:48:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:48:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:49:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:49:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:49:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:49:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:17 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:17 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:50:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:51:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:51:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:51:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:51:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:52:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:52:07 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:52:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:52:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:53:58 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:54:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:54:25 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:54:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:54:53 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:55:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:55:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:55:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:55:48 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:56:09 ] (notify) Successfully compressed Nocxite III-Grade into 1210 Compressed Nocxite III-Grade.
+[ 2026.04.29 00:56:10 ] (notify) Successfully compressed Nocxite into 5037 Compressed Nocxite.
+[ 2026.04.29 00:56:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:56:16 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:56:20 ] (notify) Successfully compressed Nocxite into 202 Compressed Nocxite.
+[ 2026.04.29 00:56:43 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:56:44 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:56:47 ] (notify) Successfully compressed Nocxite into 202 Compressed Nocxite.
+[ 2026.04.29 00:57:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:57:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:57:12 ] (notify) Successfully compressed Nocxite into 201 Compressed Nocxite.
+[ 2026.04.29 00:57:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:57:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:57:43 ] (notify) Successfully compressed Nocxite into 202 Compressed Nocxite.
+[ 2026.04.29 00:58:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:58:03 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:58:04 ] (notify) Successfully compressed Nocxite into 201 Compressed Nocxite.
+[ 2026.04.29 00:58:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:58:29 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:58:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:58:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:59:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:59:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:59:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 00:59:50 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:00:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:00:18 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:00:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:00:46 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:01:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:01:13 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:01:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:01:41 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:02:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:02:09 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:02:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:02:36 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:04 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:31 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:03:59 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:04:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:04:27 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:04:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:04:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:05:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:05:22 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:05:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:05:49 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:06:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:06:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:06:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:06:45 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:06:45 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:07:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:07:12 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:07:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:07:40 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:08:00 ] (notify) Successfully compressed Nocxite into 4534 Compressed Nocxite.
+[ 2026.04.29 01:08:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:08:08 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:08:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:08:35 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:02 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:17 ] (notify) Successfully compressed Nocxite into 604 Compressed Nocxite.
+[ 2026.04.29 01:09:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:09:54 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:10:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:10:21 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:10:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:10:47 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:11:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:11:14 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:11:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:11:42 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:12:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:12:10 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:12:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:12:37 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:13:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:13:05 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:13:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:13:33 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:00 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:00 ] (mining) <color=#fff0ff45>Critical mining success!<color=0x77ffffff><font size=10> You mined an additional <color=#fff0ff45><font size=12>303<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:28 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:14:55 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:15:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:15:23 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:15:33 ] (notify) Successfully compressed Nocxite into 3128 Compressed Nocxite.
+[ 2026.04.29 01:15:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:15:51 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>100<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:16:16 ] (notify) Successfully compressed Nocxite into 201 Compressed Nocxite.
+[ 2026.04.29 01:16:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:16:17 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>101<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:16:21 ] (notify) Successfully compressed Nocxite into 202 Compressed Nocxite.
+[ 2026.04.29 01:16:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>51<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:16:30 ] (mining) <color=0x77ffffff>You mined <font size=12><color=#ff8dc169>51<color=0x77ffffff><font size=10> units of <color=0xffffffff><font size=12>Nocxite
+[ 2026.04.29 01:16:31 ] (notify) Successfully compressed Nocxite into 102 Compressed Nocxite.
+[ 2026.04.29 01:16:55 ] (notify) Following Fierro Fallen in warp
