@@ -60,4 +60,12 @@ public sealed record CharacterStats(
     double           TotalM3FromCrits,
     long             CritCount,
     double           CritChance,
-    PilotRole        Role);
+    PilotRole        Role)
+{
+    /// <summary>
+    /// Plan 43: this pilot's refined-material output, yield-applied and sorted
+    /// by quantity descending. Init-only with an empty default so existing
+    /// construction sites are unaffected.
+    /// </summary>
+    public IReadOnlyList<RefinedMaterialAmount> RefinedOutput { get; init; } = Array.Empty<RefinedMaterialAmount>();
+}

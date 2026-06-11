@@ -59,4 +59,13 @@ public sealed record SessionStats(
     double                                     TotalM3FromCrits,
     long                                       CritCount,
     double                                     CritChance,
-    IReadOnlyDictionary<long, CharacterStats>  ByCharacter);
+    IReadOnlyDictionary<long, CharacterStats>  ByCharacter)
+{
+    /// <summary>
+    /// Plan 43: session-wide refined-material output (summed across the
+    /// eligible pilots), yield-applied and sorted by quantity descending.
+    /// Init-only with an empty default so existing construction sites are
+    /// unaffected.
+    /// </summary>
+    public IReadOnlyList<RefinedMaterialAmount> RefinedOutput { get; init; } = Array.Empty<RefinedMaterialAmount>();
+}

@@ -83,6 +83,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     private string _gamelogPath = string.Empty;
     private string _autoPauseIdleMinutesText = string.Empty;
     private bool _autoPauseSoundEnabled = true;
+    private bool _autoShowRefinedMaterials = true;
     private bool _dirty;
 
     private IReadOnlyList<MarketStation> _persistedStations = Array.Empty<MarketStation>();
@@ -193,6 +194,16 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Plan 43: whether newly-produced refined materials auto-show in the live
+    /// widgets' "Refined output" section. Setter marks the VM dirty.
+    /// </summary>
+    public bool AutoShowRefinedMaterials
+    {
+        get => _autoShowRefinedMaterials;
+        set => SetField(ref _autoShowRefinedMaterials, value);
+    }
+
+    /// <summary>
     /// Live view of the markets list shown in the dialog. Equals the persisted
     /// snapshot minus pending removals plus pending adds; rebuilt on every
     /// <see cref="OnAddStation"/> / <see cref="OnRemoveStation"/> /
@@ -296,6 +307,8 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // Plan 37 — auto-pause section.
         var idleMinutes = await _settings.GetAutoPauseIdleMinutesAsync(ct).ConfigureAwait(true);
         var soundEnabled = await _settings.GetAutoPauseSoundEnabledAsync(ct).ConfigureAwait(true);
+        // Plan 43 — refined-output auto-show.
+        var autoShowRefined = await _settings.GetAutoShowRefinedMaterialsAsync(ct).ConfigureAwait(true);
 
         // Populate Stations BEFORE assigning _selectedStationId. The ComboBox's
         // TwoWay SelectedValue binding (SettingsDialog.xaml) evaluates against
@@ -316,6 +329,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // Plan 37 — populate the auto-pause fields.
         _autoPauseIdleMinutesText = idleMinutes.ToString(CultureInfo.InvariantCulture);
         _autoPauseSoundEnabled = soundEnabled;
+        _autoShowRefinedMaterials = autoShowRefined;
 
         _dirty = false;
         OnPropertyChanged(string.Empty);
@@ -356,6 +370,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         var idleValue = int.Parse(_autoPauseIdleMinutesText, NumberStyles.Integer, CultureInfo.InvariantCulture);
         await _settings.SetAutoPauseIdleMinutesAsync(idleValue, ct).ConfigureAwait(true);
         await _settings.SetAutoPauseSoundEnabledAsync(_autoPauseSoundEnabled, ct).ConfigureAwait(true);
+        await _settings.SetAutoShowRefinedMaterialsAsync(_autoShowRefinedMaterials, ct).ConfigureAwait(true);
 
         await _settings.SetSelectedStationIdAsync(_selectedStationId, ct).ConfigureAwait(true);
 

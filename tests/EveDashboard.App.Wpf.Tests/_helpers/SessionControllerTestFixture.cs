@@ -94,6 +94,7 @@ internal sealed class SessionControllerTestFixture : IDisposable
             Db,
             new NoOpIskCalculator(),
             Settings,
+            sde,
             NullLogger<SqliteSessionStatsRepository>.Instance);
 
         ConfirmStop = new FakeConfirmDialog(dialogResult);

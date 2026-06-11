@@ -22,12 +22,14 @@ public enum BreakdownContentMode
     Compare,
 }
 
-/// <summary>Pair of (per-pilot-stats, per-pilot-ore) widgets for one pilot in the saved session — single mode.</summary>
+/// <summary>Triple of (per-pilot-stats, per-pilot-ore, per-pilot-refined) widgets for one pilot in the saved session — single mode.</summary>
 /// <param name="Pilot">Saved-data per-pilot stats VM.</param>
 /// <param name="Ore">Saved-data per-pilot per-ore breakdown VM.</param>
+/// <param name="Refined">Saved-data per-pilot refined-output breakdown VM (plan 43).</param>
 public sealed record PerPilotEntry(
     SavedPerPilotWidgetViewModel Pilot,
-    PerOreBreakdownViewModel     Ore);
+    PerOreBreakdownViewModel     Ore,
+    PerRefinedBreakdownViewModel Refined);
 
 /// <summary>
 /// Root content VM for the Reports window's right pane. Drives single-mode
@@ -73,6 +75,10 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     /// <summary>Single-mode session-level per-ore VM, or null when compare mode / empty selection.</summary>
     [ObservableProperty]
     private PerOreBreakdownViewModel? _sessionOreBreakdown;
+
+    /// <summary>Single-mode session-level refined-output VM (plan 43), or null when compare mode / empty selection.</summary>
+    [ObservableProperty]
+    private PerRefinedBreakdownViewModel? _sessionRefinedBreakdown;
 
     /// <summary>Single-mode per-pilot stack — one entry per pilot in the saved session.</summary>
     [ObservableProperty]
@@ -275,7 +281,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         // ObservableProperty values (their disposal happens in the next
         // DisposePriorWidgets call).
         var sessionId = row.SessionId;
-        var (sessionStatsVm, sessionOreVm, entries) = await Task.Run(
+        var (sessionStatsVm, sessionOreVm, sessionRefinedVm, entries) = await Task.Run(
             async () =>
             {
                 var transient = new List<IDisposable>();
@@ -301,6 +307,14 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                     // PerOreBreakdownViewModel is not IDisposable (no settings subscription) — no cleanup needed.
                     await oreVm.LoadAsync(sessionId, pilotId: null, ct).ConfigureAwait(false);
 
+                    // Plan 43: session-level refined-output breakdown (also non-IDisposable).
+                    var refinedVm = new PerRefinedBreakdownViewModel(
+                        _queries, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
+                    {
+                        Title = "Session refined output",
+                    };
+                    await refinedVm.LoadAsync(sessionId, pilotId: null, ct).ConfigureAwait(false);
+
                     var built = new List<PerPilotEntry>(pilots.Count);
                     foreach (var pilot in pilots)
                     {
@@ -321,13 +335,20 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                         };
                         await pilotOreVm.LoadAsync(sessionId, pilot.PilotId, ct).ConfigureAwait(false);
 
-                        built.Add(new PerPilotEntry(pilotVm, pilotOreVm));
+                        var pilotRefinedVm = new PerRefinedBreakdownViewModel(
+                            _queries, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
+                        {
+                            Title = $"{pilot.PilotName} refined output",
+                        };
+                        await pilotRefinedVm.LoadAsync(sessionId, pilot.PilotId, ct).ConfigureAwait(false);
+
+                        built.Add(new PerPilotEntry(pilotVm, pilotOreVm, pilotRefinedVm));
                     }
 
                     // Success — ownership transfers to the caller's publish step;
                     // do NOT dispose in the catch.
                     transient.Clear();
-                    return (statsVm, oreVm, (IReadOnlyList<PerPilotEntry>)built);
+                    return (statsVm, oreVm, refinedVm, (IReadOnlyList<PerPilotEntry>)built);
                 }
                 catch
                 {
@@ -371,6 +392,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         // Back on the UI thread — safe to publish bound properties.
         SessionStats = sessionStatsVm;
         SessionOreBreakdown = sessionOreVm;
+        SessionRefinedBreakdown = sessionRefinedVm;
         PerPilotEntries = entries;
     }
 
@@ -439,6 +461,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         }
         SessionStats = null;
         SessionOreBreakdown = null;
+        SessionRefinedBreakdown = null;
         PerPilotEntries = Array.Empty<PerPilotEntry>();
 
         // Plan 36: compare-mode subtree collapsed to a single VM.

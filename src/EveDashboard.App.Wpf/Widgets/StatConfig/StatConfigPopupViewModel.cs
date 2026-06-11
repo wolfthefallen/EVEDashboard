@@ -53,6 +53,18 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
     /// <summary>The user's working copy of hide-only rows (only the Hidden flag is editable).</summary>
     public ObservableCollection<StatConfigRowViewModel> HideOnly { get; } = new();
 
+    /// <summary>Plan 43 (decision 2.1 = C): the "Refined materials" subsection working copy — one row per seen material with a Visible checkbox. Empty unless <see cref="EnableRefinedMaterials"/> was called.</summary>
+    public ObservableCollection<RefinedMaterialConfigRowViewModel> RefinedMaterials { get; } = new();
+
+    /// <summary>Plan 43: true when the refined-materials subsection is shown (the live SessionStats + per-pilot widgets opt in).</summary>
+    public bool HasRefinedMaterials => _refinedEnabled;
+
+    private bool _refinedEnabled;
+    private Func<IReadOnlyList<(long TypeId, string Name)>>? _seenMaterials;
+    private Func<CancellationToken, Task<bool>>? _loadAutoShow;
+    private Func<CancellationToken, Task<IReadOnlyDictionary<long, bool>>>? _loadVisibility;
+    private Func<IReadOnlyDictionary<long, bool>, CancellationToken, Task>? _saveVisibility;
+
     /// <summary>True after a successful Apply; the bound chrome <c>Popup.IsOpen</c> reads this through the widget VM's <c>IsStatConfigOpen</c> flag.</summary>
     [ObservableProperty]
     private bool _shouldClose;
@@ -76,6 +88,34 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
         _load = load;
         _save = save;
         _log = log;
+    }
+
+    /// <summary>
+    /// Plan 43 (decision 2.1 = C): opt in to the "Refined materials" subsection.
+    /// Wired by <c>StatConfigurableWidgetViewModel.EnableRefinedOutput</c> for
+    /// the live widgets only; saved/reporting widgets never call this, so the
+    /// subsection stays empty + hidden for them.
+    /// </summary>
+    /// <param name="seenMaterialsProvider">Returns the materials seen so far (type id + name), display order.</param>
+    /// <param name="loadAutoShow">Reads the global auto-show flag.</param>
+    /// <param name="loadVisibility">Reads this widget's explicit visibility overrides.</param>
+    /// <param name="saveVisibility">Persists this widget's explicit visibility overrides.</param>
+    /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
+    public void EnableRefinedMaterials(
+        Func<IReadOnlyList<(long TypeId, string Name)>> seenMaterialsProvider,
+        Func<CancellationToken, Task<bool>> loadAutoShow,
+        Func<CancellationToken, Task<IReadOnlyDictionary<long, bool>>> loadVisibility,
+        Func<IReadOnlyDictionary<long, bool>, CancellationToken, Task> saveVisibility)
+    {
+        ArgumentNullException.ThrowIfNull(seenMaterialsProvider);
+        ArgumentNullException.ThrowIfNull(loadAutoShow);
+        ArgumentNullException.ThrowIfNull(loadVisibility);
+        ArgumentNullException.ThrowIfNull(saveVisibility);
+        _refinedEnabled = true;
+        _seenMaterials = seenMaterialsProvider;
+        _loadAutoShow = loadAutoShow;
+        _loadVisibility = loadVisibility;
+        _saveVisibility = saveVisibility;
     }
 
     /// <summary>
@@ -112,6 +152,20 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
                 emphasis: d.Emphasis));
         }
 
+        // Plan 43: refill the "Refined materials" subsection from the materials
+        // seen so far + the saved overrides (resolved against the auto-show flag).
+        if (_refinedEnabled)
+        {
+            var autoShow = await _loadAutoShow!(ct).ConfigureAwait(true);
+            var overrides = await _loadVisibility!(ct).ConfigureAwait(true);
+            RefinedMaterials.Clear();
+            foreach (var (typeId, name) in _seenMaterials!())
+            {
+                var visible = overrides.TryGetValue(typeId, out var v) ? v : autoShow;
+                RefinedMaterials.Add(new RefinedMaterialConfigRowViewModel(typeId, name, visible));
+            }
+        }
+
         ShouldClose = false;
     }
 
@@ -143,6 +197,22 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
         try
         {
             await _save(newConfig, ct).ConfigureAwait(true);
+
+            // Plan 43: persist the refined-materials visibility overrides. A row
+            // matching the auto-show default DROPS its override (back to default);
+            // a deviation is stored as an explicit, sticky override.
+            if (_refinedEnabled)
+            {
+                var autoShow = await _loadAutoShow!(ct).ConfigureAwait(true);
+                var map = new Dictionary<long, bool>(await _loadVisibility!(ct).ConfigureAwait(true));
+                foreach (var row in RefinedMaterials)
+                {
+                    if (row.Visible == autoShow) map.Remove(row.TypeId);
+                    else map[row.TypeId] = row.Visible;
+                }
+                await _saveVisibility!(map, ct).ConfigureAwait(true);
+            }
+
             ShouldClose = true;
         }
         catch (Exception ex)

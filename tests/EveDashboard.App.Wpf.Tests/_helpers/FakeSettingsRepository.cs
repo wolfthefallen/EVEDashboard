@@ -226,6 +226,38 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
+    /// <summary>Plan 43 — refined-output auto-show toggle (default on).</summary>
+    public bool AutoShowRefinedMaterials { get; set; } = true;
+
+    /// <summary>Plan 43 — per-widget refined-materials visibility overrides, keyed by scope ("" or pilot id string).</summary>
+    public Dictionary<string, IReadOnlyDictionary<long, bool>> RefinedMaterialsVisibility { get; } = new();
+
+    public int SetAutoShowRefinedMaterialsCount { get; private set; }
+    public int SetRefinedMaterialsVisibilityCount { get; private set; }
+
+    public Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default) =>
+        Task.FromResult(AutoShowRefinedMaterials);
+
+    public Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default)
+    {
+        AutoShowRefinedMaterials = enabled;
+        SetAutoShowRefinedMaterialsCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("auto_show_refined_materials"));
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default) =>
+        Task.FromResult(RefinedMaterialsVisibility.TryGetValue(scopeKey, out var v) ? v : new Dictionary<long, bool>());
+
+    public Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default)
+    {
+        RefinedMaterialsVisibility[scopeKey] = visibility;
+        SetRefinedMaterialsVisibilityCount++;
+        var key = scopeKey.Length == 0 ? "refined_materials_visibility" : $"refined_materials_visibility.{scopeKey}";
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs(key));
+        return Task.CompletedTask;
+    }
+
     public Task EnsureSeedDefaultsAsync(CancellationToken ct = default) => Task.CompletedTask;
 
     public event EventHandler<SettingChangedEventArgs>? SettingChanged;

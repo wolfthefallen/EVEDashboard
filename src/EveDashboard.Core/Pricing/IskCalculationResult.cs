@@ -25,9 +25,25 @@ namespace EveDashboard.Core.Pricing;
 /// breakdown widget. Plan 36 added <see cref="CritIsk"/> so the repository
 /// can derive Crit ISK % in a single per-pilot ISK call (the two-dict
 /// overload). The single-dict overload always returns <see cref="CritIsk"/>
-/// = <c>0</c>.
+/// = <c>0</c>. Plan 43 added <see cref="RefinedQuantitiesByMaterial"/> as an
+/// init-only property (default empty) so existing construction sites are
+/// unaffected — only the production calculator populates it.
 /// </remarks>
 public sealed record IskCalculationResult(
     double                            TotalIsk,
     double                            CritIsk,
-    IReadOnlyDictionary<long, double> IskByInputType);
+    IReadOnlyDictionary<long, double> IskByInputType)
+{
+    /// <summary>
+    /// Plan 43: yield-applied refined output for the FULL units (not the crit
+    /// subset) — refined-material <c>type_id</c> -> total units, summed across
+    /// every input ore and floored per (input, material) exactly as the ISK
+    /// total is. Materials with no captured price are still present here (they
+    /// contribute <c>0</c> to <see cref="TotalIsk"/> but are real output);
+    /// materials whose yield-applied quantity floors to <c>0</c> are omitted.
+    /// Empty by default; populated only by the production
+    /// <c>IskCalculator</c>.
+    /// </summary>
+    public IReadOnlyDictionary<long, long> RefinedQuantitiesByMaterial { get; init; }
+        = System.Collections.Immutable.ImmutableDictionary<long, long>.Empty;
+}

@@ -183,6 +183,56 @@ public sealed class SqliteReportingQueries : IReportingQueries
         return rows;
     }
 
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<RefineMatBreakdownRow>> GetRefinedMatBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default)
+    {
+        // Plan 43: reuse the same per-(type_id) mined-units queries the per-ore
+        // breakdown uses (3 cols: type_id, m3, units — we read type_id + units).
+        var sql = pilotId is null ? OreBreakdownSessionSql : OreBreakdownPerPilotSql;
+        var parameters = new Dictionary<string, object?> { ["$sid"] = sessionId };
+        if (pilotId is not null)
+        {
+            parameters["$pid"] = pilotId.Value;
+        }
+
+        var raw = await _db.QueryAsync(
+            sql,
+            static r => (TypeId: r.GetInt64(0), Units: r.GetInt64(2)),
+            parameters,
+            ct).ConfigureAwait(false);
+
+        if (raw.Count == 0)
+        {
+            return Array.Empty<RefineMatBreakdownRow>();
+        }
+
+        var unitsByType = new Dictionary<long, long>(raw.Count);
+        foreach (var r in raw)
+        {
+            unitsByType[r.TypeId] = r.Units;
+        }
+
+        var stationId            = await _settings.GetSelectedStationIdAsync(ct).ConfigureAwait(false);
+        var refiningYieldPercent = await _settings.GetRefiningYieldPercentAsync(ct).ConfigureAwait(false);
+        var priceMode            = await _settings.GetPriceModeAsync(ct).ConfigureAwait(false);
+
+        // allowLazyFetch:false — reports never fetch. Prices are irrelevant to the
+        // quantities anyway (RefinedQuantitiesByMaterial is captured before the price gate).
+        var iskResult = await _iskCalculator
+            .ComputeAsync(unitsByType, stationId, sessionId, allowLazyFetch: false, refiningYieldPercent, priceMode, ct)
+            .ConfigureAwait(false);
+
+        var rows = new List<RefineMatBreakdownRow>(iskResult.RefinedQuantitiesByMaterial.Count);
+        foreach (var (typeId, qty) in iskResult.RefinedQuantitiesByMaterial)
+        {
+            var name = _sdeLookup.TryGetRefinedMaterialName(typeId)
+                       ?? string.Create(CultureInfo.InvariantCulture, $"#{typeId}");
+            rows.Add(new RefineMatBreakdownRow(typeId, name, qty));
+        }
+        rows.Sort(static (a, b) => b.Quantity.CompareTo(a.Quantity));
+        return rows;
+    }
+
     private const string StartTimeSql = """
         SELECT MIN(start_time)
         FROM session_time

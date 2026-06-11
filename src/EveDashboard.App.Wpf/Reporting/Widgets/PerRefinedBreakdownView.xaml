@@ -1,0 +1,64 @@
+<widgets:WidgetBase x:Class="EveDashboard.App.Wpf.Reporting.Widgets.PerRefinedBreakdownView"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+                    mc:Ignorable="d">
+    <!--
+        Plan 43 reporting "Refined output" widget. Two columns (Material /
+        Quantity), sortable; default sort by Quantity descending (SQL/VM
+        post-sort). Reporting shows ALL materials (decision 1.3 = A). Used at
+        session-level and per-pilot level inside the Reports window. Mirrors
+        PerOreBreakdownView; chrome inherited from WidgetBase.
+    -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Title}"
+                   FontWeight="Bold"
+                   Margin="0,0,0,4"
+                   Foreground="{DynamicResource ForegroundBrush}" />
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Rows}"
+                  AutoGenerateColumns="False"
+                  CanUserSortColumns="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeRows="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column"
+                  Background="Transparent"
+                  Foreground="{DynamicResource ForegroundBrush}"
+                  RowBackground="Transparent"
+                  AlternatingRowBackground="{DynamicResource HoverOverlayBrush}"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Material"
+                                    Binding="{Binding TypeName}"
+                                    Width="*"
+                                    SortMemberPath="TypeName" />
+                <DataGridTextColumn Header="Quantity"
+                                    Binding="{Binding Quantity, StringFormat=N0}"
+                                    Width="Auto"
+                                    SortMemberPath="Quantity">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</widgets:WidgetBase>

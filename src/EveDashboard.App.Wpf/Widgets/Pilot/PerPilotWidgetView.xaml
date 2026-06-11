@@ -5,6 +5,7 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
                     xmlns:pilot="clr-namespace:EveDashboard.App.Wpf.Widgets.Pilot"
+                    xmlns:statconfig="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
                     xmlns:sessions="clr-namespace:EveDashboard.Core.Sessions;assembly=EveDashboard.Core"
                     mc:Ignorable="d">
     <!--
@@ -65,7 +66,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ItemsControl Grid.Row="0" ItemsSource="{Binding Stats}" />
+        <StackPanel Grid.Row="0">
+            <ItemsControl ItemsSource="{Binding Stats}" />
+            <!-- Plan 43: this pilot's "Refined output" section. -->
+            <statconfig:RefinedOutputSectionView />
+        </StackPanel>
 
         <!-- Footer: "Last event: HH:mm:ss" or "No events yet" when LastEventAt is null.
              Visibility bound to IsLastEventAtVisible so the popup's hide-only zone can suppress it. -->

@@ -60,6 +60,8 @@ public class IskCalculatorTests
             Materials.TryGetValue(typeId, out var list) ? list : Array.Empty<TypeMaterial>();
         public IReadOnlyList<long> GetRefinedMaterialTypeIds() =>
             Materials.Values.SelectMany(l => l.Select(t => t.MaterialTypeId)).Distinct().ToArray();
+        public string? TryGetRefinedMaterialName(long typeId) =>
+            Products.TryGetValue(typeId, out var p) ? p.Name : null;
         public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 
@@ -393,5 +395,138 @@ public class IskCalculatorTests
             JitaStationId, SessionId, true, 90.6, PriceMode.Buy);
 
         result.IskByInputType.Should().ContainKey(30375L).WhoseValue.Should().Be(0.0);
+    }
+
+    // ---- Plan 43: RefinedQuantitiesByMaterial -------------------------------------
+
+    /// <summary>
+    /// Two ores sharing a base material (Tritanium) plus a second material on the
+    /// moon ore, all at a clean-flooring yield, so refined quantities sum across
+    /// inputs and the per-material price reconciles exactly with TotalIsk.
+    /// </summary>
+    private static StubSdeLookup TwoOreSharedMaterialSde()
+    {
+        // Pyerite type id (35) is the second material; reuse Tritanium (34) shared.
+        const long PyeriteTypeId = 35L;
+        const long ScorditeTypeId = 1228L;
+        var sde = new StubSdeLookup();
+        sde.Products[VeldsparTypeId] = new MiningProduct(VeldsparTypeId, "Veldspar", 0.1, PortionSize: 100);
+        sde.Materials[VeldsparTypeId] = new[] { new TypeMaterial(TritaniumTypeId, 400L) };
+        sde.Products[ScorditeTypeId] = new MiningProduct(ScorditeTypeId, "Scordite", 0.15, PortionSize: 100);
+        sde.Materials[ScorditeTypeId] = new[]
+        {
+            new TypeMaterial(TritaniumTypeId, 300L),
+            new TypeMaterial(PyeriteTypeId,   100L),
+        };
+        return sde;
+    }
+
+    [Fact]
+    public async Task ComputeAsync_populates_RefinedQuantitiesByMaterial_summed_across_inputs()
+    {
+        // Veldspar 1000u (portion 100 -> 10 batches) -> 400 Tritanium/batch = 4000 raw.
+        // Scordite 500u (portion 100 -> 5 batches) -> 300 Trit/batch = 1500 raw,
+        //                                             100 Pyerite/batch = 500 raw.
+        // 100% yield floors cleanly: Tritanium = 4000 + 1500 = 5500; Pyerite = 500.
+        await using var db = await SeededDbAsync();
+        await SeedPriceAsync(db, TritaniumTypeId, JitaStationId, buy: 5.0, sell: 6.0);
+        await SeedPriceAsync(db, 35L, JitaStationId, buy: 10.0, sell: 11.0);
+        var sde = TwoOreSharedMaterialSde();
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long>
+            {
+                [VeldsparTypeId] = 1000L,
+                [1228L]          = 500L,
+            },
+            JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        result.RefinedQuantitiesByMaterial.Should().HaveCount(2);
+        result.RefinedQuantitiesByMaterial[TritaniumTypeId].Should().Be(5500L);
+        result.RefinedQuantitiesByMaterial[35L].Should().Be(500L);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_applies_yield_floor_to_RefinedQuantitiesByMaterial()
+    {
+        // Veldspar 1000u (10 batches * 400 = 4000 raw Tritanium) at 90% yield:
+        // floor(4000 * 0.90) = 3600.
+        await using var db = await SeededDbAsync();
+        await SeedPriceAsync(db, TritaniumTypeId, JitaStationId, buy: 5.0, sell: 6.0);
+        var sde = VeldsparOnlySde();
+        sde.Materials[VeldsparTypeId] = new[] { new TypeMaterial(TritaniumTypeId, 400L) };
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long> { [VeldsparTypeId] = 1000L },
+            JitaStationId, SessionId, true, 90.0, PriceMode.Buy);
+
+        result.RefinedQuantitiesByMaterial[TritaniumTypeId].Should().Be(3600L);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_includes_unpriced_material_in_RefinedQuantitiesByMaterial_with_zero_isk()
+    {
+        // Tritanium has NO market_data row (and lazy fetch can't fill it). The
+        // material must still appear in the refined-quantity map with its real
+        // quantity, while contributing 0 to TotalIsk.
+        await using var db = await SeededDbAsync();
+        // No SeedPriceAsync for Tritanium.
+        var sde = VeldsparOnlySde();
+        sde.Materials[VeldsparTypeId] = new[] { new TypeMaterial(TritaniumTypeId, 400L) };
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long> { [VeldsparTypeId] = 1000L },
+            JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        result.TotalIsk.Should().Be(0.0, "no price was captured for Tritanium");
+        result.RefinedQuantitiesByMaterial.Should().ContainKey(TritaniumTypeId)
+            .WhoseValue.Should().Be(4000L, "the quantity is captured before the price-null check");
+    }
+
+    [Fact]
+    public async Task ComputeAsync_priced_refined_quantities_reconcile_with_TotalIsk()
+    {
+        // Reconciliation: sum over PRICED materials of qty * buyPrice == TotalIsk.
+        await using var db = await SeededDbAsync();
+        const double TritaniumBuy = 5.0;
+        const double PyeriteBuy   = 10.0;
+        await SeedPriceAsync(db, TritaniumTypeId, JitaStationId, buy: TritaniumBuy, sell: 6.0);
+        await SeedPriceAsync(db, 35L, JitaStationId, buy: PyeriteBuy, sell: 11.0);
+        var sde = TwoOreSharedMaterialSde();
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long>
+            {
+                [VeldsparTypeId] = 1000L,
+                [1228L]          = 500L,
+            },
+            JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        var priceByMaterial = new Dictionary<long, double>
+        {
+            [TritaniumTypeId] = TritaniumBuy,
+            [35L]             = PyeriteBuy,
+        };
+        var reconciled = result.RefinedQuantitiesByMaterial
+            .Where(kvp => priceByMaterial.ContainsKey(kvp.Key))
+            .Sum(kvp => kvp.Value * priceByMaterial[kvp.Key]);
+
+        reconciled.Should().BeApproximately(result.TotalIsk, 1e-6);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_RefinedQuantitiesByMaterial_is_empty_for_empty_input()
+    {
+        await using var db = await SeededDbAsync();
+        var calc = NewCalculator(db, new StubSdeLookup(), new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long>(), JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        result.RefinedQuantitiesByMaterial.Should().BeEmpty();
     }
 }

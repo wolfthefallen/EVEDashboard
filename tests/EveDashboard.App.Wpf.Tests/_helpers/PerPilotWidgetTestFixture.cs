@@ -47,6 +47,7 @@ internal sealed class PerPilotWidgetTestFixture : IDisposable
             Db,
             new NoOpIskCalculator(),
             new FakeSettingsRepository(),
+            new FakeSdeLookup(),
             NullLogger<SqliteSessionStatsRepository>.Instance);
         StatsRepo = new CountingSessionStatsRepository(inner);
 

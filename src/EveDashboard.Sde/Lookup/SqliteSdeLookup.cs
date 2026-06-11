@@ -43,6 +43,7 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
     private Dictionary<long, MiningProduct> _byTypeId = new();
     private Dictionary<long, IReadOnlyList<TypeMaterial>> _typeMaterialsByTypeId = new();
     private IReadOnlyList<long> _refinedMaterialTypeIds = Array.Empty<long>();
+    private Dictionary<long, string> _refinedMaterialNames = new();
 
     /// <summary>Construct a lookup over the given SDE database and logger.</summary>
     /// <param name="db">Open SDE SQLite database (the file at <see cref="EveDashboard.Sde.Storage.ISdeStorage.DatabasePath"/>).</param>
@@ -89,6 +90,14 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
     }
 
     /// <inheritdoc />
+    public string? TryGetRefinedMaterialName(long typeId)
+    {
+        _ready.Wait();
+        var byId = Volatile.Read(ref _refinedMaterialNames);
+        return byId.TryGetValue(typeId, out var name) ? name : null;
+    }
+
+    /// <inheritdoc />
     public async Task LoadAsync(CancellationToken ct = default)
     {
         await _loadGate.WaitAsync(ct).ConfigureAwait(false);
@@ -122,23 +131,29 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
             // Plan 18: load the type_materials recipe for every is_ore = 1 type.
             // Drives both IskCalculator (recursive reprocessing) and
             // MarketPriceFetcher (the prefetch type-id list).
+            // Plan 43: the JOIN to the material's own `types` row carries its
+            // display name (Tritanium, etc.) so we can cache refined-material
+            // names — these are NOT in the ore/gas MiningProduct cache.
             var materialRows = await _db.QueryAsync(
                 """
-                SELECT tm.type_id, tm.material_type_id, tm.quantity
+                SELECT tm.type_id, tm.material_type_id, tm.quantity, mt.name
                 FROM type_materials tm
-                JOIN types t ON t.type_id = tm.type_id
+                JOIN types t  ON t.type_id  = tm.type_id
+                JOIN types mt ON mt.type_id = tm.material_type_id
                 WHERE t.is_ore = 1
                 ORDER BY tm.type_id, tm.material_type_id
                 """,
                 static r => (
                     TypeId: r.GetInt64(0),
                     MaterialTypeId: r.GetInt64(1),
-                    Quantity: r.GetInt64(2)),
+                    Quantity: r.GetInt64(2),
+                    MaterialName: r.GetString(3)),
                 null,
                 ct).ConfigureAwait(false);
 
             var typeMaterialsByTypeId = new Dictionary<long, IReadOnlyList<TypeMaterial>>();
             var refinedSet = new HashSet<long>();
+            var refinedNames = new Dictionary<long, string>();
             var pendingByType = new Dictionary<long, List<TypeMaterial>>();
             foreach (var m in materialRows)
             {
@@ -149,6 +164,7 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
                 }
                 list.Add(new TypeMaterial(m.MaterialTypeId, m.Quantity));
                 refinedSet.Add(m.MaterialTypeId);
+                refinedNames[m.MaterialTypeId] = m.MaterialName;
             }
             foreach (var kvp in pendingByType)
             {
@@ -160,6 +176,7 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
             Volatile.Write(ref _byTypeId, byId);
             Volatile.Write(ref _typeMaterialsByTypeId, typeMaterialsByTypeId);
             Volatile.Write(ref _refinedMaterialTypeIds, refinedTypeIds);
+            Volatile.Write(ref _refinedMaterialNames, refinedNames);
             _ready.Set();
 
             _log.LogInformation(

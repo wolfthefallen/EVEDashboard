@@ -47,10 +47,14 @@
         <DataTemplate DataType="{x:Type reportingWidgets:PerOreBreakdownViewModel}">
             <reportingWidgets:PerOreBreakdownView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type reportingWidgets:PerRefinedBreakdownViewModel}">
+            <reportingWidgets:PerRefinedBreakdownView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type reporting:PerPilotEntry}">
             <StackPanel Orientation="Vertical" Margin="0,0,0,12">
                 <ContentPresenter Content="{Binding Pilot}" />
                 <ContentPresenter Content="{Binding Ore}" Margin="0,4,0,0" />
+                <ContentPresenter Content="{Binding Refined}" Margin="0,4,0,0" />
             </StackPanel>
         </DataTemplate>
 
@@ -231,6 +235,7 @@
                                 Visibility="{Binding Content.Mode, Converter={StaticResource ModeToVisibility}, ConverterParameter=Single}">
                         <ContentPresenter Content="{Binding Content.SessionStats}" />
                         <ContentPresenter Content="{Binding Content.SessionOreBreakdown}" Margin="0,8,0,0" />
+                        <ContentPresenter Content="{Binding Content.SessionRefinedBreakdown}" Margin="0,8,0,0" />
                         <ItemsControl ItemsSource="{Binding Content.PerPilotEntries}" Margin="0,12,0,0" />
                     </StackPanel>
                     <!-- Compare mode: 2+ sessions selected. Plan 36: single

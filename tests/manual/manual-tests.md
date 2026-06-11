@@ -1125,6 +1125,59 @@ re-appears every launch until updated, and a failure (offline) is silent.
 
 ---
 
+## 16. Refined output (plan 43)
+
+Verifies the live "Refined output" section in the Session + per-pilot widgets
+(quantities of refined materials, tracked as they are mined), the Settings
+auto-show toggle, the sticky per-material hide in the stat-config cog, and the
+Reports refined-output breakdown.
+
+### Setup
+
+A working SDE + market prices (so ISK computes). Start a session with at least
+one pilot and mine some ore in EVE whose reprocess outputs you know (e.g.
+Veldspar -> Tritanium; or Kylixium -> Tritanium / Pyerite / Mexallon).
+
+### Steps
+
+1. **Live refined output appears.** With auto-show ON (Settings -> Refined
+   output -> "Auto-show refined materials as they are mined" checked, the
+   default), mine ore and Continue the session.
+   - Expected: a "Refined output" section appears under the stats in the Session
+     widget AND under each mining pilot's widget, listing each refined material
+     (name + quantity) as it is first produced. Quantities grow as you mine; the
+     numbers are yield-applied (reflect your refining-yield setting). The
+     Session-widget list is the sum across pilots; each pilot widget shows that
+     pilot's own.
+2. **Auto-show OFF = manual only.** Open Settings, uncheck "Auto-show refined
+   materials...", Apply. Mine an ore that produces a material NOT yet shown.
+   - Expected: the new material does NOT appear in any "Refined output" section.
+3. **Reveal a hidden material via the cog.** Click a widget's stat-config cog;
+   scroll to the "Refined materials" subsection; check the box next to the
+   hidden material; Apply.
+   - Expected: that material now shows in this widget's "Refined output" section.
+     (Per-widget: revealing it on one pilot does not reveal it on another —
+     decision 2.2 = A.)
+4. **Sticky hide survives auto-show ON.** With a material currently visible,
+   open the cog, UNCHECK that material, Apply -> it disappears from the section.
+   Now re-enable auto-show in Settings (check the box, Apply).
+   - Expected: the explicitly-hidden material STAYS hidden even though auto-show
+     is on (sticky hide wins). Other materials auto-show as normal.
+5. **Reporting shows ALL materials.** Stop the session. Open Reports, select the
+   session.
+   - Expected: a "Session refined output" breakdown (Material | Quantity,
+     sortable) lists EVERY refined material for the session, plus a per-pilot
+     "refined output" breakdown under each pilot — regardless of anything you
+     hid live (decision 1.3 = A). Quantities match the live totals.
+
+### Cleanup
+
+Re-check "Auto-show refined materials..." in Settings (Apply) if you want the
+default. Stop the session. To fully reset the per-widget hides, delete the
+`refined_materials_visibility*` rows from the `setting` table (optional).
+
+---
+
 ## Reporting a failure
 
 If any scenario fails, capture:

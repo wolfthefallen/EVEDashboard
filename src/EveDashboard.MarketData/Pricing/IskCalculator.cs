@@ -192,12 +192,27 @@ public sealed class IskCalculator : IIskCalculator
         var totalIsk = 0.0;
         var critIsk  = 0.0;
         var iskByInputType = new Dictionary<long, double>(typeIdToUnitsMined.Count);
+        // Plan 43: yield-applied refined output, material type_id -> total units,
+        // summed across every input ore. Accumulated BEFORE the price gate so a
+        // material with no captured price still reports its quantity (it just
+        // contributes 0 ISK). Built from the FULL accumulator only (not crit).
+        var refinedByMaterial = new Dictionary<long, long>();
         foreach (var (inputTypeId, inputAcc) in perInputAccumulator)
         {
             var critAcc = perInputCritAccumulator[inputTypeId];
             var perInputIsk = 0.0;
             foreach (var (materialTypeId, rawQuantity) in inputAcc)
             {
+                // Plan 43: floor the yield-applied quantity once, up front, and
+                // record it (omit a material that floors to 0). This is the same
+                // floored value the ISK total uses, so quantity reconciles with ISK.
+                var adjustedQty = (long)Math.Floor(rawQuantity * oreEff);
+                if (adjustedQty > 0)
+                {
+                    refinedByMaterial[materialTypeId] =
+                        refinedByMaterial.GetValueOrDefault(materialTypeId) + adjustedQty;
+                }
+
                 if (!priceCache.TryGetValue(materialTypeId, out var price))
                 {
                     price = await ReadPriceAsync(materialTypeId, sessionId, priceMode, ct).ConfigureAwait(false);
@@ -205,9 +220,8 @@ public sealed class IskCalculator : IIskCalculator
                 }
                 if (price is null)
                 {
-                    continue;   // No price -> 0 contribution per market-schema.md.
+                    continue;   // No price -> 0 ISK contribution per market-schema.md (quantity already recorded above).
                 }
-                var adjustedQty = (long)Math.Floor(rawQuantity * oreEff);
                 perInputIsk += adjustedQty * price.Value;   // weight = 1.0 in v1.
 
                 if (critAcc.TryGetValue(materialTypeId, out var critRawQty) && critRawQty > 0)
@@ -221,10 +235,13 @@ public sealed class IskCalculator : IIskCalculator
         }
 
         _log.LogDebug(
-            "ComputeAsync(typeIdCount={InCount}, materialCount={MatCount}, critTypeIdCount={CritInCount}) -> ISK={Total} CritISK={Crit} (per-input keys: {KeyCount})",
-            typeIdToUnitsMined.Count, allMaterials.Count, critTypeIdToUnitsMined.Count, totalIsk, critIsk, iskByInputType.Count);
+            "ComputeAsync(typeIdCount={InCount}, materialCount={MatCount}, critTypeIdCount={CritInCount}) -> ISK={Total} CritISK={Crit} (per-input keys: {KeyCount}, refined materials: {RefinedCount})",
+            typeIdToUnitsMined.Count, allMaterials.Count, critTypeIdToUnitsMined.Count, totalIsk, critIsk, iskByInputType.Count, refinedByMaterial.Count);
 
-        return new IskCalculationResult(totalIsk, critIsk, iskByInputType);
+        return new IskCalculationResult(totalIsk, critIsk, iskByInputType)
+        {
+            RefinedQuantitiesByMaterial = refinedByMaterial,
+        };
     }
 
     private void BreakdownRecursive(long typeId, long quantity, Dictionary<long, long> acc)

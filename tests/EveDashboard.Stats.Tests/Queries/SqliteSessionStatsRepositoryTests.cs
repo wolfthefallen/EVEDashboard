@@ -1,5 +1,7 @@
 using System.Globalization;
+using EveDashboard.Core.Domain;
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Lookup;
 using EveDashboard.Core.Pricing;
 using EveDashboard.Core.Settings;
 using EveDashboard.Core.Settings.WidgetStats;
@@ -28,12 +30,27 @@ public class SqliteSessionStatsRepositoryTests
         ISqliteDatabase db,
         ILogger<SqliteSessionStatsRepository>? log = null,
         IIskCalculator? iskCalculator = null,
-        ISettingsRepository? settings = null) =>
+        ISettingsRepository? settings = null,
+        ISdeLookup? sdeLookup = null) =>
         new(
             db,
             iskCalculator ?? new ZeroIskCalculator(),
             settings ?? new InMemorySettingsRepository(),
+            sdeLookup ?? new StubSdeLookup(),
             log ?? NullLogger<SqliteSessionStatsRepository>.Instance);
+
+    /// <summary>Plan 43: SDE stub — resolves refined-material names from <see cref="RefinedNames"/>, empty otherwise.</summary>
+    private sealed class StubSdeLookup : ISdeLookup
+    {
+        public Dictionary<long, string> RefinedNames { get; } = new();
+        public long? TryGetTypeId(string productName) => null;
+        public MiningProduct? TryGetProduct(long typeId) => null;
+        public IReadOnlyList<TypeMaterial> GetTypeMaterials(long typeId) => Array.Empty<TypeMaterial>();
+        public IReadOnlyList<long> GetRefinedMaterialTypeIds() => Array.Empty<long>();
+        public string? TryGetRefinedMaterialName(long typeId) =>
+            RefinedNames.TryGetValue(typeId, out var n) ? n : null;
+        public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
+    }
 
     /// <summary>Test stub <see cref="IIskCalculator"/> that always returns 0.</summary>
     private sealed class ZeroIskCalculator : IIskCalculator
@@ -157,6 +174,10 @@ public class SqliteSessionStatsRepositoryTests
         public Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default) => Task.CompletedTask;
         public Task<EveDashboard.Core.Sessions.PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default) => Task.FromResult(EveDashboard.Core.Sessions.PilotSortOrder.LastActiveNewest);
         public Task SetPilotSortOrderAsync(EveDashboard.Core.Sessions.PilotSortOrder order, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default) => Task.FromResult(true);
+        public Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default) => Task.FromResult<IReadOnlyDictionary<long, bool>>(new Dictionary<long, bool>());
+        public Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default) => Task.CompletedTask;
         public Task<double?> GetReportsSidebarWidthAsync(CancellationToken ct = default) => Task.FromResult<double?>(null);
         public Task SetReportsSidebarWidthAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<int> GetAutoPauseIdleMinutesAsync(CancellationToken ct = default) => Task.FromResult(5);
@@ -261,6 +282,7 @@ public class SqliteSessionStatsRepositoryTests
             null!,
             new ZeroIskCalculator(),
             new InMemorySettingsRepository(),
+            new StubSdeLookup(),
             NullLogger<SqliteSessionStatsRepository>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
@@ -274,6 +296,7 @@ public class SqliteSessionStatsRepositoryTests
             db,
             null!,
             new InMemorySettingsRepository(),
+            new StubSdeLookup(),
             NullLogger<SqliteSessionStatsRepository>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
@@ -286,6 +309,21 @@ public class SqliteSessionStatsRepositoryTests
         Action act = () => _ = new SqliteSessionStatsRepository(
             db,
             new ZeroIskCalculator(),
+            null!,
+            new StubSdeLookup(),
+            NullLogger<SqliteSessionStatsRepository>.Instance);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task Ctor_throws_on_null_sdeLookup()
+    {
+        await using var db = OpenInMemory();
+        Action act = () => _ = new SqliteSessionStatsRepository(
+            db,
+            new ZeroIskCalculator(),
+            new InMemorySettingsRepository(),
             null!,
             NullLogger<SqliteSessionStatsRepository>.Instance);
 
@@ -300,6 +338,7 @@ public class SqliteSessionStatsRepositoryTests
             db,
             new ZeroIskCalculator(),
             new InMemorySettingsRepository(),
+            new StubSdeLookup(),
             null!);
 
         act.Should().Throw<ArgumentNullException>();

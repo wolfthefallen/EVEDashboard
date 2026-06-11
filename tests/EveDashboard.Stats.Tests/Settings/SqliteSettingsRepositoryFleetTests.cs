@@ -119,4 +119,112 @@ public class SqliteSettingsRepositoryFleetTests
 
         keys.Should().ContainSingle().Which.Should().Be("pilot_sort_order");
     }
+
+    // ---- Plan 43: AutoShowRefinedMaterials ----------------------------------------
+
+    [Fact]
+    public async Task GetAutoShowRefinedMaterialsAsync_returns_true_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var enabled = await repo.GetAutoShowRefinedMaterialsAsync();
+
+        enabled.Should().BeTrue("auto-show defaults to true when never persisted");
+    }
+
+    [Fact]
+    public async Task SetAutoShowRefinedMaterialsAsync_then_GetAutoShowRefinedMaterialsAsync_round_trips_false()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetAutoShowRefinedMaterialsAsync(false);
+        var enabled = await repo.GetAutoShowRefinedMaterialsAsync();
+
+        enabled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SetAutoShowRefinedMaterialsAsync_raises_SettingChanged_with_key_auto_show_refined_materials()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetAutoShowRefinedMaterialsAsync(false);
+
+        keys.Should().ContainSingle().Which.Should().Be("auto_show_refined_materials");
+    }
+
+    // ---- Plan 43: RefinedMaterialsVisibility (session scope, scopeKey "") ----------
+
+    [Fact]
+    public async Task GetRefinedMaterialsVisibilityAsync_returns_empty_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var map = await repo.GetRefinedMaterialsVisibilityAsync("");
+
+        map.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SetRefinedMaterialsVisibilityAsync_then_GetRefinedMaterialsVisibilityAsync_round_trips_map()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var visibility = new Dictionary<long, bool> { [34] = false, [35] = true };
+
+        await repo.SetRefinedMaterialsVisibilityAsync("", visibility);
+        var map = await repo.GetRefinedMaterialsVisibilityAsync("");
+
+        map.Should().BeEquivalentTo(visibility);
+    }
+
+    [Fact]
+    public async Task SetRefinedMaterialsVisibilityAsync_session_scope_raises_SettingChanged_with_unscoped_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetRefinedMaterialsVisibilityAsync("", new Dictionary<long, bool> { [34] = false });
+
+        keys.Should().ContainSingle().Which.Should().Be("refined_materials_visibility");
+    }
+
+    // ---- Plan 43: RefinedMaterialsVisibility (per-pilot scope) ---------------------
+
+    [Fact]
+    public async Task SetRefinedMaterialsVisibilityAsync_per_pilot_scope_raises_SettingChanged_with_composed_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetRefinedMaterialsVisibilityAsync("12345", new Dictionary<long, bool> { [34] = false });
+
+        keys.Should().ContainSingle().Which.Should().Be("refined_materials_visibility.12345");
+    }
+
+    [Fact]
+    public async Task RefinedMaterialsVisibility_per_pilot_scope_round_trips_independently_of_session_scope()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var sessionScope = new Dictionary<long, bool> { [34] = false };
+        var pilotScope   = new Dictionary<long, bool> { [35] = false, [36] = true };
+
+        await repo.SetRefinedMaterialsVisibilityAsync("", sessionScope);
+        await repo.SetRefinedMaterialsVisibilityAsync("12345", pilotScope);
+
+        (await repo.GetRefinedMaterialsVisibilityAsync("")).Should().BeEquivalentTo(sessionScope,
+            "the session scope is untouched by the per-pilot write");
+        (await repo.GetRefinedMaterialsVisibilityAsync("12345")).Should().BeEquivalentTo(pilotScope);
+    }
 }

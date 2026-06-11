@@ -166,6 +166,9 @@ public sealed class ExcelSessionExporterTests : IAsyncLifetime, IDisposable
             return Task.FromResult(PerPilotOre.TryGetValue(pilotId.Value, out var v) ? v : Array.Empty<OreBreakdownRow>());
         }
 
+        public Task<IReadOnlyList<RefineMatBreakdownRow>> GetRefinedMatBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<RefineMatBreakdownRow>>(Array.Empty<RefineMatBreakdownRow>());
+
         public Task<SessionTimeline> GetSessionTimelineAsync(string sessionId, CancellationToken ct = default) =>
             Task.FromResult(Timeline);
     }

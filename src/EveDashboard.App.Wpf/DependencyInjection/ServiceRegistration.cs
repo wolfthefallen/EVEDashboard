@@ -186,6 +186,7 @@ public static class ServiceRegistration
                 sessionDb,
                 iskCalculator,
                 settingsRepo,
+                sdeLookup,
                 sp.GetRequiredService<ILogger<SqliteSessionStatsRepository>>()));
 
         // Plan 25 — Reporting query layer (uses the same explicit sessionDb capture pattern).

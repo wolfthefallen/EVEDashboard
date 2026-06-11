@@ -160,6 +160,10 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
         _activeSession.RolesChanged += OnRolesChanged;
         Settings.SettingChanged += OnSettingChanged;
 
+        // Plan 43: this pilot's per-widget "Refined output" section (scope key =
+        // the pilot id, matching the per_pilot_stats_config keying).
+        EnableRefinedOutput(pilotId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
         // Initial render with default config (pre-load); will rebuild on first SettingChanged
         // OR on the first tick — whichever fires first. Calling here is optional safety:
         // gives the widget non-empty Stats immediately on construction.
@@ -195,6 +199,8 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
         // Plan 35: also propagate role from the snapshot (RolesChanged is the
         // immediate signal; this is the redundant catch-all).
         Role             = stats.Role;
+        // Plan 43: merge this pilot's refined output into the section.
+        MergeRefinedOutput(stats.RefinedOutput);
         LastUpdated      = DateTimeOffset.UtcNow;
     }
 

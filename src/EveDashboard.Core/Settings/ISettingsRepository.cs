@@ -214,6 +214,44 @@ public interface ISettingsRepository
     Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default);
 
     /// <summary>
+    /// Read whether newly-produced refined materials auto-show in the live
+    /// widgets' "Refined output" section (plan 43). Returns <c>true</c> when
+    /// missing or when the stored value is unrecognised (Warning log on the latter).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted auto-show flag, or <c>true</c>.</returns>
+    Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default);
+
+    /// <summary>Persist the refined-materials auto-show toggle (plan 43). Raises <see cref="SettingChanged"/> with key <c>"auto_show_refined_materials"</c>.</summary>
+    /// <param name="enabled">Whether newly-produced materials auto-show.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default);
+
+    /// <summary>
+    /// Read the per-widget explicit refined-material visibility overrides (plan 43,
+    /// decision 2.2 = A — per-widget). Returns an empty map when none are set;
+    /// a material absent from the map follows the auto-show default, a
+    /// <c>false</c> entry is a sticky hide, a <c>true</c> entry an explicit show.
+    /// </summary>
+    /// <param name="scopeKey">Empty string for the Session widget, or the pilot id for a per-pilot widget.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Material type id -> explicit visibility; empty when unset or malformed.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="scopeKey"/> is null.</exception>
+    Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default);
+
+    /// <summary>
+    /// Persist the per-widget explicit refined-material visibility overrides
+    /// (plan 43). Raises <see cref="SettingChanged"/> with key
+    /// <c>"refined_materials_visibility"</c> (Session) or
+    /// <c>"refined_materials_visibility.&lt;pilot_id&gt;"</c> (per pilot).
+    /// </summary>
+    /// <param name="scopeKey">Empty string for the Session widget, or the pilot id for a per-pilot widget.</param>
+    /// <param name="visibility">Material type id -> explicit visibility map.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="scopeKey"/> or <paramref name="visibility"/> is null.</exception>
+    Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default);
+
+    /// <summary>
     /// Read the persisted Reports-window sidebar expanded width in pixels
     /// (plan 25). Returns <c>null</c> when missing (interpret as default 280 px)
     /// or malformed (with Warning log on malformed).

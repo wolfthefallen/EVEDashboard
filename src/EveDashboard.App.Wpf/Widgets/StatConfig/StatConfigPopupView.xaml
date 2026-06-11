@@ -110,10 +110,30 @@
                            Foreground="{DynamicResource ForegroundBrush}" />
             </Grid>
         </DataTemplate>
+
+        <!-- Plan 43 (decision 2.1 = C): refined-material row — a Visible checkbox + name. -->
+        <DataTemplate x:Key="RefinedMaterialRowTemplate">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0"
+                          Margin="0,0,6,0"
+                          VerticalAlignment="Center"
+                          ToolTip="Show / hide this material in the Refined output section"
+                          IsChecked="{Binding Visible}" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding Name}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -162,7 +182,40 @@
                           ItemTemplate="{StaticResource HideOnlyRowTemplate}" />
         </Border>
 
-        <StackPanel Grid.Row="4"
+        <!-- Plan 43 (decision 2.1 = C): refined-materials subsection. Visible only
+             when there are seen materials to toggle. -->
+        <Border Grid.Row="4"
+                Margin="0,8,0,0"
+                BorderBrush="{DynamicResource WidgetBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,6,0,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RefinedMaterials.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel>
+                <TextBlock Text="Refined materials"
+                           FontWeight="Bold"
+                           FontSize="12"
+                           Margin="0,0,0,2"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <TextBlock Text="Uncheck to hide from the Refined output section."
+                           FontSize="11"
+                           Opacity="0.7"
+                           Margin="0,0,0,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <ItemsControl ItemsSource="{Binding RefinedMaterials}"
+                              ItemTemplate="{StaticResource RefinedMaterialRowTemplate}" />
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="5"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,8,0,0">

@@ -168,6 +168,10 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     [ObservableProperty]
     private double _critIskPercent;
 
+    /// <summary>Plan 43: session-wide refined-material output (yield-applied, quantity desc). Sourced from the stats snapshot; drives the SessionStats widget's "Refined output" section.</summary>
+    [ObservableProperty]
+    private IReadOnlyList<RefinedMaterialAmount> _sessionRefinedOutput = Array.Empty<RefinedMaterialAmount>();
+
     /// <summary>Construct the ViewModel. All dependencies are required.</summary>
     /// <param name="db">Singleton session SQLite wrapper.</param>
     /// <param name="statsRepo">Session-stats query layer (plan 13).</param>
@@ -1049,6 +1053,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         CritCount        = stats.CritCount;
         CritChance       = stats.CritChance;
         CritIskPercent   = stats.CritIskPercent;
+        SessionRefinedOutput = stats.RefinedOutput;
     }
 
     private void ResetStatFieldsToZero()
@@ -1061,6 +1066,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         CritCount        = 0;
         CritChance       = 0;
         CritIskPercent   = 0;
+        SessionRefinedOutput = Array.Empty<RefinedMaterialAmount>();
     }
 
     private async Task TryRollbackAsync()

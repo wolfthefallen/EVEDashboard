@@ -392,6 +392,68 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         RaiseSettingChanged("pilot_sort_order");
     }
 
+    private static readonly IReadOnlyDictionary<long, bool> EmptyVisibility = new Dictionary<long, bool>();
+
+    /// <summary>Compose the per-widget refined-materials visibility setting key (plan 43).</summary>
+    internal static string RefinedMaterialsVisibilityKey(string scopeKey) =>
+        scopeKey.Length == 0
+            ? "refined_materials_visibility"
+            : $"refined_materials_visibility.{scopeKey}";
+
+    /// <inheritdoc />
+    public async Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'auto_show_refined_materials'", ct: ct);
+        if (raw is null) return true;
+        return raw switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => LogWarnAndReturn(
+                $"Unknown auto_show_refined_materials value '{raw}' - returning default 'true'.",
+                true),
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default)
+    {
+        await UpsertAsync("auto_show_refined_materials", enabled ? "true" : "false", ct);
+        RaiseSettingChanged("auto_show_refined_materials");
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(scopeKey);
+        var key = RefinedMaterialsVisibilityKey(scopeKey);
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = $k LIMIT 1",
+            new Dictionary<string, object?> { ["$k"] = key }, ct);
+        if (raw is null) return EmptyVisibility;
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<long, bool>>(raw) ?? EmptyVisibility;
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "{Key} JSON malformed - returning empty.", key);
+            return EmptyVisibility;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(scopeKey);
+        ArgumentNullException.ThrowIfNull(visibility);
+        var key = RefinedMaterialsVisibilityKey(scopeKey);
+        var json = JsonSerializer.Serialize(visibility);
+        await UpsertAsync(key, json, ct);
+        RaiseSettingChanged(key);
+    }
+
     /// <inheritdoc />
     public async Task<double?> GetReportsSidebarWidthAsync(CancellationToken ct = default)
     {
@@ -514,6 +576,9 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         await SeedAsync("auto_pause_idle_minutes",
             IdleMinutesDefault.ToString(CultureInfo.InvariantCulture), ct);
         await SeedAsync("auto_pause_sound_enabled", "true", ct);
+        // Plan 43 — refined-output auto-show default on.
+        await SeedAsync("auto_show_refined_materials", "true", ct);
+        // refined_materials_visibility[.<pilot_id>]  intentionally NOT seeded (null sentinel = no explicit overrides)
         // window_geometry         intentionally NOT seeded (round-2 3.1 = B - null sentinel)
         // widget_layout           intentionally NOT seeded (plan 19 - null sentinel = use default layout)
         // session_stats_config    intentionally NOT seeded (plan 20 - null sentinel = use default order/emphasis)

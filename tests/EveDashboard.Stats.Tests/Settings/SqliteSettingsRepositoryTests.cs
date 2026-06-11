@@ -553,7 +553,7 @@ public class SqliteSettingsRepositoryTests
     // ---- EnsureSeedDefaultsAsync --------------------------------------------------
 
     [Fact]
-    public async Task EnsureSeedDefaultsAsync_seeds_six_keys_on_fresh_db_skips_window_geometry()
+    public async Task EnsureSeedDefaultsAsync_seeds_seven_keys_on_fresh_db_skips_window_geometry()
     {
         await using var db = await NewSchemaAsync();
         var repo = NewRepo(db);
@@ -566,13 +566,14 @@ public class SqliteSettingsRepositoryTests
 
         // schema_version is seeded by SchemaInitializer (plan 11); the repo
         // defaults are theme / price_mode / refining_yield_percent /
-        // selected_station_id (plan 14) and auto_pause_idle_minutes +
-        // auto_pause_sound_enabled (plan 37). window_geometry intentionally
-        // NOT seeded (round-2 3.1 = B).
+        // selected_station_id (plan 14), auto_pause_idle_minutes +
+        // auto_pause_sound_enabled (plan 37), and auto_show_refined_materials
+        // (plan 43). window_geometry intentionally NOT seeded (round-2 3.1 = B).
         keys.Should().BeEquivalentTo(new[]
         {
             "auto_pause_idle_minutes",
             "auto_pause_sound_enabled",
+            "auto_show_refined_materials",
             "price_mode",
             "refining_yield_percent",
             "schema_version",

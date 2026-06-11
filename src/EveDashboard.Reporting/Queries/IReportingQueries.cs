@@ -64,6 +64,24 @@ public interface IReportingQueries
     Task<IReadOnlyList<OreBreakdownRow>> GetOreBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default);
 
     /// <summary>
+    /// Enumerate the per-refined-material breakdown for a saved session,
+    /// optionally scoped to one pilot (plan 43). Returns rows ordered by
+    /// quantity descending, showing ALL refined materials (decision 1.3 = A —
+    /// reporting ignores the live auto-show / hide). Used by the Reports
+    /// "Refined output" widget at session- and per-pilot-level.
+    /// </summary>
+    /// <param name="sessionId">Session id to query against.</param>
+    /// <param name="pilotId">When non-null, filter to that pilot's events only; when null, aggregate across all pilots in the session.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>One row per refined material produced in the scoped slice; empty when no matching events.</returns>
+    /// <remarks>
+    /// Quantities are sourced from <c>IIskCalculator.ComputeAsync(...)</c>'s
+    /// <c>RefinedQuantitiesByMaterial</c> (yield-applied) and name-resolved via
+    /// <c>ISdeLookup.TryGetRefinedMaterialName</c>.
+    /// </remarks>
+    Task<IReadOnlyList<RefineMatBreakdownRow>> GetRefinedMatBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default);
+
+    /// <summary>
     /// Materialise a session's <c>session_time</c> rows into a closed-form
     /// <see cref="SessionTimeline"/>: session start (earliest active interval),
     /// total active duration, and the ordered list of completed pause windows.

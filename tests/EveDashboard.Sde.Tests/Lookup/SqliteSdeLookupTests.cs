@@ -300,4 +300,33 @@ public class SqliteSdeLookupTests
         var refined = lookup.GetRefinedMaterialTypeIds();
         refined.Should().BeEquivalentTo(new long[] { 34L, 16637L });
     }
+
+    // ---- Plan 43: TryGetRefinedMaterialName ------------------------------------------
+
+    [Fact]
+    public async Task TryGetRefinedMaterialName_resolves_name_from_material_types_row()
+    {
+        // Veldspar (is_ore=1) -> 415 Tritanium (type 34). The JOIN to the
+        // material's own `types` row carries Tritanium's name into the cache.
+        await using var db = await SeededDbAsync();
+        using var lookup = new SqliteSdeLookup(db, NullLogger<SqliteSdeLookup>.Instance);
+        await lookup.LoadAsync();
+
+        lookup.TryGetRefinedMaterialName(34L).Should().Be("Tritanium");
+        // Bitumens -> 16637 Tungsten + 34 Tritanium; the second material resolves too.
+        lookup.TryGetRefinedMaterialName(16637L).Should().Be("Tungsten");
+    }
+
+    [Fact]
+    public async Task TryGetRefinedMaterialName_returns_null_for_unknown_type_id()
+    {
+        await using var db = await SeededDbAsync();
+        using var lookup = new SqliteSdeLookup(db, NullLogger<SqliteSdeLookup>.Instance);
+        await lookup.LoadAsync();
+
+        // 30375 is a gas type (is_ore=0) with no type_materials row, so it never
+        // appears as a refined-material output.
+        lookup.TryGetRefinedMaterialName(30375L).Should().BeNull();
+        lookup.TryGetRefinedMaterialName(999_999L).Should().BeNull();
+    }
 }

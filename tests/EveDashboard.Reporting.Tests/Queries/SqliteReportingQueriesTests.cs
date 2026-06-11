@@ -377,6 +377,72 @@ public class SqliteReportingQueriesTests
         result.Single().TypeName.Should().Be("#99999");
     }
 
+    // ---- GetRefinedMatBreakdownAsync (plan 43) ----------------------------------
+
+    private const long TritaniumTypeId = 34L;
+    private const long PyeriteTypeId = 35L;
+
+    /// <summary>SDE stub that name-resolves Tritanium (34) and Pyerite (35).</summary>
+    private static StubSdeLookup RefinedNamesSde() =>
+        new()
+        {
+            Products =
+            {
+                [TritaniumTypeId] = new MiningProduct(TritaniumTypeId, "Tritanium", 0.01, 1),
+                [PyeriteTypeId]   = new MiningProduct(PyeriteTypeId,   "Pyerite",   0.01, 1),
+            },
+        };
+
+    [Fact]
+    public async Task GetRefinedMatBreakdownAsync_session_level_rows_sorted_desc_with_resolved_names()
+    {
+        await using var db = await NewSchemaAsync();
+        var s1 = await InsertSessionAsync(db, "Refined Session");
+        await InsertSessionPilotAsync(db, s1, Pilot1, "Alice");
+        await InsertSessionPilotAsync(db, s1, Pilot2, "Bob");
+        await InsertSessionTimeAsync(db, s1, T0, T0.AddMinutes(20));
+        // Two pilots mining (so the ore-breakdown SQL the query reuses returns rows).
+        await InsertLogAsync(db, s1, Pilot1, T0.AddSeconds(5),  "Tick", VeldsparTypeId, units: 100, volumeM3: 10.0);
+        await InsertLogAsync(db, s1, Pilot2, T0.AddSeconds(10), "Tick", VeldsparTypeId, units: 200, volumeM3: 20.0);
+
+        var calc = new StubIskCalculator
+        {
+            RefinedQuantities = new Dictionary<long, long> { [TritaniumTypeId] = 2000L, [PyeriteTypeId] = 800L },
+        };
+        var queries = NewQueries(db, sdeLookup: RefinedNamesSde(), iskCalculator: calc);
+
+        var result = await queries.GetRefinedMatBreakdownAsync(s1, pilotId: null);
+
+        result.Should().Equal(
+            new RefineMatBreakdownRow(TritaniumTypeId, "Tritanium", 2000L),
+            new RefineMatBreakdownRow(PyeriteTypeId,   "Pyerite",   800L));
+    }
+
+    [Fact]
+    public async Task GetRefinedMatBreakdownAsync_per_pilot_scope_returns_resolved_sorted_rows()
+    {
+        await using var db = await NewSchemaAsync();
+        var s1 = await InsertSessionAsync(db, "Refined Per-Pilot");
+        await InsertSessionPilotAsync(db, s1, Pilot1, "Alice");
+        await InsertSessionPilotAsync(db, s1, Pilot2, "Bob");
+        await InsertSessionTimeAsync(db, s1, T0, T0.AddMinutes(20));
+        await InsertLogAsync(db, s1, Pilot1, T0.AddSeconds(5),  "Tick", VeldsparTypeId, units: 100, volumeM3: 10.0);
+        await InsertLogAsync(db, s1, Pilot2, T0.AddSeconds(10), "Tick", ScorditeTypeId, units: 200, volumeM3: 20.0);
+
+        var calc = new StubIskCalculator
+        {
+            // Pyerite > Tritanium here, so the desc sort flips the row order.
+            RefinedQuantities = new Dictionary<long, long> { [TritaniumTypeId] = 300L, [PyeriteTypeId] = 900L },
+        };
+        var queries = NewQueries(db, sdeLookup: RefinedNamesSde(), iskCalculator: calc);
+
+        var result = await queries.GetRefinedMatBreakdownAsync(s1, pilotId: Pilot1);
+
+        result.Should().Equal(
+            new RefineMatBreakdownRow(PyeriteTypeId,   "Pyerite",   900L),
+            new RefineMatBreakdownRow(TritaniumTypeId, "Tritanium", 300L));
+    }
+
     // ---- GetSessionTimelineAsync ------------------------------------------------
 
     [Fact]
@@ -491,11 +557,21 @@ public class SqliteReportingQueriesTests
             Materials.TryGetValue(typeId, out var m) ? m : Array.Empty<TypeMaterial>();
         public IReadOnlyList<long> GetRefinedMaterialTypeIds() =>
             Materials.Values.SelectMany(l => l.Select(t => t.MaterialTypeId)).Distinct().ToArray();
+        public string? TryGetRefinedMaterialName(long typeId) =>
+            Products.TryGetValue(typeId, out var p) ? p.Name : null;
         public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 
     private sealed class StubIskCalculator : IIskCalculator
     {
+        /// <summary>
+        /// Plan 43: optional refined-quantity map (refined-material type_id -> units)
+        /// returned on every <c>ComputeAsync</c>. Empty by default so the m^3 / ISK
+        /// tests above are unaffected; set it to drive the refined-breakdown test.
+        /// </summary>
+        public IReadOnlyDictionary<long, long> RefinedQuantities { get; set; } =
+            new Dictionary<long, long>();
+
         public Task<IskCalculationResult> ComputeAsync(
             IReadOnlyDictionary<long, long> typeIdToUnitsMined,
             long stationId,
@@ -510,7 +586,10 @@ public class SqliteReportingQueriesTests
             // covered by IskCalculatorTests.
             var perInput = new Dictionary<long, double>(typeIdToUnitsMined.Count);
             foreach (var k in typeIdToUnitsMined.Keys) perInput[k] = 0.0;
-            return Task.FromResult(new IskCalculationResult(0.0, 0.0, perInput));
+            return Task.FromResult(new IskCalculationResult(0.0, 0.0, perInput)
+            {
+                RefinedQuantitiesByMaterial = RefinedQuantities,
+            });
         }
 
         public Task<IskCalculationResult> ComputeAsync(
@@ -525,7 +604,10 @@ public class SqliteReportingQueriesTests
         {
             var perInput = new Dictionary<long, double>(typeIdToUnitsMined.Count);
             foreach (var k in typeIdToUnitsMined.Keys) perInput[k] = 0.0;
-            return Task.FromResult(new IskCalculationResult(0.0, 0.0, perInput));
+            return Task.FromResult(new IskCalculationResult(0.0, 0.0, perInput)
+            {
+                RefinedQuantitiesByMaterial = RefinedQuantities,
+            });
         }
     }
 
@@ -557,6 +639,10 @@ public class SqliteReportingQueriesTests
         public Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default) => Task.CompletedTask;
         public Task<EveDashboard.Core.Sessions.PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default) => Task.FromResult(EveDashboard.Core.Sessions.PilotSortOrder.LastActiveNewest);
         public Task SetPilotSortOrderAsync(EveDashboard.Core.Sessions.PilotSortOrder order, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default) => Task.FromResult(true);
+        public Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default) => Task.FromResult<IReadOnlyDictionary<long, bool>>(new Dictionary<long, bool>());
+        public Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default) => Task.CompletedTask;
         public Task<double?> GetReportsSidebarWidthAsync(CancellationToken ct = default) => Task.FromResult<double?>(null);
         public Task SetReportsSidebarWidthAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<int> GetAutoPauseIdleMinutesAsync(CancellationToken ct = default) => Task.FromResult(5);

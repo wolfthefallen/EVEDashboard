@@ -1,0 +1,56 @@
+<UserControl x:Class="EveDashboard.App.Wpf.Widgets.StatConfig.RefinedOutputSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <!--
+        Plan 43: the live widget body's "Refined output" section. DataContext is
+        the owning StatConfigurableWidgetViewModel; binds its RefinedOutput
+        collection (already filtered to visible rows + sorted by quantity desc).
+        Collapsed when empty so the section only appears once a material is
+        produced (and is visible). Embedded in SessionStatsView + PerPilotWidgetView.
+    -->
+    <Border Margin="0,8,0,0"
+            BorderBrush="{DynamicResource WidgetBorderBrush}"
+            BorderThickness="0,1,0,0"
+            Padding="0,6,0,0">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RefinedOutput.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <StackPanel>
+            <TextBlock Text="Refined output"
+                       FontWeight="Bold"
+                       FontSize="12"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+            <ItemsControl ItemsSource="{Binding RefinedOutput}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       Foreground="{DynamicResource ForegroundBrush}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Quantity, StringFormat=N0}"
+                                       Margin="8,0,0,0"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource ForegroundBrush}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</UserControl>

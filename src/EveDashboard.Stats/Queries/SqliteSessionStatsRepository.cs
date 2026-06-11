@@ -3,6 +3,7 @@ namespace EveDashboard.Stats.Queries;
 using System.Collections.Immutable;
 using System.Data.Common;
 using System.Globalization;
+using EveDashboard.Core.Lookup;
 using EveDashboard.Core.Pricing;
 using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
@@ -29,6 +30,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
     private readonly ISqliteDatabase _db;
     private readonly IIskCalculator _iskCalculator;
     private readonly ISettingsRepository _settings;
+    private readonly ISdeLookup _sdeLookup;
     private readonly ILogger<SqliteSessionStatsRepository> _log;
 
     /// <summary>
@@ -39,6 +41,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
     ///     session SQLite file.</param>
     /// <param name="iskCalculator">Calculator that turns per-pilot mined units into ISK (plan 18).</param>
     /// <param name="settings">Settings repository — read once per snapshot for refining yield, price mode, and selected station.</param>
+    /// <param name="sdeLookup">SDE lookup — resolves refined-material type ids to display names for the plan-43 "Refined output" section.</param>
     /// <param name="log">Logger for diagnostics — Debug per call, Warning
     ///     when called with a missing <c>sessionId</c>.</param>
     /// <exception cref="ArgumentNullException">
@@ -48,15 +51,18 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         ISqliteDatabase db,
         IIskCalculator iskCalculator,
         ISettingsRepository settings,
+        ISdeLookup sdeLookup,
         ILogger<SqliteSessionStatsRepository> log)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(iskCalculator);
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(sdeLookup);
         ArgumentNullException.ThrowIfNull(log);
         _db = db;
         _iskCalculator = iskCalculator;
         _settings = settings;
+        _sdeLookup = sdeLookup;
         _log = log;
     }
 
@@ -140,6 +146,11 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
 
         var pilotIsk     = new Dictionary<long, double>();
         var pilotCritIsk = new Dictionary<long, double>();
+        // Plan 43: per-pilot refined output (name-resolved, sorted) + the
+        // session-wide sum of every pilot's refined map (mirrors how session ISK
+        // is the sum of per-pilot ISK — no second ISK call).
+        var pilotRefined     = new Dictionary<long, IReadOnlyList<RefinedMaterialAmount>>();
+        var sessionRefinedMap = new Dictionary<long, long>();
         foreach (var pilotGroup in perPilotPerType.GroupBy(r => r.PilotId))
         {
             var typeIdToUnits     = pilotGroup.ToDictionary(r => r.TypeId, r => r.Units);
@@ -151,7 +162,14 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
                 .ConfigureAwait(false);
             pilotIsk[pilotGroup.Key]     = iskResult.TotalIsk;
             pilotCritIsk[pilotGroup.Key] = iskResult.CritIsk;
+
+            pilotRefined[pilotGroup.Key] = BuildRefinedList(iskResult.RefinedQuantitiesByMaterial);
+            foreach (var (matId, qty) in iskResult.RefinedQuantitiesByMaterial)
+            {
+                sessionRefinedMap[matId] = sessionRefinedMap.GetValueOrDefault(matId) + qty;
+            }
         }
+        var sessionRefined = BuildRefinedList(sessionRefinedMap);
 
         var sessionTotalIsk     = pilotIsk.Values.Sum();
         var sessionTotalCritIsk = pilotCritIsk.Values.Sum();
@@ -190,7 +208,10 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
                 TotalM3FromCrits:   row.CritM3,
                 CritCount:          row.CritCount,
                 CritChance:         pilotCritChance,
-                Role:               PilotRoleExtensions.Parse(row.Role));
+                Role:               PilotRoleExtensions.Parse(row.Role))
+            {
+                RefinedOutput = pilotRefined.GetValueOrDefault(row.PilotId, Array.Empty<RefinedMaterialAmount>()),
+            };
         }
 
         _log.LogDebug(
@@ -213,7 +234,29 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
             TotalM3FromCrits:   sessionRow.CritM3,
             CritCount:          sessionRow.CritCount,
             CritChance:         sessionCritChance,
-            ByCharacter:        byCharacter);
+            ByCharacter:        byCharacter)
+        {
+            RefinedOutput = sessionRefined,
+        };
+    }
+
+    /// <summary>
+    /// Plan 43: turn a refined-material quantity map into a display list — name
+    /// resolved via the SDE (falling back to <c>#&lt;typeId&gt;</c>), sorted by
+    /// quantity descending. Returns an empty list for an empty map.
+    /// </summary>
+    private IReadOnlyList<RefinedMaterialAmount> BuildRefinedList(IReadOnlyDictionary<long, long> map)
+    {
+        if (map.Count == 0) return Array.Empty<RefinedMaterialAmount>();
+        var list = new List<RefinedMaterialAmount>(map.Count);
+        foreach (var (typeId, qty) in map)
+        {
+            var name = _sdeLookup.TryGetRefinedMaterialName(typeId)
+                       ?? string.Create(CultureInfo.InvariantCulture, $"#{typeId}");
+            list.Add(new RefinedMaterialAmount(typeId, name, qty));
+        }
+        list.Sort(static (a, b) => b.Quantity.CompareTo(a.Quantity));
+        return list;
     }
 
     /// <summary>Empty snapshot returned when the requested session id is not found (8.1 = B).</summary>

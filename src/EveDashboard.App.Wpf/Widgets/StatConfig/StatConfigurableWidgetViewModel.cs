@@ -1,8 +1,11 @@
 namespace EveDashboard.App.Wpf.Widgets.StatConfig;
 
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using EveDashboard.Core.Settings;
 using EveDashboard.Core.Settings.WidgetStats;
+using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -102,8 +105,19 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
 
     private void OnSettingChanged(object? sender, SettingChangedEventArgs e)
     {
-        if (!string.Equals(e.Key, _settingKey, StringComparison.Ordinal)) return;
-        _ = RebuildStatsAsync();
+        if (string.Equals(e.Key, _settingKey, StringComparison.Ordinal))
+        {
+            _ = RebuildStatsAsync();
+            return;
+        }
+        // Plan 43: re-resolve the refined-output section on a global auto-show
+        // change or this widget's own visibility-override change.
+        if (_refinedScopeKey is not null
+            && (string.Equals(e.Key, "auto_show_refined_materials", StringComparison.Ordinal)
+                || string.Equals(e.Key, RefinedVisibilityKey(_refinedScopeKey), StringComparison.Ordinal)))
+        {
+            _ = HydrateRefinedAsync();
+        }
     }
 
     private void OnPopupPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -141,6 +155,88 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
             if (string.Equals(d.Key, key, StringComparison.Ordinal)) return d.Hidden;
         }
         return false;
+    }
+
+    /* ----- Plan 43: refined-output section (opt-in — live SessionStats + per-pilot widgets only) ----- */
+
+    private string? _refinedScopeKey;
+    private bool _refinedAutoShow = true;
+    private Dictionary<long, bool> _refinedOverrides = new();
+    private readonly Dictionary<long, RefinedMaterialAmount> _refinedSeen = new();
+
+    /// <summary>Plan 43: the visible refined-material rows (quantity desc). Empty unless <see cref="EnableRefinedOutput"/> was called.</summary>
+    public ObservableCollection<RefinedOutputRowViewModel> RefinedOutput { get; } = new();
+
+    /// <summary>Plan 43: true when this widget shows the "Refined output" section (live SessionStats + per-pilot widgets opt in; saved/reporting widgets do not).</summary>
+    public bool HasRefinedOutput => _refinedScopeKey is not null;
+
+    /// <summary>Compose the per-widget refined-materials visibility setting key (must match the settings repository).</summary>
+    private static string RefinedVisibilityKey(string scopeKey) =>
+        scopeKey.Length == 0 ? "refined_materials_visibility" : $"refined_materials_visibility.{scopeKey}";
+
+    /// <summary>
+    /// Plan 43 (decision 2.1 = C / 2.2 = A): enable the per-widget "Refined
+    /// output" section plus the cog-popup "Refined materials" subsection. Called
+    /// from the live SessionStats / per-pilot widget ctors only.
+    /// </summary>
+    /// <param name="scopeKey">Empty string for the Session widget; the pilot id for a per-pilot widget.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="scopeKey"/> is null.</exception>
+    protected void EnableRefinedOutput(string scopeKey)
+    {
+        ArgumentNullException.ThrowIfNull(scopeKey);
+        _refinedScopeKey = scopeKey;
+        _popup.EnableRefinedMaterials(
+            seenMaterialsProvider: () => _refinedSeen.Values
+                .OrderByDescending(m => m.Quantity)
+                .Select(m => (m.TypeId, m.Name))
+                .ToList(),
+            loadAutoShow:   ct => Settings.GetAutoShowRefinedMaterialsAsync(ct),
+            loadVisibility: ct => Settings.GetRefinedMaterialsVisibilityAsync(scopeKey, ct),
+            saveVisibility: (map, ct) => Settings.SetRefinedMaterialsVisibilityAsync(scopeKey, map, ct));
+        _ = HydrateRefinedAsync();
+    }
+
+    /// <summary>
+    /// Plan 43: merge the latest refined-output snapshot into the section
+    /// (called by subclasses on each refresh). A material never disappears once
+    /// seen; quantities only grow. No-op when refined output is not enabled.
+    /// </summary>
+    /// <param name="snapshot">The latest refined-output amounts for this widget's scope.</param>
+    protected void MergeRefinedOutput(IReadOnlyList<RefinedMaterialAmount> snapshot)
+    {
+        if (_refinedScopeKey is null) return;
+        ArgumentNullException.ThrowIfNull(snapshot);
+        foreach (var m in snapshot)
+        {
+            _refinedSeen[m.TypeId] = m;
+        }
+        RebuildRefinedRows();
+    }
+
+    private async Task HydrateRefinedAsync()
+    {
+        if (_refinedScopeKey is null) return;
+        _refinedAutoShow = await Settings.GetAutoShowRefinedMaterialsAsync().ConfigureAwait(true);
+        var overrides = await Settings.GetRefinedMaterialsVisibilityAsync(_refinedScopeKey).ConfigureAwait(true);
+        _refinedOverrides = new Dictionary<long, bool>(overrides);
+        RebuildRefinedRows();
+    }
+
+    private bool RefinedVisible(long typeId) =>
+        _refinedOverrides.TryGetValue(typeId, out var v) ? v : _refinedAutoShow;
+
+    private void RebuildRefinedRows()
+    {
+        RefinedOutput.Clear();
+        foreach (var m in _refinedSeen.Values
+                     .OrderByDescending(x => x.Quantity)
+                     .ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            if (RefinedVisible(m.TypeId))
+            {
+                RefinedOutput.Add(new RefinedOutputRowViewModel(m.TypeId, m.Name, m.Quantity));
+            }
+        }
     }
 
     /// <summary>Dispose: unsubscribe from settings + popup; dispose renderer + popup; invoke <see cref="DisposeCore"/> for subclass cleanup. Idempotent.</summary>

@@ -1,5 +1,7 @@
 using System.Globalization;
+using EveDashboard.Core.Domain;
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Lookup;
 using EveDashboard.Core.Pricing;
 using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
@@ -38,7 +40,19 @@ public class SqliteSessionStatsRepositoryRoleTests
             db,
             new ZeroIskCalculator(),
             new InMemorySettingsRepository(),
+            new StubSdeLookup(),
             NullLogger<SqliteSessionStatsRepository>.Instance);
+
+    /// <summary>Plan 43: SDE stub — role tests do not exercise refined output (ZeroIskCalculator returns none).</summary>
+    private sealed class StubSdeLookup : ISdeLookup
+    {
+        public long? TryGetTypeId(string productName) => null;
+        public MiningProduct? TryGetProduct(long typeId) => null;
+        public IReadOnlyList<TypeMaterial> GetTypeMaterials(long typeId) => Array.Empty<TypeMaterial>();
+        public IReadOnlyList<long> GetRefinedMaterialTypeIds() => Array.Empty<long>();
+        public string? TryGetRefinedMaterialName(long typeId) => null;
+        public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
+    }
 
     private static string ToIso(DateTimeOffset value) =>
         value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
@@ -268,6 +282,10 @@ public class SqliteSessionStatsRepositoryRoleTests
         public Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default) => Task.CompletedTask;
         public Task<EveDashboard.Core.Sessions.PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default) => Task.FromResult(EveDashboard.Core.Sessions.PilotSortOrder.LastActiveNewest);
         public Task SetPilotSortOrderAsync(EveDashboard.Core.Sessions.PilotSortOrder order, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default) => Task.FromResult(true);
+        public Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default) => Task.FromResult<IReadOnlyDictionary<long, bool>>(new Dictionary<long, bool>());
+        public Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default) => Task.CompletedTask;
         public Task<double?> GetReportsSidebarWidthAsync(CancellationToken ct = default) => Task.FromResult<double?>(null);
         public Task SetReportsSidebarWidthAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<int> GetAutoPauseIdleMinutesAsync(CancellationToken ct = default) => Task.FromResult(5);

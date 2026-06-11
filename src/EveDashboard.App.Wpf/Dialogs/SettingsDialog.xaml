@@ -238,6 +238,21 @@
                     </Grid>
                 </StackPanel>
 
+                <!-- ============================================== Refined output ============================================== -->
+                <!-- Plan 43: section hidden in bootstrap-failure mode. -->
+                <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <TextBlock Text="Refined output"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"
+                               Foreground="{DynamicResource ForegroundBrush}" />
+                    <CheckBox x:Name="AutoShowRefinedMaterialsCheck"
+                              Margin="12,0,0,16"
+                              Content="Auto-show refined materials as they are mined"
+                              IsChecked="{Binding AutoShowRefinedMaterials, Mode=TwoWay}"
+                              Foreground="{DynamicResource ForegroundBrush}" />
+                </StackPanel>
+
                 <!-- ============================================== Logs ============================================== -->
                 <TextBlock Text="Logs"
                            FontSize="16"

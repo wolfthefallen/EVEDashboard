@@ -4,6 +4,7 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
+                    xmlns:statconfig="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
                     mc:Ignorable="d">
     <!--
         Plan 20: replaced the previous header-TextBlocks + 7-row Grid with one
@@ -12,6 +13,10 @@
         as StatRowViewModel rows via the implicit DataTemplate in
         Themes/StatRowTemplates.xaml. WidgetBase chrome handles the LastUpdated
         line with Visibility bound to IsLastUpdatedVisible.
+        Plan 43: the "Refined output" section renders below the stats.
     -->
-    <ItemsControl ItemsSource="{Binding Stats}" />
+    <StackPanel>
+        <ItemsControl ItemsSource="{Binding Stats}" />
+        <statconfig:RefinedOutputSectionView />
+    </StackPanel>
 </widgets:WidgetBase>

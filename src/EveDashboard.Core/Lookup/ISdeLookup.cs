@@ -102,6 +102,22 @@ public interface ISdeLookup
     IReadOnlyList<long> GetRefinedMaterialTypeIds();
 
     /// <summary>
+    /// Resolve a refined-material type id (e.g. Tritanium) to its EVE display
+    /// name (plan 43). Covers the refined OUTPUTS of ore recipes — the same set
+    /// as <see cref="GetRefinedMaterialTypeIds"/>.
+    /// </summary>
+    /// <param name="typeId">EVE type id of a refined material.</param>
+    /// <returns>The material's display name, or <c>null</c> when <paramref name="typeId"/> is not a known refined material.</returns>
+    /// <remarks>
+    /// Refined-material names are NOT in the ore/gas <see cref="MiningProduct"/>
+    /// cache — <see cref="TryGetProduct"/> returns <c>null</c> for them. This is a
+    /// separate cache built from the SDE <c>types</c> table during
+    /// <see cref="LoadAsync"/>. Blocks on the same block-and-queue gate as the
+    /// other reads until the first <see cref="LoadAsync"/> completes.
+    /// </remarks>
+    string? TryGetRefinedMaterialName(long typeId);
+
+    /// <summary>
     /// Build (or rebuild) the in-memory cache by querying the SDE SQLite
     /// database. Concurrent invocations serialize via an internal semaphore.
     /// </summary>

@@ -141,6 +141,22 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />
+    public Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
     public Task<double?> GetReportsSidebarWidthAsync(CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 

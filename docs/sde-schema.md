@@ -143,6 +143,8 @@ WHERE m.type_id = 1230;
 
 One JOIN-and-multiply per query. No pre-computed refining table to maintain.
 
+**Plan 43 — refined-material names are cached at load.** `SqliteSdeLookup.LoadAsync` now also reads each refined output's `types.name` (via the recipe JOIN above) into a small `type_id -> name` cache, exposed through `ISdeLookup.TryGetRefinedMaterialName`. This is needed because the ore/gas `MiningProduct` cache deliberately does NOT include refined outputs (Tritanium etc.), and the live + reporting "Refined output" widgets need their display names. No schema change — the names already live in `types`.
+
 ---
 
 ## What we deliberately skipped from the everef.net JSON

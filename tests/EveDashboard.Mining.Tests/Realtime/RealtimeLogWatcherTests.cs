@@ -247,6 +247,7 @@ public class RealtimeLogWatcherTests
 
         public IReadOnlyList<TypeMaterial> GetTypeMaterials(long typeId) => Array.Empty<TypeMaterial>();
         public IReadOnlyList<long> GetRefinedMaterialTypeIds() => Array.Empty<long>();
+        public string? TryGetRefinedMaterialName(long typeId) => null;
         public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 }

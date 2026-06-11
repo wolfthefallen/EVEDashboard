@@ -91,6 +91,10 @@ public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
         _controller = controller;
         _controller.PropertyChanged += OnControllerPropertyChanged;
 
+        // Plan 43: the Session widget owns the session-wide "Refined output"
+        // section (scope key = "" — the singleton session widget).
+        EnableRefinedOutput(string.Empty);
+
         // Subclass fields are now set; trigger the initial render.
         StartInitialRebuild();
     }
@@ -131,6 +135,9 @@ public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
                 break;
             case nameof(SessionController.CritIskPercent):
                 OnPropertyChanged(nameof(CritIskPercent));
+                break;
+            case nameof(SessionController.SessionRefinedOutput):
+                MergeRefinedOutput(_controller.SessionRefinedOutput);
                 break;
             case nameof(SessionController.LastUpdated):
                 LastUpdated = _controller.LastUpdated;
