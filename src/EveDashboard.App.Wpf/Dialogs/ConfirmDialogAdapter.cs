@@ -12,13 +12,14 @@ using System.Windows;
 public sealed class ConfirmDialogAdapter : IConfirmDialog
 {
     /// <inheritdoc />
-    public bool Show(string title, string body, string confirmLabel)
+    public bool Show(string title, string body, string confirmLabel, string cancelLabel = "Cancel")
     {
         ArgumentNullException.ThrowIfNull(title);
         ArgumentNullException.ThrowIfNull(body);
         ArgumentNullException.ThrowIfNull(confirmLabel);
+        ArgumentNullException.ThrowIfNull(cancelLabel);
 
-        var dialog = new ConfirmDialog(title, body, confirmLabel)
+        var dialog = new ConfirmDialog(title, body, confirmLabel, cancelLabel)
         {
             Owner = ResolveOwner(),
         };

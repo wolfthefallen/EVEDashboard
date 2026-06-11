@@ -1034,6 +1034,53 @@ keeps all sessions / config / SDE cache / logs after the EveDashboard rename.
 
 ---
 
+## 15. Update check on launch (plan 41)
+
+Verifies the launch-time GitHub release check: a newer published release prompts a
+modal Yes/No dialog that opens the download page, the prompt is non-blocking and
+re-appears every launch until updated, and a failure (offline) is silent.
+
+### Setup
+
+- Build + run from source per Shared setup. The app version comes from `<Version>`
+  in `Directory.Build.props` (currently `0.1.0`, matching the published release
+  tag `v0.1.0`).
+
+### Steps
+
+1. **Newer release available.** Edit `Directory.Build.props` and set `<Version>`
+   BELOW the latest published release (e.g. `0.0.1`). Rebuild and launch
+   (`dotnet run --project src/EveDashboard.App.Wpf`).
+   - Expected: shortly after the main window appears, a modal dialog titled
+     "Update available" names the latest release (e.g. `v0.1.0`) and shows two
+     buttons, **Yes** and **No** (not "Cancel"). The main window finished showing
+     first - the check did not block startup.
+2. **Yes opens the download page.** Click **Yes**.
+   - Expected: your default browser opens the release page
+     (`https://github.com/wolfthefallen/EVEDashboard/releases/tag/v0.1.0`); the
+     app keeps running.
+3. **Nag persists.** Close and relaunch (still on the low `<Version>`).
+   - Expected: the "Update available" dialog appears again - there is no
+     "don't remind me" and no persisted dismissal.
+4. **No opens nothing.** Relaunch; click **No**.
+   - Expected: the dialog closes, no browser opens, the app runs normally.
+5. **Up to date - no prompt.** Restore `<Version>` to match (or exceed) the latest
+   release tag (`0.1.0`). Rebuild and launch.
+   - Expected: no dialog. The log shows an Information line that the running
+     version is current with the latest release.
+6. **Offline - silent.** Disconnect the network (or block api.github.com). Launch.
+   - Expected: no dialog, the app starts normally, and a single Warning is logged
+     to `%APPDATA%\EveDashboard\logs\<latest>.log` that the update check was
+     skipped. Startup is not delayed.
+
+### Cleanup
+
+- Restore `<Version>` in `Directory.Build.props` to `0.1.0` (or the real current
+  version) and rebuild.
+- Re-enable the network if you disabled it in step 6.
+
+---
+
 ## Reporting a failure
 
 If any scenario fails, capture:

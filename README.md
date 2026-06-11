@@ -27,6 +27,10 @@ Get the latest Windows build from the
 It is a self-contained `.exe` - no installer and no separate .NET runtime to set up. Download
 it, run it, done.
 
+**Staying current:** on launch EVE Dashboard checks GitHub for a newer release and, if one is
+out, asks whether to open the download page. It never downloads or installs anything itself -
+you stay in control of updating.
+
 **Requirements:** Windows 10 or 11, and EVE Online launched at least once on this PC (so your
 gamelog folder exists).
 
@@ -38,9 +42,9 @@ EVE Dashboard is built to be private:
   under `%APPDATA%\EveDashboard\` on your machine.
 - It **never uploads your data**, never logs into your EVE account, and never sends anything
   about you anywhere.
-- The only network traffic is **downloading public reference data**: current market prices
-  (from the GoonMetrics API) and EVE's Static Data Export (from everef.net). That traffic is
-  read-only and contains nothing personal.
+- The only network traffic is **read-only public data**: current market prices (from the
+  GoonMetrics API), EVE's Static Data Export (from everef.net), and a check against the public
+  GitHub Releases API on launch to see if a newer version is out. None of it is personal.
 
 ## Is this allowed? (EVE Online ToS)
 

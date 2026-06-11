@@ -10,15 +10,17 @@ internal sealed class FakeConfirmDialog : IConfirmDialog
     public string? LastTitle { get; private set; }
     public string? LastBody { get; private set; }
     public string? LastConfirmLabel { get; private set; }
+    public string? LastCancelLabel { get; private set; }
 
     public FakeConfirmDialog(bool result) { _result = result; }
 
-    public bool Show(string title, string body, string confirmLabel)
+    public bool Show(string title, string body, string confirmLabel, string cancelLabel = "Cancel")
     {
         ShowCount++;
         LastTitle = title;
         LastBody = body;
         LastConfirmLabel = confirmLabel;
+        LastCancelLabel = cancelLabel;
         return _result;
     }
 }

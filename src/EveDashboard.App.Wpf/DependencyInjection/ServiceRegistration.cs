@@ -22,6 +22,8 @@ using EveDashboard.Mining.Gamelogs;
 using EveDashboard.Mining.Parsing;
 using EveDashboard.Mining.Realtime;
 using EveDashboard.MarketData.Pricing;
+using EveDashboard.Core.Updates;
+using EveDashboard.Updates;
 using EveDashboard.Reporting.Queries;
 using EveDashboard.Sde.Storage;
 using EveDashboard.Sde.Updater;
@@ -73,6 +75,7 @@ public static class ServiceRegistration
     /// <param name="marketPriceClient">Plan 18 GoonMetrics HTTP client.</param>
     /// <param name="marketPriceFetcher">Plan 18 fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
     /// <param name="iskCalculator">Plan 18 ISK calculator (canonical recursive reprocessing algorithm).</param>
+    /// <param name="releaseClient">Plan 41 GitHub release-check client for the launch update check.</param>
     /// <returns>A constructed <see cref="ServiceProvider"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public static ServiceProvider BuildServiceProvider(
@@ -94,7 +97,8 @@ public static class ServiceRegistration
         IBootstrapConfigLoader bootstrapLoader,
         GoonMetricsPriceClient marketPriceClient,
         MarketPriceFetcher marketPriceFetcher,
-        IskCalculator iskCalculator)
+        IskCalculator iskCalculator,
+        GitHubReleaseClient releaseClient)
     {
         ArgumentNullException.ThrowIfNull(loggerFactory);
         ArgumentNullException.ThrowIfNull(sessionDb);
@@ -115,6 +119,7 @@ public static class ServiceRegistration
         ArgumentNullException.ThrowIfNull(marketPriceClient);
         ArgumentNullException.ThrowIfNull(marketPriceFetcher);
         ArgumentNullException.ThrowIfNull(iskCalculator);
+        ArgumentNullException.ThrowIfNull(releaseClient);
 
         var services = new ServiceCollection();
 
@@ -156,6 +161,15 @@ public static class ServiceRegistration
         services.AddSingleton<IMarketPriceFetcher>(marketPriceFetcher);
         services.AddSingleton(iskCalculator);
         services.AddSingleton<IIskCalculator>(iskCalculator);
+
+        // Plan 41 — launch update check. Release client dual-registered
+        // (concrete + interface), mirroring the pricing client; the browser
+        // launcher and notifier are app-only services. UpdateNotifier is
+        // resolved once after MainWindow.Show and run fire-and-forget.
+        services.AddSingleton(releaseClient);
+        services.AddSingleton<IReleaseClient>(releaseClient);
+        services.AddSingleton<IBrowserLauncher, BrowserLauncher>();
+        services.AddSingleton<UpdateNotifier>();
 
         // Stats query layer — explicit sessionDb capture (NOT via ISqliteDatabase resolution).
         services.AddSingleton<ISessionStatsRepository>(sp =>

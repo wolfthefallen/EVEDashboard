@@ -1,6 +1,7 @@
 namespace EveDashboard.App.Wpf.Tests.DependencyInjection;
 
 using System.IO;
+using System.Net.Http;
 using EveDashboard.App.Wpf.DependencyInjection;
 using EveDashboard.App.Wpf.Tests.Helpers;
 using EveDashboard.App.Wpf.Widgets.Session;
@@ -10,6 +11,7 @@ using EveDashboard.Persistence.Storage;
 using EveDashboard.Stats.Schema;
 using EveDashboard.Stats.Settings;
 using EveDashboard.Stats.Storage;
+using EveDashboard.Updates;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -69,7 +71,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var vm = sp.GetRequiredService<SessionController>();
 
@@ -125,7 +128,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var coord = sp.GetRequiredService<EveDashboard.App.Wpf.Widgets.Pilot.PerPilotWidgetCoordinator>();
             // Trigger the session_pilot query path; if wired to sdeDb this throws.
@@ -178,7 +182,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var mainVm = sp.GetRequiredService<EveDashboard.App.Wpf.MainWindowViewModel>();
             var layout = sp.GetRequiredService<EveDashboard.App.Wpf.Layout.LayoutCoordinator>();
@@ -229,7 +234,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var layout = sp.GetRequiredService<EveDashboard.App.Wpf.Layout.LayoutCoordinator>();
             // LoadAsync queries setting; if wired to sdeDb (no setting table) this throws.
@@ -278,7 +284,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var statsRepo = sp.GetRequiredService<EveDashboard.Stats.Queries.ISessionStatsRepository>();
             // GetSessionStatsAsync queries session/session_time/log/session_pilot.
@@ -329,7 +336,8 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc);
+                priceClient, priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var ctrl = sp.GetRequiredService<SessionController>();
             var statsVm = sp.GetRequiredService<SessionStatsViewModel>();

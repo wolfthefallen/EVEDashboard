@@ -107,6 +107,7 @@ src/
   EveDashboard.Stats/          Session schema, event writer, stats query layer, settings.
   EveDashboard.Reporting/      Saved-session queries.
   EveDashboard.SessionIO/      JSON / Excel session export and JSON import.
+  EveDashboard.Updates/        GitHub release-check client for the launch update check.
   EveDashboard.App.Wpf/        WPF UI. Bootstraps and composes everything.
 tests/
   EveDashboard.Core.Tests/
@@ -117,12 +118,13 @@ tests/
   EveDashboard.Stats.Tests/
   EveDashboard.Reporting.Tests/
   EveDashboard.SessionIO.Tests/
+  EveDashboard.Updates.Tests/
   EveDashboard.App.Wpf.Tests/
   manual/                   Single canonical manual-tests.md (all scenarios, workflow order).
 docs/                       Schema reference for the SQLite databases.
 ```
 
-**Dependency direction is one-way:** UI -> (Stats / MarketData / Sde / Logs / Persistence) -> Core. `EveDashboard.Core` is the leaf — it depends on nothing else in the solution and contains no I/O. WPF dispatcher use is confined to `EveDashboard.App.Wpf`; lower layers communicate upward via events, observable collections, or async tasks.
+**Dependency direction is one-way:** UI -> (Stats / MarketData / Sde / Updates / Logs / Persistence) -> Core. `EveDashboard.Core` is the leaf — it depends on nothing else in the solution and contains no I/O. WPF dispatcher use is confined to `EveDashboard.App.Wpf`; lower layers communicate upward via events, observable collections, or async tasks.
 
 ```
                               +-----------------------+

@@ -3,6 +3,7 @@ namespace EveDashboard.App.Wpf;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Windows;
 using EveDashboard.App.Wpf.Bootstrap;
 using EveDashboard.App.Wpf.DependencyInjection;
@@ -16,6 +17,7 @@ using EveDashboard.Mining.Gamelogs;
 using EveDashboard.Mining.Parsing;
 using EveDashboard.Mining.Realtime;
 using EveDashboard.MarketData.Pricing;
+using EveDashboard.Updates;
 using EveDashboard.Persistence.Configuration;
 using EveDashboard.Persistence.Logging;
 using EveDashboard.Persistence.Storage;
@@ -108,6 +110,12 @@ public partial class App : Application
     private GoonMetricsPriceClient? _marketPriceClient;
     private MarketPriceFetcher?     _marketPriceFetcher;
     private IskCalculator?          _iskCalculator;
+
+    // Plan 41 — launch update check. The release client reuses the app-lifetime
+    // _httpClient; the fire-and-forget notify task is rooted in _updateCheckTask
+    // so it is not collected before it completes.
+    private GitHubReleaseClient? _releaseClient;
+    private Task?                _updateCheckTask;
 
     /// <summary>
     /// Application startup. Configures logging, then runs the bootstrap chain
@@ -389,6 +397,13 @@ public partial class App : Application
                 LogProvider.Factory.CreateLogger<IskCalculator>());
         }
 
+        // 8.6. Plan 41 — GitHub release-check client for the launch update
+        //      check. Reuses the app-lifetime _httpClient created at chain
+        //      step 5 (guaranteed non-null after step 8.5).
+        _releaseClient ??= new GitHubReleaseClient(
+            _httpClient!,
+            LogProvider.Factory.CreateLogger<GitHubReleaseClient>());
+
         // 9. Validate gamelog_path. API-drift fix per 1.3 = A: discovery ctor
         //    takes the directory; DiscoverCharactersAsync takes only a CT.
         //    Path-dependent: rebuilt every call so a retry uses the new path.
@@ -426,7 +441,8 @@ public partial class App : Application
             _parser!, discovery,
             characters,
             _bootstrapLoader!,
-            _marketPriceClient!, _marketPriceFetcher!, _iskCalculator!);
+            _marketPriceClient!, _marketPriceFetcher!, _iskCalculator!,
+            _releaseClient!);
 
         var themeService = _services.GetRequiredService<ThemeService>();
         await themeService.LoadInitialAsync().ConfigureAwait(true);
@@ -445,6 +461,20 @@ public partial class App : Application
         mainWindow.Show();
 
         logger.LogInformation("EVE Dashboard startup complete.");
+
+        // Plan 41 — fire-and-forget launch update check. Runs AFTER Show() so it
+        // never delays startup; UpdateNotifier swallows + logs all failures.
+        // Rooted in _updateCheckTask so the task is not collected mid-flight.
+        var runningVersion = Assembly.GetEntryAssembly()?.GetName().Version;
+        if (runningVersion is not null)
+        {
+            _updateCheckTask = _services.GetRequiredService<UpdateNotifier>()
+                .NotifyIfUpdateAvailableAsync(runningVersion);
+        }
+        else
+        {
+            logger.LogWarning("Could not determine the running assembly version; skipping the update check.");
+        }
     }
 
     /// <summary>

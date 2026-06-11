@@ -9,6 +9,7 @@
     <ProjectReference Include="..\EveDashboard.Stats\EveDashboard.Stats.csproj" />
     <ProjectReference Include="..\EveDashboard.Reporting\EveDashboard.Reporting.csproj" />
     <ProjectReference Include="..\EveDashboard.SessionIO\EveDashboard.SessionIO.csproj" />
+    <ProjectReference Include="..\EveDashboard.Updates\EveDashboard.Updates.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
