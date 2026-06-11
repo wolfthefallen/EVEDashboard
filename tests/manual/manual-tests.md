@@ -179,75 +179,116 @@ any test stations added during steps 7 and 9.
 
 ---
 
-## 3. SessionConfig + chrome bar lifecycle
+## 3. New Session (Fleets) + chrome bar lifecycle
 
-Verifies the SessionConfig / SessionStats split, the four-mode
-(`Config / Running / Paused / Stopped`) chrome-button surface, app-launch
-Paused detection, template variables, and pilot sort order.
+Verifies the plan-42 New Session window (saved Fleets are the only way to
+start a session), the four-mode (`Config / Running / Paused / Stopped`)
+chrome-button surface, app-launch Paused detection, and template variables.
 
 ### Setup
 
 Delete `widget_layout` from the `setting` table (or the whole
-`session.sqlite` for a full layout reset). Launch the app.
+`session.sqlite` for a full layout reset). Launch the app. This first launch
+after plan 42 has NO saved fleets yet.
 
-### Steps
+### 3a. Empty state + build a fleet
 
-1. **Default layout.** Only `SessionConfig` is visible (pilot list +
-   name input). Chrome bar shows `Start` only.
-2. **Pilot list sort.** The pilot list is ordered by gamelog file
-   last-write-time, newest first.
-3. **Start a session (plan 37: lands in Paused).** Type
-   `manual-{{$DATE}} with {{$CHARS}}`, toggle on 2+ pilots, click Start.
-   - Expected: SessionConfig DISAPPEARS; `SessionStats` appears at slot
-     0 with elapsed time `00:00:00` (FROZEN -- not ticking). Per-pilot
-     widgets at slots 1+. Chrome bar shows `Continue` + `Stop`. Session
-     name reads e.g. `manual-2026-06-04 with PilotOne, PilotTwo`
-     (template variables expanded). `ActiveSessionContext.State` is
-     Paused, so any live mining events are dropped UNLESS they
-     auto-resume the session per section 6.
-4. **Adjust pilot roles, then Continue.** Optionally use the per-pilot
-   widget UI to change pilot roles (Miner / Booster / Cyno / Combat).
-   Click `Continue`.
-   - Expected: chrome bar flips to `Pause` + `Stop`. Elapsed time
-     starts ticking from `00:00:00` at 1 Hz. Live mining events from EVE
-     accumulate normally.
-5. **Manual pause + Continue.** Click `Pause` -> SessionStats freezes;
-   chrome bar shows `Continue` + `Stop`. While mining in EVE, stats do
-   NOT advance (unless auto-resume fires per section 6). Click
-   `Continue` -> chrome bar back to `Pause` + `Stop`. Elapsed time picks
-   up where it left off; mining ticks accumulate again.
-6. **Stop with confirm.** Click Stop -> themed ConfirmDialog appears
-   titled `Stop session?` with body "This will stop the current session
-   and it cannot be started again. If you are taking a break please
-   pause." Click Cancel -> dialog closes, mode stays. Click Stop again
-   -> click `Stop` in the dialog -> Mode = Stopped. SessionStats stays
-   with frozen final stats. Per-pilot widgets stay visible. Chrome bar
-   shows `New Session` only.
-7. **New Session.** Click `New Session` -> SessionConfig inserts at its
-   saved slot (typically 0). SessionStats stays at its saved slot with
-   prior session's data. Per-pilot widgets stay. Chrome bar shows
-   `Start`. Pilot toggles preserved from prior session.
-8. **App-launch Paused detection.** Start a fresh session (let Continue
-   bring it to Running), then close MainWindow without Stop. Relaunch.
-   - Expected: SessionStats appears at its saved slot with the prior
-     session's frozen elapsed time. Chrome bar shows `Continue` +
-     `Stop` ONLY. NO Start, NO SessionConfig widget visible. Per-pilot
-     column is empty (no `ActiveSessionContext.Set` until Continue is
-     clicked).
-9. **Continue from app-launch Paused.** Click `Continue` -> Mode =
-   Running. Per-pilot widgets appear and rehydrate from the stored log
-   rows. SessionStats updates with live data.
-10. **Stop from app-launch Paused.** Repeat step 8 to re-enter the
-    state. Click Stop -> confirm dialog appears (consistent across all
-    Stop paths). Click Stop -> Mode = Stopped.
-11. **Independent slots.** From Running mode, drag SessionStats to a
-    later slot. Stop + New Session -> SessionConfig inserts at its
-    saved slot 0; SessionStats stays at its dragged slot.
+1. **Open the window.** Click `New Session` in the chrome bar. The modal
+   New Session window opens showing a **Fleets** header, an **empty-state
+   prompt** ("No fleets yet. Click Create Fleet to make one ..."), a
+   **Create Fleet** button, the session-name textbox, and `Start`.
+   - Expected: `Start` is DISABLED (no fleet selected).
+2. **Create Fleet -> pilot picker.** Click `Create Fleet`. The pilot picker
+   appears: a **Sort by** dropdown plus one row per discovered pilot, each a
+   checkbox + a role dropdown (Miner / Booster / Cyno / Combat). `Add Fleet`
+   is disabled until at least one pilot is checked.
+3. **Sort the picker.** Change **Sort by** through its four options:
+   `Last active (newest)` [default], `Last active (oldest)`, `Name (A-Z)`,
+   `Name (Z-A)`. The pilot rows reorder accordingly. Re-check the same pilot
+   after re-sorting -> its check and chosen role are preserved across the
+   sort change (selections are never dropped).
+4. **Pick pilots + roles.** Check 2+ pilots; set one to `Booster` and the
+   rest to `Miner`. Click `Add Fleet`.
+   - Expected: the confirm panel appears listing the picked pilots with their
+     roles (e.g. `PilotOne  -  Miner`, `PilotTwo  -  Booster`), a **name**
+     textbox, a **Make default fleet** checkbox, and `Save`.
+5. **Save the fleet.** Type a name (e.g. `Moon crew`), tick **Make default
+   fleet**, click `Save`.
+   - Expected: the picker/confirm panels hide; the Fleets list now shows
+     `Moon crew` marked `(default)` and already selected; `Start` is ENABLED.
+
+### 3b. Start a session from a fleet (plan 37: lands in Paused)
+
+6. **Confirm + Start.** With `Moon crew` selected, type the session name
+   `manual-{{$DATE}} with {{$CHARS}}` and click `Start`.
+   - Expected: the dialog CLOSES; `SessionStats` appears at slot 0 with
+     elapsed time `00:00:00` (FROZEN). Per-pilot widgets at slots 1+, each
+     already showing its fleet role on first render (the Booster's border +
+     `[Booster]` tag, no flash of Miner). Chrome bar shows `Continue` +
+     `Stop`. Session name reads e.g.
+     `manual-2026-06-11 with PilotOne, PilotTwo`. `ActiveSessionContext.State`
+     is Paused, so live mining events are dropped UNLESS they auto-resume per
+     section 6.
+7. **Adjust roles mid-session, then Continue.** Optionally right-click a
+   per-pilot widget to change its role. Click `Continue`.
+   - Expected: chrome bar flips to `Pause` + `Stop`; elapsed time ticks from
+     `00:00:00` at 1 Hz; live mining events accumulate normally.
+8. **Manual pause + Continue.** Click `Pause` -> SessionStats freezes; chrome
+   shows `Continue` + `Stop`; stats do NOT advance. Click `Continue` ->
+   chrome back to `Pause` + `Stop`; elapsed picks up; ticks accumulate again.
+9. **Stop with confirm.** Click Stop -> themed ConfirmDialog `Stop session?`.
+   Click Cancel -> mode stays. Click Stop again -> `Stop` in the dialog ->
+   Mode = Stopped; SessionStats keeps frozen final stats; per-pilot widgets
+   stay; chrome shows `New Session` only.
+10. **New Session re-open -> default auto-selected.** Click `New Session`.
+    - Expected: the New Session window opens with `Moon crew` already selected
+      (the default fleet), `Start` enabled. SessionStats / per-pilot widgets
+      behind the modal still show the prior session's data.
+
+### 3c. Manage fleets
+
+11. **Single-select.** Create a second fleet (3a steps 2-5, name it `Solo`,
+    do NOT make default). In the Fleets list, click `Solo`'s checkbox -> it
+    selects and `Moon crew` deselects (only one fleet selectable at a time).
+12. **Caret expander.** Click a fleet row's caret -> it expands to list that
+    fleet's pilots + roles. Collapse it again.
+13. **Make default (right-click).** Right-click `Solo` -> `Make default`.
+    - Expected: the `(default)` marker moves to `Solo`. Close + reopen the
+      window -> `Solo` is auto-selected.
+14. **Delete (right-click), including the default.** Right-click `Solo` ->
+    `Delete` -> confirm. The row disappears. Because `Solo` was the default,
+    no fleet now shows `(default)`; reopening the window auto-selects nothing
+    and (if it was the only remaining fleet) shows the empty-state prompt with
+    `Start` disabled.
+15. **Duplicate name rejected.** Create a fleet, and in the confirm panel type
+    a name already in use -> `Save` -> an inline error appears and the confirm
+    panel stays open (nothing saved).
+16. **Offline fleet pilot skipped at Start.** Build a fleet that includes a
+    pilot, then close that pilot's EVE client (so it has no current gamelog).
+    Select the fleet, Start.
+    - Expected: the session starts with the still-logged-in pilots; the
+      offline pilot is skipped (a Warning is logged, no per-pilot widget for
+      it). If NONE of the fleet's pilots are logged in, Start is blocked and an
+      inline error appears in the dialog (the dialog stays open).
+
+### 3d. App-launch Paused detection (unchanged by plan 42)
+
+17. **App-launch Paused detection.** Start a fresh session (let Continue bring
+    it to Running), then close MainWindow without Stop. Relaunch.
+    - Expected: SessionStats appears at its saved slot with the prior
+      session's frozen elapsed time. Chrome shows `Continue` + `Stop` ONLY.
+      NO `New Session`/`Start`. Per-pilot column empty until Continue.
+18. **Continue from app-launch Paused.** Click `Continue` -> Mode = Running;
+    per-pilot widgets appear and rehydrate from stored log rows.
+19. **Stop from app-launch Paused.** Re-enter the state (step 17). Click Stop
+    -> confirm dialog appears (consistent across all Stop paths) -> Stop ->
+    Mode = Stopped.
 
 ### Cleanup
 
-Click `New Session` to return to Config. Close the app. Optional reset:
-delete `widget_layout` from the `setting` table.
+Click `New Session` then Cancel to close the modal. Close the app. Optional
+reset: delete `widget_layout` (and the `fleet` / `fleet_pilot` tables +
+`default_fleet_id` / `pilot_sort_order` setting rows) from `session.sqlite`.
 
 ---
 
@@ -404,12 +445,15 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
     retroactively -- the existing A-Booster rows keep their
     filter status; new events from A are stamped Miner and count
     immediately.
-12. **Default-to-last-role across sessions.** Stop the session,
-    click New Session, pick the same pilots, Start.
-    - Expected: each pilot defaults to their most recent prior
-      role (looked up from `session_pilot`). Border + header
-      tag are correct on first widget creation -- no flash of
-      Miner before the first stats tick.
+12. **Fleet roles flow into a new session (plan 42).** Stop the
+    session. Click New Session, select a fleet whose pilots have
+    assigned non-Miner roles (e.g. one Booster), confirm the name,
+    Start.
+    - Expected: each pilot's role comes from the fleet's stored
+      role (NOT from any prior session -- the old default-to-last-
+      role lookup is gone). Border + header tag are correct on the
+      first widget creation -- no flash of Miner before the first
+      stats tick.
 13. **Theme reactivity.** With non-Miner pilots visible, swap
     Theme via Settings.
     - Expected: the role-colored borders re-resolve to the new

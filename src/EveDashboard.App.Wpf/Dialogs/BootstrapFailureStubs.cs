@@ -1,6 +1,7 @@
 namespace EveDashboard.App.Wpf.Dialogs;
 
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
 using EveDashboard.Core.Settings.WidgetStats;
 
@@ -121,6 +122,22 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
 
     /// <inheritdoc />
     public Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task<PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />

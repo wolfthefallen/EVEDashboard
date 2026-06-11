@@ -24,8 +24,7 @@ public class SessionControllerAutoResumeTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Auto-resume";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -63,8 +62,7 @@ public class SessionControllerAutoResumeTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Already Running";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         await vm.ResumeCommand.ExecuteAsync(null); // -> Running
 
         try
@@ -110,9 +108,8 @@ public class SessionControllerAutoResumeTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Pause Accum";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         try
         {
             // Sleep just long enough that a non-zero pause window exists.

@@ -44,7 +44,7 @@ The shape of the SQLite database that holds **session / pilot / event / settings
 │ pilot_id   INTEGER NOT NULL FK──────────┼────┤    │
 │ role       TEXT NOT NULL DEFAULT 'Miner'│    │    │   Plan 35: Miner / Booster / Cyno / Combat
 │ PRIMARY KEY (session_id, pilot_id)      │    │    │
-│ IDX(pilot_id)                           │    │    │   Plan 38: default-to-last-role orders by start_time
+│ IDX(pilot_id)                           │    │    │   per-pilot seek (the plan-35 last-role lookup was removed in plan 42; index retained)
 └─────────────────────────────────────────┘    │    │
                                                 │    │
 ┌─────────────────────────────────────────┐    │    │
@@ -69,6 +69,25 @@ The shape of the SQLite database that holds **session / pilot / event / settings
 │─────────────────────────────────────────│
 │ key   TEXT PK                           │           e.g. "theme", "price_mode", "selected_station_id"
 │ value TEXT NOT NULL                     │           JSON for complex values
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ fleet                          (plan 42)│
+│─────────────────────────────────────────│
+│ fleet_id   TEXT PK (sha256 hex)         │◄───┐      content hash of name + sorted "pilotId:role"
+│ name       TEXT NOT NULL  UNIQUE idx     │    │      trimmed; unique display name (decision 2.4=B)
+│ created_at TEXT NOT NULL                │    │      ISO-8601 UTC
+└─────────────────────────────────────────┘    │ FK
+                                                │
+┌─────────────────────────────────────────┐    │
+│ fleet_pilot                    (plan 42)│    │
+│─────────────────────────────────────────│    │
+│ fleet_id   TEXT NOT NULL FK─────────────┼────┘
+│ pilot_id   INTEGER NOT NULL FK──────────┼──► pilot(pilot_id)   name reused from pilot, not stored here
+│ role       TEXT NOT NULL DEFAULT 'Miner'│      Miner / Booster / Cyno / Combat
+│ created_at TEXT NOT NULL                │
+│ PRIMARY KEY (fleet_id, pilot_id)        │
+│ IDX(fleet_id)                           │
 └─────────────────────────────────────────┘
 ```
 
@@ -109,7 +128,7 @@ CREATE TABLE session_pilot (
                        CHECK (role IN ('Miner','Booster','Cyno','Combat')),
     PRIMARY KEY (session_id, pilot_id)
 );
-CREATE INDEX idx_session_pilot_pilot ON session_pilot(pilot_id);  -- plan 38: per-pilot seek (default-to-last-role lookup now orders by session_time.start_time, sha256 ids are not chronological)
+CREATE INDEX idx_session_pilot_pilot ON session_pilot(pilot_id);  -- plan 35/38: per-pilot seek. The default-to-last-role lookup it backed was removed in plan 42 (fleets supply the role); index retained as a cheap generic per-pilot seek.
 
 CREATE TABLE log (
     log_id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -130,7 +149,29 @@ CREATE TABLE setting (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- Plan 42 (schema v2): saved fleets. Shipped via the v1 -> v2 migration in
+-- Migrations.All (additive, CREATE TABLE IF NOT EXISTS); also emitted by the
+-- canonical SchemaDdl so a fresh DB creates them directly.
+CREATE TABLE fleet (
+    fleet_id   TEXT PRIMARY KEY,          -- sha256 hex of (trimmed name + 0x1F + sorted "pilotId:role" list); app-computed
+    name       TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX idx_fleet_name ON fleet(name);   -- decision 2.4 = B (display names unique)
+
+CREATE TABLE fleet_pilot (
+    fleet_id   TEXT    NOT NULL REFERENCES fleet(fleet_id),
+    pilot_id   INTEGER NOT NULL REFERENCES pilot(pilot_id),   -- name reused from the pilot table, not duplicated here
+    role       TEXT    NOT NULL DEFAULT 'Miner'
+                       CHECK (role IN ('Miner','Booster','Cyno','Combat')),
+    created_at TEXT    NOT NULL,
+    PRIMARY KEY (fleet_id, pilot_id)
+);
+CREATE INDEX idx_fleet_pilot_fleet ON fleet_pilot(fleet_id);
 ```
+
+> *Schema versioning: `fleet` + `fleet_pilot` are the first real `schema_version` migration (v1 -> v2, plan 42). A fresh DB is stamped at the latest version (the canonical `SchemaDdl` already emits these tables); an existing v1 store runs the additive migration on first launch — no existing row is touched.*
 
 ---
 
@@ -140,7 +181,7 @@ CREATE TABLE setting (
 
 | User action | What gets written |
 |---|---|
-| Start | Compute `session_id = SessionId.Compute(expanded_name, now)` (plan 38; no `last_insert_rowid`), then INSERT into `session` `(session_id, name, notes)`; for each selected pilot: look up the most-recent prior `session_pilot.role` for that pilot — **the "most recent" is by `session_time.start_time` DESC** (plan 38: sha256 ids are not chronological) defaulting to `'Miner'` if no prior row exists — and INSERT into `session_pilot` with the resolved role; INSERT into `session_time` `(session_id, start_time=now, stop_time=NULL, is_pause)`. The same role dict is then seeded into the in-memory `ActiveSessionContext` map (plan 35). |
+| Start | A session is started from a **selected fleet** (plan 42 — a fleet is the only start path). The fleet's roster is resolved against a fresh gamelog-discovery snapshot; pilots with no current gamelog are skipped (Start is blocked only if none are discoverable — decision 2.5 = A). Then compute `session_id = SessionId.Compute(expanded_name, now)` (plan 38; no `last_insert_rowid`), INSERT into `session` `(session_id, name, notes)`; for each resolved pilot INSERT into `session_pilot` with the role **taken straight from the fleet** (the old default-to-last-role lookup is removed — decision 1.4 = A); INSERT into `session_time` `(session_id, start_time=now, stop_time=NULL, is_pause=1)` (Start lands paused, plan 37). The same fleet-role dict is then seeded into the in-memory `ActiveSessionContext` map (plan 35). |
 | Pause | UPDATE the open `session_time` row (`stop_time = now`); INSERT new `session_time` `(session_id, start_time=now, stop_time=NULL, is_pause=1)` |
 | Resume | UPDATE the open `session_time` row (`stop_time = now`); INSERT new `session_time` `(session_id, start_time=now, stop_time=NULL, is_pause=0)` |
 | Stop | UPDATE the open `session_time` row (`stop_time = now`); no new row. The session is permanently ended — it cannot be re-Started. Clears the in-memory role map (plan 35). |
@@ -245,7 +286,7 @@ Queries that read `session_time`, `session_pilot`, or `session` (not `log`) are 
 - **`event_kind` is TEXT** rather than an integer enum. Storage cost is negligible at session-data sizes; debuggability in the SQLite CLI wins.
 - **`type_id` is nullable.** **`Tick` and `Crit` events have non-null `type_id`** resolved by the SDE lookup (an unresolved name is logged at Warning by the parser and the event is dropped before reaching `log`). **`Residue` events legitimately carry NULL `type_id`** because the EVE residue line carries no ore name (`Additional N units depleted from asteroid as residue`); the parser emits `TypeId = null` and the writer stores `type_id = NULL` and `volume_m3 = NULL`. **`Depleted` events also carry NULL `type_id`** — not emitted in v1; gated to v2 on a real captured EVE log line per plan 10 decision 10.5.
 - **`role` is non-null TEXT** on both `session_pilot` and `log`, constrained to `'Miner'` / `'Booster'` / `'Cyno'` / `'Combat'` (plan 35). `session_pilot.role` carries the **current** role of each pilot in the session; `log.role` carries the **event-time** role (the role this pilot held at the moment this event was INSERTed). The DEFAULT clause is `'Miner'` and is defensive — pre-plan-35 JSON imports that lack the field round-trip via custom `JsonConverter`s that default missing values to `"Miner"` (see [`LogRowJsonConverter`](../src/EveDashboard.SessionIO/Json/LogRowJsonConverter.cs)).
-- **`setting.value` is TEXT** with JSON encoding for complex values. The v1 `setting` keys: `theme` (`"dark"`/`"light"`, plain text), `price_mode` (`"buy"`/`"sell"`/`"split"`, plain text), `refining_yield_percent` (the JSON number `90.6`), `selected_station_id` (a JSON number long, FK by convention to `market_stations.station_id`), `window_geometry` (a JSON object round-tripped via `System.Text.Json`), `widget_layout` (plan 19; plan 24 expanded the descriptor union — a JSON object `{"items":[...]}` carrying the user's dashboard widget order + per-item hidden flag; per item shape is `{"kind":"session_config","hidden":false}`, `{"kind":"session_stats","hidden":false}`, or `{"kind":"pilot","pilot_id":<long>,"hidden":<bool>}`; absent/null on first launch = "use default layout"; ghost entries for inactive pilots are preserved indefinitely per decision 19.C; pre-plan-24 `{"kind":"session"}` entries fail to deserialise and the layout falls back to default per `MEMORY.md → feedback_no_migrations_until_release`), `schema_version` (a JSON number int, owned by plan 11), `session_stats_config` (plan 20 — a JSON array `[{"stat":"<key>","hidden":<bool>,"emphasis":"<level>"}, ...]` carrying the user's stat row order + hide flag + emphasis level for the singleton SessionStats widget; absent/null on first launch = "use default order with all visible at default emphasis"; missing `emphasis` field defaults to `None` and the renderer falls back to the property's `[StatRow] DefaultEmphasis`), `per_pilot_stats_config.<pilot_id>` (plan 20 — same JSON array shape as `session_stats_config`, but one row per pilot id keyed by the EVE character id; rows for pilots no longer in any active session are kept indefinitely so a re-selected pilot recovers its customisation), `non_sticky_station_defaults_seeded` (sentinel `"1"`, owned by plan 14's `SqliteMarketStationCatalog`). The list of stations was previously an inline JSON array under the key `markets`; that key is dropped in favour of the normalised `market_stations` table (plan 14). See [`market-schema.md`](market-schema.md).
+- **`setting.value` is TEXT** with JSON encoding for complex values. The v1 `setting` keys: `theme` (`"dark"`/`"light"`, plain text), `price_mode` (`"buy"`/`"sell"`/`"split"`, plain text), `refining_yield_percent` (the JSON number `90.6`), `selected_station_id` (a JSON number long, FK by convention to `market_stations.station_id`), `window_geometry` (a JSON object round-tripped via `System.Text.Json`), `widget_layout` (plan 19; plan 24 expanded the descriptor union — a JSON object `{"items":[...]}` carrying the user's dashboard widget order + per-item hidden flag; per item shape is `{"kind":"session_config","hidden":false}`, `{"kind":"session_stats","hidden":false}`, or `{"kind":"pilot","pilot_id":<long>,"hidden":<bool>}`; absent/null on first launch = "use default layout"; ghost entries for inactive pilots are preserved indefinitely per decision 19.C; pre-plan-24 `{"kind":"session"}` entries fail to deserialise and the layout falls back to default per `MEMORY.md → feedback_no_migrations_until_release`), `schema_version` (a JSON number int, owned by plan 11), `session_stats_config` (plan 20 — a JSON array `[{"stat":"<key>","hidden":<bool>,"emphasis":"<level>"}, ...]` carrying the user's stat row order + hide flag + emphasis level for the singleton SessionStats widget; absent/null on first launch = "use default order with all visible at default emphasis"; missing `emphasis` field defaults to `None` and the renderer falls back to the property's `[StatRow] DefaultEmphasis`), `per_pilot_stats_config.<pilot_id>` (plan 20 — same JSON array shape as `session_stats_config`, but one row per pilot id keyed by the EVE character id; rows for pilots no longer in any active session are kept indefinitely so a re-selected pilot recovers its customisation), `non_sticky_station_defaults_seeded` (sentinel `"1"`, owned by plan 14's `SqliteMarketStationCatalog`), `default_fleet_id` (plan 42 — the `fleet.fleet_id` of the default fleet auto-selected when the New Session window opens; the row is **absent** when there is no default, since `setting.value` is NOT NULL — clearing the default DELETEs the row), `pilot_sort_order` (plan 42 — the persisted fleet-builder pilot-picker sort; one of `"LastActiveNewest"` [default] / `"LastActiveOldest"` / `"NameAsc"` / `"NameDesc"`; absent or unrecognised = the default `LastActiveNewest`). The list of stations was previously an inline JSON array under the key `markets`; that key is dropped in favour of the normalised `market_stations` table (plan 14). See [`market-schema.md`](market-schema.md).
 
 ---
 
@@ -259,7 +300,7 @@ Highlights:
 - Plan 38: `session_id` is now the SHA-256 content id (see the top of this doc). It round-trips verbatim. **Legacy files** whose `session_id` is a bare integer (or absent) have it recomputed on import via `SessionId.Compute(name, first start_time)`. The still-autoincremented PKs (`session_time_id`, `log_id`, `marketdata_id`) are regenerated on import; FKs onto `session_id` are rewritten to the (declared or computed) sha256 id.
 - Plan 38 re-import dedup (decision 3.1 = A): if the destination DB already holds a session with the same `session_id`, the import is a **skip-with-warning no-op** (nothing written; `ImportResult.AlreadyPresent = true`). Re-importing your own backup is safe.
 - EVE-side stable IDs (`pilot.pilot_id`, `market_stations.station_id`) are preserved; existing rows are skipped on collision and a Warning is logged if the imported display name differs.
-- `_manifest.schema_version` is hard-checked against the destination DB's `schema_version` setting at import time. Mismatched versions throw `SchemaVersionMismatchException`.
+- `_manifest.schema_version` carries the export-FORMAT version (the on-disk JSON shape), a constant `SessionExportFormat.CurrentVersion` decoupled from the DB `schema_version` (plan 42 decision 4.1 = B). Import rejects only a file whose format version is NEWER than this app supports (throws `SchemaVersionMismatchException`); an equal-or-older file imports. This is why the v1->v2 schema bump (fleet tables) does NOT break import of older exports — the export shape is unchanged, so the format version stays 1. The wire field name remains `schema_version` for back-compat with existing files.
 - Plan 38: `market_data` rows in scope are exactly the session's own rows (`WHERE session_id = <this session>`) — prices are session-bound, so the session owns them directly. Imported price rows are stamped with the (declared or computed) session id, keeping overlapping imports isolated. (This replaces the old time-window `fetched_at <= session_end` scoping.)
 - Plan 35: `log.role` and `session_pilot.role` ride along on every row. **Pre-plan-35 JSON files (which lack the `role` field) reimport cleanly** — [`LogRowJsonConverter`](../src/EveDashboard.SessionIO/Json/LogRowJsonConverter.cs) and [`SessionPilotRowJsonConverter`](../src/EveDashboard.SessionIO/Json/SessionPilotRowJsonConverter.cs) default missing `role` to `"Miner"` at deserialise time, and tolerate a numeric or string `session_id` token (the per-row session_id is rewritten on import regardless).
 

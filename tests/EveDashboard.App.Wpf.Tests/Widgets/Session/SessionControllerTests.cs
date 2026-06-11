@@ -171,56 +171,22 @@ public class SessionControllerTests
         vm.Mode.Should().Be(SessionWidgetMode.Paused);
     }
 
-    /* ---------- StartCommand CanExecute ---------- */
-
-    [Fact]
-    public void StartCommand_CanExecute_false_when_name_blank()
-    {
-        using var f = new SessionControllerTestFixture();
-        using var vm = f.CreateViewModel();
-        vm.Pilots[0].IsSelected = true;
-        vm.SessionName = "   ";
-
-        vm.StartCommand.CanExecute(null).Should().BeFalse();
-    }
-
-    [Fact]
-    public void StartCommand_CanExecute_false_when_no_pilot_selected()
-    {
-        using var f = new SessionControllerTestFixture();
-        using var vm = f.CreateViewModel();
-        vm.SessionName = "Run";
-        // No pilot selected.
-
-        vm.StartCommand.CanExecute(null).Should().BeFalse();
-    }
-
-    [Fact]
-    public void StartCommand_CanExecute_true_when_name_and_pilot_present()
-    {
-        using var f = new SessionControllerTestFixture();
-        using var vm = f.CreateViewModel();
-        vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-
-        vm.StartCommand.CanExecute(null).Should().BeTrue();
-    }
-
-    /* ---------- Start lifecycle ---------- */
+    /* ---------- Start lifecycle ----------
+       Plan 42: Start is driven by a fleet roster passed to the new
+       StartAsync(roster) method. The CanExecute logic (name + a selected fleet)
+       moved to SessionConfigDialogViewModel and is covered by its tests. */
 
     [Fact]
     public async Task StartAsync_inserts_session_session_pilot_session_time_rows_and_transitions_to_Paused()
     {
-        // Plan 37: StartCommand now lands in Paused (Start-as-paused) so the
-        // user can configure pilot roles before mining counts. The first
-        // session_time row carries is_pause=1.
+        // Plan 37: Start now lands in Paused (Start-as-paused) so the user can
+        // configure pilot roles before mining counts. The first session_time
+        // row carries is_pause=1.
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        vm.Pilots[1].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster(2));
 
         try
         {
@@ -250,13 +216,13 @@ public class SessionControllerTests
         // user doesn't see the stale time flash on screen for ~1 second.
         using var f = new SessionControllerTestFixture(dialogResult: true);
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
         vm.TotalTimeMined = "00:01:23"; // simulate accumulated elapsed time
         await vm.StopCommand.ExecuteAsync(null);
         vm.TotalTimeMined.Should().Be("00:01:23",
             "preconditions: Stop preserves the prior session's frozen elapsed time");
 
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         try
         {
@@ -274,9 +240,8 @@ public class SessionControllerTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "{{$DATE}} run with {{$CHARS}}";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -300,12 +265,11 @@ public class SessionControllerTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
 
         f.ActiveSession.ActiveSessionId.Should().BeNull();
         f.ActiveSession.State.Should().Be(SessionRunState.None);
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -325,7 +289,7 @@ public class SessionControllerTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         try
         {
@@ -351,7 +315,7 @@ public class SessionControllerTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
         await vm.PauseCommand.ExecuteAsync(null);
 
         try
@@ -384,7 +348,7 @@ public class SessionControllerTests
     {
         using var f = new SessionControllerTestFixture(dialogResult: false);
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         try
         {
@@ -406,7 +370,7 @@ public class SessionControllerTests
         // Plan 23 decision 1.1 = A — Stop now lands in Stopped mode (was Config).
         using var f = new SessionControllerTestFixture(dialogResult: true);
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         await vm.StopCommand.ExecuteAsync(null);
 
@@ -421,12 +385,12 @@ public class SessionControllerTests
     public async Task StopAsync_resets_active_session_lifecycle_but_preserves_display_state()
     {
         // Plan 23: lifecycle private fields + ActiveSessionContext still reset
-        // (the session is genuinely over), but bound display props + pilot
-        // selection PRESERVED so the Stopped-mode view shows the just-ended
-        // session and New Session can re-use the prior pilot pick.
+        // (the session is genuinely over), but bound display props PRESERVED so
+        // the Stopped-mode view shows the just-ended session. (Plan 42 removed
+        // the controller's pilot list — the fleet picker now lives in the dialog.)
         using var f = new SessionControllerTestFixture(dialogResult: true);
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         await vm.StopCommand.ExecuteAsync(null);
 
@@ -437,8 +401,6 @@ public class SessionControllerTests
         // Display props preserved (the Stopped-mode view binds to these).
         vm.DisplaySessionName.Should().NotBeEmpty(
             "DisplaySessionName must remain visible in Stopped mode");
-        vm.Pilots.Any(p => p.IsSelected).Should().BeTrue(
-            "pilot selection must be preserved so New Session can re-use it");
     }
 
     /* ---------- Resume from app-launch Paused (plan 24 collapsed Resume mode into Paused) ---------- */
@@ -492,15 +454,17 @@ public class SessionControllerTests
         }
     }
 
-    /* ---------- Stale-path refresh at Start (regression: 2026-05-03 user mining session lost events) ---------- */
+    /* ---------- Fresh-discovery resolve at Start (regression: 2026-05-03 user mining session lost events) ---------- */
 
     [Fact]
-    public async Task StartAsync_refreshes_pilot_LogFilePath_against_live_filesystem()
+    public async Task StartAsync_resolves_roster_from_fresh_discovery_snapshot_not_stale_launch_path()
     {
         // Reproduces the user's bug: EVE created a newer log file for the pilot
-        // between app launch (when the Character record was captured by discovery)
-        // and the user clicking Start. Without the refresh in StartAsync, the
-        // watcher tails the stale path and misses every mining event.
+        // between app launch (when the Character record was captured) and Start.
+        // Plan 42 front-loads a FRESH discovery snapshot and resolves the roster
+        // against it, so the watcher follows the live file — the stale launch-time
+        // path is never used (discovery IS the source now; the old post-COMMIT
+        // "log file refreshed" reconcile is gone).
         var dir = Path.Combine(Path.GetTempPath(), "evemining-stalepath-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         try
@@ -534,17 +498,22 @@ public class SessionControllerTests
             await File.WriteAllTextAsync(newPath, header);
 
             vm.SessionName = "Stale-path repro";
-            vm.Pilots[0].IsSelected = true;
-            await vm.StartCommand.ExecuteAsync(null);
+            var result = await vm.StartAsync(new[] { new FleetMember(charId, "Stale Pilot", PilotRole.Miner) });
 
             try
             {
-                // Verify the refresh log fired and named the new path.
-                var refreshEntry = f.WidgetLog.Entries
-                    .FirstOrDefault(e => e.Message.Contains("log file refreshed", StringComparison.Ordinal));
-                refreshEntry.Should().NotBeNull("StartAsync must refresh the pilot's LogFilePath via discovery");
-                refreshEntry!.Message.Should().Contain(newPath);
-                refreshEntry.Message.Should().Contain(oldPath);
+                // The pilot is discoverable (via the fresh snapshot, which picks the
+                // newer file by its YYYYMMDD prefix), so the session starts with that
+                // pilot — it was NOT skipped as undiscoverable.
+                result.Should().Be(SessionStartResult.Started);
+
+                var pilotRows = await f.Db.QueryAsync(
+                    "SELECT pilot_id FROM session_pilot", r => r.GetInt64(0), null, default);
+                pilotRows.Should().ContainSingle().Which.Should().Be(charId);
+
+                f.WidgetLog.Entries.Should().NotContain(
+                    e => e.Message.Contains("skipping", StringComparison.OrdinalIgnoreCase),
+                    "the pilot is discoverable so it must not be skipped");
             }
             finally
             {
@@ -564,7 +533,7 @@ public class SessionControllerTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        await StartAsync(vm);
+        await StartAsync(f, vm);
 
         try
         {
@@ -598,16 +567,15 @@ public class SessionControllerTests
 
     /// <summary>
     /// Helper that brings the controller to the Running state in one step.
-    /// Plan 37: StartCommand now lands in Paused (Start-as-paused), so tests
-    /// that want a Running session must follow up with ResumeCommand. Callers
-    /// that specifically want to assert on the post-Start state should use
-    /// StartCommand directly instead of this helper.
+    /// Plan 37: Start lands in Paused (Start-as-paused), so tests that want a
+    /// Running session must follow up with ResumeCommand. Plan 42: Start takes a
+    /// fleet roster — callers that want to assert on the post-Start state call
+    /// <c>vm.StartAsync(f.Roster())</c> directly instead of this helper.
     /// </summary>
-    private static async Task StartAsync(SessionController vm)
+    private static async Task StartAsync(SessionControllerTestFixture f, SessionController vm)
     {
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         await vm.ResumeCommand.ExecuteAsync(null); // -> Running
     }
 

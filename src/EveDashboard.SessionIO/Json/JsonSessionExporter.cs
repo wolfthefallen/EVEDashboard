@@ -2,7 +2,6 @@ namespace EveDashboard.SessionIO.Json;
 
 using System.Globalization;
 using System.Text.Json;
-using EveDashboard.Core.Storage;
 using EveDashboard.SessionIO.Tables;
 using Microsoft.Extensions.Logging;
 
@@ -12,24 +11,25 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public sealed class JsonSessionExporter
 {
-    private readonly ISqliteDatabase     _db;
     private readonly SessionTableReader  _reader;
     private readonly ILogger<JsonSessionExporter> _log;
 
     /// <summary>Construct the exporter.</summary>
-    /// <param name="db">Source session SQLite wrapper — used to read <c>schema_version</c> for the manifest.</param>
     /// <param name="reader">Reader that materialises the per-table row payload.</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
+    /// <remarks>
+    /// Plan 42 decision 4.1 = B: the exporter no longer reads the DB
+    /// <c>schema_version</c>. The manifest now carries the decoupled
+    /// <see cref="SessionExportFormat.CurrentVersion"/> (the export shape), so a
+    /// DB-schema bump never affects export/import compatibility.
+    /// </remarks>
     public JsonSessionExporter(
-        ISqliteDatabase     db,
         SessionTableReader  reader,
         ILogger<JsonSessionExporter> log)
     {
-        ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(log);
-        _db = db;
         _reader = reader;
         _log = log;
     }
@@ -51,11 +51,9 @@ public sealed class JsonSessionExporter
                 $"Cannot export session {sessionId}: no row in 'session' table.");
         }
 
-        var schemaVersion = await ReadSchemaVersionAsync(ct).ConfigureAwait(false);
-
         var manifest = new SessionExportManifest(
             Format:        "EveDashboardSessionExport",
-            SchemaVersion: schemaVersion,
+            SchemaVersion: SessionExportFormat.CurrentVersion,
             AppVersion:    JsonSerializerOptionsFactory.ResolveAppVersion(),
             ExportedAt:    DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture),
             SessionId:     data.Session[0].SessionId,
@@ -78,13 +76,5 @@ public sealed class JsonSessionExporter
         _log.LogInformation(
             "Exported session #{SessionId} ('{Name}') to {Path}: {Logs} log + {MarketData} market_data rows.",
             sessionId, manifest.SessionName, filePath, data.Logs.Count, data.MarketData.Count);
-    }
-
-    private async Task<int> ReadSchemaVersionAsync(CancellationToken ct)
-    {
-        var raw = await _db.QueryScalarAsync<string>(
-            "SELECT value FROM setting WHERE key = 'schema_version'",
-            ct: ct).ConfigureAwait(false);
-        return raw is null ? 0 : int.Parse(raw, CultureInfo.InvariantCulture);
     }
 }

@@ -37,7 +37,7 @@ public sealed class JsonRoundTripTests : IDisposable
         var sourceSid = await SeedSampleSessionAsync(sourceDb);
 
         var reader = new SessionTableReader(sourceDb, NullLogger<SessionTableReader>.Instance);
-        var exporter = new JsonSessionExporter(sourceDb, reader, NullLogger<JsonSessionExporter>.Instance);
+        var exporter = new JsonSessionExporter(reader, NullLogger<JsonSessionExporter>.Instance);
         var path = Path.Combine(_tempDir, "session.json");
         await exporter.ExportAsync(sourceSid, path);
 
@@ -145,7 +145,7 @@ public sealed class JsonRoundTripTests : IDisposable
         var sourceSid = await SeedSampleSessionAsync(sourceDb);
 
         var reader = new SessionTableReader(sourceDb, NullLogger<SessionTableReader>.Instance);
-        var exporter = new JsonSessionExporter(sourceDb, reader, NullLogger<JsonSessionExporter>.Instance);
+        var exporter = new JsonSessionExporter(reader, NullLogger<JsonSessionExporter>.Instance);
         var path = Path.Combine(_tempDir, "version-mutated.json");
         await exporter.ExportAsync(sourceSid, path);
 

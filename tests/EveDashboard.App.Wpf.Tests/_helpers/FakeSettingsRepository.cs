@@ -1,6 +1,7 @@
 namespace EveDashboard.App.Wpf.Tests.Helpers;
 
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
 using EveDashboard.Core.Settings.WidgetStats;
 
@@ -191,6 +192,37 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         AutoPauseSoundEnabled = enabled;
         SetAutoPauseSoundEnabledCount++;
         SettingChanged?.Invoke(this, new SettingChangedEventArgs("auto_pause_sound_enabled"));
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Plan 42 — default fleet id (null = no default).</summary>
+    public string? DefaultFleetId { get; set; }
+
+    /// <summary>Plan 42 — persisted pilot-picker sort order.</summary>
+    public PilotSortOrder PilotSortOrder { get; set; } = PilotSortOrder.LastActiveNewest;
+
+    public int SetDefaultFleetIdCount { get; private set; }
+    public int SetPilotSortOrderCount { get; private set; }
+
+    public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default) =>
+        Task.FromResult(DefaultFleetId);
+
+    public Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default)
+    {
+        DefaultFleetId = fleetId;
+        SetDefaultFleetIdCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("default_fleet_id"));
+        return Task.CompletedTask;
+    }
+
+    public Task<PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default) =>
+        Task.FromResult(PilotSortOrder);
+
+    public Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default)
+    {
+        PilotSortOrder = order;
+        SetPilotSortOrderCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("pilot_sort_order"));
         return Task.CompletedTask;
     }
 

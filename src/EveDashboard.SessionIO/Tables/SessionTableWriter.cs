@@ -5,13 +5,16 @@ using System.Linq;
 using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Storage;
 using EveDashboard.SessionIO.Import;
+using EveDashboard.SessionIO.Json;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Writes a <see cref="SessionExportData"/> payload into a session SQLite
 /// database as a brand-new session, atomically. Implements the plan-29
 /// alignment 2.1 / 2.2 = B "skip + Warning" pilot/station collision policy and
-/// the alignment 6.2 = A schema-version hard-fail.
+/// (plan 42 decision 4.1 = B) an export-FORMAT version check decoupled from the
+/// DB schema_version — a file from a newer export format than this app supports
+/// is rejected; an equal-or-older format imports.
 /// </summary>
 /// <remarks>
 /// Locally-autoincremented PKs (<c>session_id</c>, <c>session_time_id</c>,
@@ -43,11 +46,11 @@ public sealed class SessionTableWriter
     /// database. Any failure rolls back to the pre-import state.
     /// </summary>
     /// <param name="data">Session payload to write.</param>
-    /// <param name="fileSchemaVersion">Schema version recorded in the import file's manifest. Must match the destination DB's <c>schema_version</c> setting.</param>
+    /// <param name="fileSchemaVersion">Export-format version from the import file's manifest (its <c>schema_version</c> wire field — see <see cref="SessionExportFormat"/>). Decoupled from the DB schema_version (plan 42 decision 4.1 = B).</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An <see cref="ImportResult"/> with the new session id, name, collision warnings, and per-table row counts.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="data"/> contains zero or more than one <c>session</c> row (single-session export contract).</exception>
-    /// <exception cref="SchemaVersionMismatchException">Thrown if <paramref name="fileSchemaVersion"/> does not match the destination DB's schema_version.</exception>
+    /// <exception cref="SchemaVersionMismatchException">Thrown if <paramref name="fileSchemaVersion"/> is newer than this app's supported export format (<see cref="SessionExportFormat.CurrentVersion"/>).</exception>
     public async Task<ImportResult> WriteAsync(
         SessionExportData data,
         int               fileSchemaVersion,
@@ -61,12 +64,15 @@ public sealed class SessionTableWriter
                 nameof(data));
         }
 
-        // Schema-version check BEFORE BEGIN IMMEDIATE. Mirrors the existing
-        // reader pattern in SchemaInitializer.GetCurrentSchemaVersionAsync.
-        var currentVersion = await ReadCurrentSchemaVersionAsync(ct).ConfigureAwait(false);
-        if (currentVersion != fileSchemaVersion)
+        // Plan 42 decision 4.1 = B: the manifest's version is the export-FORMAT
+        // version (SessionExportFormat.CurrentVersion), decoupled from the DB
+        // schema_version. Reject only a file written by a NEWER export format
+        // than this app understands; an equal-or-older format is importable (an
+        // additive DB migration never changes the export shape, so an older
+        // file's rows still fit). No DB schema_version read here.
+        if (fileSchemaVersion > SessionExportFormat.CurrentVersion)
         {
-            throw new SchemaVersionMismatchException(fileSchemaVersion, currentVersion);
+            throw new SchemaVersionMismatchException(fileSchemaVersion, SessionExportFormat.CurrentVersion);
         }
 
         // Plan 38: resolve the content-addressed session id — the file's id when
@@ -139,14 +145,6 @@ public sealed class SessionTableWriter
             }
             throw;
         }
-    }
-
-    private async Task<int> ReadCurrentSchemaVersionAsync(CancellationToken ct)
-    {
-        var raw = await _db.QueryScalarAsync<string>(
-            "SELECT value FROM setting WHERE key = 'schema_version'",
-            ct: ct).ConfigureAwait(false);
-        return raw is null ? 0 : int.Parse(raw, CultureInfo.InvariantCulture);
     }
 
     private async Task<int> WritePilotsAsync(

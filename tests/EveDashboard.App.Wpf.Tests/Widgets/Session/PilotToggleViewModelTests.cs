@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using EveDashboard.App.Wpf.Widgets.Session;
 using EveDashboard.Core.Domain;
+using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 public class PilotToggleViewModelTests
@@ -26,6 +27,20 @@ public class PilotToggleViewModelTests
 
         sut.Character.Should().BeSameAs(character);
         sut.IsSelected.Should().BeFalse();
+        sut.Role.Should().Be(PilotRole.Miner, "the picker defaults each pilot to Miner (plan 42)");
+    }
+
+    [Fact]
+    public void Role_round_trips_via_INPC()
+    {
+        var sut = new PilotToggleViewModel(SamplePilot());
+        var raisedFor = new List<string?>();
+        ((INotifyPropertyChanged)sut).PropertyChanged += (_, e) => raisedFor.Add(e.PropertyName);
+
+        sut.Role = PilotRole.Booster;
+
+        sut.Role.Should().Be(PilotRole.Booster);
+        raisedFor.Should().Contain(nameof(PilotToggleViewModel.Role));
     }
 
     [Fact]

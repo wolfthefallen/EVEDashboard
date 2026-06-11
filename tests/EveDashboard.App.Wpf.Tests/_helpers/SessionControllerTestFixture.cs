@@ -52,6 +52,27 @@ internal sealed class SessionControllerTestFixture : IDisposable
             new Character(2_000_000_002, "TestPilotTwo", Path.Combine(TempGamelogDir, "20260101_120000_2000000002.txt")),
         };
 
+        // Plan 42: the New Session start path resolves the fleet roster against a
+        // FRESH gamelog-discovery snapshot and skips pilots with no current
+        // gamelog (decision 2.5 = A). So discovery must actually find these
+        // characters — write a minimal gamelog file (with the Listener: header
+        // the discovery service reads) for each, where the file lives in an
+        // existing directory.
+        foreach (var c in Characters)
+        {
+            var parent = Path.GetDirectoryName(c.LogFilePath);
+            if (parent is not null && Directory.Exists(parent))
+            {
+                File.WriteAllText(
+                    c.LogFilePath,
+                    "------------------------------------------------------------\r\n" +
+                    "  Gamelog\r\n" +
+                    $"  Listener: {c.Name}\r\n" +
+                    "  Session Started: 2026.01.01 12:00:00\r\n" +
+                    "------------------------------------------------------------\r\n");
+            }
+        }
+
         // Real in-memory SQLite + schema.
         Db = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
         SchemaInitializer.EnsureSchemaAsync(Db).GetAwaiter().GetResult();
@@ -79,6 +100,16 @@ internal sealed class SessionControllerTestFixture : IDisposable
         WidgetLog = new CapturingLogger<SessionController>();
         Discovery = new GamelogDiscoveryService(TempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
     }
+
+    /// <summary>
+    /// Build a fleet roster (all <see cref="PilotRole.Miner"/>) from the first
+    /// <paramref name="count"/> discovered characters — the plan-42 input to
+    /// <see cref="SessionController.StartAsync(IReadOnlyList{FleetMember}, CancellationToken)"/>.
+    /// </summary>
+    public FleetMember[] Roster(int count = 1) =>
+        Characters.Take(count)
+            .Select(c => new FleetMember(c.CharacterId, c.Name, PilotRole.Miner))
+            .ToArray();
 
     public SessionController CreateViewModel() =>
         new(

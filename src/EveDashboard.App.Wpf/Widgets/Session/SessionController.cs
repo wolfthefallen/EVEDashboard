@@ -28,8 +28,9 @@ using Microsoft.Extensions.Logging;
 /// the lifecycle SQL transitions (Start / Pause / Resume / Stop, each as one
 /// transaction), the 1 Hz <see cref="DispatcherTimer"/> that drives both stats
 /// refresh and elapsed-time tick, the dirty-flag pattern fed by
-/// <see cref="ISessionEventNotifier.SessionEventAdded"/>, the pilot toggle
-/// list, and all bound stat fields. The two thin VMs
+/// <see cref="ISessionEventNotifier.SessionEventAdded"/>, and all bound stat
+/// fields. The pilot picker moved to the New Session dialog (plan 42 — fleets).
+/// The two thin VMs
 /// <c>SessionConfigViewModel</c> and <c>SessionStatsViewModel</c> hold a
 /// reference to this controller and forward the bound fields each view needs.
 /// </summary>
@@ -124,7 +125,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     private SessionWidgetMode _mode = SessionWidgetMode.Config;
 
     /// <summary>Raw user-typed session name (Config mode). Template variables expanded at Start.</summary>
-    [NotifyCanExecuteChangedFor(nameof(StartCommand))]
     [ObservableProperty]
     private string _sessionName = string.Empty;
 
@@ -168,9 +168,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     [ObservableProperty]
     private double _critIskPercent;
 
-    /// <summary>Pilots discovered at app startup. Each row is a <see cref="PilotToggleViewModel"/> with a togglable IsSelected.</summary>
-    public ObservableCollection<PilotToggleViewModel> Pilots { get; }
-
     /// <summary>Construct the ViewModel. All dependencies are required.</summary>
     /// <param name="db">Singleton session SQLite wrapper.</param>
     /// <param name="statsRepo">Session-stats query layer (plan 13).</param>
@@ -183,7 +180,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     ///     each selected pilot's <c>LogFilePath</c> against the live filesystem — handles the
     ///     case where EVE created a newer log file for a pilot between app launch (when the
     ///     <paramref name="allCharacters"/> list was captured) and the user clicking Start.</param>
-    /// <param name="allCharacters">All EVE characters discovered at app startup. The Pilots list is built from this.</param>
+    /// <param name="allCharacters">All EVE characters discovered at app startup. Used as the fallback
+    ///     snapshot when Start-time discovery throws (the per-pilot picker now lives in the New Session dialog).</param>
     /// <param name="settings">Settings repository — used to read/refresh the plan-37 auto-pause idle threshold.</param>
     /// <param name="log">Logger for lifecycle / SQL / refresh diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
@@ -223,14 +221,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         _allCharacters = allCharacters;
         _settings = settings;
         _log = log;
-
-        Pilots = new ObservableCollection<PilotToggleViewModel>(
-            allCharacters.Select(c =>
-            {
-                var p = new PilotToggleViewModel(c);
-                p.PropertyChanged += OnPilotPropertyChanged;
-                return p;
-            }));
 
         _notifier.SessionEventAdded += OnSessionEventAdded;
 
@@ -332,38 +322,71 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
             open.SessionId, open.IsPause);
     }
 
-    /* ----- Start command (Config -> Running) ----- */
+    /* ----- Start (Config -> Paused), driven by the New Session dialog VM ----- */
 
-    /// <summary>Whether <see cref="StartCommand"/> can fire — name non-empty AND >= 1 pilot toggled on.</summary>
-    private bool CanStart() =>
-        !string.IsNullOrWhiteSpace(SessionName) && Pilots.Any(p => p.IsSelected);
-
-    [RelayCommand(CanExecute = nameof(CanStart))]
-    private async Task StartAsync()
+    /// <summary>
+    /// Plan 42: start a session from a fleet roster. Resolves the roster against
+    /// a fresh gamelog-discovery snapshot, writes the session in one transaction
+    /// with each pilot in the fleet's assigned role, and lands in
+    /// <see cref="SessionWidgetMode.Paused"/> (Start-as-paused, plan 37).
+    /// </summary>
+    /// <param name="roster">The selected fleet's members. Only <see cref="FleetMember.PilotId"/>
+    ///     and <see cref="FleetMember.Role"/> are consumed — the freshly-discovered name wins.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>
+    /// <see cref="SessionStartResult.Started"/> on success (or when a session was
+    /// already active — the defensive guard, decision 3.2 = A);
+    /// <see cref="SessionStartResult.NoDiscoverablePilots"/> when none of the
+    /// roster's pilots are discoverable, in which case nothing is written
+    /// (decision 2.5 = A).
+    /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="roster"/> is null.</exception>
+    public async Task<SessionStartResult> StartAsync(IReadOnlyList<FleetMember> roster, CancellationToken ct = default)
     {
-        // Bug-1 defence-in-depth: if a session is already active, refuse to
-        // start a new one. Without this guard, a stale UI signal (e.g. the
-        // pre-fix dialog that didn't close on Start landing in Paused) could
-        // let the user click Start twice, which then crashes inside
-        // _writer.StartAsync ("already started"). This is a no-op + Warning
-        // log; callers should fix their stale signal rather than rely on it.
+        ArgumentNullException.ThrowIfNull(roster);
+
+        // Bug-1 defence-in-depth: if a session is already active, refuse to start
+        // a second one. A session genuinely is active, so the dialog closing is
+        // the correct outcome — report Started (decision 3.2 = A).
         if (_activeSessionId is not null)
         {
             _log.LogWarning(
                 "SessionController.StartAsync invoked while session {SessionId} is already active; ignoring (defensive guard, bug 1 follow-up).",
                 _activeSessionId);
-            return;
+            return SessionStartResult.Started;
         }
 
         var asOf = DateTimeOffset.UtcNow;
-        var selectedPilots = Pilots.Where(p => p.IsSelected).Select(p => p.Character).ToList();
-        var expandedName = SessionNameTemplateExpander.Expand(SessionName, selectedPilots, asOf);
-        var tsIso = ToSqliteIso(asOf);
 
-        // Plan 35: per-pilot default role resolved BEFORE the session_pilot INSERT (lookup
-        // most-recent prior session_pilot row); captured here so the post-COMMIT SeedRoles
-        // call has the same authoritative dictionary that was just written to SQL.
-        var roleByPilotId = new Dictionary<long, PilotRole>(selectedPilots.Count);
+        // Front-load the discovery resolve, before any SQL. A fresh by-id
+        // discovery snapshot (falling back to launch-time characters if
+        // discovery throws) gives each resolved pilot its live LogFilePath, so
+        // the watcher never tails a stale file. FleetRosterResolver pairs each
+        // discoverable roster id with its fleet role and reports the rest as
+        // skipped (decision 2.5 = A).
+        var discoveredById = await ResolveDiscoveredByIdAsync(ct);
+        var (resolved, skipped) = FleetRosterResolver.Resolve(roster, discoveredById);
+
+        if (resolved.Count == 0)
+        {
+            _log.LogWarning(
+                "Start blocked: none of the {Count} fleet pilot(s) are currently discoverable (decision 2.5 = A).",
+                roster.Count);
+            return SessionStartResult.NoDiscoverablePilots;
+        }
+        foreach (var skippedId in skipped)
+        {
+            _log.LogWarning(
+                "Fleet pilot {PilotId} has no current gamelog; skipping from this session (decision 2.5 = A).",
+                skippedId);
+        }
+
+        var resolvedCharacters = resolved.Select(r => r.Char).ToList();
+        // The role map is the fleet's stored roles — no prior-session lookup.
+        var roleByPilotId = resolved.ToDictionary(r => r.Char.CharacterId, r => r.Role);
+
+        var expandedName = SessionNameTemplateExpander.Expand(SessionName, resolvedCharacters, asOf);
+        var tsIso = ToSqliteIso(asOf);
 
         // Plan 38: session_id is the content-addressed sha256 of (name + 0x1F +
         // first start_time). Computed BEFORE the INSERT — no last_insert_rowid.
@@ -377,41 +400,22 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
                 "INSERT INTO session (session_id, name, notes) VALUES ($sid, $name, NULL)",
                 new Dictionary<string, object?> { ["$sid"] = sessionId, ["$name"] = expandedName }, default);
 
-            foreach (var pilot in selectedPilots)
+            foreach (var pilot in resolvedCharacters)
             {
                 await _db.ExecuteNonQueryAsync(
                     "INSERT OR IGNORE INTO pilot (pilot_id, name) VALUES ($pid, $name)",
                     new Dictionary<string, object?> { ["$pid"] = pilot.CharacterId, ["$name"] = pilot.Name },
                     default);
 
-                // Plan 35: default-to-last-role lookup. Pilots with no prior session_pilot
-                // row default to Miner. Index idx_session_pilot_pilot makes this a seek.
-                // Plan 38: sha256 ids are not chronological, so "most recent
-                // prior session" is by session start_time, not by session_id.
-                var priorRoles = await _db.QueryAsync(
-                    """
-                    SELECT sp.role FROM session_pilot sp
-                    JOIN (SELECT session_id, MIN(start_time) AS st FROM session_time GROUP BY session_id) t
-                      ON t.session_id = sp.session_id
-                    WHERE sp.pilot_id = $pid
-                    ORDER BY t.st DESC
-                    LIMIT 1
-                    """,
-                    static r => r.GetString(0),
-                    new Dictionary<string, object?> { ["$pid"] = pilot.CharacterId },
-                    default);
-                var resolvedRole = priorRoles.Count > 0
-                    ? PilotRoleExtensions.Parse(priorRoles[0])
-                    : PilotRole.Miner;
-                roleByPilotId[pilot.CharacterId] = resolvedRole;
-
+                // Plan 42: the role comes straight from the fleet roster — the
+                // old default-to-last-role lookup is removed (decision 1.4 = A).
                 await _db.ExecuteNonQueryAsync(
                     "INSERT INTO session_pilot (session_id, pilot_id, role) VALUES ($sid, $pid, $role)",
                     new Dictionary<string, object?>
                     {
                         ["$sid"]  = sessionId,
                         ["$pid"]  = pilot.CharacterId,
-                        ["$role"] = PilotRoleExtensions.ToCanonicalString(resolvedRole),
+                        ["$role"] = PilotRoleExtensions.ToCanonicalString(roleByPilotId[pilot.CharacterId]),
                     },
                     default);
             }
@@ -445,21 +449,17 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         // the user clicks Continue or a Tick/Crit auto-resumes.
         _activeSession.Set(sessionId, SessionRunState.Paused);
 
-        // Refresh each selected pilot's LogFilePath against the live filesystem.
-        // EVE may have created a newer log file for the pilot between app launch
-        // (when _allCharacters was captured) and now — without this refresh, the
-        // watcher would tail the stale file and never see the live mining events.
-        var freshPilots = await ResolveFreshPilotsAsync(selectedPilots, default);
-
         // Plan 37: wire the writer's auto-resume callback BEFORE starting the
         // writer + watcher, so the very first event arriving while paused can
         // trigger an auto-resume (with that event preserved into the log).
         _writer.SetAutoResumeCallback(AutoResumeAsync);
 
         // Order matters: writer subscribes to RowChanged, so it must be started
-        // BEFORE the watcher's first emitted event flows through.
+        // BEFORE the watcher's first emitted event flows through. The resolved
+        // characters carry their fresh LogFilePath (from the discovery snapshot
+        // above), so no post-COMMIT re-resolve is needed.
         await _writer.StartAsync(sessionId, default);
-        await _watcher.StartAsync(sessionId, freshPilots, default);
+        await _watcher.StartAsync(sessionId, resolvedCharacters, default);
 
         DisplaySessionName = expandedName;
         _sessionStartUtc = asOf;
@@ -481,7 +481,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
         _log.LogInformation(
             "SessionController started session {SessionId} ('{Name}') with {PilotCount} pilots; landed in Paused (Start-as-paused).",
-            sessionId, expandedName, selectedPilots.Count);
+            sessionId, expandedName, resolvedCharacters.Count);
+        return SessionStartResult.Started;
     }
 
     /* ----- Plan 35: SetPilotRoleAsync (Running/Paused, any time) ----- */
@@ -1062,15 +1063,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         CritIskPercent   = 0;
     }
 
-    private void OnPilotPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        // Re-evaluate StartCommand.CanExecute when any pilot's IsSelected toggles.
-        if (e.PropertyName == nameof(PilotToggleViewModel.IsSelected))
-        {
-            StartCommand.NotifyCanExecuteChanged();
-        }
-    }
-
     private async Task TryRollbackAsync()
     {
         try
@@ -1081,6 +1073,36 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         {
             _log.LogWarning(ex, "ROLLBACK failed after a transaction error; SQLite may already be back to autocommit.");
         }
+    }
+
+    /// <summary>
+    /// Plan 42: take a fresh gamelog-discovery snapshot keyed by character id,
+    /// for resolving a fleet roster at Start (each entry carries its live
+    /// <c>LogFilePath</c>). Falls back to the launch-time <c>_allCharacters</c>
+    /// if discovery throws — the same warn-and-fallback as
+    /// <see cref="ResolveFreshPilotsAsync"/>.
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Discovered characters keyed by <see cref="Character.CharacterId"/>.</returns>
+    private async Task<IReadOnlyDictionary<long, Character>> ResolveDiscoveredByIdAsync(CancellationToken ct)
+    {
+        IReadOnlyList<Character> fresh;
+        try
+        {
+            fresh = await _discovery.DiscoverCharactersAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Discovery refresh failed at Start; falling back to launch-time characters.");
+            fresh = _allCharacters;
+        }
+
+        var byId = new Dictionary<long, Character>(fresh.Count);
+        foreach (var c in fresh)
+        {
+            byId[c.CharacterId] = c;
+        }
+        return byId;
     }
 
     /// <summary>
@@ -1152,7 +1174,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         _notifier.SessionEventAdded -= OnSessionEventAdded;
         _settings.SettingChanged -= OnSettingChanged;
         StopTickTimer();
-        foreach (var p in Pilots) p.PropertyChanged -= OnPilotPropertyChanged;
         _disposed = true;
     }
 }

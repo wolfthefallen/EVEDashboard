@@ -6,12 +6,12 @@ using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 37 — Start-as-paused. StartCommand writes the first session_time row
-/// with is_pause=1, lands in <see cref="SessionWidgetMode.Paused"/>, sets
+/// Plan 37 — Start-as-paused. Start writes the first session_time row with
+/// is_pause=1, lands in <see cref="SessionWidgetMode.Paused"/>, sets
 /// <see cref="IActiveSessionContext.State"/> to
 /// <see cref="SessionRunState.Paused"/>, and wires the writer's auto-resume
-/// callback. The tick timer is NOT started — it kicks off on the user's
-/// first Continue click (or an auto-resume).
+/// callback. The tick timer is NOT started — it kicks off on the user's first
+/// Continue click (or an auto-resume). Plan 42: Start takes a fleet roster.
 /// </summary>
 public class SessionControllerStartPausedTests
 {
@@ -21,9 +21,8 @@ public class SessionControllerStartPausedTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Plan 37 Start";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         try
         {
             var rows = await f.Db.QueryAsync(
@@ -45,9 +44,8 @@ public class SessionControllerStartPausedTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Plan 37 Start";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         try
         {
             vm.Mode.Should().Be(SessionWidgetMode.Paused);
@@ -65,9 +63,8 @@ public class SessionControllerStartPausedTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Plan 37 Start";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         try
         {
             // Elapsed shows 00:00:00 immediately after Start (no tick timer
@@ -86,9 +83,8 @@ public class SessionControllerStartPausedTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Plan 37 Continue Path";
-        vm.Pilots[0].IsSelected = true;
 
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
         try
         {
             // After Continue, the session_time row sequence is: row 1 (is_pause=1,
@@ -122,26 +118,28 @@ public class SessionControllerStartPausedTests
         // Bug-1 follow-up: defensive guard against double-Start (a UI signal
         // bug previously let the New Session dialog stay open after Start,
         // exposing the user to clicking Start a second time which then crashed
-        // inside _writer.StartAsync).
+        // inside _writer.StartAsync). Plan 42 decision 3.2 = A: the guard now
+        // returns SessionStartResult.Started (a session genuinely is active) so
+        // the dialog still closes — but no second session is created.
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "First";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
             var firstSessionId = f.ActiveSession.ActiveSessionId;
             firstSessionId.Should().NotBeNull("preconditions: first Start put a session in flight");
 
-            // Simulate a double-click: change the name + selection, then call
-            // Start again. Pre-fix this threw "writer already started"; post-fix
-            // it's a quiet no-op with a Warning log.
+            // Simulate a double-click: change the name, then call Start again.
+            // Pre-fix this threw "writer already started"; post-fix it's a quiet
+            // no-op (returns Started) with a Warning log.
             vm.SessionName = "Second (should be ignored)";
-            vm.Pilots[1].IsSelected = true;
 
-            Func<Task> act = async () => await vm.StartCommand.ExecuteAsync(null);
+            SessionStartResult? secondResult = null;
+            Func<Task> act = async () => secondResult = await vm.StartAsync(f.Roster(2));
             await act.Should().NotThrowAsync();
+            secondResult.Should().Be(SessionStartResult.Started, "the guard reports Started so the dialog closes");
 
             // Original session is untouched.
             f.ActiveSession.ActiveSessionId.Should().Be(firstSessionId);
@@ -172,16 +170,14 @@ public class SessionControllerStartPausedTests
         using (var vm1 = f.CreateViewModel())
         {
             vm1.SessionName = "First";
-            vm1.Pilots[0].IsSelected = true;
-            await vm1.StartCommand.ExecuteAsync(null);
+            await vm1.StartAsync(f.Roster());
             await vm1.StopCommand.ExecuteAsync(null);
         }
 
         using (var vm2 = f.CreateViewModel())
         {
             vm2.SessionName = "Second";
-            vm2.Pilots[0].IsSelected = true;
-            await vm2.StartCommand.ExecuteAsync(null);
+            await vm2.StartAsync(f.Roster());
             try
             {
                 vm2.Mode.Should().Be(SessionWidgetMode.Paused);

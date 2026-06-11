@@ -1,22 +1,24 @@
 namespace EveDashboard.SessionIO.Import;
 
 /// <summary>
-/// Thrown when an import file's <c>_manifest.schema_version</c> does not match
-/// the destination database's <c>schema_version</c> setting. Per the
-/// pre-release rule (no migrations until v1 ships) the importer hard-fails
-/// rather than attempting to transform data across schema versions.
+/// Thrown when an import file's export-FORMAT version (its
+/// <c>_manifest.schema_version</c> wire field) is newer than this app's
+/// supported export format (<c>SessionExportFormat.CurrentVersion</c>). Plan 42
+/// decision 4.1 = B decoupled the export-format version from the DB
+/// <c>schema_version</c>, so an additive schema migration no longer blocks
+/// import of an older backup — only a genuinely newer export shape is refused.
 /// </summary>
 public sealed class SchemaVersionMismatchException : Exception
 {
-    /// <summary>Schema version recorded in the import file's manifest.</summary>
+    /// <summary>Export-format version recorded in the import file's manifest.</summary>
     public int FileSchemaVersion { get; }
 
-    /// <summary>Schema version present in the destination database's <c>setting</c> table.</summary>
+    /// <summary>The app's supported export-format version (<c>SessionExportFormat.CurrentVersion</c>).</summary>
     public int CurrentSchemaVersion { get; }
 
     /// <summary>Construct with the mismatched versions surfaced in the message.</summary>
-    /// <param name="fileSchemaVersion">Schema version recorded in the manifest.</param>
-    /// <param name="currentSchemaVersion">Schema version of the destination database.</param>
+    /// <param name="fileSchemaVersion">Export-format version recorded in the manifest.</param>
+    /// <param name="currentSchemaVersion">The app's supported export-format version.</param>
     public SchemaVersionMismatchException(int fileSchemaVersion, int currentSchemaVersion)
         : base($"schema_version mismatch (file={fileSchemaVersion}, current={currentSchemaVersion})")
     {

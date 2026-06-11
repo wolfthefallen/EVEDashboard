@@ -32,8 +32,7 @@ public class SessionControllerSetPilotRoleTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -57,8 +56,7 @@ public class SessionControllerSetPilotRoleTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -79,8 +77,7 @@ public class SessionControllerSetPilotRoleTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {
@@ -107,8 +104,7 @@ public class SessionControllerSetPilotRoleTests
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
         vm.SessionName = "Run";
-        vm.Pilots[0].IsSelected = true;
-        await vm.StartCommand.ExecuteAsync(null);
+        await vm.StartAsync(f.Roster());
 
         try
         {

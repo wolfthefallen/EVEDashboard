@@ -31,6 +31,7 @@ using EveDashboard.SessionIO.Excel;
 using EveDashboard.SessionIO.Json;
 using EveDashboard.SessionIO.Tables;
 using EveDashboard.Stats.Events;
+using EveDashboard.Stats.Fleets;
 using EveDashboard.Stats.Queries;
 using EveDashboard.Stats.Storage;
 using EveDashboard.Stats.Writer;
@@ -171,6 +172,14 @@ public static class ServiceRegistration
         services.AddSingleton<IBrowserLauncher, BrowserLauncher>();
         services.AddSingleton<UpdateNotifier>();
 
+        // Plan 42 — fleet repository (explicit sessionDb capture, same pattern as
+        // the stats repo). Owns the fleet / fleet_pilot tables; the New Session
+        // dialog VM resolves it for load / create / delete.
+        services.AddSingleton<IFleetRepository>(sp =>
+            new SqliteFleetRepository(
+                sessionDb,
+                sp.GetRequiredService<ILogger<SqliteFleetRepository>>()));
+
         // Stats query layer — explicit sessionDb capture (NOT via ISqliteDatabase resolution).
         services.AddSingleton<ISessionStatsRepository>(sp =>
             new SqliteSessionStatsRepository(
@@ -232,7 +241,6 @@ public static class ServiceRegistration
             sessionDb,
             sp.GetRequiredService<ILogger<SessionTableDeleter>>()));
         services.AddSingleton(sp => new JsonSessionExporter(
-            sessionDb,
             sp.GetRequiredService<SessionTableReader>(),
             sp.GetRequiredService<ILogger<JsonSessionExporter>>()));
         services.AddSingleton(sp => new JsonSessionImporter(

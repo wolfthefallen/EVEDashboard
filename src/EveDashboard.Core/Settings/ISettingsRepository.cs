@@ -1,6 +1,7 @@
 namespace EveDashboard.Core.Settings;
 
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
@@ -179,6 +180,38 @@ public interface ISettingsRepository
     /// <param name="ct">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default);
+
+    /// <summary>
+    /// Read the id of the default fleet (plan 42). Returns <c>null</c> when no
+    /// default has been set (the <c>default_fleet_id</c> row is absent).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The default fleet's content id, or <c>null</c>.</returns>
+    Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Set or clear the default fleet (plan 42). A non-null id is upserted; a
+    /// <c>null</c> clears the default by deleting the <c>default_fleet_id</c> row
+    /// (the setting value is NOT NULL, so absence is the "no default" sentinel).
+    /// Raises <see cref="SettingChanged"/> with key <c>"default_fleet_id"</c>.
+    /// </summary>
+    /// <param name="fleetId">Fleet id to set as default, or <c>null</c> to clear.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Read the persisted pilot-picker sort order (plan 42). Returns
+    /// <see cref="PilotSortOrder.LastActiveNewest"/> when missing or when the
+    /// stored value is unrecognised (with Warning log on the latter).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted sort order, or the default.</returns>
+    Task<PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default);
+
+    /// <summary>Persist the pilot-picker sort order (plan 42). Raises <see cref="SettingChanged"/> with key <c>"pilot_sort_order"</c>.</summary>
+    /// <param name="order">Sort order to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default);
 
     /// <summary>
     /// Read the persisted Reports-window sidebar expanded width in pixels

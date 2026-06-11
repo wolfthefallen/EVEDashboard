@@ -3,6 +3,7 @@ namespace EveDashboard.Stats.Settings;
 using System.Globalization;
 using System.Text.Json;
 using EveDashboard.Core.Layout;
+using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
 using EveDashboard.Core.Settings.WidgetStats;
 using EveDashboard.Core.Storage;
@@ -346,6 +347,49 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         ArgumentNullException.ThrowIfNull(value);
         await UpsertAsync("crystal_diagram_selected_anomaly", value, ct);
         RaiseSettingChanged("crystal_diagram_selected_anomaly");
+    }
+
+    /// <inheritdoc />
+    public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default) =>
+        _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'default_fleet_id'", ct: ct);
+
+    /// <inheritdoc />
+    public async Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default)
+    {
+        if (fleetId is null)
+        {
+            // setting.value is NOT NULL, so "no default" is the row's absence:
+            // clearing the default deletes the row.
+            await _db.ExecuteNonQueryAsync(
+                "DELETE FROM setting WHERE key = 'default_fleet_id'", null, ct);
+        }
+        else
+        {
+            await UpsertAsync("default_fleet_id", fleetId, ct);
+        }
+        RaiseSettingChanged("default_fleet_id");
+    }
+
+    /// <inheritdoc />
+    public async Task<PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'pilot_sort_order'", ct: ct);
+        if (raw is null) return PilotSortOrder.LastActiveNewest;
+        if (!PilotSortOrderExtensions.TryParse(raw, out var order))
+        {
+            _log.LogWarning(
+                "pilot_sort_order value '{Raw}' is not recognised - returning default LastActiveNewest.", raw);
+        }
+        return order;
+    }
+
+    /// <inheritdoc />
+    public async Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default)
+    {
+        await UpsertAsync("pilot_sort_order", PilotSortOrderExtensions.ToCanonicalString(order), ct);
+        RaiseSettingChanged("pilot_sort_order");
     }
 
     /// <inheritdoc />
