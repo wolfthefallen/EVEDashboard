@@ -8,6 +8,7 @@ using EveDashboard.App.Wpf.Widgets.Session;
 using EveDashboard.Core.Domain;
 using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// ViewModel behind the <see cref="SessionConfigDialog"/> (plan 42). Owns the
@@ -34,6 +35,7 @@ public sealed partial class SessionConfigDialogViewModel : ObservableObject, IDi
     private readonly IFleetRepository _fleetRepo;
     private readonly ISettingsRepository _settings;
     private readonly IConfirmDialog _confirmDialog;
+    private readonly ILogger<SessionConfigDialogViewModel> _log;
 
     private bool _disposed;
     private bool _suppressSortPersist;
@@ -45,24 +47,28 @@ public sealed partial class SessionConfigDialogViewModel : ObservableObject, IDi
     /// <param name="fleetRepo">Fleet repository (load / create / delete).</param>
     /// <param name="settings">Settings repository (default-fleet pointer + persisted sort order).</param>
     /// <param name="confirmDialog">Confirm-dialog seam for Delete.</param>
+    /// <param name="log">Logger for fire-and-forget persistence failures (e.g. the sort-order write).</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public SessionConfigDialogViewModel(
         SessionController controller,
         IReadOnlyList<Character> allCharacters,
         IFleetRepository fleetRepo,
         ISettingsRepository settings,
-        IConfirmDialog confirmDialog)
+        IConfirmDialog confirmDialog,
+        ILogger<SessionConfigDialogViewModel> log)
     {
         ArgumentNullException.ThrowIfNull(controller);
         ArgumentNullException.ThrowIfNull(allCharacters);
         ArgumentNullException.ThrowIfNull(fleetRepo);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(confirmDialog);
+        ArgumentNullException.ThrowIfNull(log);
         _controller = controller;
         _allCharacters = allCharacters;
         _fleetRepo = fleetRepo;
         _settings = settings;
         _confirmDialog = confirmDialog;
+        _log = log;
         _controller.PropertyChanged += OnControllerPropertyChanged;
     }
 
@@ -396,8 +402,22 @@ public sealed partial class SessionConfigDialogViewModel : ObservableObject, IDi
         if (!_suppressSortPersist)
         {
             // Fire-and-forget persistence (mirrors the Crystal Diagram VM's
-            // OnSelectedEntryChanged pattern) — the read path defaults safely.
-            _ = _settings.SetPilotSortOrderAsync(value);
+            // OnSelectedEntryChanged pattern) — guarded so a failed write is
+            // logged, not silently dropped on an unobserved Task.
+            _ = PersistSortOrderAsync(value);
+        }
+    }
+
+    /// <summary>Guarded fire-and-forget write of the pilot sort order; logs (not swallows) a failure.</summary>
+    private async Task PersistSortOrderAsync(PilotSortOrder order)
+    {
+        try
+        {
+            await _settings.SetPilotSortOrderAsync(order).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Failed to persist pilot sort order '{Order}'; the next change will retry.", order);
         }
     }
 

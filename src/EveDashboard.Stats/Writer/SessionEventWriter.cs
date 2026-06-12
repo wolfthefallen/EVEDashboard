@@ -300,6 +300,19 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
                     "Failed to INSERT log row for {Kind} (pilot {Pilot}, type {TypeId}); continuing.",
                     ev.Kind, ev.CharacterId, ev.TypeId);
             }
+            catch (Exception ex)
+            {
+                // Belt-and-suspenders (BUGS.md Bug 1): a NON-DbException (e.g. a
+                // driver-internal ArgumentOutOfRangeException raised by concurrent
+                // connection access) must NOT escape this loop. If it did, the
+                // background consumer Task would fault and die unobserved, and
+                // every subsequent mining event for the session would be enqueued
+                // but never written — silent data loss while the app keeps
+                // running. Log and keep draining instead.
+                _log.LogError(ex,
+                    "Unexpected error inserting log row for {Kind} (pilot {Pilot}, type {TypeId}); the consumer continues draining.",
+                    ev.Kind, ev.CharacterId, ev.TypeId);
+            }
         }
     }
 

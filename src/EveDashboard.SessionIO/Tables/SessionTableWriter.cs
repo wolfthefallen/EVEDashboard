@@ -99,8 +99,11 @@ public sealed class SessionTableWriter
                 AlreadyPresent: true);
         }
 
-        await _db.ExecuteScriptAsync("BEGIN IMMEDIATE", ct).ConfigureAwait(false);
-        try
+        // Atomic via WithTransactionAsync (BEGIN IMMEDIATE..COMMIT, ROLLBACK on
+        // throw) — holds the connection gate for the whole import so it cannot
+        // interleave with a live session's writes. The Write* helpers call back
+        // into _db; the re-entrant un-gated path keeps that from self-deadlocking.
+        var result = await _db.WithTransactionAsync(async (_, _) =>
         {
             var warnings = new List<NameMismatchWarning>();
 
@@ -111,12 +114,6 @@ public sealed class SessionTableWriter
             var sessionPilots    = await WriteSessionPilotsAsync(data.SessionPilots, sessionId, ct).ConfigureAwait(false);
             var logsInserted     = await WriteLogsAsync(data.Logs, sessionId, ct).ConfigureAwait(false);
             var marketInserted   = await WriteMarketDataAsync(data.MarketData, sessionId, ct).ConfigureAwait(false);
-
-            await _db.ExecuteScriptAsync("COMMIT", ct).ConfigureAwait(false);
-
-            _log.LogInformation(
-                "Imported session {NewSessionId} ('{Name}'): {Logs} log + {SessionTimes} session_time + {Pilots} new pilot + {Stations} new station + {MarketData} market_data; {Warnings} name warning(s).",
-                sessionId, data.Session[0].Name, logsInserted, timesInserted, pilotsInserted, stationsInserted, marketInserted, warnings.Count);
 
             return new ImportResult(
                 NewSessionId: sessionId,
@@ -129,22 +126,14 @@ public sealed class SessionTableWriter
                     SessionPilots:  sessionPilots,
                     Logs:           logsInserted,
                     MarketData:     marketInserted));
-        }
-        catch
-        {
-            // Best-effort rollback. Swallow any rollback exception to surface
-            // the original cause; the SQLite connection's WAL state will be
-            // reset on next write regardless.
-            try
-            {
-                await _db.ExecuteScriptAsync("ROLLBACK", ct).ConfigureAwait(false);
-            }
-            catch (Exception rollbackEx)
-            {
-                _log.LogWarning(rollbackEx, "ROLLBACK after import failure also failed; surfacing original exception.");
-            }
-            throw;
-        }
+        }, immediate: true, ct).ConfigureAwait(false);
+
+        _log.LogInformation(
+            "Imported session {NewSessionId} ('{Name}'): {Logs} log + {SessionTimes} session_time + {Pilots} new pilot + {Stations} new station + {MarketData} market_data; {Warnings} name warning(s).",
+            result.NewSessionId, result.SessionName, result.RowCounts.Logs, result.RowCounts.SessionTimes,
+            result.RowCounts.Pilots, result.RowCounts.MarketStations, result.RowCounts.MarketData, result.Warnings.Count);
+
+        return result;
     }
 
     private async Task<int> WritePilotsAsync(

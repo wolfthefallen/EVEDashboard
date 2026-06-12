@@ -397,31 +397,28 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         // tsIso is the exact start_time persisted into the is_pause row below,
         // so the startup migration and import reproduce the identical id.
         var sessionId = SessionId.Compute(expandedName, tsIso);
-        await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, default);
-        try
+        await _db.WithTransactionAsync(async (tx, _) =>
         {
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "INSERT INTO session (session_id, name, notes) VALUES ($sid, $name, NULL)",
-                new Dictionary<string, object?> { ["$sid"] = sessionId, ["$name"] = expandedName }, default);
+                new Dictionary<string, object?> { ["$sid"] = sessionId, ["$name"] = expandedName });
 
             foreach (var pilot in resolvedCharacters)
             {
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "INSERT OR IGNORE INTO pilot (pilot_id, name) VALUES ($pid, $name)",
-                    new Dictionary<string, object?> { ["$pid"] = pilot.CharacterId, ["$name"] = pilot.Name },
-                    default);
+                    new Dictionary<string, object?> { ["$pid"] = pilot.CharacterId, ["$name"] = pilot.Name });
 
                 // Plan 42: the role comes straight from the fleet roster — the
                 // old default-to-last-role lookup is removed (decision 1.4 = A).
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "INSERT INTO session_pilot (session_id, pilot_id, role) VALUES ($sid, $pid, $role)",
                     new Dictionary<string, object?>
                     {
                         ["$sid"]  = sessionId,
                         ["$pid"]  = pilot.CharacterId,
                         ["$role"] = PilotRoleExtensions.ToCanonicalString(roleByPilotId[pilot.CharacterId]),
-                    },
-                    default);
+                    });
             }
 
             // Plan 37: the first session_time row is is_pause=1 — Start lands
@@ -429,19 +426,11 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
             // counts. The chrome bar's Continue button (formerly Resume) is
             // the user's first action; auto-resume on first Tick/Crit also
             // covers this transition.
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "INSERT INTO session_time (session_id, start_time, stop_time, is_pause) " +
                 "VALUES ($sid, $ts, NULL, 1)",
-                new Dictionary<string, object?> { ["$sid"] = sessionId, ["$ts"] = tsIso },
-                default);
-
-            await _db.ExecuteNonQueryAsync("COMMIT", null, default);
-        }
-        catch
-        {
-            await TryRollbackAsync();
-            throw;
-        }
+                new Dictionary<string, object?> { ["$sid"] = sessionId, ["$ts"] = tsIso });
+        });
 
         _activeSessionId = sessionId;
         // Plan 35 decision 2.5 cross = A: SeedRoles BEFORE Set so ActiveSessionChanged
@@ -558,28 +547,18 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         if (_activeSessionId is not { } sid) return;
         var tsIso = ToSqliteIso(nowUtc);
 
-        await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, default);
-        try
+        await _db.WithTransactionAsync(async (tx, _) =>
         {
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "UPDATE session_time SET stop_time = $ts " +
                 "WHERE session_id = $sid AND stop_time IS NULL",
-                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                default);
+                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
 
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "INSERT INTO session_time (session_id, start_time, stop_time, is_pause) " +
                 "VALUES ($sid, $ts, NULL, 1)",
-                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                default);
-
-            await _db.ExecuteNonQueryAsync("COMMIT", null, default);
-        }
-        catch
-        {
-            await TryRollbackAsync();
-            throw;
-        }
+                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
+        });
 
         _activeSession.Set(sid, SessionRunState.Paused);
         _currentPauseStartUtc = nowUtc;
@@ -673,28 +652,18 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         if (_activeSessionId is not { } sid) return;
         var tsIso = ToSqliteIso(nowUtc);
 
-        await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, default);
-        try
+        await _db.WithTransactionAsync(async (tx, _) =>
         {
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "UPDATE session_time SET stop_time = $ts " +
                 "WHERE session_id = $sid AND stop_time IS NULL",
-                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                default);
+                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
 
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "INSERT INTO session_time (session_id, start_time, stop_time, is_pause) " +
                 "VALUES ($sid, $ts, NULL, 0)",
-                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                default);
-
-            await _db.ExecuteNonQueryAsync("COMMIT", null, default);
-        }
-        catch
-        {
-            await TryRollbackAsync();
-            throw;
-        }
+                new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
+        });
 
         _activeSession.Set(sid, SessionRunState.Running);
 
@@ -778,28 +747,18 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         if (wasPaused)
         {
             var tsIso = ToSqliteIso(nowUtc);
-            await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, default);
-            try
+            await _db.WithTransactionAsync(async (tx, _) =>
             {
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "UPDATE session_time SET stop_time = $ts " +
                     "WHERE session_id = $sid AND stop_time IS NULL",
-                    new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                    default);
+                    new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
 
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "INSERT INTO session_time (session_id, start_time, stop_time, is_pause) " +
                     "VALUES ($sid, $ts, NULL, 0)",
-                    new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso },
-                    default);
-
-                await _db.ExecuteNonQueryAsync("COMMIT", null, default);
-            }
-            catch
-            {
-                await TryRollbackAsync();
-                throw;
-            }
+                    new Dictionary<string, object?> { ["$sid"] = sid, ["$ts"] = tsIso });
+            });
         }
 
         // Bootstrap timer state from current cumulative active duration.
@@ -1069,17 +1028,6 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         SessionRefinedOutput = Array.Empty<RefinedMaterialAmount>();
     }
 
-    private async Task TryRollbackAsync()
-    {
-        try
-        {
-            await _db.ExecuteNonQueryAsync("ROLLBACK", null, default);
-        }
-        catch (Exception ex)
-        {
-            _log.LogWarning(ex, "ROLLBACK failed after a transaction error; SQLite may already be back to autocommit.");
-        }
-    }
 
     /// <summary>
     /// Plan 42: take a fresh gamelog-discovery snapshot keyed by character id,

@@ -22,7 +22,7 @@ public class SessionConfigDialogViewModelTests
 
     private static SessionConfigDialogViewModel BuildVm(
         SessionControllerTestFixture f, SessionController controller, IFleetRepository repo) =>
-        new(controller, f.Characters, repo, f.Settings, f.ConfirmStop);
+        new(controller, f.Characters, repo, f.Settings, f.ConfirmStop, NullLogger<SessionConfigDialogViewModel>.Instance);
 
     /// <summary>Create a fleet directly through the repo (the discoverable test pilots, all Miner).</summary>
     private static async Task<string?> SeedFleetAsync(
@@ -41,7 +41,7 @@ public class SessionConfigDialogViewModelTests
     public void Ctor_throws_on_null_controller()
     {
         using var f = new SessionControllerTestFixture();
-        Action act = () => new SessionConfigDialogViewModel(null!, f.Characters, Repo(f), f.Settings, f.ConfirmStop);
+        Action act = () => new SessionConfigDialogViewModel(null!, f.Characters, Repo(f), f.Settings, f.ConfirmStop, NullLogger<SessionConfigDialogViewModel>.Instance);
         act.Should().Throw<ArgumentNullException>().WithParameterName("controller");
     }
 
@@ -50,7 +50,7 @@ public class SessionConfigDialogViewModelTests
     {
         using var f = new SessionControllerTestFixture();
         using var controller = f.CreateViewModel();
-        Action act = () => new SessionConfigDialogViewModel(controller, f.Characters, null!, f.Settings, f.ConfirmStop);
+        Action act = () => new SessionConfigDialogViewModel(controller, f.Characters, null!, f.Settings, f.ConfirmStop, NullLogger<SessionConfigDialogViewModel>.Instance);
         act.Should().Throw<ArgumentNullException>().WithParameterName("fleetRepo");
     }
 

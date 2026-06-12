@@ -81,6 +81,46 @@ public interface ISqliteDatabase : IDisposable, IAsyncDisposable
         CancellationToken ct = default);
 
     /// <summary>
+    /// Run <paramref name="body"/> inside a single transaction, holding the
+    /// connection lock for the WHOLE <c>BEGIN..COMMIT</c> so no other operation
+    /// can interleave on the (single, non-thread-safe) connection. COMMITs on
+    /// success; ROLLBACKs and rethrows if the body throws.
+    /// </summary>
+    /// <param name="body">
+    /// The transaction body. It receives an <see cref="ISqliteTransaction"/>
+    /// handle whose calls run inside the held lock + open transaction — use that
+    /// handle for every DB call in the body, NOT this <see cref="ISqliteDatabase"/>
+    /// (the outer methods would re-acquire the held lock and self-deadlock). The
+    /// handle is valid only for the duration of the body and must not be used
+    /// from another thread.
+    /// </param>
+    /// <param name="immediate">When <c>true</c>, opens with <c>BEGIN IMMEDIATE</c> (takes the write lock up front) instead of <c>BEGIN</c>.</param>
+    /// <param name="ct">Cancellation token, honoured while acquiring the lock and inside the body; the <c>COMMIT</c>/<c>ROLLBACK</c> themselves are not cancelled.</param>
+    /// <exception cref="System.Data.Common.DbException">Rethrown after <c>ROLLBACK</c> on a SQL error.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the database has been disposed.</exception>
+    Task WithTransactionAsync(
+        Func<ISqliteTransaction, CancellationToken, Task> body,
+        bool immediate = false,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Result-returning overload of
+    /// <see cref="WithTransactionAsync(Func{ISqliteTransaction, CancellationToken, Task}, bool, CancellationToken)"/>:
+    /// returns the value produced by <paramref name="body"/> after the COMMIT.
+    /// </summary>
+    /// <typeparam name="T">Result type returned by the body.</typeparam>
+    /// <param name="body">The transaction body; see the non-generic overload for the handle/threading contract.</param>
+    /// <param name="immediate">When <c>true</c>, opens with <c>BEGIN IMMEDIATE</c>.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The value returned by <paramref name="body"/>.</returns>
+    /// <exception cref="System.Data.Common.DbException">Rethrown after <c>ROLLBACK</c> on a SQL error.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the database has been disposed.</exception>
+    Task<T> WithTransactionAsync<T>(
+        Func<ISqliteTransaction, CancellationToken, Task<T>> body,
+        bool immediate = false,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Raised on every INSERT / UPDATE / DELETE through the underlying SQLite
     /// connection. Consumers (e.g. plan 12's session-event notifier) filter on
     /// <see cref="SqliteRowChangedEventArgs.Table"/> and translate to higher-level
@@ -99,6 +139,15 @@ public interface ISqliteDatabase : IDisposable, IAsyncDisposable
     /// The event argument carries only the table name, the affected
     /// <c>rowid</c>, and the change kind - not column values. Consumers that
     /// need column values must query the row themselves.
+    /// </para>
+    /// <para>
+    /// THREADING: the hook fires SYNCHRONOUSLY on the thread performing the
+    /// write, WHILE the implementation holds its connection lock. A handler
+    /// therefore runs inside that lock and MUST NOT call back into this
+    /// <see cref="ISqliteDatabase"/> (any method would try to re-acquire the
+    /// non-reentrant lock and self-deadlock). Handlers must be cheap and
+    /// non-reentrant: flip a flag, enqueue, or raise a higher-level event — and
+    /// do any DB work off this thread.
     /// </para>
     /// </remarks>
     event EventHandler<SqliteRowChangedEventArgs>? RowChanged;

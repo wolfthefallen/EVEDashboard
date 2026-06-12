@@ -130,12 +130,22 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     /// <param name="ct">Cancellation token.</param>
     internal async Task RebuildStatsAsync(CancellationToken ct = default)
     {
-        var saved = await _load(ct).ConfigureAwait(true);
-        var resolution = StatRowsBuilder.Resolve(_vmType, saved, _log);
-        _renderer.ApplyDescriptors(resolution.Reorderable);
+        try
+        {
+            var saved = await _load(ct).ConfigureAwait(true);
+            var resolution = StatRowsBuilder.Resolve(_vmType, saved, _log);
+            _renderer.ApplyDescriptors(resolution.Reorderable);
 
-        IsLastUpdatedVisible = !FindHidden(resolution.HideOnly, nameof(LastUpdated));
-        OnAdditionalHideOnlyResolved(resolution.HideOnly);
+            IsLastUpdatedVisible = !FindHidden(resolution.HideOnly, nameof(LastUpdated));
+            OnAdditionalHideOnlyResolved(resolution.HideOnly);
+        }
+        catch (Exception ex)
+        {
+            // Launched fire-and-forget (StartInitialRebuild / OnSettingChanged), so
+            // a fault here would vanish on an unobserved Task and the widget would
+            // silently stop reflecting config / stat changes. Surface it instead.
+            _log?.LogWarning(ex, "Failed to rebuild stat config for {VmType}; the widget keeps its last-rendered stats.", _vmType.Name);
+        }
     }
 
     /// <summary>Override to apply extra hide-only flags (e.g. per-pilot's <c>LastEventAt</c>). Default no-op.</summary>
@@ -216,10 +226,20 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     private async Task HydrateRefinedAsync()
     {
         if (_refinedScopeKey is null) return;
-        _refinedAutoShow = await Settings.GetAutoShowRefinedMaterialsAsync().ConfigureAwait(true);
-        var overrides = await Settings.GetRefinedMaterialsVisibilityAsync(_refinedScopeKey).ConfigureAwait(true);
-        _refinedOverrides = new Dictionary<long, bool>(overrides);
-        RebuildRefinedRows();
+        try
+        {
+            _refinedAutoShow = await Settings.GetAutoShowRefinedMaterialsAsync().ConfigureAwait(true);
+            var overrides = await Settings.GetRefinedMaterialsVisibilityAsync(_refinedScopeKey).ConfigureAwait(true);
+            _refinedOverrides = new Dictionary<long, bool>(overrides);
+            RebuildRefinedRows();
+        }
+        catch (Exception ex)
+        {
+            // Fire-and-forget (EnableRefinedOutput / OnSettingChanged) — without
+            // this guard a fault would vanish on an unobserved Task and the refined
+            // section would silently fail to hydrate.
+            _log?.LogWarning(ex, "Failed to hydrate refined-output visibility for scope '{Scope}'; the section keeps its current state.", _refinedScopeKey);
+        }
     }
 
     private bool RefinedVisible(long typeId) =>

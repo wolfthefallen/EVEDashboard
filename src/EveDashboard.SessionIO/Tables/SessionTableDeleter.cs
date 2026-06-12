@@ -47,8 +47,10 @@ public sealed class SessionTableDeleter
     /// <returns>The total number of rows deleted across all four tables. Returns 0 if no session matched (everything else cascade-trivially returns 0 too).</returns>
     public async Task<int> DeleteAsync(string sessionId, CancellationToken ct = default)
     {
-        await _db.ExecuteScriptAsync("BEGIN IMMEDIATE", ct).ConfigureAwait(false);
-        try
+        // Atomic via WithTransactionAsync (BEGIN IMMEDIATE..COMMIT, ROLLBACK on
+        // throw) — holds the connection gate for the whole delete so it cannot
+        // interleave with a live session's writes.
+        return await _db.WithTransactionAsync(async (tx, _) =>
         {
             // FK-respecting order: child tables first, parent last. PRAGMA
             // foreign_keys = ON (set by SchemaInitializer) would otherwise
@@ -56,34 +58,19 @@ public sealed class SessionTableDeleter
             // still reference it.
             var parameters = new Dictionary<string, object?> { ["$sid"] = sessionId };
 
-            var logsDeleted = await _db.ExecuteNonQueryAsync(
+            var logsDeleted = await tx.ExecuteNonQueryAsync(
                 "DELETE FROM log WHERE session_id = $sid", parameters, ct).ConfigureAwait(false);
-            var sessionPilotsDeleted = await _db.ExecuteNonQueryAsync(
+            var sessionPilotsDeleted = await tx.ExecuteNonQueryAsync(
                 "DELETE FROM session_pilot WHERE session_id = $sid", parameters, ct).ConfigureAwait(false);
-            var sessionTimesDeleted = await _db.ExecuteNonQueryAsync(
+            var sessionTimesDeleted = await tx.ExecuteNonQueryAsync(
                 "DELETE FROM session_time WHERE session_id = $sid", parameters, ct).ConfigureAwait(false);
-            var sessionsDeleted = await _db.ExecuteNonQueryAsync(
+            var sessionsDeleted = await tx.ExecuteNonQueryAsync(
                 "DELETE FROM session WHERE session_id = $sid", parameters, ct).ConfigureAwait(false);
 
-            await _db.ExecuteScriptAsync("COMMIT", ct).ConfigureAwait(false);
-
-            var total = logsDeleted + sessionPilotsDeleted + sessionTimesDeleted + sessionsDeleted;
             _log.LogInformation(
                 "Deleted session #{SessionId}: {Sessions} session + {SessionTimes} session_time + {SessionPilots} session_pilot + {Logs} log row(s).",
                 sessionId, sessionsDeleted, sessionTimesDeleted, sessionPilotsDeleted, logsDeleted);
-            return total;
-        }
-        catch
-        {
-            try
-            {
-                await _db.ExecuteScriptAsync("ROLLBACK", ct).ConfigureAwait(false);
-            }
-            catch (Exception rollbackEx)
-            {
-                _log.LogWarning(rollbackEx, "ROLLBACK after delete failure also failed; surfacing original exception.");
-            }
-            throw;
-        }
+            return logsDeleted + sessionPilotsDeleted + sessionTimesDeleted + sessionsDeleted;
+        }, immediate: true, ct).ConfigureAwait(false);
     }
 }

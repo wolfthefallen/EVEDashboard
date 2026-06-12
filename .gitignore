@@ -33,3 +33,9 @@ CLAUDE.md
 
 # Local-only notes (e.g. ESI app registration / secrets); never committed or published.
 *.local.md
+
+# Local-only developer tools (NOT shipped, NOT published). Currently holds the SQLite
+# CLI binaries (sqlite3.exe etc.) kept here for Claude/AI to read the runtime SQLite
+# stores (session.sqlite, sde.sqlite) read-only when troubleshooting live bugs. See
+# tools/README.md.
+tools/

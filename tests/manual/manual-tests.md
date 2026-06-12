@@ -1178,6 +1178,53 @@ default. Stop the session. To fully reset the per-widget hides, delete the
 
 ---
 
+## 17. Sustained-session stability (plan 44 — DB thread-safety + no silent failures)
+
+This is the regression check for BUGS.md Bug 1: a shared SQLite connection used
+concurrently by the live consumer and the UI stat-refresh corrupted the driver,
+threw a non-`DbException`, and silently killed the mining-log insert pipeline —
+the live stats froze (with a ~5-minute auto-pause/resume flap) while the app kept
+running. The fix serialises the connection, makes transactions atomic, and makes
+the consumer un-killable.
+
+### Setup
+
+- A real EVE client (ideally a multi-character fleet — the heavier the write
+  load, the better this exercises the old race), mining live.
+- The dashboard built from this branch. Have `tools/sqlite3.exe` handy.
+
+### Step-by-step actions
+
+1. Start a session with several actively-mining pilots and mine for **30+ minutes**
+   without interruption.
+   - Expected: the live stats (ISK, m3, per-pilot, refined output) advance the
+     **whole time** — no multi-minute freeze, no "stats stuck while the clock
+     ticks", no repeating auto-pause/auto-resume every ~5 minutes while you are
+     actively mining.
+2. Mid-session, confirm capture is keeping pace:
+   `& "tools\sqlite3.exe" "file:$env:APPDATA\EveDashboard\session.sqlite?mode=ro" "SELECT COUNT(*), MAX(eve_timestamp) FROM log WHERE session_id='<id>';"`
+   - Expected: the row count climbs and `MAX(eve_timestamp)` stays within a few
+     seconds of the newest `(mining)` line in the gamelogs.
+3. While the session is still Running, open **Reports** and **Import** a session
+   JSON, then **Delete** a saved session.
+   - Expected: both complete; the live session keeps capturing throughout; the
+     app does not crash.
+4. Open **New Session** a few times and change the pilot **sort** dropdown each time.
+   - Expected: no crash; the chosen sort order is remembered on reopen.
+
+### Expected results
+
+No freeze, no silent stall, no crash. `%APPDATA%\EveDashboard\logs\EveDashboard.log`
+shows continuous activity with no unhandled-exception traces and no repeating
+5-minute idle auto-pause while you are actively mining.
+
+### Cleanup
+
+Stop the session. Delete any test session you imported (Reports -> right-click ->
+Delete). No other cleanup needed.
+
+---
+
 ## Reporting a failure
 
 If any scenario fails, capture:

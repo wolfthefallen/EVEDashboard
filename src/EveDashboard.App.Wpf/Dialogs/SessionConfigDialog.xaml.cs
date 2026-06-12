@@ -62,6 +62,15 @@ public partial class SessionConfigDialog : Window
             _log.LogWarning(ex,
                 "Failed to load the fleet list for the New Session dialog; opening with no fleets (Start disabled).");
         }
+        catch (Exception ex)
+        {
+            // There is no app-wide unhandled-exception handler, so ANY unfiltered
+            // throw on this async void would crash WPF. Surface unexpected errors
+            // at Error and still open the dialog degraded (empty fleet list, Start
+            // stays disabled) rather than taking the process down.
+            _log.LogError(ex,
+                "Unexpected error loading the New Session dialog; opening with no fleets (Start disabled).");
+        }
     }
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)

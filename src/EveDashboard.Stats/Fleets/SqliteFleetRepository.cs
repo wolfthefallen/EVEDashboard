@@ -74,18 +74,18 @@ public sealed class SqliteFleetRepository : IFleetRepository
         var fleetId = FleetId.Compute(trimmed, members.Select(m => (m.PilotId, m.Role)).ToList());
         var createdAt = DateTimeOffset.UtcNow.ToString(IsoUtcFormat, CultureInfo.InvariantCulture);
 
-        await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, ct);
-        try
+        var result = await _db.WithTransactionAsync<FleetCreateResult>(async (tx, _) =>
         {
             // Decision 2.4 = B: reject a duplicate display name. No separate
             // id-existence check (decision 3.1 = A) — an identical id implies an
-            // identical name, already caught here.
-            var dup = await _db.QueryScalarAsync<long>(
+            // identical name, already caught here. On a duplicate the body simply
+            // returns without writing — WithTransactionAsync COMMITs an empty
+            // transaction (no rows changed), equivalent to the old explicit ROLLBACK.
+            var dup = await tx.QueryScalarAsync<long>(
                 "SELECT 1 FROM fleet WHERE name = $n LIMIT 1",
                 new Dictionary<string, object?> { ["$n"] = trimmed }, ct);
             if (dup != 0)
             {
-                await _db.ExecuteNonQueryAsync("ROLLBACK", null, ct);
                 _log.LogInformation("Fleet create rejected: name '{Name}' already in use.", trimmed);
                 return new FleetCreateResult(FleetCreateStatus.DuplicateName, null);
             }
@@ -94,18 +94,18 @@ public sealed class SqliteFleetRepository : IFleetRepository
             // characters at create time, so the name is known).
             foreach (var m in members)
             {
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "INSERT OR IGNORE INTO pilot (pilot_id, name) VALUES ($pid, $name)",
                     new Dictionary<string, object?> { ["$pid"] = m.PilotId, ["$name"] = m.Name }, ct);
             }
 
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "INSERT INTO fleet (fleet_id, name, created_at) VALUES ($id, $n, $ts)",
                 new Dictionary<string, object?> { ["$id"] = fleetId, ["$n"] = trimmed, ["$ts"] = createdAt }, ct);
 
             foreach (var m in members)
             {
-                await _db.ExecuteNonQueryAsync(
+                await tx.ExecuteNonQueryAsync(
                     "INSERT INTO fleet_pilot (fleet_id, pilot_id, role, created_at) VALUES ($id, $pid, $role, $ts)",
                     new Dictionary<string, object?>
                     {
@@ -116,17 +116,16 @@ public sealed class SqliteFleetRepository : IFleetRepository
                     }, ct);
             }
 
-            await _db.ExecuteNonQueryAsync("COMMIT", null, ct);
-        }
-        catch
+            return new FleetCreateResult(FleetCreateStatus.Created, fleetId);
+        }, immediate: false, ct).ConfigureAwait(false);
+
+        if (result.Status == FleetCreateStatus.Created)
         {
-            await TryRollbackAsync(ct);
-            throw;
+            _log.LogInformation(
+                "Created fleet '{Name}' ({FleetId}) with {Count} member(s).", trimmed, fleetId, members.Count);
         }
 
-        _log.LogInformation(
-            "Created fleet '{Name}' ({FleetId}) with {Count} member(s).", trimmed, fleetId, members.Count);
-        return new FleetCreateResult(FleetCreateStatus.Created, fleetId);
+        return result;
     }
 
     /// <inheritdoc />
@@ -134,35 +133,16 @@ public sealed class SqliteFleetRepository : IFleetRepository
     {
         ArgumentNullException.ThrowIfNull(fleetId);
 
-        await _db.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, ct);
-        try
+        await _db.WithTransactionAsync(async (tx, _) =>
         {
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "DELETE FROM fleet_pilot WHERE fleet_id = $id",
                 new Dictionary<string, object?> { ["$id"] = fleetId }, ct);
-            await _db.ExecuteNonQueryAsync(
+            await tx.ExecuteNonQueryAsync(
                 "DELETE FROM fleet WHERE fleet_id = $id",
                 new Dictionary<string, object?> { ["$id"] = fleetId }, ct);
-            await _db.ExecuteNonQueryAsync("COMMIT", null, ct);
-        }
-        catch
-        {
-            await TryRollbackAsync(ct);
-            throw;
-        }
+        }, immediate: false, ct).ConfigureAwait(false);
 
         _log.LogInformation("Deleted fleet {FleetId}.", fleetId);
-    }
-
-    private async Task TryRollbackAsync(CancellationToken ct)
-    {
-        try
-        {
-            await _db.ExecuteNonQueryAsync("ROLLBACK", null, ct);
-        }
-        catch (Exception ex)
-        {
-            _log.LogWarning(ex, "ROLLBACK failed after a fleet transaction error; SQLite may already be back to autocommit.");
-        }
     }
 }

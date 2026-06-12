@@ -263,6 +263,15 @@ public sealed class RealtimeLogWatcher : IAsyncDisposable
         {
             _log.LogWarning(ex, "RealtimeLogWatcher permission denied on '{Path}' for pilot {CharId}.", state.Path, charId);
         }
+        catch (Exception ex)
+        {
+            // Belt-and-suspenders: TailFileAsync is launched fire-and-forget
+            // (Task.Run), so an unexpected exception (parser, UTF-8 decode, stream
+            // math) would fault an unobserved task and silently stop tailing this
+            // pilot. Surface it and preserve the offset so the next Changed/Created
+            // event retries this file.
+            _log.LogWarning(ex, "RealtimeLogWatcher unexpected error reading '{Path}' for pilot {CharId}; offset preserved at {Offset}, will retry on next event.", state.Path, charId, state.Offset);
+        }
         finally
         {
             state.Gate.Release();
