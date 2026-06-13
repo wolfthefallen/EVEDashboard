@@ -4,7 +4,7 @@ The shape of the **market price data** persisted by the app at runtime. Companio
 
 **Source:** the GoonMetrics API at `https://goonmetrics.apps.gnf.lt/api/price_data/?station_id=<id>&type_id=<csv>` (no auth, no documented rate limits per `MEMORY.md → project_pricing_model`).
 
-**Why this shape:** v1 ISK valuation needs prices for the type_materials reachable from each mined ore. Per the user's 2026-05-02 alignment, prices are persisted in the session SQLite database (NOT a transient cache) so v2 reporting can review the prices that applied at any point in the past. v1 has no auto-refresh — prices fetch at session start (and lazily on-demand when a new type_material is mined that wasn't pre-fetched). v2 will add auto-refresh; v3 will add gas pricing.
+**Why this shape:** v1 ISK valuation needs prices for the type_materials reachable from each mined ore. Per the user's 2026-05-02 alignment, prices are persisted in the session SQLite database (NOT a transient cache) so v2 reporting can review the prices that applied at any point in the past. v1 has **no time-based periodic auto-refresh** — prices fetch at session start (and on Resume, and on a mid-session pricing-station change), plus a lazy on-demand fill for a material with no usable price for the active price mode, throttled to at most once per 15 minutes per session. v3 will add gas pricing.
 
 ---
 
@@ -96,8 +96,9 @@ The catalog cross-touches the `setting` table for the `non_sticky_station_defaul
 
 | Trigger | What gets written |
 |---|---|
-| User clicks Start (session begins) | INSERT a row per `(type_id, station_id)` pair for every common ore type_material × every configured station, each stamped with the new session's `session_id`. Plan 38: this start fetch is **unconditional** — the 60s throttle is bypassed so the session owns accurate prices from t0. ~35 type_materials × N stations per start. |
-| Mining event lands and the (live) ISK calculator finds no row for a type_material it needs | INSERT a row per `(type_id, station_id)` for the missing type_material, stamped with the active `session_id`, on-demand. Plan 38: the lazy throttle is session-scoped (`AND session_id = active`) so a back-to-back session is never starved by a previous session's "fresh" rows. |
+| User clicks Start, Resume, or restore-on-launch (session enters Running) | INSERT one row per refined-material `type_id` at the **selected** station (`selected_station_id`), each stamped with the active `session_id`. **Unconditional** — every refined material is (re-)fetched regardless of any already-captured price, so the session owns its prices from t0 and re-prices on Resume. ~35 type_materials per fetch. |
+| User changes the selected pricing station mid-session (while Running) | Full **unconditional** re-fetch of all refined materials at the new station, stamped with the active `session_id` — identical to a session start, and **bypasses the 15-minute rule**. The new rows win the latest-row-per-type read, so the session re-prices to the new hub from that point. |
+| Mining event lands and the (live) ISK calculator finds a material with no usable price for the active price mode | INSERT a row for that material at the selected station, stamped with the active `session_id`, on-demand — but **at most once per 15 minutes per (session, type)**: a still-unpriced material is retried only on that cadence (tracked by an in-memory attempt map, never a DB sentinel row), never every tick. A material that already has a usable price for the mode is never re-fetched. |
 | Reports / any saved (non-live) session | Plan 38: **NO fetch, ever.** The calculator runs with `allowLazyFetch = false`; a missing price contributes 0. This is what keeps a saved session's ISK permanently stable. |
 | GoonMetrics is unreachable | NO row written; ISK calculation gracefully degrades for that item (returns 0, logs Warning). Does NOT crash the app. No retry/backoff. |
 | Session ends / user clicks Stop | NO write. Existing rows persist (now permanently owned by that `session_id`). |
@@ -146,5 +147,5 @@ Because prices are session-bound, "what prices applied during session X" is now 
 - **No UPDATE path.** Every fetch is a new INSERT. Old rows are immutable history.
 - **No automatic eviction / pruning.** Rows accumulate across the app's lifetime. At v1 fetch rates (~35-70 rows per session start, no auto-refresh) this is bounded by user activity. v2 may add a retention policy.
 - **No gas pricing.** Fullerite gases land in v3 (raw market price + user-supplied decompression loss rate).
-- **No periodic auto-refresh** in v1 (per round-7 user direction — sessions last 1-6 hours and the prices stay fresh enough). v2 plan adds the scheduler.
-- **No retry / backoff on GoonMetrics failure.** If the API is unreachable, the affected type_material gets ISK = 0 with a Warning log; the user can manually trigger a refetch in v2 (or re-Start the session in v1). No retry loops, no exponential backoff.
+- **No *time-based periodic* auto-refresh.** Prices are captured at session start / Resume / a user-driven station change; the only automatic re-fetch is the gaps-only 15-minute retry for a material still missing a usable price for the active mode. There is no background scheduler polling every material on a timer. The 15-minute throttle is an in-memory attempt map (no new column, no sentinel row — consistent with the "no NULL-only sentinel rows" choice).
+- **No tight retry / backoff on GoonMetrics failure.** If the API is unreachable, the affected material gets ISK = 0 with a Warning log. A still-unpriced material is retried only on the gaps-only 15-minute cadence (or on the next Start / Resume / station-change full re-fetch) — never in a tight loop and never with exponential backoff.

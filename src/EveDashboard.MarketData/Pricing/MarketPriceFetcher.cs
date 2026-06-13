@@ -11,29 +11,62 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Default <see cref="IMarketPriceFetcher"/>. Subscribes to
-/// <see cref="IActiveSessionContext.ActiveSessionChanged"/> for session-start
-/// prefetch and exposes <see cref="EnsurePricesAsync"/> for synchronous lazy
-/// fetches from inside <see cref="IskCalculator"/>.
+/// <see cref="IActiveSessionContext.ActiveSessionChanged"/> for the session-start
+/// (and resume) prefetch, and to <see cref="ISettingsRepository.SettingChanged"/>
+/// so a mid-session pricing-station change re-prices the running session. Exposes
+/// <see cref="EnsurePricesAsync"/> for the live ISK calculator's lazy, gaps-only
+/// fetches.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 38: every inserted row is stamped with the active session's
-/// <c>session_id</c>. The 60-second throttle is scoped to that session
-/// (<c>... WHERE session_id = $session AND type_id IN (...)</c>) for lazy
-/// fetches, and is BYPASSED entirely for the session-start fetch
-/// (<see cref="FetchForSessionStartAsync"/>) so a new session always captures
-/// its own prices from t0. <c>station_id</c> is used only to tell the API which
-/// hub to query (and is stored on each row as provenance); it is never a query
-/// filter here or in the ISK read.
+/// Every inserted row is stamped with the active session's <c>session_id</c>
+/// (prices are session-bound; the ISK read keys on <c>session_id</c> +
+/// <c>type_id</c> only, station-blind). <c>station_id</c> tells the API which hub
+/// to query and is kept on each row as provenance.
 /// </para>
 /// <para>
-/// Persistence: returned <see cref="MarketPrice"/> rows are INSERTed (no
-/// UPDATE) per <c>docs/market-schema.md</c>. Old rows are immutable history.
+/// Fetch policy:
+/// <list type="bullet">
+///   <item><description>
+///     <b>Session start / resume</b> (<see cref="FetchForSessionStartAsync"/>, via
+///     <see cref="IActiveSessionContext.ActiveSessionChanged"/> into Running):
+///     unconditional full pull of every refined-material type id at the selected
+///     station.
+///   </description></item>
+///   <item><description>
+///     <b>Pricing-station change</b> while Running (the <c>selected_station_id</c>
+///     <see cref="ISettingsRepository.SettingChanged"/>): the same unconditional
+///     full pull at the new hub, so the session re-prices to it. The 15-minute rule
+///     is bypassed (every material is re-fetched and re-stamped).
+///   </description></item>
+///   <item><description>
+///     <b>Live lazy</b> (<see cref="EnsurePricesAsync"/>, from
+///     <see cref="IskCalculator"/>): fetches ONLY materials with no usable price
+///     for the active <see cref="PriceMode"/> ("gaps"), and only when no fetch was
+///     attempted for that (session, type) within the last 15 minutes. A
+///     fully-priced session makes zero live fetches.
+///   </description></item>
+/// </list>
+/// </para>
+/// <para>
+/// The 15-minute throttle is tracked in an in-memory attempt map (no sentinel rows
+/// are ever written to <c>market_data</c>); it is stamped on every fetch attempt,
+/// including ones the API returns nothing for, so a genuinely-priceless material is
+/// retried at most once per 15 minutes rather than every tick.
+/// </para>
+/// <para>
+/// Persistence: returned <see cref="MarketPrice"/> rows are INSERTed (no UPDATE);
+/// old rows are immutable history (see <c>docs/market-schema.md</c>).
 /// </para>
 /// </remarks>
 public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
 {
-    private const int ThrottleSeconds = 60;
+    /// <summary>
+    /// An uncovered (no usable price for the active mode) material is re-fetched at
+    /// most once per this window per (session, type id) -- decision 1.1 = D. A
+    /// material that already has a usable price is never re-fetched by the live path.
+    /// </summary>
+    private static readonly TimeSpan RetryWindow = TimeSpan.FromMinutes(15);
 
     private readonly IMarketPriceClient    _client;
     private readonly ISqliteDatabase       _sessionDb;
@@ -43,12 +76,22 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
     private readonly ILogger<MarketPriceFetcher> _log;
     private bool _disposed;
 
+    private readonly object _attemptLock = new();
+
+    // (sessionId, typeId) -> last fetch ATTEMPT time (UTC). Stamped on every
+    // attempt, even when the API returned no data, so a genuinely-priceless
+    // material is retried at most once per RetryWindow instead of every tick
+    // (decision 1.1 = D). In-memory only: a restart re-runs the unconditional start
+    // prefetch (decision 1.3 = B), re-stamping everything. No sentinel row is ever
+    // written to market_data (user-confirmed: no null-holder rows in the DB).
+    private readonly Dictionary<(string SessionId, long TypeId), DateTimeOffset> _lastAttempt = new();
+
     /// <summary>Construct the fetcher.</summary>
     /// <param name="client">Underlying HTTP price client.</param>
     /// <param name="sessionDb">Session SQLite wrapper (NOT the SDE DB) — owns <c>market_data</c>.</param>
     /// <param name="sdeLookup">SDE lookup, used to derive the prefetch type-id list.</param>
-    /// <param name="settings">Settings repository, used to read <c>selected_station_id</c>.</param>
-    /// <param name="activeSession">Active-session context. Subscribed in the ctor; unsubscribed in <see cref="Dispose"/>.</param>
+    /// <param name="settings">Settings repository: read for <c>selected_station_id</c>, and subscribed via <see cref="ISettingsRepository.SettingChanged"/> so a mid-session station change re-fetches at the new hub.</param>
+    /// <param name="activeSession">Active-session context. Subscribed in the ctor for the session-start/resume prefetch; unsubscribed in <see cref="Dispose"/>.</param>
     /// <param name="log">Logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public MarketPriceFetcher(
@@ -73,6 +116,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         _log = log;
 
         _activeSession.ActiveSessionChanged += OnActiveSessionChanged;
+        _settings.SettingChanged += OnSettingChanged;
     }
 
     /// <inheritdoc />
@@ -89,22 +133,40 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
             return;
         }
 
+        // Memory tidiness: only one session is active at a time, so drop attempt
+        // entries for any other session. On Resume / station-change sessionId ==
+        // current, so nothing is pruned. Not load-bearing for correctness.
+        lock (_attemptLock)
+        {
+            var stale = _lastAttempt.Keys.Where(k => k.SessionId != sessionId).ToList();
+            foreach (var key in stale)
+            {
+                _lastAttempt.Remove(key);
+            }
+        }
+
         _log.LogInformation(
             "Prefetching prices: stationId={StationId} typeIdCount={Count} sessionId={SessionId}",
             stationId, typeIds.Count, sessionId);
 
-        // Plan 38: the session-start fetch is unconditional (bypassThrottle:
-        // true) so the new session owns accurate prices from t0, and every row
-        // is stamped with this session's id.
-        var (inserted, throttled) = await FetchAndInsertAsync(typeIds, stationId, sessionId, bypassThrottle: true, ct).ConfigureAwait(false);
+        // The session-start / resume / station-change fetch is unconditional: fetch
+        // every refined-material id (decisions 1.3 = B and 1.4) and stamp the attempt
+        // map so the live lazy path is throttled for the whole material set.
+        var inserted = await FetchInsertAndStampAsync(
+            typeIds, stationId, sessionId, DateTimeOffset.UtcNow, ct).ConfigureAwait(false);
 
         _log.LogInformation(
-            "Prefetch complete: inserted {Inserted} rows, skipped {Throttled} throttled.",
-            inserted, throttled);
+            "Prefetch complete: inserted {Inserted} of {Requested} requested rows.",
+            inserted, typeIds.Count);
     }
 
     /// <inheritdoc />
-    public async Task EnsurePricesAsync(IReadOnlyList<long> typeIds, long stationId, string sessionId, CancellationToken ct = default)
+    public async Task EnsurePricesAsync(
+        IReadOnlyList<long> typeIds,
+        long                stationId,
+        string              sessionId,
+        PriceMode           priceMode,
+        CancellationToken   ct = default)
     {
         ArgumentNullException.ThrowIfNull(typeIds);
         ArgumentNullException.ThrowIfNull(sessionId);
@@ -112,41 +174,149 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         {
             return;
         }
-        await FetchAndInsertAsync(typeIds, stationId, sessionId, bypassThrottle: false, ct).ConfigureAwait(false);
-    }
 
-    private async Task<(int Inserted, int Throttled)> FetchAndInsertAsync(
-        IReadOnlyList<long> typeIds,
-        long                stationId,
-        string              sessionId,
-        bool                bypassThrottle,
-        CancellationToken   ct)
-    {
         var distinct = new HashSet<long>(typeIds).ToList();
-        List<long> toFetch;
-        if (bypassThrottle)
+        var latest = await GetLatestPricesAsync(distinct, sessionId, ct).ConfigureAwait(false);
+        var now = DateTimeOffset.UtcNow;
+
+        // Two independent gates per requested id (decisions 1.1 = D, 1.2 = B):
+        //  1. Coverage: if the latest captured price is usable for the active mode,
+        //     never re-fetch.
+        //  2. Attempt throttle: an uncovered id is fetched only if no attempt was
+        //     made for (session, type) within RetryWindow.
+        var toFetch = new List<long>();
+        lock (_attemptLock)
         {
-            // Plan 38: session-start fetch — fetch every requested type id
-            // regardless of how recently another session fetched it.
-            toFetch = distinct;
+            foreach (var id in distinct)
+            {
+                if (latest.TryGetValue(id, out var price) && IsCovered(price.Buy, price.Sell, priceMode))
+                {
+                    continue;
+                }
+                if (_lastAttempt.TryGetValue((sessionId, id), out var attemptedAt)
+                    && (now - attemptedAt) < RetryWindow)
+                {
+                    continue;
+                }
+                toFetch.Add(id);
+            }
         }
-        else
-        {
-            var fresh = await GetFreshTypeIdsAsync(distinct, sessionId, ct).ConfigureAwait(false);
-            toFetch = distinct.Where(id => !fresh.Contains(id)).ToList();
-        }
+
         if (toFetch.Count == 0)
         {
             _log.LogDebug(
-                "Throttled — every requested type id has a market_data row younger than {Seconds} s; skipping HTTP. stationId={StationId}",
-                ThrottleSeconds, stationId);
-            return (0, distinct.Count);
+                "EnsurePrices: every requested type id is covered or within the {Window} retry window; skipping HTTP. stationId={StationId}",
+                RetryWindow, stationId);
+            return;
         }
 
-        var rows = await _client.FetchPricesAsync(stationId, toFetch, ct).ConfigureAwait(false);
+        await FetchInsertAndStampAsync(toFetch, stationId, sessionId, now, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// True when the latest captured (buy, sell) pair is a usable price for
+    /// <paramref name="mode"/> -- i.e. the material is NOT a gap (decision 1.2 = B).
+    /// A price is "usable" only when it is non-null and strictly positive; null or
+    /// &lt;= 0 is treated as no price. For Split, the pair is covered if EITHER side
+    /// is usable, so a Split gap requires BOTH sides to be 0/null.
+    /// </summary>
+    private static bool IsCovered(double? buy, double? sell, PriceMode mode)
+    {
+        static bool Usable(double? v) => v is > 0;
+        return mode switch
+        {
+            PriceMode.Sell  => Usable(sell),
+            PriceMode.Split => Usable(buy) || Usable(sell),
+            _               => Usable(buy),   // Buy (default)
+        };
+    }
+
+    /// <summary>
+    /// Read the latest captured <c>(isk_buy, isk_sell)</c> per requested type id for
+    /// the session (station-blind, mirroring the ISK read). Type ids with no row are
+    /// absent from the result.
+    /// </summary>
+    private async Task<Dictionary<long, (double? Buy, double? Sell)>> GetLatestPricesAsync(
+        IReadOnlyList<long> typeIds,
+        string              sessionId,
+        CancellationToken   ct)
+    {
+        var result = new Dictionary<long, (double? Buy, double? Sell)>();
+        if (typeIds.Count == 0)
+        {
+            return result;
+        }
+
+        // Build "$tid0, $tid1, ..." placeholders so the IN-clause is parameterised.
+        // Latest row per type within the session; station is NOT a filter (a
+        // session's prices are station-blind on read).
+        var sb = new StringBuilder();
+        sb.Append(
+            "SELECT md.type_id, md.isk_buy, md.isk_sell FROM market_data md " +
+            "JOIN (SELECT type_id, MAX(fetched_at) AS latest FROM market_data " +
+            "WHERE session_id = $session AND type_id IN (");
+        var parameters = new Dictionary<string, object?> { ["$session"] = sessionId };
+        for (int i = 0; i < typeIds.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            var name = "$tid" + i.ToString(CultureInfo.InvariantCulture);
+            sb.Append(name);
+            parameters[name] = typeIds[i];
+        }
+        sb.Append(") GROUP BY type_id) lat ON md.type_id = lat.type_id AND md.fetched_at = lat.latest ");
+        sb.Append("WHERE md.session_id = $session");
+
+        var rows = await _sessionDb.QueryAsync(
+            sb.ToString(),
+            static r => (
+                TypeId: r.GetInt64(0),
+                Buy:  r.IsDBNull(1) ? (double?)null : r.GetDouble(1),
+                Sell: r.IsDBNull(2) ? (double?)null : r.GetDouble(2)),
+            parameters,
+            ct).ConfigureAwait(false);
+
+        foreach (var row in rows)
+        {
+            // Dict assignment collapses any rare fetched_at tie to last-write-wins;
+            // both tied rows are equally "latest", so coverage is unaffected.
+            result[row.TypeId] = (row.Buy, row.Sell);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Fetch the given type ids at the station and INSERT returned rows, stamping
+    /// the attempt map for EVERY requested id (including ones the API omits) so the
+    /// 15-minute throttle has a timestamp even when no row is written.
+    /// </summary>
+    /// <returns>The number of rows inserted (i.e. ids the API returned data for).</returns>
+    private async Task<int> FetchInsertAndStampAsync(
+        IReadOnlyList<long> typeIds,
+        long                stationId,
+        string              sessionId,
+        DateTimeOffset      attemptTime,
+        CancellationToken   ct)
+    {
+        var distinct = new HashSet<long>(typeIds).ToList();
+        if (distinct.Count == 0)
+        {
+            return 0;
+        }
+
+        // Stamp the attempt up front for every requested id so a still-unpriced
+        // material is throttled to one attempt per RetryWindow (decision 1.1 = D).
+        lock (_attemptLock)
+        {
+            foreach (var id in distinct)
+            {
+                _lastAttempt[(sessionId, id)] = attemptTime;
+            }
+        }
+
+        var rows = await _client.FetchPricesAsync(stationId, distinct, ct).ConfigureAwait(false);
         if (rows.Count == 0)
         {
-            return (0, distinct.Count - toFetch.Count);
+            return 0;
         }
 
         foreach (var row in rows)
@@ -167,57 +337,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
                 },
                 ct).ConfigureAwait(false);
         }
-        return (rows.Count, distinct.Count - toFetch.Count);
-    }
-
-    private async Task<HashSet<long>> GetFreshTypeIdsAsync(
-        IReadOnlyList<long> typeIds,
-        string              sessionId,
-        CancellationToken   ct)
-    {
-        var fresh = new HashSet<long>();
-        if (typeIds.Count == 0)
-        {
-            return fresh;
-        }
-
-        // Build "$tid0, $tid1, ..." parameter placeholders so the IN-clause is
-        // safely parameterised (no string interpolation of user input).
-        // Plan 38: scope the freshness check to THIS session so a back-to-back
-        // session is never starved by a previous session's "fresh" rows.
-        // Station is NOT a filter (plan 38 amendment): a session's prices are
-        // station-blind on read, so freshness is per (session, type) only.
-        var sb = new StringBuilder();
-        sb.Append(
-            "SELECT type_id, MAX(fetched_at) AS latest FROM market_data " +
-            "WHERE session_id = $session AND type_id IN (");
-        var parameters = new Dictionary<string, object?> { ["$session"] = sessionId };
-        for (int i = 0; i < typeIds.Count; i++)
-        {
-            if (i > 0) sb.Append(", ");
-            var name = "$tid" + i.ToString(CultureInfo.InvariantCulture);
-            sb.Append(name);
-            parameters[name] = typeIds[i];
-        }
-        sb.Append(") GROUP BY type_id");
-
-        var rows = await _sessionDb.QueryAsync(
-            sb.ToString(),
-            static r => (TypeId: r.GetInt64(0), Latest: r.GetString(1)),
-            parameters,
-            ct).ConfigureAwait(false);
-
-        var threshold = DateTimeOffset.UtcNow
-            .AddSeconds(-ThrottleSeconds)
-            .ToString("O", CultureInfo.InvariantCulture);
-        foreach (var row in rows)
-        {
-            if (string.Compare(row.Latest, threshold, StringComparison.Ordinal) >= 0)
-            {
-                fresh.Add(row.TypeId);
-            }
-        }
-        return fresh;
+        return rows.Count;
     }
 
     private async void OnActiveSessionChanged(object? sender, EventArgs e)
@@ -249,12 +369,52 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         }
     }
 
-    /// <summary>Unsubscribe from <see cref="IActiveSessionContext.ActiveSessionChanged"/>. Idempotent.</summary>
+    private async void OnSettingChanged(object? sender, SettingChangedEventArgs e)
+    {
+        try
+        {
+            // Decision 1.4: a mid-session pricing-station change re-fetches all
+            // materials at the new hub (only while Running; a change while Paused is
+            // picked up by the unconditional refetch on the next Resume).
+            if (e.Key != "selected_station_id")
+            {
+                return;
+            }
+            var sid = _activeSession.ActiveSessionId;
+            if (sid is null || _activeSession.State != SessionRunState.Running)
+            {
+                return;
+            }
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    await FetchForSessionStartAsync(sid).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Station-change refetch failed for sessionId={SessionId}; continuing.", sid);
+                }
+            }).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Defensive — the handler must not throw back into the event source.
+            _log.LogWarning(ex, "MarketPriceFetcher.OnSettingChanged threw; suppressed.");
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe from <see cref="IActiveSessionContext.ActiveSessionChanged"/> and
+    /// <see cref="ISettingsRepository.SettingChanged"/>. Idempotent.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
         try { _activeSession.ActiveSessionChanged -= OnActiveSessionChanged; }
+        catch { /* defensive */ }
+        try { _settings.SettingChanged -= OnSettingChanged; }
         catch { /* defensive */ }
     }
 }

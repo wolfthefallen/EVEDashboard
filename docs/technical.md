@@ -343,13 +343,15 @@ IIskCalculator.ComputeAsync(typeIdToUnits, critTypeIdToUnits,
         |  Step 2 - Apply user's refining yield (50.0 .. 90.6 %)
         |     adjustedQty = floor(rawQty * yieldPct/100)
         |
-        |  Step 3 - Lazy fetch missing prices in ONE round-trip
-        |     IMarketPriceFetcher.EnsurePricesAsync(materialTypeIds, stationId)
+        |  Step 3 - Lazy fetch GAPS only in ONE round-trip
+        |     IMarketPriceFetcher.EnsurePricesAsync(materialTypeIds, stationId, priceMode)
         |       |
         |       v
         |     MarketPriceFetcher
-        |       - 60-second SQL throttle per (type_id, station_id)
-        |       - On cache miss: GoonMetricsPriceClient HTTP GET
+        |       - Skip any material already priced for the active mode
+        |       - Fetch a gap (no usable price for the mode) at most once per
+        |         15 min per (session, type) via an in-memory attempt map
+        |       - On a gap: GoonMetricsPriceClient HTTP GET
         |       - INSERT-only into `market_data`
         |       - On transport/parse failure: log Warning, return what we have
         |

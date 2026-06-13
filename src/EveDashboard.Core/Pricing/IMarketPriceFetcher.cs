@@ -1,5 +1,7 @@
 namespace EveDashboard.Core.Pricing;
 
+using EveDashboard.Core.Settings;
+
 /// <summary>
 /// Orchestrates GoonMetrics fetches and writes returned rows to the
 /// <c>market_data</c> table. Implementations subscribe to
@@ -21,28 +23,33 @@ public interface IMarketPriceFetcher
     /// <param name="ct">Cancellation token.</param>
     /// <remarks>
     /// Called via <see cref="EveDashboard.Core.Sessions.IActiveSessionContext.ActiveSessionChanged"/>
-    /// when the active session transitions to <see cref="EveDashboard.Core.Sessions.SessionRunState.Running"/>.
-    /// Plan 38: this start fetch is UNCONDITIONAL — the 60-second throttle is
-    /// bypassed so the new session captures its own accurate prices from t0,
-    /// even if another session fetched the same type ids seconds earlier.
+    /// when the active session transitions to <see cref="EveDashboard.Core.Sessions.SessionRunState.Running"/>
+    /// (a fresh Start, a Resume, or restore-on-launch), and on a mid-session
+    /// pricing-station change. This fetch is UNCONDITIONAL — it re-pulls every
+    /// refined-material type id regardless of any already-captured price, so the
+    /// session captures its own prices from t0 and re-prices to a newly-selected
+    /// hub. It also re-stamps the live path's attempt throttle for the whole set.
     /// </remarks>
     Task FetchForSessionStartAsync(string sessionId, CancellationToken ct = default);
 
     /// <summary>
-    /// Ensure this session's <c>market_data</c> contains a non-throttled row for
-    /// each requested type id at the given station; fetch the missing ones
-    /// synchronously and stamp them with <paramref name="sessionId"/>.
+    /// Live-session gaps-only fetch: for each requested type id, fetch + INSERT a
+    /// price ONLY when this session has no usable price for it under
+    /// <paramref name="priceMode"/>, and only when no fetch was attempted for that
+    /// (session, type id) within the last 15 minutes.
     /// </summary>
     /// <param name="typeIds">Type ids the caller needs prices for.</param>
-    /// <param name="stationId">Station to price against.</param>
-    /// <param name="sessionId">Plan 38: the active session's sha256 id; inserted rows are stamped with it and the throttle is scoped to it.</param>
+    /// <param name="stationId">Station to price against (which hub to query; not a read filter).</param>
+    /// <param name="sessionId">The active session's sha256 id; inserted rows are stamped with it and the per-(session, type) attempt throttle is scoped to it.</param>
+    /// <param name="priceMode">Active price mode. Coverage is mode-aware: Buy needs a usable buy price, Sell a usable sell price, Split needs either (a Split gap requires both sides 0/null).</param>
     /// <param name="ct">Cancellation token.</param>
     /// <remarks>
-    /// Called from <see cref="IIskCalculator"/> (LIVE sessions only) when an ISK
-    /// calc finds a missing price. After this returns, the caller re-reads
-    /// <c>market_data</c>. The 60-second throttle still applies, scoped to
-    /// <paramref name="sessionId"/> — repeated missed lookups for an unstocked
-    /// type id will not spam HTTP.
+    /// Called from <see cref="IIskCalculator"/> (LIVE sessions only). After this
+    /// returns, the caller re-reads <c>market_data</c>. A material that already has a
+    /// usable price for the mode is never re-fetched; an uncovered material (no
+    /// price, or 0/null for the mode) is fetched at most once per 15 minutes per
+    /// session, tracked by an in-memory attempt map (no sentinel rows are written),
+    /// so a genuinely-priceless type id never spams HTTP.
     /// </remarks>
-    Task EnsurePricesAsync(IReadOnlyList<long> typeIds, long stationId, string sessionId, CancellationToken ct = default);
+    Task EnsurePricesAsync(IReadOnlyList<long> typeIds, long stationId, string sessionId, PriceMode priceMode, CancellationToken ct = default);
 }

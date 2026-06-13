@@ -400,7 +400,7 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
    SELECT COUNT(*) FROM market_data WHERE station_id = 60003760;
    ```
    Expect ~36 rows with `fetched_at` near current UTC. Log line:
-   `Prefetch complete: inserted 36 rows, skipped 0 throttled.`
+   `Prefetch complete: inserted 36 of 36 requested rows.`
 2. **Live ISK numbers.** Mine briefly in EVE. Per-pilot `Total ISK`
    and `ISK/h` go from 0 to real values within one tick (~1s).
 3. **Aggregate matches.** Session-level `Total ISK` equals the sum
@@ -460,11 +460,34 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
       theme's brushes (slight color shift -- e.g. Light's
       `#3ECF9E` vs Dark's `#5FE0B8`). No border goes black or
       blank.
+14. **No periodic re-fetch (gaps-only).** With the session Running
+    and prices captured at Start, mine for several minutes. Replacing
+    `<sid>` with the active session id, periodically run:
+    ```sql
+    SELECT type_id, COUNT(*) FROM market_data WHERE session_id = '<sid>' GROUP BY type_id;
+    ```
+    - Expected: a fully-priced material's row count does NOT grow
+      over time -- the live path never re-fetches a material it
+      already has a usable price for (the old ~per-minute refetch is
+      gone). Only a material that returned no price at Start may gain
+      at most ONE extra row per 15 minutes.
+15. **Station change re-prices mid-session (decision 1.4).** With the
+    session still Running, open Settings, change Selected station from
+    Jita to C-J6MT (`1049588174021`), Apply.
+    - Expected: a fresh `Prefetch complete: inserted N of N requested
+      rows.` log line appears;
+      `SELECT station_id, COUNT(*) FROM market_data WHERE session_id = '<sid>' GROUP BY station_id;`
+      now shows rows at the C-J6MT station id; per-pilot / session
+      `Total ISK` shifts to the new hub's valuation within a tick.
+    - Negative check: while **Paused**, changing the station does NOT
+      emit a new prefetch log line (it re-fetches on the next Resume
+      instead).
 
 ### Cleanup
 
-Restore default Settings values you changed. Stop the session.
-Optional: `DELETE FROM market_data;` for a clean slate next round.
+Restore default Settings values you changed (incl. Selected station =
+Jita). Stop the session. Optional: `DELETE FROM market_data;` for a
+clean slate next round.
 
 ---
 

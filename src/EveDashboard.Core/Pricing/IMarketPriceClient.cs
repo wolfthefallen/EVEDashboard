@@ -5,9 +5,10 @@ namespace EveDashboard.Core.Pricing;
 /// to SQLite. Implementations live in <c>EveDashboard.MarketData</c>.
 /// </summary>
 /// <remarks>
-/// Caller is responsible for de-duplication and the 60-second per-<c>(type_id,
-/// station_id)</c> throttle (per <c>docs/market-schema.md</c>); the client just
-/// issues the HTTP request and parses the response.
+/// Caller is responsible for de-duplication and the gaps-only fetch policy (fetch
+/// only a type id with no usable price for the active mode, at most once per 15
+/// minutes per session — see <c>docs/market-schema.md</c>); the client just issues
+/// the HTTP request and parses the response.
 /// </remarks>
 public interface IMarketPriceClient
 {

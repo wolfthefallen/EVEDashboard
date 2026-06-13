@@ -67,7 +67,7 @@ public class IskCalculatorTests
 
     private sealed class RecordingFetcher : IMarketPriceFetcher
     {
-        public List<(IReadOnlyList<long> TypeIds, long StationId)> EnsureCalls { get; } = new();
+        public List<(IReadOnlyList<long> TypeIds, long StationId, PriceMode PriceMode)> EnsureCalls { get; } = new();
         public List<string> SessionStarts { get; } = new();
         public Func<IReadOnlyList<long>, long, Task>? OnEnsure { get; set; }
 
@@ -77,9 +77,9 @@ public class IskCalculatorTests
             return Task.CompletedTask;
         }
 
-        public async Task EnsurePricesAsync(IReadOnlyList<long> typeIds, long stationId, string sessionId, CancellationToken ct = default)
+        public async Task EnsurePricesAsync(IReadOnlyList<long> typeIds, long stationId, string sessionId, PriceMode priceMode, CancellationToken ct = default)
         {
-            EnsureCalls.Add((typeIds.ToArray(), stationId));
+            EnsureCalls.Add((typeIds.ToArray(), stationId, priceMode));
             if (OnEnsure is not null) await OnEnsure(typeIds, stationId).ConfigureAwait(false);
         }
     }
@@ -213,6 +213,7 @@ public class IskCalculatorTests
         fetcher.EnsureCalls.Should().HaveCount(1);
         fetcher.EnsureCalls[0].TypeIds.Should().Contain(TritaniumTypeId);
         fetcher.EnsureCalls[0].StationId.Should().Be(JitaStationId);
+        fetcher.EnsureCalls[0].PriceMode.Should().Be(PriceMode.Buy);
     }
 
     [Fact]

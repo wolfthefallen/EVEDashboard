@@ -28,11 +28,14 @@ using Microsoft.Extensions.Logging;
 /// provenance kept on the row; it is NEVER a read filter.
 /// The synchronous lazy fetch runs ONLY when the caller passes
 /// <c>allowLazyFetch == true</c> (a LIVE session): the union of needed type ids
-/// is passed to <see cref="IMarketPriceFetcher.EnsurePricesAsync"/> (which
-/// stamps the new rows with this session's id) in a single round-trip before
-/// any prices are read. Reports / saved sessions pass <c>false</c> and never
-/// fetch. Any still-missing price contributes 0 ISK with a Warning log per the
-/// <c>docs/market-schema.md</c> "ISK gracefully degrades to 0" contract.
+/// plus the active <c>priceMode</c> is passed to
+/// <see cref="IMarketPriceFetcher.EnsurePricesAsync"/> in a single round-trip
+/// before any prices are read. The fetcher fills only mode-aware gaps (a type id
+/// with no usable price for the mode), throttled to one attempt per 15 minutes
+/// per session, so an already-priced material is never re-fetched. Reports /
+/// saved sessions pass <c>false</c> and never fetch. Any still-missing price
+/// contributes 0 ISK with a Warning log per the <c>docs/market-schema.md</c>
+/// "ISK gracefully degrades to 0" contract.
 /// </para>
 /// <para>
 /// Plan 25 algorithm refactor: the recursive breakdown runs INDEPENDENTLY per
@@ -175,7 +178,7 @@ public sealed class IskCalculator : IIskCalculator
         // session already captured; a missing row contributes 0 (below).
         if (allowLazyFetch)
         {
-            await _fetcher.EnsurePricesAsync(allMaterials.ToList(), stationId, sessionId, ct).ConfigureAwait(false);
+            await _fetcher.EnsurePricesAsync(allMaterials.ToList(), stationId, sessionId, priceMode, ct).ConfigureAwait(false);
         }
 
         // Cache prices per material so we don't re-query the same row N times

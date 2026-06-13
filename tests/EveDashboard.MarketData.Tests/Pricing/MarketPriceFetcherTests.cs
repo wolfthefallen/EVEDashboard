@@ -100,7 +100,14 @@ public class MarketPriceFetcherTests
         public Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default) => Task.FromResult(RefiningYieldPercent);
         public Task SetRefiningYieldPercentAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<long> GetSelectedStationIdAsync(CancellationToken ct = default) => Task.FromResult(SelectedStationId);
-        public Task SetSelectedStationIdAsync(long stationId, CancellationToken ct = default) { SelectedStationId = stationId; return Task.CompletedTask; }
+        public Task SetSelectedStationIdAsync(long stationId, CancellationToken ct = default)
+        {
+            // Mirror the real SqliteSettingsRepository: persist AND raise SettingChanged
+            // so the fetcher's station-change re-fetch (decision 1.4) is exercised.
+            SelectedStationId = stationId;
+            SettingChanged?.Invoke(this, new SettingChangedEventArgs("selected_station_id"));
+            return Task.CompletedTask;
+        }
         public Task<WindowGeometry?> GetWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
         public Task SetWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<WidgetLayout?> GetWidgetLayoutAsync(CancellationToken ct = default) => Task.FromResult<WidgetLayout?>(null);
@@ -131,7 +138,6 @@ public class MarketPriceFetcherTests
         public Task SetAutoPauseSoundEnabledAsync(bool enabled, CancellationToken ct = default) => Task.CompletedTask;
         public Task EnsureSeedDefaultsAsync(CancellationToken ct = default) => Task.CompletedTask;
         public event EventHandler<SettingChangedEventArgs>? SettingChanged;
-        private void _suppress() => SettingChanged?.Invoke(this, new SettingChangedEventArgs(""));
     }
 
     private static MarketPriceFetcher NewFetcher(
@@ -159,12 +165,11 @@ public class MarketPriceFetcherTests
     }
 
     [Fact]
-    public async Task FetchForSessionStartAsync_bypasses_throttle_even_when_every_id_has_recent_row()
+    public async Task FetchForSessionStartAsync_is_unconditional_even_when_ids_have_recent_rows()
     {
-        // Plan 38: the session-start fetch is UNCONDITIONAL. Even though both ids
-        // already have a market_data row younger than 60 s (stamped to ANOTHER
-        // session here), the new session must still request both so it captures
-        // its OWN prices from t0.
+        // The session-start fetch is UNCONDITIONAL. Even though both ids already
+        // have a recent market_data row (stamped to ANOTHER session here), the new
+        // session must still request both so it captures its OWN prices from t0.
         await using var db = await SeededDbAsync();
         var now = DateTimeOffset.UtcNow;
         await SeedMarketDataAsync(db, 34, JitaStationId, now, sessionId: "sess-other");
@@ -181,15 +186,15 @@ public class MarketPriceFetcherTests
 
         await fetcher.FetchForSessionStartAsync(SessionId);
 
-        client.Calls.Should().HaveCount(1, "the start fetch is unconditional (throttle bypassed)");
+        client.Calls.Should().HaveCount(1, "the start fetch is unconditional");
         client.Calls[0].TypeIds.Should().BeEquivalentTo(new long[] { 34, 35 });
     }
 
     [Fact]
-    public async Task FetchForSessionStartAsync_requests_all_ids_ignoring_throttle_state()
+    public async Task FetchForSessionStartAsync_requests_all_ids_regardless_of_existing_rows()
     {
-        // Plan 38: even a mix of fresh and stale rows (for another session) does
-        // not narrow the start request — every refined-material id is fetched.
+        // Even a mix of recent and older rows (for another session) does not narrow
+        // the start request — every refined-material id is fetched.
         await using var db = await SeededDbAsync();
         var now = DateTimeOffset.UtcNow;
         await SeedMarketDataAsync(db, 34, JitaStationId, now, sessionId: "sess-other");
@@ -207,7 +212,7 @@ public class MarketPriceFetcherTests
         await fetcher.FetchForSessionStartAsync(SessionId);
 
         client.Calls.Should().HaveCount(1);
-        client.Calls[0].TypeIds.Should().BeEquivalentTo(new long[] { 34, 35 }, "the start fetch ignores throttle state");
+        client.Calls[0].TypeIds.Should().BeEquivalentTo(new long[] { 34, 35 }, "the start fetch is unconditional");
     }
 
     [Fact]
@@ -279,22 +284,97 @@ public class MarketPriceFetcherTests
         };
         var fetcher = NewFetcher(db, client, sde, new StubSettingsRepository(), new ActiveSessionContext());
 
-        await fetcher.EnsurePricesAsync(new long[] { 100, 101 }, JitaStationId, SessionId);
+        await fetcher.EnsurePricesAsync(new long[] { 100, 101 }, JitaStationId, SessionId, PriceMode.Buy);
 
         (await RowCountAsync(db)).Should().Be(2);
     }
 
     [Fact]
-    public async Task EnsurePricesAsync_throttles_per_60s_floor()
+    public async Task EnsurePricesAsync_skips_fetch_when_material_already_priced_for_mode()
     {
+        // Covered: a usable buy price exists for this (session, type) -> never fetch.
+        // A covered material is never re-fetched, with no time-based throttle.
         await using var db = await SeededDbAsync();
-        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow);
+        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow, iskBuy: 5.0, iskSell: 6.0);
         var client = new StubPriceClient();
         var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
 
-        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId);
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Buy);
 
         client.Calls.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task EnsurePricesAsync_fetches_when_price_is_zero_for_mode()
+    {
+        // Gap: buy price is 0 for this (session, type) -> fetch (no prior attempt).
+        await using var db = await SeededDbAsync();
+        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow, iskBuy: 0.0, iskSell: 0.0);
+        var client = new StubPriceClient();
+        var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
+
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Buy);
+
+        client.Calls.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task EnsurePricesAsync_split_covered_when_only_one_side_present()
+    {
+        // Split is covered when EITHER side is usable: buy=5, sell=null -> no fetch.
+        await using var db = await SeededDbAsync();
+        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow, iskBuy: 5.0, iskSell: null);
+        var client = new StubPriceClient();
+        var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
+
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Split);
+
+        client.Calls.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task EnsurePricesAsync_split_gap_when_both_zero()
+    {
+        // Split gap requires BOTH sides 0/null: buy=0, sell=null -> fetch.
+        await using var db = await SeededDbAsync();
+        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow, iskBuy: 0.0, iskSell: null);
+        var client = new StubPriceClient();
+        var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
+
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Split);
+
+        client.Calls.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task EnsurePricesAsync_sell_gap_when_only_buy_present()
+    {
+        // Sell mode needs a usable sell price: buy=5, sell=null -> gap -> fetch.
+        await using var db = await SeededDbAsync();
+        await SeedMarketDataAsync(db, 100, JitaStationId, DateTimeOffset.UtcNow, iskBuy: 5.0, iskSell: null);
+        var client = new StubPriceClient();
+        var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
+
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Sell);
+
+        client.Calls.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task EnsurePricesAsync_throttles_repeat_gap_within_15min()
+    {
+        // The client returns nothing, so id 100 stays an (un-rowed) gap. The second
+        // call within the 15-minute window must be suppressed by the in-memory
+        // attempt throttle -> exactly one HTTP attempt. This proves the
+        // perpetual-zero loop is closed without a wall-clock wait.
+        await using var db = await SeededDbAsync();
+        var client = new StubPriceClient { Respond = (_, _) => Array.Empty<MarketPrice>() };
+        var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
+
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Buy);
+        await fetcher.EnsurePricesAsync(new long[] { 100 }, JitaStationId, SessionId, PriceMode.Buy);
+
+        client.Calls.Should().HaveCount(1);
     }
 
     [Fact]
@@ -304,7 +384,7 @@ public class MarketPriceFetcherTests
         var client = new StubPriceClient();
         var fetcher = NewFetcher(db, client, new StubSdeLookup(), new StubSettingsRepository(), new ActiveSessionContext());
 
-        await fetcher.EnsurePricesAsync(Array.Empty<long>(), JitaStationId, SessionId);
+        await fetcher.EnsurePricesAsync(Array.Empty<long>(), JitaStationId, SessionId, PriceMode.Buy);
 
         client.Calls.Should().BeEmpty();
     }
@@ -369,5 +449,96 @@ public class MarketPriceFetcherTests
             await Task.Delay(20);
         }
         log.Entries.Should().Contain(e => e.Level == LogLevel.Warning);
+    }
+
+    [Fact]
+    public async Task StationChange_during_running_session_refetches_all_at_new_station()
+    {
+        // Decision 1.4: changing selected_station_id while Running triggers a full
+        // unconditional re-fetch of all refined materials at the new station.
+        await using var db = await SeededDbAsync();
+        const long OtherStation = 99999999L;
+        await db.ExecuteNonQueryAsync(
+            "INSERT INTO market_stations (station_id, system_name, station_name) VALUES ($s, 'Other', 'Other Station')",
+            new Dictionary<string, object?> { ["$s"] = OtherStation });
+        var sde = new StubSdeLookup { RefinedTypeIds = new long[] { 34, 35 } };
+        var client = new StubPriceClient
+        {
+            Respond = (sid, ids) => ids
+                .Select(id => new MarketPrice(id, sid, 1.0, 2.0, DateTimeOffset.UtcNow))
+                .ToArray(),
+        };
+        var settings = new StubSettingsRepository();
+        var activeSession = new ActiveSessionContext();
+        // Set Running BEFORE constructing the fetcher so it does NOT see the
+        // ActiveSessionChanged start-prefetch — the only fetch must be the station change.
+        activeSession.Set(SessionId, SessionRunState.Running);
+        using var fetcher = NewFetcher(db, client, sde, settings, activeSession);
+
+        await settings.SetSelectedStationIdAsync(OtherStation);
+
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (client.Calls.Count == 0 && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20);
+        }
+        client.Calls.Should().HaveCount(1);
+        client.Calls[0].StationId.Should().Be(OtherStation);
+        client.Calls[0].TypeIds.Should().BeEquivalentTo(new long[] { 34, 35 });
+    }
+
+    [Fact]
+    public async Task StationChange_with_no_active_session_does_not_fetch()
+    {
+        await using var db = await SeededDbAsync();
+        var sde = new StubSdeLookup { RefinedTypeIds = new long[] { 34 } };
+        var client = new StubPriceClient();
+        var settings = new StubSettingsRepository();
+        var activeSession = new ActiveSessionContext();   // stays None
+        using var fetcher = NewFetcher(db, client, sde, settings, activeSession);
+
+        await settings.SetSelectedStationIdAsync(12345L);
+
+        await Task.Delay(150);
+        client.Calls.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task StationChange_while_paused_does_not_fetch()
+    {
+        // Running-only gate: a station change while Paused does not fetch (the next
+        // Resume re-fetches unconditionally — decision 1.3 = B).
+        await using var db = await SeededDbAsync();
+        var sde = new StubSdeLookup { RefinedTypeIds = new long[] { 34 } };
+        var client = new StubPriceClient();
+        var settings = new StubSettingsRepository();
+        var activeSession = new ActiveSessionContext();
+        activeSession.Set(SessionId, SessionRunState.Paused);
+        using var fetcher = NewFetcher(db, client, sde, settings, activeSession);
+
+        await settings.SetSelectedStationIdAsync(12345L);
+
+        await Task.Delay(150);
+        client.Calls.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Dispose_unsubscribes_from_SettingChanged()
+    {
+        var db = await SeededDbAsync();
+        var sde = new StubSdeLookup { RefinedTypeIds = new long[] { 34 } };
+        var client = new StubPriceClient();
+        var settings = new StubSettingsRepository();
+        var activeSession = new ActiveSessionContext();
+        // Set Running before construction so no start-prefetch fires on subscribe.
+        activeSession.Set(SessionId, SessionRunState.Running);
+        var fetcher = NewFetcher(db, client, sde, settings, activeSession);
+
+        fetcher.Dispose();
+        await settings.SetSelectedStationIdAsync(12345L);
+
+        await Task.Delay(150);
+        client.Calls.Should().BeEmpty("Dispose must unsubscribe SettingChanged; no station-change fetch should fire");
+        await db.DisposeAsync();
     }
 }
