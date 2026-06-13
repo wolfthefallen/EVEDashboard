@@ -200,6 +200,11 @@ public sealed class IskCalculator : IIskCalculator
         // material with no captured price still reports its quantity (it just
         // contributes 0 ISK). Built from the FULL accumulator only (not crit).
         var refinedByMaterial = new Dictionary<long, long>();
+        // Plan 45: yield-applied ISK per refined material, accumulated in lockstep
+        // with the ISK total (only for priced materials), so it reconciles to
+        // totalIsk exactly. Drives the Reports compare-view "Total Refined Output"
+        // ISK column.
+        var iskByMaterial = new Dictionary<long, double>();
         foreach (var (inputTypeId, inputAcc) in perInputAccumulator)
         {
             var critAcc = perInputCritAccumulator[inputTypeId];
@@ -226,6 +231,9 @@ public sealed class IskCalculator : IIskCalculator
                     continue;   // No price -> 0 ISK contribution per market-schema.md (quantity already recorded above).
                 }
                 perInputIsk += adjustedQty * price.Value;   // weight = 1.0 in v1.
+                // Plan 45: same priced amount, bucketed by material (summed across inputs).
+                iskByMaterial[materialTypeId] =
+                    iskByMaterial.GetValueOrDefault(materialTypeId) + adjustedQty * price.Value;
 
                 if (critAcc.TryGetValue(materialTypeId, out var critRawQty) && critRawQty > 0)
                 {
@@ -244,6 +252,7 @@ public sealed class IskCalculator : IIskCalculator
         return new IskCalculationResult(totalIsk, critIsk, iskByInputType)
         {
             RefinedQuantitiesByMaterial = refinedByMaterial,
+            IskByMaterial = iskByMaterial,
         };
     }
 

@@ -769,9 +769,11 @@ Untick all sessions. Close Reports.
 ## 10. Reports — compare-mode widget
 
 Verifies the single decluttered compare widget: stacked session-name
-subheader, a 4-row Cumulative table (`Stat | Avg | Total`) ending in
-`Crit ISK %`, and a 2-row Rates table (`Stat | Avg`) using the
-corrected `sum(total) / sum(time)` math.
+subheader, the plan-45 `TOTAL TIME` / `TOTAL ISK` labels and the Total
+Refined Output table (`Material | Quantity | Total ISK`), a 4-row
+Cumulative table (`Stat | Avg | Total`) ending in `Crit ISK %`, and a
+2-row Rates table (`Stat | Avg`) using the corrected
+`sum(total) / sum(time)` math.
 
 ### Setup
 
@@ -783,45 +785,65 @@ crits`).
 ### Steps
 
 1. **Two-session compare.** Tick sessions A + B in the sidebar.
-   - Expected: right pane shows ONE compare widget. Subheader reads:
+   - Expected: right pane shows ONE compare widget, top to bottom:
      ```
      Comparing sessions:
          <session 1 name>
          <session 2 name>
+
+     TOTAL TIME:  <hh:mm:ss>
+     TOTAL ISK:   <n0>
+
+     Total Refined Output
+         <Material | Quantity | Total ISK table>
+
+     Cumulative
+         <Stat | Avg | Total: ISK, Time, m^3, Crit ISK %>
+
+     Rates
+         <Stat | Avg: m^3/sec, ISK/h>
      ```
-     followed by a `Cumulative` header with a 4-row DataGrid
-     (`Stat | Avg | Total`) for `ISK`, `Time`, `m^3`,
-     `Crit ISK %`. Then a `Rates` header with a 2-row DataGrid
-     (`Stat | Avg`) for `m^3/sec`, `ISK/h`. No per-pilot widgets,
-     no per-ore tables, no per-session columns, no Diff column, no
-     em-dash cells.
-2. **Cumulative ISK math.** `Total` cell of `ISK` row =
+     No per-pilot widgets, no per-ore tables, no per-session columns,
+     no Diff column, no em-dash cells.
+2. **Grand-total labels (plan 45).** The `TOTAL TIME` label equals
+   the Cumulative `Time` row's `Total` cell, and `TOTAL ISK` equals
+   the Cumulative `ISK` row's `Total` cell. The labels and the table
+   intentionally show the same two numbers (decision 1.2 = A).
+3. **Total Refined Output table (plan 45).** Three columns
+   `Material | Quantity | Total ISK`; one row per refined material,
+   summed across both sessions, default-sorted by Quantity
+   descending. Click each header -> rows re-sort. Summing the
+   `Total ISK` column equals the `TOTAL ISK` label (within rounding).
+   A material with no captured price shows its quantity with `0` in
+   Total ISK.
+4. **Cumulative ISK math.** `Total` cell of `ISK` row =
    `s1.TotalIskMined + s2.TotalIskMined` (sum). `Avg` cell = that
    divided by 2.
-3. **Cumulative Time math.** `Total` = sum of per-session active
+5. **Cumulative Time math.** `Total` = sum of per-session active
    durations, formatted `HH:mm:ss`. `Avg` = `Total / N`, same
    format. Hours can exceed 23 (no overflow truncation).
-4. **Cumulative Crit ISK % math.** The Avg AND Total cells render
+6. **Cumulative Crit ISK % math.** The Avg AND Total cells render
    the SAME value: union-wide
    `sum(TotalIskFromCrits) / sum(TotalIskMined)` formatted as P1.
    A percentage is not summable; per-session means would be
    misleading.
-5. **Rate m^3/sec math (corrected).** Avg =
+7. **Rate m^3/sec math (corrected).** Avg =
    `sum(m^3) / sum(active_seconds)` over the union of selected
    sessions -- NOT the mean of per-session m^3/sec. Verify against
    a hand-computed value from the per-session totals you noted in
    Setup.
-6. **Rate ISK/h math (corrected).** Avg = `sum(ISK) /
+8. **Rate ISK/h math (corrected).** Avg = `sum(ISK) /
    (sum(active_seconds) / 3600)`. Same hand-verification.
-7. **3-session compare.** Tick a third session.
+9. **3-session compare.** Tick a third session.
    - Expected: subheader lists all three session names (one per
      indented line). Cumulative still has 4 rows; Rates still has
-     2. NO extra columns; NO per-session expansion.
-8. **5-session compare.** Tick five sessions.
-   - Expected: same shape; subheader lists all five names.
-9. **Empty selection clears the pane.** Untick everything -> right
-   pane is empty (no spinner, no widget).
-10. **Switch back to single.** Tick exactly one session -> single
+     2; the Total Refined Output table now sums across all three.
+     NO extra columns; NO per-session expansion.
+10. **5-session compare.** Tick five sessions.
+    - Expected: same shape; subheader lists all five names.
+11. **Empty selection clears the pane.** Untick everything -> right
+    pane is empty (no spinner, no widget).
+12. **Switch back to single.** Tick exactly one session -> single
     mode returns (per section 8); compare widget gone.
 
 ### Cleanup

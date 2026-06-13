@@ -63,6 +63,9 @@ public class SqliteSessionStatsRepositoryRefinedTests
     {
         public Func<IReadOnlyDictionary<long, long>, IReadOnlyDictionary<long, long>>? ComputeRefined { get; set; }
 
+        /// <summary>Plan 45: optional per-material ISK; when set, TotalIsk = sum of its values.</summary>
+        public Func<IReadOnlyDictionary<long, long>, IReadOnlyDictionary<long, double>>? ComputeIskByMaterial { get; set; }
+
         public Task<IskCalculationResult> ComputeAsync(
             IReadOnlyDictionary<long, long> typeIdToUnitsMined,
             long stationId,
@@ -88,10 +91,13 @@ public class SqliteSessionStatsRepositoryRefinedTests
         {
             var refined = ComputeRefined?.Invoke(typeIdToUnitsMined)
                           ?? new Dictionary<long, long>();
+            var iskByMaterial = ComputeIskByMaterial?.Invoke(typeIdToUnitsMined)
+                                ?? new Dictionary<long, double>();
             return Task.FromResult(new IskCalculationResult(
-                0.0, 0.0, new Dictionary<long, double>())
+                iskByMaterial.Values.Sum(), 0.0, new Dictionary<long, double>())
             {
                 RefinedQuantitiesByMaterial = refined,
+                IskByMaterial = iskByMaterial,
             });
         }
     }
@@ -256,5 +262,30 @@ public class SqliteSessionStatsRepositoryRefinedTests
 
         stats.ByCharacter[Pilot1].RefinedOutput.Select(r => r.Name)
             .Should().OnlyContain(n => n.StartsWith("#", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task GetSessionStatsAsync_RefinedOutput_carries_per_material_Isk_reconciling_to_TotalIskMined()
+    {
+        using var db = await SeedTwoMinersAsync();
+        var calc = TwoPilotRefinedCalculator();
+        // Pilot 1 ISK {34:5000, 35:2000} (total 7000); pilot 2 {34:1000, 35:8000} (total 9000).
+        calc.ComputeIskByMaterial = units =>
+            units.ContainsKey(Ore1TypeId)
+                ? new Dictionary<long, double> { [TritaniumTypeId] = 5000.0, [PyeriteTypeId] = 2000.0 }
+                : new Dictionary<long, double> { [TritaniumTypeId] = 1000.0, [PyeriteTypeId] = 8000.0 };
+        var repo = NewRepo(db, calc, TritPyeriteSde());
+
+        var stats = await repo.GetSessionStatsAsync(SessionId, T0.AddMinutes(10), true);
+
+        // Session per-material ISK: 34 -> 5000+1000=6000; 35 -> 2000+8000=10000.
+        stats.RefinedOutput.First(r => r.TypeId == TritaniumTypeId).Isk.Should().BeApproximately(6000.0, 1e-6);
+        stats.RefinedOutput.First(r => r.TypeId == PyeriteTypeId).Isk.Should().BeApproximately(10000.0, 1e-6);
+        // Per-material ISK sums to the session TotalIskMined (7000 + 9000 = 16000).
+        stats.TotalIskMined.Should().BeApproximately(16000.0, 1e-6);
+        stats.RefinedOutput.Sum(r => r.Isk).Should().BeApproximately(stats.TotalIskMined, 1e-6);
+        // And per pilot it reconciles to that pilot's TotalIskMined.
+        stats.ByCharacter[Pilot1].RefinedOutput.Sum(r => r.Isk)
+            .Should().BeApproximately(stats.ByCharacter[Pilot1].TotalIskMined, 1e-6);
     }
 }

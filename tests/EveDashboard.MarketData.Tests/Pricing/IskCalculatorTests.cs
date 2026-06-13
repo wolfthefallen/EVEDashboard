@@ -530,4 +530,53 @@ public class IskCalculatorTests
 
         result.RefinedQuantitiesByMaterial.Should().BeEmpty();
     }
+
+    // ---- Plan 45: IskByMaterial -------------------------------------------------
+
+    [Fact]
+    public async Task ComputeAsync_populates_IskByMaterial_reconciling_to_TotalIsk()
+    {
+        // Two ores sharing Tritanium plus Pyerite, clean 100% flooring:
+        // Tritanium qty 5500 * 5 = 27500; Pyerite qty 500 * 10 = 5000; total 32500.
+        await using var db = await SeededDbAsync();
+        const double TritaniumBuy = 5.0;
+        const double PyeriteBuy   = 10.0;
+        await SeedPriceAsync(db, TritaniumTypeId, JitaStationId, buy: TritaniumBuy, sell: 6.0);
+        await SeedPriceAsync(db, 35L, JitaStationId, buy: PyeriteBuy, sell: 11.0);
+        var sde = TwoOreSharedMaterialSde();
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long>
+            {
+                [VeldsparTypeId] = 1000L,
+                [1228L]          = 500L,
+            },
+            JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        result.IskByMaterial[TritaniumTypeId].Should().BeApproximately(27_500.0, 1e-6);
+        result.IskByMaterial[35L].Should().BeApproximately(5_000.0, 1e-6);
+        result.IskByMaterial.Values.Sum().Should().BeApproximately(result.TotalIsk, 1e-6);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_omits_unpriced_material_from_IskByMaterial_but_keeps_quantity()
+    {
+        // Unpriced material: a quantity is recorded but it contributes no ISK and is
+        // absent from IskByMaterial, so the sum still reconciles to TotalIsk == 0.
+        await using var db = await SeededDbAsync();
+        // No SeedPriceAsync for Tritanium.
+        var sde = VeldsparOnlySde();
+        sde.Materials[VeldsparTypeId] = new[] { new TypeMaterial(TritaniumTypeId, 400L) };
+        var calc = NewCalculator(db, sde, new RecordingFetcher());
+
+        var result = await calc.ComputeAsync(
+            new Dictionary<long, long> { [VeldsparTypeId] = 1000L },
+            JitaStationId, SessionId, true, 100.0, PriceMode.Buy);
+
+        result.TotalIsk.Should().Be(0.0);
+        result.RefinedQuantitiesByMaterial.Should().ContainKey(TritaniumTypeId).WhoseValue.Should().Be(4000L);
+        result.IskByMaterial.Should().NotContainKey(TritaniumTypeId);
+        result.IskByMaterial.Values.Sum().Should().Be(0.0);
+    }
 }

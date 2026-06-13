@@ -151,6 +151,9 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         // is the sum of per-pilot ISK — no second ISK call).
         var pilotRefined     = new Dictionary<long, IReadOnlyList<RefinedMaterialAmount>>();
         var sessionRefinedMap = new Dictionary<long, long>();
+        // Plan 45: per-material ISK summed across pilots, parallel to the quantity
+        // map, so the session-wide refined list carries ISK alongside quantity.
+        var sessionRefinedIskMap = new Dictionary<long, double>();
         foreach (var pilotGroup in perPilotPerType.GroupBy(r => r.PilotId))
         {
             var typeIdToUnits     = pilotGroup.ToDictionary(r => r.TypeId, r => r.Units);
@@ -163,13 +166,17 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
             pilotIsk[pilotGroup.Key]     = iskResult.TotalIsk;
             pilotCritIsk[pilotGroup.Key] = iskResult.CritIsk;
 
-            pilotRefined[pilotGroup.Key] = BuildRefinedList(iskResult.RefinedQuantitiesByMaterial);
+            pilotRefined[pilotGroup.Key] = BuildRefinedList(iskResult.RefinedQuantitiesByMaterial, iskResult.IskByMaterial);
             foreach (var (matId, qty) in iskResult.RefinedQuantitiesByMaterial)
             {
                 sessionRefinedMap[matId] = sessionRefinedMap.GetValueOrDefault(matId) + qty;
             }
+            foreach (var (matId, isk) in iskResult.IskByMaterial)
+            {
+                sessionRefinedIskMap[matId] = sessionRefinedIskMap.GetValueOrDefault(matId) + isk;
+            }
         }
-        var sessionRefined = BuildRefinedList(sessionRefinedMap);
+        var sessionRefined = BuildRefinedList(sessionRefinedMap, sessionRefinedIskMap);
 
         var sessionTotalIsk     = pilotIsk.Values.Sum();
         var sessionTotalCritIsk = pilotCritIsk.Values.Sum();
@@ -241,19 +248,29 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
     }
 
     /// <summary>
-    /// Plan 43: turn a refined-material quantity map into a display list — name
+    /// Plan 43/45: turn a refined-material quantity map into a display list — name
     /// resolved via the SDE (falling back to <c>#&lt;typeId&gt;</c>), sorted by
-    /// quantity descending. Returns an empty list for an empty map.
+    /// quantity descending. Each row's <see cref="RefinedMaterialAmount.Isk"/> is
+    /// taken from <paramref name="iskMap"/> (plan 45), defaulting to <c>0</c> for a
+    /// material with no captured price. Returns an empty list for an empty
+    /// <paramref name="qtyMap"/>.
     /// </summary>
-    private IReadOnlyList<RefinedMaterialAmount> BuildRefinedList(IReadOnlyDictionary<long, long> map)
+    /// <param name="qtyMap">Refined-material type id -> yield-applied quantity.</param>
+    /// <param name="iskMap">Refined-material type id -> yield-applied ISK value (plan 45); a material absent here values at 0.</param>
+    private IReadOnlyList<RefinedMaterialAmount> BuildRefinedList(
+        IReadOnlyDictionary<long, long> qtyMap,
+        IReadOnlyDictionary<long, double> iskMap)
     {
-        if (map.Count == 0) return Array.Empty<RefinedMaterialAmount>();
-        var list = new List<RefinedMaterialAmount>(map.Count);
-        foreach (var (typeId, qty) in map)
+        if (qtyMap.Count == 0) return Array.Empty<RefinedMaterialAmount>();
+        var list = new List<RefinedMaterialAmount>(qtyMap.Count);
+        foreach (var (typeId, qty) in qtyMap)
         {
             var name = _sdeLookup.TryGetRefinedMaterialName(typeId)
                        ?? string.Create(CultureInfo.InvariantCulture, $"#{typeId}");
-            list.Add(new RefinedMaterialAmount(typeId, name, qty));
+            list.Add(new RefinedMaterialAmount(typeId, name, qty)
+            {
+                Isk = iskMap.GetValueOrDefault(typeId, 0.0),
+            });
         }
         list.Sort(static (a, b) => b.Quantity.CompareTo(a.Quantity));
         return list;

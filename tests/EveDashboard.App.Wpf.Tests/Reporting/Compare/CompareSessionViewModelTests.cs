@@ -221,4 +221,61 @@ public class CompareSessionViewModelTests
         vm.CumulativeRows.First(r => r.Label == "ISK").Total
             .Should().Be(15_000.ToString("N0", System.Globalization.CultureInfo.InvariantCulture));
     }
+
+    // ---- Plan 45: grand-total labels + Total Refined Output table ---------------
+
+    [Fact]
+    public void TotalTimeDisplay_and_TotalIskDisplay_render_union_totals()
+    {
+        using var vm = new CompareSessionViewModel(
+            new[] { Snap(1, 60, 0, 1_000), Snap(2, 120, 0, 2_000) },
+            new[] { "S1", "S2" });
+
+        vm.TotalTimeDisplay.Should().Be("00:03:00");   // 60 + 120 = 180s
+        vm.TotalIskDisplay.Should().Be(
+            3_000.ToString("N0", System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void RefinedRows_sum_quantity_and_isk_per_material_across_sessions_sorted_desc()
+    {
+        var s1 = Snap(1, 60, 0, 7_000) with
+        {
+            RefinedOutput = new[]
+            {
+                new RefinedMaterialAmount(34, "Tritanium", 1000L) { Isk = 5000.0 },
+                new RefinedMaterialAmount(35, "Pyerite",    500L) { Isk = 2000.0 },
+            },
+        };
+        var s2 = Snap(2, 60, 0, 9_000) with
+        {
+            RefinedOutput = new[]
+            {
+                new RefinedMaterialAmount(34, "Tritanium", 200L) { Isk = 1000.0 },
+                new RefinedMaterialAmount(35, "Pyerite",   800L) { Isk = 8000.0 },
+            },
+        };
+        using var vm = new CompareSessionViewModel(new[] { s1, s2 }, new[] { "S1", "S2" });
+
+        // Tritanium: 1200 qty / 6000 ISK; Pyerite: 1300 qty / 10000 ISK. Sorted by qty desc.
+        vm.RefinedRows.Should().HaveCount(2);
+        vm.RefinedRows[0].Material.Should().Be("Pyerite");
+        vm.RefinedRows[0].Quantity.Should().Be(1300L);
+        vm.RefinedRows[0].Isk.Should().BeApproximately(10_000.0, 1e-6);
+        vm.RefinedRows[1].Material.Should().Be("Tritanium");
+        vm.RefinedRows[1].Quantity.Should().Be(1200L);
+        vm.RefinedRows[1].Isk.Should().BeApproximately(6_000.0, 1e-6);
+        // Reconciliation: refined ISK sums to the union Total ISK (7000 + 9000 = 16000).
+        vm.RefinedRows.Sum(r => r.Isk).Should().BeApproximately(16_000.0, 1e-6);
+    }
+
+    [Fact]
+    public void RefinedRows_empty_when_no_refined_output()
+    {
+        using var vm = new CompareSessionViewModel(
+            new[] { Snap(1, 60, 100, 100), Snap(2, 60, 100, 100) },
+            new[] { "S1", "S2" });
+
+        vm.RefinedRows.Should().BeEmpty();
+    }
 }

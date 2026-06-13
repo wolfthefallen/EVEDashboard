@@ -27,7 +27,9 @@ namespace EveDashboard.Core.Pricing;
 /// overload). The single-dict overload always returns <see cref="CritIsk"/>
 /// = <c>0</c>. Plan 43 added <see cref="RefinedQuantitiesByMaterial"/> as an
 /// init-only property (default empty) so existing construction sites are
-/// unaffected — only the production calculator populates it.
+/// unaffected — only the production calculator populates it. Plan 45 added
+/// <see cref="IskByMaterial"/> the same way to drive the Reports compare-view
+/// "Total Refined Output" ISK column.
 /// </remarks>
 public sealed record IskCalculationResult(
     double                            TotalIsk,
@@ -46,4 +48,16 @@ public sealed record IskCalculationResult(
     /// </summary>
     public IReadOnlyDictionary<long, long> RefinedQuantitiesByMaterial { get; init; }
         = System.Collections.Immutable.ImmutableDictionary<long, long>.Empty;
+
+    /// <summary>
+    /// Plan 45: yield-applied ISK value per refined-material <c>type_id</c>, for the
+    /// FULL units (not the crit subset), under the caller's price mode. The sum of
+    /// the values equals <see cref="TotalIsk"/> by construction (both are accumulated
+    /// from the same priced (input, material) pairs). A material with no captured
+    /// price is ABSENT here (it contributes <c>0</c> ISK) even though it appears in
+    /// <see cref="RefinedQuantitiesByMaterial"/> with a non-zero quantity. Empty by
+    /// default; populated only by the production <c>IskCalculator</c>.
+    /// </summary>
+    public IReadOnlyDictionary<long, double> IskByMaterial { get; init; }
+        = System.Collections.Immutable.ImmutableDictionary<long, double>.Empty;
 }

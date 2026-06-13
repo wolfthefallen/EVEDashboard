@@ -20,6 +20,7 @@ using EveDashboard.Stats.Queries;
 ///   <item><description>6.1: per-ore tables dropped.</description></item>
 ///   <item><description>6.2 = C: a single "Crit ISK %" row appears in Cumulative; Crit m³ / Crit count / Crit chance dropped from compare.</description></item>
 ///   <item><description>6.3 = A: stacked session-name subheader, one name per line, no dates.</description></item>
+///   <item><description>Plan 45: adds <see cref="TotalTimeDisplay"/> / <see cref="TotalIskDisplay"/> grand-total labels and a <see cref="RefinedRows"/> "Total Refined Output" table (Material | Quantity | ISK), rendered above the Cumulative table.</description></item>
 /// </list>
 /// <para>
 /// All cell values are pre-rendered into strings in the ctor (single pass, no
@@ -41,6 +42,15 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
 
     /// <summary>2 rows (m³/sec, ISK/h). DataGrid columns: <c>Stat | Avg</c>. Both rows have <c>Total = null</c>.</summary>
     public IReadOnlyList<CompareRow> RateRows { get; }
+
+    /// <summary>Plan 45: sum of active durations across the selected sessions, pre-rendered <c>HH:mm:ss</c>.</summary>
+    public string TotalTimeDisplay { get; }
+
+    /// <summary>Plan 45: sum of per-session Total ISK across the selected sessions, pre-rendered <c>N0</c>.</summary>
+    public string TotalIskDisplay { get; }
+
+    /// <summary>Plan 45: "Total Refined Output" rows — per material, quantity + ISK summed across the selection, sorted by quantity descending.</summary>
+    public IReadOnlyList<CompareRefinedRow> RefinedRows { get; }
 
     /// <summary>Construct the compare-session VM from per-session snapshots + display names (parallel lists in click order).</summary>
     /// <param name="perSessionSnapshots">Per-session <see cref="SessionStats"/> snapshots. Length must equal <paramref name="sessionNames"/>.Count and be >= 1.</param>
@@ -114,6 +124,26 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
                 Avg:   rateIskPerHr.ToString("N0", CultureInfo.InvariantCulture),
                 Total: null),
         };
+
+        // Plan 45: prominent grand totals shown above the Cumulative table.
+        TotalTimeDisplay = FormatDuration(totalTime);
+        TotalIskDisplay  = totalIsk.ToString("N0", CultureInfo.InvariantCulture);
+
+        // Plan 45: aggregate each session's refined output by material across the
+        // selection (quantity + ISK summed), sorted by total quantity descending.
+        var refinedByMaterial = new Dictionary<long, (string Name, long Qty, double Isk)>();
+        foreach (var snapshot in perSessionSnapshots)
+        {
+            foreach (var mat in snapshot.RefinedOutput)
+            {
+                var cur = refinedByMaterial.GetValueOrDefault(mat.TypeId);
+                refinedByMaterial[mat.TypeId] = (mat.Name, cur.Qty + mat.Quantity, cur.Isk + mat.Isk);
+            }
+        }
+        RefinedRows = refinedByMaterial.Values
+            .Select(v => new CompareRefinedRow(v.Name, v.Qty, v.Isk))
+            .OrderByDescending(r => r.Quantity)
+            .ToArray();
 
         LastUpdated = DateTimeOffset.UtcNow;
     }
