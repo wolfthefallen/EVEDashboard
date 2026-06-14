@@ -59,7 +59,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<SessionSummaryRow>> GetAllSessionSummariesAsync(CancellationToken ct = default)
+    public async Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default)
     {
         // Step 1: enumerate sessions. Plan 38: sha256 ids are not chronological,
         // so the newest-first ordering is applied below by StartTime (decision
@@ -71,10 +71,16 @@ public sealed class SqliteReportingQueries : IReportingQueries
 
         if (sessions.Count == 0)
         {
-            return Array.Empty<SessionSummaryRow>();
+            return new SessionsReport(Array.Empty<SessionSummaryRow>(), LifetimeSummary.Empty);
         }
 
+        // Plan 46: accumulate the lifetime rollup as we go — each per-session
+        // snapshot below is summed into these, so the all-time aggregate costs
+        // no extra per-session work and is bound to the same per-session pricing.
         var asOf = DateTimeOffset.UtcNow;
+        var totalTime = TimeSpan.Zero;
+        var totalIsk = 0.0;
+        var perSessionRefined = new List<IReadOnlyList<RefinedMaterialAmount>>(sessions.Count);
         var rows = new List<SessionSummaryRow>(sessions.Count);
         foreach (var session in sessions)
         {
@@ -102,6 +108,13 @@ public sealed class SqliteReportingQueries : IReportingQueries
                 .GetSessionStatsAsync(session.Id, asOf, allowLazyFetch: false, ct)
                 .ConfigureAwait(false);
 
+            // Plan 46: fold this session into the lifetime rollup. The snapshot
+            // already carries TotalTimeMined / TotalIskMined / RefinedOutput, so
+            // this is pure accumulation — no additional query.
+            totalTime += snapshot.TotalTimeMined;
+            totalIsk += snapshot.TotalIskMined;
+            perSessionRefined.Add(snapshot.RefinedOutput);
+
             rows.Add(new SessionSummaryRow(
                 SessionId:      session.Id,
                 Name:           session.Name,
@@ -113,7 +126,11 @@ public sealed class SqliteReportingQueries : IReportingQueries
 
         // Plan 38 (decision 3.2 = A): present newest-first by mining start time.
         rows.Sort((a, b) => b.StartTime.CompareTo(a.StartTime));
-        return rows;
+
+        // Plan 46: the refined sum+sort is shared with the compare view via the
+        // single aggregator (decision 2.1 = A reuse).
+        var refined = RefinedOutputAggregator.SumAcross(perSessionRefined);
+        return new SessionsReport(rows, new LifetimeSummary(totalTime, totalIsk, refined));
     }
 
     /// <inheritdoc />

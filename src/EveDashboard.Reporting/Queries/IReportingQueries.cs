@@ -21,19 +21,25 @@ public interface IReportingQueries
 {
     /// <summary>
     /// Enumerate every saved session with metadata for the Reports sidebar
-    /// (name, start time, active duration, pilot count, total ISK). Returns
-    /// rows ordered by descending start time (newest first) — plan 38, since
-    /// sha256 session ids are not chronological.
+    /// (name, start time, active duration, pilot count, total ISK) AND the
+    /// all-time <see cref="LifetimeSummary"/> rollup across those same sessions
+    /// (plan 46), both built in one pass. Sidebar rows are ordered by descending
+    /// start time (newest first) — plan 38, since sha256 session ids are not
+    /// chronological.
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>One row per session in the session SQLite <c>session</c> table.</returns>
+    /// <returns>A <see cref="SessionsReport"/> carrying one row per session in
+    ///     the session SQLite <c>session</c> table plus the lifetime aggregate
+    ///     (<see cref="LifetimeSummary.Empty"/> when there are no sessions).</returns>
     /// <remarks>
-    /// Per-session <c>TotalIskMined</c> is computed by reusing
-    /// <c>ISessionStatsRepository.GetSessionStatsAsync</c> for each session at
-    /// query time. Lazy / on-demand for plan 25; pre-computed cache is plan 26+
-    /// work if real session counts make this perceptibly slow.
+    /// Per-session <c>TotalIskMined</c> (and the lifetime totals) are computed by
+    /// reusing <c>ISessionStatsRepository.GetSessionStatsAsync</c> for each
+    /// session at query time. The lifetime rollup is summed from the very same
+    /// per-session snapshots — no second pass, no cross-session pricing. Lazy /
+    /// on-demand for plan 25; a pre-computed cache is plan 26+ work if real
+    /// session counts make this perceptibly slow.
     /// </remarks>
-    Task<IReadOnlyList<SessionSummaryRow>> GetAllSessionSummariesAsync(CancellationToken ct = default);
+    Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Enumerate the pilots associated with a saved session, with display

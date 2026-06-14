@@ -99,8 +99,8 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
                 Total: totalIsk.ToString("N0", CultureInfo.InvariantCulture)),
             new CompareRow(
                 Label: "Time",
-                Avg:   FormatDuration(TimeSpan.FromSeconds(totalSeconds / n)),
-                Total: FormatDuration(totalTime)),
+                Avg:   ReportFormatting.FormatActiveDuration(TimeSpan.FromSeconds(totalSeconds / n)),
+                Total: ReportFormatting.FormatActiveDuration(totalTime)),
             new CompareRow(
                 Label: "m³",
                 Avg:   (totalM3 / n).ToString("N1", CultureInfo.InvariantCulture),
@@ -126,23 +126,17 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
         };
 
         // Plan 45: prominent grand totals shown above the Cumulative table.
-        TotalTimeDisplay = FormatDuration(totalTime);
+        TotalTimeDisplay = ReportFormatting.FormatActiveDuration(totalTime);
         TotalIskDisplay  = totalIsk.ToString("N0", CultureInfo.InvariantCulture);
 
         // Plan 45: aggregate each session's refined output by material across the
         // selection (quantity + ISK summed), sorted by total quantity descending.
-        var refinedByMaterial = new Dictionary<long, (string Name, long Qty, double Isk)>();
-        foreach (var snapshot in perSessionSnapshots)
-        {
-            foreach (var mat in snapshot.RefinedOutput)
-            {
-                var cur = refinedByMaterial.GetValueOrDefault(mat.TypeId);
-                refinedByMaterial[mat.TypeId] = (mat.Name, cur.Qty + mat.Quantity, cur.Isk + mat.Isk);
-            }
-        }
-        RefinedRows = refinedByMaterial.Values
-            .Select(v => new CompareRefinedRow(v.Name, v.Qty, v.Isk))
-            .OrderByDescending(r => r.Quantity)
+        // Plan 46: the sum+sort math is shared with the lifetime rollup via the
+        // single RefinedOutputAggregator (reuse mandate) — this VM only maps the
+        // result into its own CompareRefinedRow shape.
+        RefinedRows = RefinedOutputAggregator
+            .SumAcross(perSessionSnapshots.Select(s => s.RefinedOutput))
+            .Select(m => new CompareRefinedRow(m.Name, m.Quantity, m.Isk))
             .ToArray();
 
         LastUpdated = DateTimeOffset.UtcNow;
@@ -150,16 +144,6 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
 
     /// <inheritdoc />
     public override Task RefreshAsync(CancellationToken ct = default) => Task.CompletedTask;
-
-    /// <summary>Format an active-duration TimeSpan as <c>HH:mm:ss</c> with hours unbounded (matches SavedSessionStatsViewModel.FormatDuration).</summary>
-    private static string FormatDuration(TimeSpan duration)
-    {
-        var totalHours = (long)duration.TotalHours;
-        return string.Format(
-            CultureInfo.InvariantCulture,
-            "{0:D2}:{1:D2}:{2:D2}",
-            totalHours, duration.Minutes, duration.Seconds);
-    }
 
     /// <summary>Dispose: idempotent no-op for now; reserved for future settings subscriptions.</summary>
     public void Dispose()

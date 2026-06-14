@@ -677,7 +677,74 @@ changes from viewing reports.
 
 ---
 
-## 9. Reports — sidebar checkbox-driven compare + loading spinner
+## 9. Reports — empty-state lifetime totals
+
+Verifies the all-time rollup shown in the right pane when no session is
+selected (plan 46): total active time tracked, total ISK, and the
+`Total Refined Output` table (`Material | Quantity | Total ISK`). The
+rollup is computed once in the sidebar's per-session pass and refreshed
+on Reports open / import / delete (NOT on mere checkbox toggles).
+
+### Setup
+
+2+ saved (Stopped) sessions in the DB, ideally with refined output and
+non-zero ISK in more than one. Note each session's `Total ISK` and
+`Duration` from the sidebar columns (you will reconcile against their
+sums).
+
+### Steps
+
+1. **Open with nothing selected -> Lifetime Totals.** Open Reports with
+   no sidebar checkboxes ticked (first open, or untick all first).
+   - Expected (right pane): a `Lifetime Totals` header with a separator
+     rule under it; then `Time Tracked:` + an `HH:mm:ss` value and
+     `Total ISK:` + an `N0` value; then a `Total Refined Output` header
+     and a table with `Material | Quantity | Total ISK` columns.
+2. **Total ISK reconciles to the sidebar sum.** Add up the sidebar's
+   `Total ISK` column across every session.
+   - Expected: the `Total ISK:` figure equals that sum exactly (each
+     session is priced from its own captured rows, then summed — no
+     cross-session pricing).
+3. **Time Tracked reconciles to the sidebar sum.** Add up the sidebar's
+   `Duration` column across every session.
+   - Expected: the `Time Tracked:` figure equals that sum. Hours are not
+     wrapped at 24 (e.g. a 30-hour total reads `30:00:00`).
+4. **Refined table sums across sessions, sorted by quantity.**
+   - Expected: one row per refined material, quantity summed across all
+     sessions, default sorted by `Quantity` descending. The sum of the
+     table's `Total ISK` column reconciles to the `Total ISK:` figure
+     (within sub-percent rounding).
+5. **Columns sort.** Click `Material`, then `Quantity`, then
+   `Total ISK` headers -> rows resort; click again -> direction
+   reverses.
+6. **Untick-all returns to Lifetime Totals.** Tick a session (single or
+   compare view appears), then untick everything.
+   - Expected: the right pane returns to the Lifetime Totals panel,
+     identical to step 1. (The figures do NOT change on toggles — the
+     rollup is cached from the last sidebar load.)
+7. **Refreshes after import.** With the lifetime panel showing, Import a
+   session (section 12) that adds new data.
+   - Expected: after the import completes the panel refreshes; Time /
+     ISK / refined figures grow to include the imported session.
+8. **Refreshes after delete.** Right-click a session you can spare
+   (Export it to JSON first if you want it back) -> Delete -> confirm.
+   With nothing checked afterwards (untick all):
+   - Expected: the lifetime figures shrink to exclude the deleted
+     session.
+9. **Empty database (optional).** On a DB with no saved sessions (a
+   fresh install or a throwaway store — do NOT delete real sessions for
+   this):
+   - Expected: the panel shows `Time Tracked: 00:00:00`, `Total ISK: 0`,
+     and an empty `Total Refined Output` table.
+
+### Cleanup
+
+Untick all sessions. Close Reports (window hides). Re-import any session
+you exported + deleted in step 8 if you want it back.
+
+---
+
+## 10. Reports — sidebar checkbox-driven compare + loading spinner
 
 Verifies the per-row checkbox column that drives compare-mode
 selection, the orbital loading spinner, cancel-in-flight on rapid
@@ -713,7 +780,7 @@ for spinner / cancel-in-flight verification.
 5. **Add to compare.** Tick session B's checkbox.
    - Expected: checkbox B flips immediately; spinner appears
      (replacing single-mode); eventually the compare widget renders
-     (see section 10 for compare-widget shape).
+     (see section 11 for compare-widget shape).
 6. **Rapid clicks (cancel-in-flight).** Untick everything. Within
    ~200 ms, tick A, then B, then C (three rapid clicks).
    - Expected: each checkbox flips immediately; spinner stays
@@ -739,7 +806,8 @@ for spinner / cancel-in-flight verification.
     smoothly OR is gone; never frozen mid-spin. The empty-pane gap
     between spinner-hide and widget-render is expected.
 11. **Spinner hides when not visible.** Uncheck everything. Right
-    pane is empty; spinner subtree is Collapsed; CPU% idle.
+    pane shows the Lifetime Totals rollup (plan 46, section 9), NOT a
+    blank pane; spinner subtree is Collapsed; CPU% idle.
 12. **Reopen Reports preserves checks AND skips spinner.** With
     (A, B) checked, X-close Reports. Click Reports again.
     - Expected: A + B still checked; compare view appears
@@ -766,7 +834,7 @@ Untick all sessions. Close Reports.
 
 ---
 
-## 10. Reports — compare-mode widget
+## 11. Reports — compare-mode widget
 
 Verifies the single decluttered compare widget: stacked session-name
 subheader, the plan-45 `TOTAL TIME` / `TOTAL ISK` labels and the Total
@@ -841,8 +909,9 @@ crits`).
      NO extra columns; NO per-session expansion.
 10. **5-session compare.** Tick five sessions.
     - Expected: same shape; subheader lists all five names.
-11. **Empty selection clears the pane.** Untick everything -> right
-    pane is empty (no spinner, no widget).
+11. **Empty selection shows Lifetime Totals.** Untick everything ->
+    right pane shows the all-time lifetime rollup (plan 46, section 9),
+    no spinner.
 12. **Switch back to single.** Tick exactly one session -> single
     mode returns (per section 8); compare widget gone.
 
@@ -852,7 +921,7 @@ Untick all. Close Reports.
 
 ---
 
-## 11. Reports — import / export / delete
+## 12. Reports — import / export / delete
 
 Verifies JSON round-trip, Excel export (Summary tab + per-table
 tabs + per-pilot tabs + role column), schema-version refusal,

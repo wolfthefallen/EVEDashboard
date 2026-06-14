@@ -71,6 +71,15 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject
     [ObservableProperty]
     private double _expandedWidth = 280;
 
+    /// <summary>
+    /// Plan 46: the all-time rollup across every saved session, recomputed by
+    /// <see cref="LoadAsync"/> alongside the rows (Reports open / import / delete).
+    /// A plain property — the content pane reads it on demand when the selection
+    /// goes empty; it does not need to be observable. <see cref="LifetimeSummary.Empty"/>
+    /// until the first load, and reset to Empty on a load failure.
+    /// </summary>
+    public LifetimeSummary Lifetime { get; private set; } = LifetimeSummary.Empty;
+
     /// <summary>Raised whenever <see cref="CheckedRows"/> changes — including transitions to the empty selection. Carries the new ordered selection.</summary>
     public event EventHandler<IReadOnlyList<SessionSummaryRow>>? SelectionChanged;
 
@@ -150,7 +159,11 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject
             }
             _tracker.Clear();
 
-            var dataRows = await _queries.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
+            var report = await _queries.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
+            var dataRows = report.Sessions;
+            // Plan 46: cache the all-time rollup computed in the same pass so the
+            // content pane can show it when the selection is empty.
+            Lifetime = report.Lifetime;
             var wrappers = new List<SessionRowViewModel>(dataRows.Count);
             foreach (var data in dataRows)
             {
@@ -193,6 +206,8 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject
             _log.LogWarning(ex, "SessionsSidebarViewModel.LoadAsync failed; sidebar renders empty.");
             Rows = Array.Empty<SessionRowViewModel>();
             CheckedRows = Array.Empty<SessionSummaryRow>();
+            // Plan 46: a failed load leaves no valid rollup to show.
+            Lifetime = LifetimeSummary.Empty;
             SelectionChanged?.Invoke(this, CheckedRows);
         }
     }

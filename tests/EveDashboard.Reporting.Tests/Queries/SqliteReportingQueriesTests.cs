@@ -127,7 +127,8 @@ public class SqliteReportingQueriesTests
 
         var result = await queries.GetAllSessionSummariesAsync();
 
-        result.Should().BeEmpty();
+        result.Sessions.Should().BeEmpty();
+        result.Lifetime.Should().Be(LifetimeSummary.Empty);
     }
 
     [Fact]
@@ -154,17 +155,17 @@ public class SqliteReportingQueriesTests
 
         var result = await queries.GetAllSessionSummariesAsync();
 
-        result.Should().HaveCount(2);
+        result.Sessions.Should().HaveCount(2);
         // Plan 38: ordered by start_time DESC -> newest first (sha256 ids are not chronological).
-        result[0].SessionId.Should().Be(s2);
-        result[0].Name.Should().Be("Second Run");
-        result[0].PilotCount.Should().Be(2);
-        result[0].ActiveDuration.Should().Be(TimeSpan.FromMinutes(45));
-        result[0].TotalIskMined.Should().Be(250_000.0);
-        result[0].StartTime.Should().BeCloseTo(T0.AddDays(1), TimeSpan.FromSeconds(1));
-        result[1].SessionId.Should().Be(s1);
-        result[1].PilotCount.Should().Be(1);
-        result[1].TotalIskMined.Should().Be(100_000.0);
+        result.Sessions[0].SessionId.Should().Be(s2);
+        result.Sessions[0].Name.Should().Be("Second Run");
+        result.Sessions[0].PilotCount.Should().Be(2);
+        result.Sessions[0].ActiveDuration.Should().Be(TimeSpan.FromMinutes(45));
+        result.Sessions[0].TotalIskMined.Should().Be(250_000.0);
+        result.Sessions[0].StartTime.Should().BeCloseTo(T0.AddDays(1), TimeSpan.FromSeconds(1));
+        result.Sessions[1].SessionId.Should().Be(s1);
+        result.Sessions[1].PilotCount.Should().Be(1);
+        result.Sessions[1].TotalIskMined.Should().Be(100_000.0);
     }
 
     [Fact]
@@ -185,7 +186,7 @@ public class SqliteReportingQueriesTests
 
         var result = await queries.GetAllSessionSummariesAsync();
 
-        result.Single().ActiveDuration.Should().Be(TimeSpan.FromMinutes(15));
+        result.Sessions.Single().ActiveDuration.Should().Be(TimeSpan.FromMinutes(15));
     }
 
     [Fact]
@@ -204,7 +205,7 @@ public class SqliteReportingQueriesTests
 
         var result = await queries.GetAllSessionSummariesAsync();
 
-        result.Single().PilotCount.Should().Be(3);
+        result.Sessions.Single().PilotCount.Should().Be(3);
     }
 
     [Fact]
@@ -221,7 +222,58 @@ public class SqliteReportingQueriesTests
 
         var result = await queries.GetAllSessionSummariesAsync();
 
-        result.Single().TotalIskMined.Should().Be(1_234_567.89);
+        result.Sessions.Single().TotalIskMined.Should().Be(1_234_567.89);
+    }
+
+    [Fact]
+    public async Task GetAllSessionSummariesAsync_lifetime_sums_time_isk_and_refined_across_sessions()
+    {
+        // Plan 46: the lifetime rollup sums each session's active duration, total
+        // ISK, and per-material refined output (qty + ISK), sorted by qty desc.
+        await using var db = await NewSchemaAsync();
+        var s1 = await InsertSessionAsync(db, "First Run");
+        await InsertSessionTimeAsync(db, s1, T0, T0.AddMinutes(30));
+        var s2 = await InsertSessionAsync(db, "Second Run");
+        await InsertSessionTimeAsync(db, s2, T0.AddDays(1), T0.AddDays(1).AddMinutes(45));
+
+        // MakeSnapshot does not set RefinedOutput (init-only), so attach it via
+        // a record `with` expression per session.
+        var statsRepo = new StubStatsRepo
+        {
+            ByIdSnapshots =
+            {
+                [s1] = MakeSnapshot(s1, TimeSpan.FromMinutes(30), totalIsk: 100_000.0) with
+                {
+                    RefinedOutput = new[]
+                    {
+                        new RefinedMaterialAmount(TritaniumTypeId, "Tritanium", 1000L) { Isk = 5000.0 },
+                        new RefinedMaterialAmount(PyeriteTypeId,   "Pyerite",    500L) { Isk = 2000.0 },
+                    },
+                },
+                [s2] = MakeSnapshot(s2, TimeSpan.FromMinutes(45), totalIsk: 250_000.0) with
+                {
+                    RefinedOutput = new[]
+                    {
+                        new RefinedMaterialAmount(TritaniumTypeId, "Tritanium", 200L) { Isk = 1000.0 },
+                        new RefinedMaterialAmount(PyeriteTypeId,   "Pyerite",   800L) { Isk = 8000.0 },
+                    },
+                },
+            },
+        };
+        var queries = NewQueries(db, statsRepo);
+
+        var result = await queries.GetAllSessionSummariesAsync();
+
+        result.Lifetime.TotalTime.Should().Be(TimeSpan.FromMinutes(75));
+        result.Lifetime.TotalIsk.Should().Be(350_000.0);
+        // Tritanium: 1200 qty / 6000 ISK; Pyerite: 1300 qty / 10000 ISK. Sorted by qty desc.
+        result.Lifetime.Refined.Should().HaveCount(2);
+        result.Lifetime.Refined[0].Name.Should().Be("Pyerite");
+        result.Lifetime.Refined[0].Quantity.Should().Be(1300L);
+        result.Lifetime.Refined[0].Isk.Should().BeApproximately(10_000.0, 1e-6);
+        result.Lifetime.Refined[1].Name.Should().Be("Tritanium");
+        result.Lifetime.Refined[1].Quantity.Should().Be(1200L);
+        result.Lifetime.Refined[1].Isk.Should().BeApproximately(6_000.0, 1e-6);
     }
 
     // ---- GetPilotsForSessionAsync -------------------------------------------------

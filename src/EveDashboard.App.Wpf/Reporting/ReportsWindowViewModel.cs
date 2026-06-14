@@ -72,7 +72,11 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     {
         try
         {
-            await Content.LoadAsync(selected).ConfigureAwait(true);
+            // Plan 46: pass the sidebar's cached lifetime rollup so the content
+            // pane can render it when the selection is empty. It was refreshed by
+            // the Sidebar.LoadAsync that fired this event, or is the last cached
+            // value across mere checkbox toggles (sessions unchanged).
+            await Content.LoadAsync(selected, Sidebar.Lifetime).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
