@@ -13,10 +13,9 @@
     -->
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Lifetime Totals"
-                   FontWeight="Bold"
-                   FontSize="14"
-                   Margin="0,0,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [Title]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,2" />
         <Separator Margin="0,0,0,8" />
 
         <Grid Margin="0,0,0,8">
@@ -31,29 +30,34 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0"
                        Text="Time Tracked:"
-                       Margin="0,0,12,2"
-                       Foreground="{DynamicResource ForegroundBrush}" />
+                       Tag="{Binding [TimeTracked]}"
+                       Style="{StaticResource ReportsEmphasisLabel}"
+                       Margin="0,0,12,2" />
             <TextBlock Grid.Row="0" Grid.Column="1"
                        Text="{Binding TimeTrackedDisplay}"
-                       Margin="0,0,0,2"
-                       Foreground="{DynamicResource ForegroundBrush}" />
+                       Tag="{Binding [TimeTracked]}"
+                       Style="{StaticResource ReportsEmphasisLabel}"
+                       Margin="0,0,0,2" />
 
             <TextBlock Grid.Row="1" Grid.Column="0"
                        Text="Total ISK:"
-                       Margin="0,0,12,0"
-                       Foreground="{DynamicResource ForegroundBrush}" />
+                       Tag="{Binding [TotalIsk]}"
+                       Style="{StaticResource ReportsEmphasisLabel}"
+                       Margin="0,0,12,0" />
             <TextBlock Grid.Row="1" Grid.Column="1"
                        Text="{Binding TotalIskDisplay}"
-                       Foreground="{DynamicResource ForegroundBrush}" />
+                       Tag="{Binding [TotalIsk]}"
+                       Style="{StaticResource ReportsEmphasisLabel}" />
         </Grid>
 
         <TextBlock Text="Total Refined Output"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [RefinedLabel]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,2" />
 
         <DataGrid x:Name="RefinedGrid"
                   ItemsSource="{Binding RefinedRows}"
+                  FontSize="{Binding [Table], Converter={StaticResource EmphasisToFontSize}}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
                   CanUserAddRows="False"
@@ -81,8 +85,7 @@
                                     SortMemberPath="Quantity">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -92,8 +95,7 @@
                                     SortMemberPath="Isk">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>

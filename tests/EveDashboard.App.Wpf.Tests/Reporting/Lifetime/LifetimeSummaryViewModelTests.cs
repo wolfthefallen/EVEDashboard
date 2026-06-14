@@ -1,6 +1,7 @@
 namespace EveDashboard.App.Wpf.Tests.Reporting.Lifetime;
 
 using EveDashboard.App.Wpf.Reporting.Lifetime;
+using EveDashboard.App.Wpf.Tests.Helpers;
 using EveDashboard.Reporting;
 using EveDashboard.Stats.Queries;
 using FluentAssertions;
@@ -12,6 +13,11 @@ using FluentAssertions;
 /// </summary>
 public class LifetimeSummaryViewModelTests
 {
+    /// <summary>Plan 47: construct the VM with a throwaway settings fake (these tests exercise the rollup rendering, not persistence).</summary>
+    private static LifetimeSummaryViewModel Vm(LifetimeSummary summary) =>
+        new(summary, new FakeSettingsRepository());
+
+
     [Fact]
     public void TimeTrackedDisplay_and_TotalIskDisplay_render_lifetime_totals()
     {
@@ -20,7 +26,7 @@ public class LifetimeSummaryViewModelTests
             3_000.0,
             Array.Empty<RefinedMaterialAmount>());
 
-        var vm = new LifetimeSummaryViewModel(summary);
+        var vm = Vm(summary);
 
         vm.TimeTrackedDisplay.Should().Be("00:03:00");
         vm.TotalIskDisplay.Should().Be(
@@ -36,7 +42,7 @@ public class LifetimeSummaryViewModelTests
             0.0,
             Array.Empty<RefinedMaterialAmount>());
 
-        var vm = new LifetimeSummaryViewModel(summary);
+        var vm = Vm(summary);
 
         vm.TimeTrackedDisplay.Should().Be("30:00:00");
     }
@@ -51,7 +57,7 @@ public class LifetimeSummaryViewModelTests
         };
         var summary = new LifetimeSummary(TimeSpan.FromMinutes(75), 350_000.0, refined);
 
-        var vm = new LifetimeSummaryViewModel(summary);
+        var vm = Vm(summary);
 
         vm.RefinedRows.Should().BeSameAs(refined);
         vm.RefinedRows.Select(r => r.Name).Should().ContainInOrder("Pyerite", "Tritanium");
@@ -60,7 +66,7 @@ public class LifetimeSummaryViewModelTests
     [Fact]
     public void Empty_summary_renders_zeros_and_no_rows()
     {
-        var vm = new LifetimeSummaryViewModel(LifetimeSummary.Empty);
+        var vm = Vm(LifetimeSummary.Empty);
 
         vm.TimeTrackedDisplay.Should().Be("00:00:00");
         vm.TotalIskDisplay.Should().Be(
@@ -71,7 +77,14 @@ public class LifetimeSummaryViewModelTests
     [Fact]
     public void Ctor_throws_on_null_summary()
     {
-        Action act = () => _ = new LifetimeSummaryViewModel(null!);
+        Action act = () => _ = Vm(null!);
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Ctor_throws_on_null_settings()
+    {
+        Action act = () => _ = new LifetimeSummaryViewModel(LifetimeSummary.Empty, null!);
         act.Should().Throw<ArgumentNullException>();
     }
 }

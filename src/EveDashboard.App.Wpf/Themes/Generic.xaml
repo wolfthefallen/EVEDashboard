@@ -88,6 +88,8 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <!-- Plan 47: extra Auto column for the second ("text size") cog. -->
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
@@ -176,8 +178,69 @@
                                     </Border>
                                 </Popup>
 
-                                <!-- Plan 19 close button. -->
-                                <Button Grid.Column="2"
+                                <!-- Plan 47: second cog — per-element text sizing for the Reports table widgets.
+                                     Visibility gated by HasTextSizeConfig (default false, so non-table widgets
+                                     never show it). Mirrors the plan-20 cog above (its own inline CogBorder
+                                     template — the close button's WidgetChromeButton style is a different look). -->
+                                <ToggleButton Grid.Column="2"
+                                              x:Name="WidgetTextSizeButton"
+                                              Content="A"
+                                              ToolTip="Text size"
+                                              Width="16"
+                                              Height="16"
+                                              Padding="0"
+                                              FontSize="11"
+                                              Margin="0,0,4,0"
+                                              VerticalContentAlignment="Center"
+                                              HorizontalContentAlignment="Center"
+                                              Background="Transparent"
+                                              Foreground="{DynamicResource ForegroundBrush}"
+                                              BorderBrush="{DynamicResource WidgetBorderBrush}"
+                                              BorderThickness="1"
+                                              Effect="{x:Null}"
+                                              IsChecked="{Binding IsTextSizeConfigOpen, Mode=TwoWay}"
+                                              Visibility="{Binding HasTextSizeConfig, Converter={StaticResource BoolToVis}}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="TextCogBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="2"
+                                                    SnapsToDevicePixels="True">
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  RecognizesAccessKey="True" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TextCogBorder" Property="Background" Value="{DynamicResource HoverOverlayBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="TextCogBorder" Property="Background" Value="{DynamicResource ActiveOverlayBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <Popup PlacementTarget="{Binding ElementName=WidgetTextSizeButton}"
+                                       Placement="Bottom"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       IsOpen="{Binding IsTextSizeConfigOpen, Mode=TwoWay}">
+                                    <Border Background="{DynamicResource BackgroundBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="3"
+                                            Padding="6"
+                                            Effect="{DynamicResource ModalShadowEffect}">
+                                        <ContentPresenter Content="{Binding TextSizePopup}" />
+                                    </Border>
+                                </Popup>
+
+                                <!-- Plan 19 close button (Plan 47: shifted from col 2 to col 3 for the new cog). -->
+                                <Button Grid.Column="3"
                                         x:Name="WidgetCloseButton"
                                         Style="{StaticResource WidgetChromeButton}"
                                         Command="{Binding HideCommand}"

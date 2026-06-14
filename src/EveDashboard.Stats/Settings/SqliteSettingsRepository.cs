@@ -2,6 +2,7 @@ namespace EveDashboard.Stats.Settings;
 
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using EveDashboard.Core.Layout;
 using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Settings;
@@ -563,6 +564,86 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         }
     }
 
+    private static readonly JsonSerializerOptions ReportsTextSizeJsonOptions = CreateReportsTextSizeJsonOptions();
+
+    private static JsonSerializerOptions CreateReportsTextSizeJsonOptions()
+    {
+        // Persist StatEmphasis by NAME (not ordinal) so the stored JSON survives
+        // enum-member reordering. Unknown names throw JsonException on read ->
+        // null + Warning (the malformed-JSON policy), same as every other JSON setting.
+        var opts = new JsonSerializerOptions();
+        opts.Converters.Add(new JsonStringEnumConverter());
+        return opts;
+    }
+
+    /// <summary>Compose the per-grid-type Reports column-widths setting key (plan 47).</summary>
+    internal static string ReportsColumnWidthsKey(string gridKey) => $"reports_column_widths.{gridKey}";
+
+    /// <summary>Compose the per-widget-type Reports text-size setting key (plan 47).</summary>
+    internal static string ReportsTextSizeKey(string widgetTypeKey) => $"reports_text_size.{widgetTypeKey}";
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(gridKey);
+        var key = ReportsColumnWidthsKey(gridKey);
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = $k LIMIT 1",
+            new Dictionary<string, object?> { ["$k"] = key }, ct);
+        if (raw is null) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<int, double>>(raw);
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "{Key} JSON malformed - returning null.", key);
+            return null;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetReportsColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(gridKey);
+        ArgumentNullException.ThrowIfNull(widths);
+        var key = ReportsColumnWidthsKey(gridKey);
+        var json = JsonSerializer.Serialize(widths);
+        await UpsertAsync(key, json, ct);
+        RaiseSettingChanged(key);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<string, StatEmphasis>?> GetReportsTextSizeAsync(string widgetTypeKey, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(widgetTypeKey);
+        var key = ReportsTextSizeKey(widgetTypeKey);
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = $k LIMIT 1",
+            new Dictionary<string, object?> { ["$k"] = key }, ct);
+        if (raw is null) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<string, StatEmphasis>>(raw, ReportsTextSizeJsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "{Key} JSON malformed - returning null.", key);
+            return null;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetReportsTextSizeAsync(string widgetTypeKey, IReadOnlyDictionary<string, StatEmphasis> textSize, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(widgetTypeKey);
+        ArgumentNullException.ThrowIfNull(textSize);
+        var key = ReportsTextSizeKey(widgetTypeKey);
+        var json = JsonSerializer.Serialize(textSize, ReportsTextSizeJsonOptions);
+        await UpsertAsync(key, json, ct);
+        RaiseSettingChanged(key);
+    }
+
     /// <inheritdoc />
     public async Task EnsureSeedDefaultsAsync(CancellationToken ct = default)
     {
@@ -585,6 +666,8 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         // per_pilot_stats_config.<pilot_id>  intentionally NOT seeded (plan 20 - null sentinel; rows added on first user customisation)
         // reports_window_geometry intentionally NOT seeded (plan 25 - null sentinel = use Reports default 1100x700 centered)
         // reports_sidebar_width   intentionally NOT seeded (plan 25 - null sentinel = use Reports default 280 px)
+        // reports_column_widths.<gridKey> intentionally NOT seeded (plan 47 - null sentinel = use XAML default column widths)
+        // reports_text_size.<widgetTypeKey> intentionally NOT seeded (plan 47 - null sentinel = all elements at StatEmphasis.None)
         // crystal_diagram_window_geometry intentionally NOT seeded (null sentinel = use Crystal default 900x650 centered)
         // crystal_diagram_selected_anomaly intentionally NOT seeded (plan 35 - null sentinel = default to 'all' entry)
         // schema_version          owned by plan 11

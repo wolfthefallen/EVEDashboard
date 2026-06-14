@@ -9,6 +9,7 @@
         xmlns:lifetime="clr-namespace:EveDashboard.App.Wpf.Reporting.Lifetime"
         xmlns:session="clr-namespace:EveDashboard.App.Wpf.Widgets.Session"
         xmlns:pilot="clr-namespace:EveDashboard.App.Wpf.Widgets.Pilot"
+        xmlns:statconfig="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
         xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
         mc:Ignorable="d"
         Title="Reports - EVE Dashboard"
@@ -69,6 +70,15 @@
         <!-- Plan 46: empty-selection lifetime-rollup VM <-> View pairing. -->
         <DataTemplate DataType="{x:Type lifetime:LifetimeSummaryViewModel}">
             <lifetime:LifetimeSummaryView />
+        </DataTemplate>
+
+        <!-- Plan 47: the table widgets' chrome "text size" Popup resolves its content
+             (TextSizePopupViewModel) through this implicit template. The chrome lives in
+             the app-wide Generic.xaml, but the popup VM->View mapping is per-window (the
+             stat-config equivalent lives in MainWindow.xaml), so the Reports table widgets
+             need their own copy here. -->
+        <DataTemplate DataType="{x:Type statconfig:TextSizePopupViewModel}">
+            <statconfig:TextSizePopupView />
         </DataTemplate>
     </Window.Resources>
 

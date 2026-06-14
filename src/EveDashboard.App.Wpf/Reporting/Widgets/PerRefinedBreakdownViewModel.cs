@@ -2,6 +2,8 @@ namespace EveDashboard.App.Wpf.Reporting.Widgets;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.App.Wpf.Widgets;
+using EveDashboard.Core.Settings;
+using EveDashboard.Core.Settings.WidgetStats;
 using EveDashboard.Reporting;
 using EveDashboard.Reporting.Queries;
 using Microsoft.Extensions.Logging;
@@ -17,10 +19,19 @@ using Microsoft.Extensions.Logging;
 /// provided by the view's <c>DataGrid.CanUserSortColumns="True"</c>; refresh is
 /// driven externally by <see cref="LoadAsync"/>;
 /// <see cref="WidgetBaseViewModel.RefreshAsync"/> is a no-op. Mirrors
-/// <see cref="PerOreBreakdownViewModel"/>.
+/// <see cref="PerOreBreakdownViewModel"/>. Plan 47: inherits
+/// <see cref="TextSizeConfigurableWidgetViewModel"/> for the "Text size" cog +
+/// column-width persistence (widget-type key <c>"refined"</c>).
 /// </remarks>
-public sealed partial class PerRefinedBreakdownViewModel : WidgetBaseViewModel
+public sealed partial class PerRefinedBreakdownViewModel : TextSizeConfigurableWidgetViewModel
 {
+    /// <summary>Plan 47: sizeable elements + their default emphasis (Layout 1 — Title bold, table plain).</summary>
+    private static readonly IReadOnlyList<(string Key, string Label, StatEmphasis Default)> Elements = new[]
+    {
+        ("Title", "Title", StatEmphasis.Header0),
+        ("Table", "Table", StatEmphasis.None),
+    };
+
     private readonly IReportingQueries _queries;
     private readonly ILogger<PerRefinedBreakdownViewModel> _log;
 
@@ -34,11 +45,14 @@ public sealed partial class PerRefinedBreakdownViewModel : WidgetBaseViewModel
 
     /// <summary>Construct the per-refined breakdown VM.</summary>
     /// <param name="queries">Reporting queries facade.</param>
+    /// <param name="settings">Settings repository (plan 47: text size + column widths).</param>
     /// <param name="log">Logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public PerRefinedBreakdownViewModel(
         IReportingQueries queries,
+        ISettingsRepository settings,
         ILogger<PerRefinedBreakdownViewModel> log)
+        : base(settings, "refined", Elements, log)
     {
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(log);

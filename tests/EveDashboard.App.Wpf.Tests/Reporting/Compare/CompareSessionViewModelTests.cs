@@ -2,6 +2,7 @@ namespace EveDashboard.App.Wpf.Tests.Reporting.Compare;
 
 using System.Collections.Immutable;
 using EveDashboard.App.Wpf.Reporting.Compare;
+using EveDashboard.App.Wpf.Tests.Helpers;
 using EveDashboard.Stats.Queries;
 using FluentAssertions;
 
@@ -40,24 +41,35 @@ public class CompareSessionViewModelTests
             CritChance:         0.0,
             ByCharacter:        ImmutableDictionary<long, CharacterStats>.Empty);
 
+    /// <summary>Plan 47: construct the VM with a throwaway settings fake (these tests exercise the compare math, not persistence).</summary>
+    private static CompareSessionViewModel Vm(IReadOnlyList<SessionStats> snaps, IReadOnlyList<string> names) =>
+        new(new FakeSettingsRepository(), snaps, names);
+
+    [Fact]
+    public void Ctor_throws_on_null_settings()
+    {
+        Action act = () => _ = new CompareSessionViewModel(null!, new[] { Snap(1, 60, 100, 100) }, new[] { "a" });
+        act.Should().Throw<ArgumentNullException>();
+    }
+
     [Fact]
     public void Ctor_throws_on_null_snapshots()
     {
-        Action act = () => _ = new CompareSessionViewModel(null!, new[] { "a" });
+        Action act = () => _ = Vm(null!, new[] { "a" });
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void Ctor_throws_on_null_session_names()
     {
-        Action act = () => _ = new CompareSessionViewModel(new[] { Snap(1, 60, 100, 100) }, null!);
+        Action act = () => _ = Vm(new[] { Snap(1, 60, 100, 100) }, null!);
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void Ctor_throws_on_mismatched_lengths()
     {
-        Action act = () => _ = new CompareSessionViewModel(
+        Action act = () => _ = Vm(
             new[] { Snap(1, 60, 100, 100), Snap(2, 60, 100, 100) },
             new[] { "only-one" });
         act.Should().Throw<ArgumentException>();
@@ -66,14 +78,14 @@ public class CompareSessionViewModelTests
     [Fact]
     public void Ctor_throws_on_empty_snapshots()
     {
-        Action act = () => _ = new CompareSessionViewModel(Array.Empty<SessionStats>(), Array.Empty<string>());
+        Action act = () => _ = Vm(Array.Empty<SessionStats>(), Array.Empty<string>());
         act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void SessionNames_mirrors_input_in_order()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 100), Snap(2, 60, 100, 100), Snap(3, 60, 100, 100) },
             new[] { "Alpha", "Bravo", "Charlie" });
 
@@ -83,7 +95,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void CumulativeRows_has_4_rows_with_expected_labels_in_order()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 100) },
             new[] { "S1" });
 
@@ -94,7 +106,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void RateRows_has_2_rows_with_expected_labels_in_order()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 100) },
             new[] { "S1" });
 
@@ -105,7 +117,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void Cumulative_ISK_row_Total_is_sum_and_Avg_is_sum_over_N()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 1_000), Snap(2, 60, 100, 2_000), Snap(3, 60, 100, 3_000) },
             new[] { "S1", "S2", "S3" });
 
@@ -117,7 +129,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void Cumulative_Time_row_renders_Total_and_Avg_as_HHmmss()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 0, 0), Snap(2, 120, 0, 0) },
             new[] { "S1", "S2" });
 
@@ -131,7 +143,7 @@ public class CompareSessionViewModelTests
     {
         // S1: 100 ISK, 30 of it crit. S2: 200 ISK, 90 of it crit.
         // Union: 300 ISK, 120 of it crit. Ratio = 120/300 = 0.4.
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[]
             {
                 Snap(1, 60, 100, 100, totalCritIsk: 30,  critIskPercent: 0.30),
@@ -152,7 +164,7 @@ public class CompareSessionViewModelTests
         // Naive mean would be 4.0. Corrected math: (100+300) / (50+50) = 4.0... hmm same.
         // Pick asymmetric durations to make them differ: S1 100m³/50s=2.0, S2 300m³/100s=3.0.
         // Mean of rates = 2.5. Corrected union rate = (100+300)/(50+100) = 400/150 ≈ 2.6667.
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[]
             {
                 Snap(1, 50,  100, 0),
@@ -170,7 +182,7 @@ public class CompareSessionViewModelTests
     {
         // S1: 100 ISK over 3600s -> 100/h. S2: 300 ISK over 1800s -> 600/h.
         // Mean of rates = 350. Corrected: (100+300) / ((3600+1800)/3600) = 400/1.5 ≈ 266.67.
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[]
             {
                 Snap(1, 3600, 0, 100),
@@ -186,7 +198,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void All_RateRows_have_null_Total()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 100), Snap(2, 60, 100, 100) },
             new[] { "S1", "S2" });
 
@@ -196,7 +208,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void Zero_time_edge_case_renders_rate_as_zero_not_throws()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 0, 0, 0), Snap(2, 0, 0, 0) },
             new[] { "S1", "S2" });
 
@@ -210,7 +222,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void Five_session_compare_builds_clean()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             Enumerable.Range(1, 5).Select(i => Snap(i, 60, 100 * i, 1000 * i)).ToArray(),
             Enumerable.Range(1, 5).Select(i => $"Session {i}").ToArray());
 
@@ -227,7 +239,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void TotalTimeDisplay_and_TotalIskDisplay_render_union_totals()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 0, 1_000), Snap(2, 120, 0, 2_000) },
             new[] { "S1", "S2" });
 
@@ -255,7 +267,7 @@ public class CompareSessionViewModelTests
                 new RefinedMaterialAmount(35, "Pyerite",   800L) { Isk = 8000.0 },
             },
         };
-        using var vm = new CompareSessionViewModel(new[] { s1, s2 }, new[] { "S1", "S2" });
+        using var vm = Vm(new[] { s1, s2 }, new[] { "S1", "S2" });
 
         // Tritanium: 1200 qty / 6000 ISK; Pyerite: 1300 qty / 10000 ISK. Sorted by qty desc.
         vm.RefinedRows.Should().HaveCount(2);
@@ -272,7 +284,7 @@ public class CompareSessionViewModelTests
     [Fact]
     public void RefinedRows_empty_when_no_refined_output()
     {
-        using var vm = new CompareSessionViewModel(
+        using var vm = Vm(
             new[] { Snap(1, 60, 100, 100), Snap(2, 60, 100, 100) },
             new[] { "S1", "S2" });
 

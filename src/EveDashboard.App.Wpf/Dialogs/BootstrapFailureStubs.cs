@@ -181,6 +181,22 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetReportsColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<string, StatEmphasis>?> GetReportsTextSizeAsync(string widgetTypeKey, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetReportsTextSizeAsync(string widgetTypeKey, IReadOnlyDictionary<string, StatEmphasis> textSize, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
     public Task EnsureSeedDefaultsAsync(CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 

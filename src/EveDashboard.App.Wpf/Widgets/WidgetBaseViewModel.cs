@@ -88,6 +88,32 @@ public abstract partial class WidgetBaseViewModel : ObservableObject
     public virtual StatConfigPopupViewModel? StatConfigPopup => null;
 
     /// <summary>
+    /// Plan 47: two-way bound to the chrome's second ("text size") cog
+    /// <c>ToggleButton.IsChecked</c> and its <c>Popup.IsOpen</c>. Click-outside
+    /// (the popup's <c>StaysOpen=False</c>) and a successful Apply on the popup
+    /// VM (via <see cref="TextSizePopupViewModel.ShouldClose"/>) both flip this
+    /// back to false.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isTextSizeConfigOpen;
+
+    /// <summary>
+    /// Plan 47: true iff this widget supports per-element text sizing (the Reports
+    /// table widgets). Default false hides the text-size cog. Derived widgets
+    /// override to return true.
+    /// </summary>
+    public virtual bool HasTextSizeConfig => false;
+
+    /// <summary>
+    /// Plan 47: the text-size popup VM bound by the chrome's second
+    /// <c>Popup</c> ContentPresenter. Default null. Table widgets construct it in
+    /// their ctor and override this to return it. The chrome only resolves the
+    /// binding when <see cref="HasTextSizeConfig"/> = true, so a null return in
+    /// that case is a programming error.
+    /// </summary>
+    public virtual TextSizePopupViewModel? TextSizePopup => null;
+
+    /// <summary>
     /// Raised when the user clicks the chrome <c>x</c> button on this widget
     /// (plan 19). The layout coordinator subscribes when it adds the widget
     /// to the dashboard layout and unsubscribes on removal / dispose; no
@@ -122,5 +148,18 @@ public abstract partial class WidgetBaseViewModel : ObservableObject
     protected void ClosePopupFromVm()
     {
         IsStatConfigOpen = false;
+    }
+
+    /// <summary>
+    /// Plan 47: when the text-size popup VM's
+    /// <see cref="TextSizePopupViewModel.ShouldClose"/> flips to true (Apply
+    /// success or explicit Close), the chrome flips
+    /// <see cref="IsTextSizeConfigOpen"/> back to false through this hook. Wired
+    /// up by the table widgets in their ctor; called from the popup VM's
+    /// <c>PropertyChanged</c> on <c>ShouldClose</c>.
+    /// </summary>
+    protected void CloseTextSizePopupFromVm()
+    {
+        IsTextSizeConfigOpen = false;
     }
 }

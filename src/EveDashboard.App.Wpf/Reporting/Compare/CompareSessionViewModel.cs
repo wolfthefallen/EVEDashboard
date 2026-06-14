@@ -2,6 +2,8 @@ namespace EveDashboard.App.Wpf.Reporting.Compare;
 
 using System.Globalization;
 using EveDashboard.App.Wpf.Widgets;
+using EveDashboard.Core.Settings;
+using EveDashboard.Core.Settings.WidgetStats;
 using EveDashboard.Stats.Queries;
 
 /// <summary>
@@ -24,15 +26,28 @@ using EveDashboard.Stats.Queries;
 /// </list>
 /// <para>
 /// All cell values are pre-rendered into strings in the ctor (single pass, no
-/// XAML value converters). Implements <see cref="IDisposable"/> with an empty
-/// body so <c>BreakdownContentViewModel.DisposePriorWidgets</c> can keep its
-/// existing shape; future row-hide / settings subscriptions can plug in here
-/// without touching callers.
+/// XAML value converters). Plan 47: inherits
+/// <see cref="TextSizeConfigurableWidgetViewModel"/> for the "Text size" cog +
+/// column-width persistence (widget-type key <c>"compare"</c>); the base also
+/// supplies the <see cref="IDisposable"/> implementation that
+/// <c>BreakdownContentViewModel.DisposePriorWidgets</c> relies on.
 /// </para>
 /// </remarks>
-public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
+public sealed class CompareSessionViewModel : TextSizeConfigurableWidgetViewModel
 {
-    private bool _disposed;
+    /// <summary>Plan 47: sizeable elements + default emphasis (Layout 1 — every label Header0, every table plain).</summary>
+    private static readonly IReadOnlyList<(string Key, string Label, StatEmphasis Default)> Elements = new[]
+    {
+        ("Header", "Comparing sessions", StatEmphasis.Header0),
+        ("TotalTime", "TOTAL TIME", StatEmphasis.Header0),
+        ("TotalIsk", "TOTAL ISK", StatEmphasis.Header0),
+        ("RefinedLabel", "Total Refined Output", StatEmphasis.Header0),
+        ("RefinedTable", "Refined table", StatEmphasis.None),
+        ("CumulativeLabel", "Cumulative", StatEmphasis.Header0),
+        ("CumulativeTable", "Cumulative table", StatEmphasis.None),
+        ("RatesLabel", "Rates", StatEmphasis.Header0),
+        ("RatesTable", "Rates table", StatEmphasis.None),
+    };
 
     /// <summary>Selected session names in click order, surfaced as the stacked subheader.</summary>
     public IReadOnlyList<string> SessionNames { get; }
@@ -53,13 +68,16 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
     public IReadOnlyList<CompareRefinedRow> RefinedRows { get; }
 
     /// <summary>Construct the compare-session VM from per-session snapshots + display names (parallel lists in click order).</summary>
+    /// <param name="settings">Settings repository (plan 47: text size + column widths).</param>
     /// <param name="perSessionSnapshots">Per-session <see cref="SessionStats"/> snapshots. Length must equal <paramref name="sessionNames"/>.Count and be >= 1.</param>
     /// <param name="sessionNames">Per-session display names.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     /// <exception cref="ArgumentException">Thrown if the lengths differ or both are empty.</exception>
     public CompareSessionViewModel(
+        ISettingsRepository         settings,
         IReadOnlyList<SessionStats> perSessionSnapshots,
         IReadOnlyList<string>       sessionNames)
+        : base(settings, "compare", Elements, log: null)
     {
         ArgumentNullException.ThrowIfNull(perSessionSnapshots);
         ArgumentNullException.ThrowIfNull(sessionNames);
@@ -144,11 +162,4 @@ public sealed class CompareSessionViewModel : WidgetBaseViewModel, IDisposable
 
     /// <inheritdoc />
     public override Task RefreshAsync(CancellationToken ct = default) => Task.CompletedTask;
-
-    /// <summary>Dispose: idempotent no-op for now; reserved for future settings subscriptions.</summary>
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-    }
 }

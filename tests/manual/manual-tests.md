@@ -1016,6 +1016,100 @@ session.sqlite` between rounds.
 
 ---
 
+## 12.5 Reports — resizable columns + per-element text sizing (plan 47)
+
+Verifies the restored DataGrid column-resize grippers with per-grid-type
+width persistence (phase 1a), and the second "text size" chrome cog that
+sizes each Reports table widget's elements per emphasis level (phase 1b).
+
+### Setup
+
+- At least 3 saved sessions, at least one with 2+ pilots and refined output
+  (so the per-pilot ore/refined tables and the "Total Refined Output" table
+  render). Open Reports (chrome-bar Reports button).
+
+### 12.5.1 Column resize + persistence (phase 1a)
+
+1. **All column text is left-aligned.** Glance at every Reports table (ore,
+   refined, compare, lifetime, sidebar).
+   - Expected: every cell's text — including the numeric columns (m³, ISK,
+     Quantity, Total ISK) — is left-aligned, matching the left-aligned headers.
+2. **Grippers exist.** Hover the boundary between two column headers in the
+   sidebar "Saved sessions" grid. Cursor becomes a horizontal resize arrow.
+   - Expected: every Reports DataGrid (sidebar, ore, refined, compare tables,
+     lifetime refined) shows the resize cursor at header edges. NO horizontal
+     scrollbar ever appears.
+3. **Resize.** Drag a sidebar column edge (e.g. "Name") wider, then narrower.
+   - Expected: the column resizes live; other columns reflow; no scrollbar.
+4. **Persist across reopen.** Note the new width. Close Reports (the window
+   hides). Reopen Reports.
+   - Expected: the sidebar column keeps the width you set.
+5. **Persist across restart.** Select one session so "Session ore breakdown"
+   shows; drag its "Type" column. Close the whole app. Relaunch, open Reports,
+   reselect that session.
+   - Expected: the ore "Type" column keeps the width you set.
+6. **Per-type scope.** With a 2+ pilot session selected, resize the session ore
+   table's "Type" column. Reopen Reports and reselect.
+   - Expected: the per-pilot ore tables share the same saved "Type" width (width
+     is per grid TYPE, not per instance).
+7. **Star columns still stretch.** Widen the content pane WITHOUT having resized
+   a given table's `*` column.
+   - Expected: the untouched stretchy column (e.g. ore "Type") keeps filling the
+     width; only columns you explicitly dragged stay frozen at a fixed size.
+
+### 12.5.2 Text size cog (phase 1b)
+
+The cog uses the SAME 5 emphasis levels as the live SessionStats / per-pilot cog
+(None / Header0 / Header1 / Header2 / Hero), and applies the FULL look — size +
+weight + accent — to labels (the tables size only). Each element starts at a
+sensible DEFAULT (Layout 1): every heading / total / section label defaults to
+Header0 (Bold 14), every table + data row defaults to None (plain).
+
+1. **Cog appears on TABLE widgets only.** Select one session.
+   - Expected: the ore / refined TABLE widgets each show an "A" (text size) cog
+     plus the `x` close button. The SessionStats and per-pilot STATS widgets
+     keep their existing gear (stat-config) cog and do NOT gain an "A" cog.
+2. **Default look matches today.** Before touching anything, eyeball the ore /
+   refined / compare / lifetime widgets.
+   - Expected: the same look as before plan 47 — the titles + "TOTAL TIME/ISK" +
+     "Lifetime Totals" + the section labels render Bold ~14; the data rows + table
+     cells render plain. (Internally those headings now default to Header0 and the
+     data to None, but the on-screen result is today's look.)
+3. **Re-size a label, with live preview.** Click the "A" cog on the ore widget.
+   The "Text size" popup lists "Title" (shown bold = its Header0 default) and
+   "Table". Change "Title" to Hero in the dropdown.
+   - Expected: the popup's "Title" preview row immediately grows to 22pt in the
+     ACCENT colour (same preview behaviour as the live stat cog). Apply -> the ore
+     widget's title line renders 22pt accent; the table is unchanged; popup closes.
+4. **Re-size a table (size only).** Reopen the "A" cog, set "Table" to Header2, Apply.
+   - Expected: all cells + headers of the ore table grow to 20pt (size only — no
+     bold/accent on table cells, per the table rule).
+5. **Reset to default.** Open the cog, set "Title" back to Header0 (its default), Apply.
+   - Expected: the title returns to today's Bold 14 look (an element re-picked to
+     its default is stored as "no override").
+6. **Persistence.** Close + reopen Reports, reselect the session -> choices kept.
+   Restart the app and reselect -> still kept.
+7. **Per-type scope.** With a 2+ pilot session, set the session ore widget's
+   "Table" to Header1.
+   - Expected: every ore table (session + per-pilot) renders at Header1 — text
+     sizing is per widget TYPE.
+8. **Compare + lifetime.** Check 2+ sessions (compare mode): the compare "A" cog
+   lists Header / TOTAL TIME / TOTAL ISK / the three section labels + tables; set a
+   few to bigger levels and Apply -> those labels take the full size+weight (+accent
+   on Hero), the tables size only. Uncheck all sessions (lifetime mode): the lifetime
+   "A" cog lists Title / Time Tracked / Total ISK / Total Refined Output / Table;
+   verify the same.
+
+### Cleanup
+
+- Reset any element via each widget's "A" cog (pick its default — Header0 for
+  headings, None for tables/data — and Apply) and drag columns back to taste. OR,
+  to clear the saved state wholesale, delete `%APPDATA%\EveDashboard\session.sqlite`
+  (drops the `reports_column_widths.*` and `reports_text_size.*` settings rows —
+  only if you don't mind losing saved sessions).
+
+---
+
 ## 12. SDE updater against live everef.net (advanced, network)
 
 Verifies the real-network code path against `data.everef.net`. The

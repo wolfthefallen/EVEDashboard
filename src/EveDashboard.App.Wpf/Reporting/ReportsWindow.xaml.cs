@@ -25,6 +25,7 @@ public partial class ReportsWindow : Window
     private readonly ReportsWindowViewModel _vm;
     private readonly WindowGeometryService _geometryService;
     private readonly ILogger<ReportsWindow> _log;
+    private DataGridColumnWidthBinder? _sidebarWidthBinder;
 
     /// <summary>Construct the Reports window.</summary>
     /// <param name="vm">Reports root VM.</param>
@@ -67,6 +68,15 @@ public partial class ReportsWindow : Window
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Reports VM InitializeAsync failed; sidebar may be empty.");
+        }
+
+        // Plan 47: restore + persist the sidebar grid's column widths (per type, key "sessions").
+        // The window is a Hide-on-close singleton, so this binds once for the app lifetime.
+        if (_sidebarWidthBinder is null)
+        {
+            _sidebarWidthBinder = await DataGridColumnWidthBinder
+                .AttachAsync(SessionsGrid, "sessions", _vm.Sidebar)
+                .ConfigureAwait(true);
         }
     }
 

@@ -250,7 +250,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                 // the blank single-mode pane defensively.
                 if (lifetime is not null)
                 {
-                    LifetimeSummary = new LifetimeSummaryViewModel(lifetime);
+                    LifetimeSummary = new LifetimeSummaryViewModel(lifetime, _settings);
                     Mode = BreakdownContentMode.Lifetime;
                 }
                 else
@@ -320,20 +320,23 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                     statsVm.ApplyStats(snapshot);
                     statsVm.SetSessionName(row.Name);
 
+                    // Plan 47: now IDisposable (settings subscription for text size) — MUST be
+                    // tracked in `transient` so cancel/failure disposes it before the throw.
                     var oreVm = new PerOreBreakdownViewModel(
-                        _queries, _loggerFactory.CreateLogger<PerOreBreakdownViewModel>())
+                        _queries, _settings, _loggerFactory.CreateLogger<PerOreBreakdownViewModel>())
                     {
                         Title = "Session ore breakdown",
                     };
-                    // PerOreBreakdownViewModel is not IDisposable (no settings subscription) — no cleanup needed.
+                    transient.Add(oreVm);
                     await oreVm.LoadAsync(sessionId, pilotId: null, ct).ConfigureAwait(false);
 
-                    // Plan 43: session-level refined-output breakdown (also non-IDisposable).
+                    // Plan 43: session-level refined-output breakdown (plan 47: also IDisposable).
                     var refinedVm = new PerRefinedBreakdownViewModel(
-                        _queries, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
+                        _queries, _settings, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
                     {
                         Title = "Session refined output",
                     };
+                    transient.Add(refinedVm);
                     await refinedVm.LoadAsync(sessionId, pilotId: null, ct).ConfigureAwait(false);
 
                     var built = new List<PerPilotEntry>(pilots.Count);
@@ -350,17 +353,19 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                         }
 
                         var pilotOreVm = new PerOreBreakdownViewModel(
-                            _queries, _loggerFactory.CreateLogger<PerOreBreakdownViewModel>())
+                            _queries, _settings, _loggerFactory.CreateLogger<PerOreBreakdownViewModel>())
                         {
                             Title = $"{pilot.PilotName} ore breakdown",
                         };
+                        transient.Add(pilotOreVm);
                         await pilotOreVm.LoadAsync(sessionId, pilot.PilotId, ct).ConfigureAwait(false);
 
                         var pilotRefinedVm = new PerRefinedBreakdownViewModel(
-                            _queries, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
+                            _queries, _settings, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
                         {
                             Title = $"{pilot.PilotName} refined output",
                         };
+                        transient.Add(pilotRefinedVm);
                         await pilotRefinedVm.LoadAsync(sessionId, pilot.PilotId, ct).ConfigureAwait(false);
 
                         built.Add(new PerPilotEntry(pilotVm, pilotOreVm, pilotRefinedVm));
@@ -386,13 +391,18 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
         // Cancel observed between Task.Run completion and this point: dispose
         // the VMs we built (their settings subscriptions would otherwise leak)
-        // and bail without publishing.
+        // and bail without publishing. Plan 47: the ore/refined VMs are now
+        // IDisposable too, so dispose them alongside the stats + pilot VMs.
         if (ct.IsCancellationRequested)
         {
             try { sessionStatsVm.Dispose(); } catch { /* defensive */ }
+            try { sessionOreVm.Dispose(); } catch { /* defensive */ }
+            try { sessionRefinedVm.Dispose(); } catch { /* defensive */ }
             foreach (var e in entries)
             {
                 try { e.Pilot.Dispose(); } catch { /* defensive */ }
+                try { e.Ore.Dispose(); } catch { /* defensive */ }
+                try { e.Refined.Dispose(); } catch { /* defensive */ }
             }
             return;
         }
@@ -437,7 +447,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                         sessions.Select(s => _statsRepo.GetSessionStatsAsync(s.SessionId, asOf, allowLazyFetch: false, ct))
                     ).ConfigureAwait(false);
 
-                    var vm = new CompareSessionViewModel(snapshots, sessionNames);
+                    var vm = new CompareSessionViewModel(_settings, snapshots, sessionNames);
                     transient.Add(vm);
 
                     // Success — ownership transfers to caller's publish step.
@@ -474,11 +484,18 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
     private void DisposePriorWidgets()
     {
-        // Single-mode VMs (StatConfigurable, IDisposable).
+        // Single-mode VMs. Plan 47: the ore/refined VMs are now IDisposable
+        // (text-size settings subscription) and MUST be disposed here too, along
+        // with each per-pilot entry's Ore + Refined — otherwise a SettingChanged
+        // handler leaks on every selection switch.
         try { SessionStats?.Dispose(); } catch { /* defensive */ }
+        try { SessionOreBreakdown?.Dispose(); } catch { /* defensive */ }
+        try { SessionRefinedBreakdown?.Dispose(); } catch { /* defensive */ }
         foreach (var entry in PerPilotEntries)
         {
             try { entry.Pilot.Dispose(); } catch { /* defensive */ }
+            try { entry.Ore.Dispose(); } catch { /* defensive */ }
+            try { entry.Refined.Dispose(); } catch { /* defensive */ }
         }
         SessionStats = null;
         SessionOreBreakdown = null;
@@ -489,8 +506,9 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         try { CompareSession?.Dispose(); } catch { /* defensive */ }
         CompareSession = null;
 
-        // Plan 46: lifetime rollup VM is not IDisposable — just drop the reference
-        // so it does not bleed across modes (runs before every rebuild).
+        // Plan 46/47: lifetime rollup VM is now IDisposable (text-size subscription) —
+        // dispose then drop the reference so it does not bleed across modes.
+        try { LifetimeSummary?.Dispose(); } catch { /* defensive */ }
         LifetimeSummary = null;
     }
 }

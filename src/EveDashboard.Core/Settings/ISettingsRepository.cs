@@ -319,6 +319,55 @@ public interface ISettingsRepository
     Task SetPerPilotStatsConfigAsync(long pilotId, WidgetStatsConfig value, CancellationToken ct = default);
 
     /// <summary>
+    /// Plan 47: read the persisted Reports DataGrid column widths for one grid
+    /// type. Returns <c>null</c> when missing or malformed (with Warning log on
+    /// malformed). A <c>null</c> result means "no user-resized columns; keep the
+    /// XAML default widths." The map is column-index -> pixel width, and contains
+    /// only the columns the user actually resized.
+    /// </summary>
+    /// <param name="gridKey">Grid-type key (e.g. <c>"sessions"</c>, <c>"ore"</c>, <c>"compare.rates"</c>).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Column-index -> pixel width, or <c>null</c> when unset/malformed.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="gridKey"/> is null.</exception>
+    Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default);
+
+    /// <summary>
+    /// Plan 47: persist the Reports DataGrid column widths for one grid type.
+    /// Raises <see cref="SettingChanged"/> with key
+    /// <c>"reports_column_widths.&lt;gridKey&gt;"</c>.
+    /// </summary>
+    /// <param name="gridKey">Grid-type key (e.g. <c>"sessions"</c>, <c>"ore"</c>, <c>"compare.rates"</c>).</param>
+    /// <param name="widths">Column-index -> pixel width map (only the resized columns).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="gridKey"/> or <paramref name="widths"/> is null.</exception>
+    Task SetReportsColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths, CancellationToken ct = default);
+
+    /// <summary>
+    /// Plan 47: read the per-element text-size (emphasis) overrides for one
+    /// Reports table widget type. Returns <c>null</c> when missing or malformed
+    /// (with Warning log on malformed). A <c>null</c> result means "every element
+    /// at the default <see cref="WidgetStats.StatEmphasis.None"/> look." The map
+    /// is element-key -> emphasis, and contains only the elements the user raised
+    /// above <see cref="WidgetStats.StatEmphasis.None"/>.
+    /// </summary>
+    /// <param name="widgetTypeKey">Widget-type key (one of <c>"ore"</c>, <c>"refined"</c>, <c>"compare"</c>, <c>"lifetime"</c>).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Element-key -> emphasis, or <c>null</c> when unset/malformed.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="widgetTypeKey"/> is null.</exception>
+    Task<IReadOnlyDictionary<string, WidgetStats.StatEmphasis>?> GetReportsTextSizeAsync(string widgetTypeKey, CancellationToken ct = default);
+
+    /// <summary>
+    /// Plan 47: persist the per-element text-size (emphasis) overrides for one
+    /// Reports table widget type. Raises <see cref="SettingChanged"/> with key
+    /// <c>"reports_text_size.&lt;widgetTypeKey&gt;"</c>.
+    /// </summary>
+    /// <param name="widgetTypeKey">Widget-type key (one of <c>"ore"</c>, <c>"refined"</c>, <c>"compare"</c>, <c>"lifetime"</c>).</param>
+    /// <param name="textSize">Element-key -> emphasis map (only the raised elements).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="widgetTypeKey"/> or <paramref name="textSize"/> is null.</exception>
+    Task SetReportsTextSizeAsync(string widgetTypeKey, IReadOnlyDictionary<string, WidgetStats.StatEmphasis> textSize, CancellationToken ct = default);
+
+    /// <summary>
     /// Seed default values for any setting key not yet present in the
     /// <c>setting</c> table. Idempotent — re-running is a no-op once defaults
     /// are present. Does NOT seed <c>schema_version</c> (plan 11 owns that),

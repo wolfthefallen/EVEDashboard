@@ -12,9 +12,9 @@
     -->
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Comparing sessions:"
-                   FontWeight="Bold"
-                   Margin="0,0,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [Header]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,2" />
         <ItemsControl ItemsSource="{Binding SessionNames}" Margin="0,0,0,8">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
@@ -28,23 +28,22 @@
         <!-- Plan 45 (decision 1.1 = C): grand-total labels + Total Refined Output
              table, shown ABOVE the Cumulative / Rates tables. -->
         <TextBlock Text="{Binding TotalTimeDisplay, StringFormat='TOTAL TIME:  {0}'}"
-                   FontWeight="Bold"
-                   FontSize="14"
-                   Margin="0,4,0,0"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [TotalTime]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,4,0,0" />
         <TextBlock Text="{Binding TotalIskDisplay, StringFormat='TOTAL ISK:  {0}'}"
-                   FontWeight="Bold"
-                   FontSize="14"
-                   Margin="0,0,0,8"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [TotalIsk]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,8" />
 
         <TextBlock Text="Total Refined Output"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [RefinedLabel]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,2" />
 
         <DataGrid x:Name="RefinedGrid"
                   ItemsSource="{Binding RefinedRows}"
+                  FontSize="{Binding [RefinedTable], Converter={StaticResource EmphasisToFontSize}}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
                   CanUserAddRows="False"
@@ -73,8 +72,7 @@
                                     SortMemberPath="Quantity">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -84,8 +82,7 @@
                                     SortMemberPath="Isk">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -93,12 +90,13 @@
         </DataGrid>
 
         <TextBlock Text="Cumulative"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [CumulativeLabel]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,2" />
 
         <DataGrid x:Name="CumulativeGrid"
                   ItemsSource="{Binding CumulativeRows}"
+                  FontSize="{Binding [CumulativeTable], Converter={StaticResource EmphasisToFontSize}}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="False"
                   CanUserAddRows="False"
@@ -123,12 +121,13 @@
         </DataGrid>
 
         <TextBlock Text="Rates"
-                   FontWeight="SemiBold"
-                   Margin="0,8,0,2"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [RatesLabel]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,8,0,2" />
 
         <DataGrid x:Name="RatesGrid"
                   ItemsSource="{Binding RateRows}"
+                  FontSize="{Binding [RatesTable], Converter={StaticResource EmphasisToFontSize}}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="False"
                   CanUserAddRows="False"

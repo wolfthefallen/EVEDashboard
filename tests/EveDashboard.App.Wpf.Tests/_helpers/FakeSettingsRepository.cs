@@ -258,6 +258,49 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
+    /// <summary>Plan 47 — per-grid-type Reports column widths, keyed by gridKey.</summary>
+    public Dictionary<string, IReadOnlyDictionary<int, double>> ReportsColumnWidths { get; } = new();
+
+    /// <summary>Plan 47 — per-widget-type Reports text-size emphasis, keyed by widgetTypeKey.</summary>
+    public Dictionary<string, IReadOnlyDictionary<string, StatEmphasis>> ReportsTextSize { get; } = new();
+
+    public int SetReportsColumnWidthsCount { get; private set; }
+    public int SetReportsTextSizeCount { get; private set; }
+
+    public Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(gridKey);
+        return Task.FromResult<IReadOnlyDictionary<int, double>?>(
+            ReportsColumnWidths.TryGetValue(gridKey, out var v) ? v : null);
+    }
+
+    public Task SetReportsColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(gridKey);
+        ArgumentNullException.ThrowIfNull(widths);
+        ReportsColumnWidths[gridKey] = widths;
+        SetReportsColumnWidthsCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs($"reports_column_widths.{gridKey}"));
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyDictionary<string, StatEmphasis>?> GetReportsTextSizeAsync(string widgetTypeKey, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(widgetTypeKey);
+        return Task.FromResult<IReadOnlyDictionary<string, StatEmphasis>?>(
+            ReportsTextSize.TryGetValue(widgetTypeKey, out var v) ? v : null);
+    }
+
+    public Task SetReportsTextSizeAsync(string widgetTypeKey, IReadOnlyDictionary<string, StatEmphasis> textSize, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(widgetTypeKey);
+        ArgumentNullException.ThrowIfNull(textSize);
+        ReportsTextSize[widgetTypeKey] = textSize;
+        SetReportsTextSizeCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs($"reports_text_size.{widgetTypeKey}"));
+        return Task.CompletedTask;
+    }
+
     public Task EnsureSeedDefaultsAsync(CancellationToken ct = default) => Task.CompletedTask;
 
     public event EventHandler<SettingChangedEventArgs>? SettingChanged;

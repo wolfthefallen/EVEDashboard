@@ -1,5 +1,6 @@
 using EveDashboard.Core.Layout;
 using EveDashboard.Core.Settings;
+using EveDashboard.Core.Settings.WidgetStats;
 using EveDashboard.Core.Storage;
 using EveDashboard.Persistence.Storage;
 using EveDashboard.Stats.Schema;
@@ -864,5 +865,186 @@ public class SqliteSettingsRepositoryTests
         await repo.SetReportsSidebarWidthAsync(280);
 
         keys.Should().ContainSingle().Which.Should().Be("reports_sidebar_width");
+    }
+
+    // ---- Reports column widths (plan 47) ------------------------------------------
+
+    [Fact]
+    public async Task GetReportsColumnWidthsAsync_returns_null_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        (await repo.GetReportsColumnWidthsAsync("ore")).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ReportsColumnWidths_round_trip_is_independent_per_grid_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetReportsColumnWidthsAsync("ore", new Dictionary<int, double> { [0] = 120.5, [2] = 80 });
+
+        var widths = await repo.GetReportsColumnWidthsAsync("ore");
+        widths.Should().NotBeNull();
+        widths!.Should().HaveCount(2);
+        widths[0].Should().Be(120.5);
+        widths[2].Should().Be(80);
+        // a different grid key is unaffected.
+        (await repo.GetReportsColumnWidthsAsync("refined")).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetReportsColumnWidthsAsync_overwrites_prior_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetReportsColumnWidthsAsync("ore", new Dictionary<int, double> { [0] = 100 });
+        await repo.SetReportsColumnWidthsAsync("ore", new Dictionary<int, double> { [1] = 200 });
+
+        var widths = await repo.GetReportsColumnWidthsAsync("ore");
+        widths.Should().NotBeNull();
+        widths!.Should().ContainKey(1).WhoseValue.Should().Be(200);
+        widths.Should().NotContainKey(0);
+    }
+
+    [Fact]
+    public async Task GetReportsColumnWidthsAsync_returns_null_and_logs_warning_when_json_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "reports_column_widths.ore", "{not-json");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        var widths = await repo.GetReportsColumnWidthsAsync("ore");
+
+        widths.Should().BeNull();
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Exception is System.Text.Json.JsonException);
+    }
+
+    [Fact]
+    public async Task SetReportsColumnWidthsAsync_raises_SettingChanged_with_scoped_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetReportsColumnWidthsAsync("compare.rates", new Dictionary<int, double> { [0] = 50 });
+
+        keys.Should().ContainSingle().Which.Should().Be("reports_column_widths.compare.rates");
+    }
+
+    [Fact]
+    public async Task ReportsColumnWidths_throws_on_null_args()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        Func<Task> nullGetKey = async () => await repo.GetReportsColumnWidthsAsync(null!);
+        Func<Task> nullSetKey = async () => await repo.SetReportsColumnWidthsAsync(null!, new Dictionary<int, double>());
+        Func<Task> nullSetVal = async () => await repo.SetReportsColumnWidthsAsync("ore", null!);
+
+        await nullGetKey.Should().ThrowAsync<ArgumentNullException>();
+        await nullSetKey.Should().ThrowAsync<ArgumentNullException>();
+        await nullSetVal.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    // ---- Reports text size (plan 47) ----------------------------------------------
+
+    [Fact]
+    public async Task GetReportsTextSizeAsync_returns_null_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        (await repo.GetReportsTextSizeAsync("ore")).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ReportsTextSize_round_trip_persists_emphasis_by_name()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetReportsTextSizeAsync("ore", new Dictionary<string, StatEmphasis>
+        {
+            ["Title"] = StatEmphasis.Hero,
+            ["Table"] = StatEmphasis.Header2,
+        });
+
+        // Stored as the enum NAME, not its ordinal, so reordering the enum is safe.
+        var raw = await db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'reports_text_size.ore'");
+        raw.Should().NotBeNull();
+        raw!.Should().Contain("Hero").And.Contain("Header2");
+
+        var map = await repo.GetReportsTextSizeAsync("ore");
+        map.Should().NotBeNull();
+        map!["Title"].Should().Be(StatEmphasis.Hero);
+        map["Table"].Should().Be(StatEmphasis.Header2);
+    }
+
+    [Fact]
+    public async Task SetReportsTextSizeAsync_overwrites_prior_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetReportsTextSizeAsync("ore", new Dictionary<string, StatEmphasis> { ["Title"] = StatEmphasis.Hero });
+        await repo.SetReportsTextSizeAsync("ore", new Dictionary<string, StatEmphasis> { ["Table"] = StatEmphasis.Header1 });
+
+        var map = await repo.GetReportsTextSizeAsync("ore");
+        map.Should().NotBeNull();
+        map!.Should().ContainKey("Table").WhoseValue.Should().Be(StatEmphasis.Header1);
+        map.Should().NotContainKey("Title");
+    }
+
+    [Fact]
+    public async Task GetReportsTextSizeAsync_returns_null_and_logs_warning_when_json_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "reports_text_size.ore", "{not-json");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        var map = await repo.GetReportsTextSizeAsync("ore");
+
+        map.Should().BeNull();
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Exception is System.Text.Json.JsonException);
+    }
+
+    [Fact]
+    public async Task SetReportsTextSizeAsync_raises_SettingChanged_with_scoped_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetReportsTextSizeAsync("lifetime", new Dictionary<string, StatEmphasis> { ["Title"] = StatEmphasis.Hero });
+
+        keys.Should().ContainSingle().Which.Should().Be("reports_text_size.lifetime");
+    }
+
+    [Fact]
+    public async Task ReportsTextSize_throws_on_null_args()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        Func<Task> nullGetKey = async () => await repo.GetReportsTextSizeAsync(null!);
+        Func<Task> nullSetKey = async () => await repo.SetReportsTextSizeAsync(null!, new Dictionary<string, StatEmphasis>());
+        Func<Task> nullSetVal = async () => await repo.SetReportsTextSizeAsync("ore", null!);
+
+        await nullGetKey.Should().ThrowAsync<ArgumentNullException>();
+        await nullSetKey.Should().ThrowAsync<ArgumentNullException>();
+        await nullSetVal.Should().ThrowAsync<ArgumentNullException>();
     }
 }

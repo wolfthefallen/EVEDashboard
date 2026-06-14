@@ -20,12 +20,14 @@
 
         <TextBlock Grid.Row="0"
                    Text="{Binding Title}"
-                   FontWeight="Bold"
-                   Margin="0,0,0,4"
-                   Foreground="{DynamicResource ForegroundBrush}" />
+                   Tag="{Binding [Title]}"
+                   Style="{StaticResource ReportsEmphasisLabel}"
+                   Margin="0,0,0,4" />
 
         <DataGrid Grid.Row="1"
+                  x:Name="OreGrid"
                   ItemsSource="{Binding Rows}"
+                  FontSize="{Binding [Table], Converter={StaticResource EmphasisToFontSize}}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
                   CanUserAddRows="False"
@@ -53,8 +55,7 @@
                                     SortMemberPath="VolumeM3">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -64,8 +65,7 @@
                                     SortMemberPath="Isk">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>

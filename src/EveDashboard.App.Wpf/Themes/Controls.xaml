@@ -1,6 +1,33 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+    xmlns:emphasis="clr-namespace:EveDashboard.Core.Settings.WidgetStats;assembly=EveDashboard.Core">
+
+    <!-- Plan 47: emphasis -> font converters, registered app-wide (Controls.xaml is merged in
+         App.xaml) so the Reports table widgets can size + weight their text off a StatEmphasis.
+         The DataGrid tables use EmphasisToFontSize directly (size only, decision 2.2 = B); the
+         labels use the ReportsEmphasisLabel style below for the full size+weight+accent look. -->
+    <converters:StatEmphasisToFontSizeConverter x:Key="EmphasisToFontSize" />
+    <converters:StatEmphasisToFontWeightConverter x:Key="EmphasisToFontWeight" />
+
+    <!-- Plan 47: the full active-session emphasis look for a Reports table-widget label.
+         Each label sets Tag="{Binding [ElementKey]}" (its resolved StatEmphasis) and
+         Style="{StaticResource ReportsEmphasisLabel}". Size + weight come from the Tag via the
+         converters; Hero swaps the foreground to the accent brush (DynamicResource, so it stays
+         theme-reactive exactly like the live StatRowTemplates). None inherits the plain look. -->
+    <Style x:Key="ReportsEmphasisLabel" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="FontSize"
+                Value="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource EmphasisToFontSize}}" />
+        <Setter Property="FontWeight"
+                Value="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource EmphasisToFontWeight}}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="{x:Static emphasis:StatEmphasis.Hero}">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 
     <!--
         Theme-independent control styles. Brushes and effects are pulled via
@@ -105,6 +132,26 @@
         <Setter Property="AlternatingRowBackground" Value="{DynamicResource HoverOverlayBrush}" />
     </Style>
 
+    <!-- Plan 47: column-resize gripper. The custom DataGridColumnHeader template below dropped the
+         default WPF header grippers, so columns could not be drag-resized. This invisible 8px-wide
+         transparent Thumb (cursor SizeWE) is re-inserted into the header template as the named parts
+         PART_LeftHeaderGripper / PART_RightHeaderGripper; the DataGrid drives column width through
+         those named thumbs. Implicit on every DataGridColumnHeader app-wide (CanUserResizeColumns
+         defaults true), so this restores native drag-resize everywhere. -->
+    <Style x:Key="ColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="SizeWE" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type DataGridColumnHeader}">
         <Setter Property="Background" Value="{DynamicResource WidgetBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -129,6 +176,15 @@
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                         </Border>
+                        <!-- Plan 47: resize grippers MUST be named exactly PART_LeftHeaderGripper /
+                             PART_RightHeaderGripper (the DataGrid finds resize parts by name) and sit
+                             LAST in the Grid so they are top of z-order and hit-testable. -->
+                        <Thumb x:Name="PART_LeftHeaderGripper"
+                               HorizontalAlignment="Left"
+                               Style="{StaticResource ColumnHeaderGripperStyle}" />
+                        <Thumb x:Name="PART_RightHeaderGripper"
+                               HorizontalAlignment="Right"
+                               Style="{StaticResource ColumnHeaderGripperStyle}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

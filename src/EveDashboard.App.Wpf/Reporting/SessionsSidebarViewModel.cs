@@ -4,6 +4,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EveDashboard.App.Wpf.Dialogs;
+using EveDashboard.App.Wpf.Widgets;
 using EveDashboard.Core.Settings;
 using EveDashboard.Reporting;
 using EveDashboard.Reporting.Compare;
@@ -35,7 +36,7 @@ using Microsoft.Extensions.Logging;
 /// snapshots the previously-checked <c>SessionId</c>s and click order, then
 /// re-applies <c>IsChecked</c> to surviving wrappers in original order.
 /// </remarks>
-public sealed partial class SessionsSidebarViewModel : ObservableObject
+public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumnWidthStore
 {
     private readonly IReportingQueries _queries;
     private readonly ISettingsRepository _settings;
@@ -70,6 +71,30 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject
     /// <summary>Sidebar's width in device-independent pixels. Persisted to <c>reports_sidebar_width</c>. Default 280.</summary>
     [ObservableProperty]
     private double _expandedWidth = 280;
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, double>?> LoadColumnWidthsAsync(string gridKey, CancellationToken ct = default)
+        => _settings.GetReportsColumnWidthsAsync(gridKey, ct);
+
+    /// <inheritdoc />
+    public void SaveColumnWidths(string gridKey, IReadOnlyDictionary<int, double> widths)
+    {
+        ArgumentNullException.ThrowIfNull(gridKey);
+        ArgumentNullException.ThrowIfNull(widths);
+        _ = SaveColumnWidthsAsync(gridKey, widths);
+    }
+
+    private async Task SaveColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths)
+    {
+        try
+        {
+            await _settings.SetReportsColumnWidthsAsync(gridKey, widths).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Failed to persist Reports sidebar column widths for grid '{Grid}'.", gridKey);
+        }
+    }
 
     /// <summary>
     /// Plan 46: the all-time rollup across every saved session, recomputed by
