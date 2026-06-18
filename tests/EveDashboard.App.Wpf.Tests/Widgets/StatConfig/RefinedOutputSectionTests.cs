@@ -9,10 +9,12 @@ using FluentAssertions;
 
 /// <summary>
 /// Plan 43: the opt-in "Refined output" section on
-/// <see cref="StatConfigurableWidgetViewModel"/> — merge (a material never
-/// disappears once seen; quantities grow; sorted by quantity desc) + visibility
-/// resolution (explicit override wins, else the auto-show default). Exercised
-/// through a minimal concrete test widget.
+/// <see cref="StatConfigurableWidgetViewModel"/> — replace-from-snapshot (the
+/// section mirrors the latest snapshot exactly; within a session quantities grow
+/// because snapshots are cumulative, and an empty snapshot clears the section —
+/// bug 1, 2026-06-18; sorted by quantity desc) + visibility resolution (explicit
+/// override wins, else the auto-show default). Exercised through a minimal
+/// concrete test widget.
 /// </summary>
 public class RefinedOutputSectionTests
 {
@@ -101,5 +103,38 @@ public class RefinedOutputSectionTests
 
         w.RefinedOutput.Select(r => (r.Name, r.Quantity))
             .Should().Equal(("Tritanium", 900L), ("Pyerite", 500L));
+    }
+
+    [Fact]
+    public void Empty_snapshot_clears_the_section()
+    {
+        // Bug 1 (2026-06-18): a new session pushes an empty snapshot; the section
+        // MUST reset. Before the fix the empty merge was a no-op and the prior
+        // session's materials persisted in the singleton SessionStats widget.
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true };
+        using var w = new TestWidget(settings, scopeKey: string.Empty);
+
+        w.Merge(Mat(34, "Tritanium", 1000), Mat(35, "Pyerite", 500));
+        w.RefinedOutput.Should().HaveCount(2);
+
+        w.Merge(/* empty snapshot = new session with no refined output yet */);
+
+        w.RefinedOutput.Should().BeEmpty("an empty snapshot (new session) clears the refined-output section");
+    }
+
+    [Fact]
+    public void Material_absent_from_a_later_snapshot_is_dropped()
+    {
+        // Replace-from-snapshot contract: the section mirrors the latest snapshot,
+        // so a material not present in a later snapshot disappears. (In production
+        // this cannot happen mid-session because snapshots are cumulative; this
+        // locks the contract that makes the new-session reset work.)
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true };
+        using var w = new TestWidget(settings, scopeKey: string.Empty);
+
+        w.Merge(Mat(34, "Tritanium", 1000), Mat(35, "Pyerite", 500));
+        w.Merge(Mat(34, "Tritanium", 1000));
+
+        w.RefinedOutput.Select(r => r.Name).Should().Equal("Tritanium");
     }
 }

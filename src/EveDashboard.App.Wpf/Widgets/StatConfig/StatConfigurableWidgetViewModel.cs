@@ -172,6 +172,10 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     private string? _refinedScopeKey;
     private bool _refinedAutoShow = true;
     private Dictionary<long, bool> _refinedOverrides = new();
+    // The materials currently in the section. Mirrors the latest snapshot exactly
+    // (cleared + repopulated by MergeRefinedOutput each call) — NOT an ever-growing
+    // set. This is what lets a new session's empty snapshot reset the display
+    // (bug 1, 2026-06-18); see MergeRefinedOutput.
     private readonly Dictionary<long, RefinedMaterialAmount> _refinedSeen = new();
 
     /// <summary>Plan 43: the visible refined-material rows (quantity desc). Empty unless <see cref="EnableRefinedOutput"/> was called.</summary>
@@ -207,15 +211,24 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     }
 
     /// <summary>
-    /// Plan 43: merge the latest refined-output snapshot into the section
-    /// (called by subclasses on each refresh). A material never disappears once
-    /// seen; quantities only grow. No-op when refined output is not enabled.
+    /// Plan 43: replace the section's contents with the latest refined-output
+    /// snapshot (called by subclasses on each refresh). The snapshot from
+    /// <c>GetSessionStatsAsync</c> is ALREADY the complete cumulative refined
+    /// output for the current session, so the section simply mirrors it:
+    /// <see cref="_refinedSeen"/> is cleared and repopulated each call. Within a
+    /// session this is behaviour-identical to accumulating (snapshots are
+    /// monotonic — a mined material stays in every later snapshot), but it also
+    /// means an EMPTY snapshot clears the section, which is how a new session
+    /// resets the display (bug 1, 2026-06-18 — the singleton SessionStats VM's
+    /// <see cref="_refinedSeen"/> previously survived across sessions and an
+    /// empty merge was a no-op). No-op when refined output is not enabled.
     /// </summary>
-    /// <param name="snapshot">The latest refined-output amounts for this widget's scope.</param>
+    /// <param name="snapshot">The latest (complete, cumulative) refined-output amounts for this widget's scope.</param>
     protected void MergeRefinedOutput(IReadOnlyList<RefinedMaterialAmount> snapshot)
     {
         if (_refinedScopeKey is null) return;
         ArgumentNullException.ThrowIfNull(snapshot);
+        _refinedSeen.Clear();
         foreach (var m in snapshot)
         {
             _refinedSeen[m.TypeId] = m;

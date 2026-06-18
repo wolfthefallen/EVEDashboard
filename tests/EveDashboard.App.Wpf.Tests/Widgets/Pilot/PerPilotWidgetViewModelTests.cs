@@ -32,6 +32,19 @@ public class PerPilotWidgetViewModelTests
             NoOpCallback(),
             NullLogger<PerPilotWidgetViewModel>.Instance);
 
+    /// <summary>Build a zero-stats <see cref="CharacterStats"/> carrying the given refined-output rows.</summary>
+    private static CharacterStats StatsWithRefined(params RefinedMaterialAmount[] refined) =>
+        new(
+            PilotId: 1, LastEventAt: null,
+            TotalM3Mined: 0, M3PerSecond: 0,
+            TotalIskMined: 0, IskPerHour: 0,
+            TotalIskFromCrits: 0, CritIskPercent: 0,
+            TotalM3FromCrits: 0, CritCount: 0, CritChance: 0,
+            Role: PilotRole.Miner)
+        {
+            RefinedOutput = refined,
+        };
+
     [Fact]
     public void Ctor_throws_on_null_pilotName()
     {
@@ -159,6 +172,28 @@ public class PerPilotWidgetViewModelTests
         vm.ApplyStats(stats);
 
         vm.LastEventAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void ApplyStats_shows_refined_output_then_clears_it_on_an_empty_new_session_snapshot()
+    {
+        // Bug 1 (2026-06-18) belt-and-suspenders for the per-pilot path. In
+        // production the coordinator recreates per-pilot VMs per session, so this
+        // could not be reproduced from the source; this locks in that the shared
+        // base-class fix also resets a reused instance when a new session's first
+        // snapshot carries no refined output (empty), so old materials cannot
+        // "show back up and get added".
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true };
+        using var vm = NewVm(1, "p", settings: settings);
+
+        // Session A: this pilot has refined output.
+        vm.ApplyStats(StatsWithRefined(new RefinedMaterialAmount(34, "Tritanium", 1000)));
+        vm.RefinedOutput.Select(r => r.Name).Should().Equal("Tritanium");
+
+        // Session B (new): the first per-pilot snapshot carries no refined output.
+        vm.ApplyStats(StatsWithRefined(/* none */));
+
+        vm.RefinedOutput.Should().BeEmpty("a new session's empty refined snapshot resets the per-pilot section");
     }
 
     [Fact]

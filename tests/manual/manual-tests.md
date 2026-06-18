@@ -1377,6 +1377,14 @@ Veldspar -> Tritanium; or Kylixium -> Tritanium / Pyerite / Mexallon).
      sortable) lists EVERY refined material for the session, plus a per-pilot
      "refined output" breakdown under each pilot — regardless of anything you
      hid live (decision 1.3 = A). Quantities match the live totals.
+6. **A new session clears the refined output (bug 1 / issue #2).** After a
+   session that produced refined output (above), Stop it, then start a brand-new
+   session (New Session -> Start) and Continue it.
+   - Expected: at the moment the new session starts, BOTH the Session widget's
+     and every per-pilot widget's "Refined output" section is EMPTY — the prior
+     session's materials do not carry over. As you mine in the new session, only
+     the new session's materials appear and their quantities reflect only this
+     session (not added on top of the previous one).
 
 ### Cleanup
 
