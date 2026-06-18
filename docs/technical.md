@@ -569,6 +569,8 @@ Environment variables in `gamelog_path` (e.g. `%USERPROFILE%`) are expanded.
 | `widget_layout` | JSON | Order + hidden flag for each widget. |
 | `session_stats_config` | JSON | Stat-row order / visibility / emphasis for the SessionStats widget. |
 | `per_pilot_stats_config.<pilot_id>` | JSON | Same, per pilot. |
+| `reports_column_widths.<grid_key>` | JSON | Reports DataGrid column widths per grid type (column index -> pixel width); only user-resized columns are stored. |
+| `reports_text_size.<widget_type>` | JSON | Reports table-widget text emphasis per widget type (element key -> `StatEmphasis`); only elements that deviate from their default are stored. |
 
 ### Logs
 
