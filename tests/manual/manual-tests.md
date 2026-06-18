@@ -493,9 +493,10 @@ clean slate next round.
 
 ## 6. Auto-pause / auto-resume
 
-Plan 37. Verifies that an idle session auto-pauses with a notification
-sound and that the next mining event auto-resumes the session with the
-triggering event counted in the totals.
+Plan 37 / plan 50. Verifies that an idle session auto-pauses with a
+notification sound, that the next mining event auto-resumes the session with
+the triggering event counted in the totals, and that the sound volume slider
+scales playback (plan 50).
 
 ### Setup
 
@@ -556,11 +557,22 @@ events are flowing (TotalM3 advances).
      only the following Tick / Crit does. (Residue almost never
      arrives without a preceding Tick, so this is mainly a regression
      guard.)
+8. **Sound volume slider (plan 50).** Open Settings -> Auto-pause. A
+   **Volume** slider (default ~65%) sits under the sound checkbox.
+   - It is ENABLED only while "Play sounds on auto-pause / auto-resume"
+     is checked: uncheck the box -> the slider greys out; re-check it
+     -> the slider is active again.
+   - With the box checked, set the slider low (~15%), Apply, Close, and
+     trigger an auto-pause (idle 1+ minute) -> `Miners_have_stopped.wav`
+     plays QUIETLY.
+   - Reopen Settings, set the slider to 100%, Apply, trigger another
+     auto-pause -> the sound is noticeably LOUDER.
+   - A fresh install defaults to 65%.
 
 ### Cleanup
 
 Stop the session. Open Settings; restore Idle minutes to `5`; ensure
-sound enabled = checked; Apply; Close.
+sound enabled = checked and Volume = 65%; Apply; Close.
 
 ---
 

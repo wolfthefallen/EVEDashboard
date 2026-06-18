@@ -554,7 +554,7 @@ public class SqliteSettingsRepositoryTests
     // ---- EnsureSeedDefaultsAsync --------------------------------------------------
 
     [Fact]
-    public async Task EnsureSeedDefaultsAsync_seeds_eight_keys_on_fresh_db_skips_window_geometry()
+    public async Task EnsureSeedDefaultsAsync_seeds_nine_keys_on_fresh_db_skips_window_geometry()
     {
         await using var db = await NewSchemaAsync();
         var repo = NewRepo(db);
@@ -568,13 +568,14 @@ public class SqliteSettingsRepositoryTests
         // schema_version is seeded by SchemaInitializer (plan 11); the repo
         // defaults are theme / price_mode / refining_yield_percent /
         // selected_station_id (plan 14), auto_pause_idle_minutes +
-        // auto_pause_sound_enabled (plan 37), auto_show_refined_materials
-        // (plan 43), and show_pilot_refined_output (plan 49). window_geometry
-        // intentionally NOT seeded (round-2 3.1 = B).
+        // auto_pause_sound_enabled (plan 37), auto_pause_sound_volume (plan 50),
+        // auto_show_refined_materials (plan 43), and show_pilot_refined_output
+        // (plan 49). window_geometry intentionally NOT seeded (round-2 3.1 = B).
         keys.Should().BeEquivalentTo(new[]
         {
             "auto_pause_idle_minutes",
             "auto_pause_sound_enabled",
+            "auto_pause_sound_volume",
             "auto_show_refined_materials",
             "price_mode",
             "refining_yield_percent",
@@ -591,6 +592,7 @@ public class SqliteSettingsRepositoryTests
         (await repo.GetAutoPauseIdleMinutesAsync()).Should().Be(5);
         (await repo.GetAutoPauseSoundEnabledAsync()).Should().BeTrue();
         (await repo.GetShowPilotRefinedOutputAsync()).Should().BeTrue();
+        (await repo.GetAutoPauseSoundVolumeAsync()).Should().Be(65);
     }
 
     [Fact]

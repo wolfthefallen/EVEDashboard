@@ -213,6 +213,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="220" />
@@ -235,6 +236,28 @@
                                   Content="Play sounds on auto-pause / auto-resume"
                                   IsChecked="{Binding AutoPauseSoundEnabled, Mode=TwoWay}"
                                   Foreground="{DynamicResource ForegroundBrush}" />
+
+                        <!-- Plan 50: notification volume. Disabled (greyed) while the
+                             sound checkbox above is unchecked (decision 5.2 = A). -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal"
+                                    Margin="0,8,0,0"
+                                    IsEnabled="{Binding AutoPauseSoundEnabled}">
+                            <TextBlock Text="Volume:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource ForegroundBrush}" />
+                            <Slider x:Name="AutoPauseSoundVolumeSlider"
+                                    Width="200"
+                                    Minimum="0" Maximum="100"
+                                    TickFrequency="5" IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    Value="{Binding AutoPauseSoundVolume, Mode=TwoWay}" />
+                            <TextBlock VerticalAlignment="Center"
+                                       Margin="8,0,0,0"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       Text="{Binding AutoPauseSoundVolume, StringFormat={}{0}%}" />
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
 

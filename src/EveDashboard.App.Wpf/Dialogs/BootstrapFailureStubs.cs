@@ -189,6 +189,14 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />
+    public Task<int> GetAutoPauseSoundVolumeAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetAutoPauseSoundVolumeAsync(int volume, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 

@@ -41,6 +41,11 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     private const int IdleMinutesMax = 60;
     private const int IdleMinutesDefault = 5;
 
+    // Plan 50 — auto-pause sound volume bounds + default (percent).
+    private const int VolumeMin = 0;
+    private const int VolumeMax = 100;
+    private const int VolumeDefault = 65;
+
     private static readonly JsonSerializerOptions WidgetLayoutJsonOptions = CreateWidgetLayoutJsonOptions();
 
     private static JsonSerializerOptions CreateWidgetLayoutJsonOptions()
@@ -222,6 +227,43 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     {
         await UpsertAsync("auto_pause_sound_enabled", enabled ? "true" : "false", ct);
         RaiseSettingChanged("auto_pause_sound_enabled");
+    }
+
+    /// <inheritdoc />
+    public async Task<int> GetAutoPauseSoundVolumeAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'auto_pause_sound_volume'", ct: ct);
+        if (raw is null) return VolumeDefault;
+        if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+        {
+            _log.LogWarning(
+                "auto_pause_sound_volume value '{Raw}' is not a valid integer - returning default {Default}.",
+                raw, VolumeDefault);
+            return VolumeDefault;
+        }
+        var clamped = Math.Clamp(parsed, VolumeMin, VolumeMax);
+        if (clamped != parsed)
+        {
+            _log.LogWarning(
+                "auto_pause_sound_volume stored value {Stored} out of range [{Min}, {Max}] - clamping to {Clamped}.",
+                parsed, VolumeMin, VolumeMax, clamped);
+        }
+        return clamped;
+    }
+
+    /// <inheritdoc />
+    public async Task SetAutoPauseSoundVolumeAsync(int volume, CancellationToken ct = default)
+    {
+        var clamped = Math.Clamp(volume, VolumeMin, VolumeMax);
+        if (clamped != volume)
+        {
+            _log.LogWarning(
+                "auto_pause_sound_volume {Original} out of range [{Min}, {Max}] - clamping to {Clamped}.",
+                volume, VolumeMin, VolumeMax, clamped);
+        }
+        await UpsertAsync("auto_pause_sound_volume", clamped.ToString(CultureInfo.InvariantCulture), ct);
+        RaiseSettingChanged("auto_pause_sound_volume");
     }
 
     /// <inheritdoc />
@@ -679,6 +721,9 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         await SeedAsync("auto_pause_idle_minutes",
             IdleMinutesDefault.ToString(CultureInfo.InvariantCulture), ct);
         await SeedAsync("auto_pause_sound_enabled", "true", ct);
+        // Plan 50 — auto-pause sound volume default 65%.
+        await SeedAsync("auto_pause_sound_volume",
+            VolumeDefault.ToString(CultureInfo.InvariantCulture), ct);
         // Plan 43 — refined-output auto-show default on.
         await SeedAsync("auto_show_refined_materials", "true", ct);
         // Plan 49 (issue #1) — per-pilot refined-output toggle default on.

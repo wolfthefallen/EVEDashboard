@@ -170,8 +170,12 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
     /// <summary>Plan 37 — auto-pause / auto-resume notification sounds on/off.</summary>
     public bool AutoPauseSoundEnabled { get; set; } = true;
 
+    /// <summary>Plan 50 — auto-pause sound volume percent (default 65).</summary>
+    public int AutoPauseSoundVolume { get; set; } = 65;
+
     public int SetAutoPauseIdleMinutesCount { get; private set; }
     public int SetAutoPauseSoundEnabledCount { get; private set; }
+    public int SetAutoPauseSoundVolumeCount { get; private set; }
 
     public Task<int> GetAutoPauseIdleMinutesAsync(CancellationToken ct = default) =>
         Task.FromResult(AutoPauseIdleMinutes);
@@ -192,6 +196,17 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         AutoPauseSoundEnabled = enabled;
         SetAutoPauseSoundEnabledCount++;
         SettingChanged?.Invoke(this, new SettingChangedEventArgs("auto_pause_sound_enabled"));
+        return Task.CompletedTask;
+    }
+
+    public Task<int> GetAutoPauseSoundVolumeAsync(CancellationToken ct = default) =>
+        Task.FromResult(AutoPauseSoundVolume);
+
+    public Task SetAutoPauseSoundVolumeAsync(int volume, CancellationToken ct = default)
+    {
+        AutoPauseSoundVolume = volume;
+        SetAutoPauseSoundVolumeCount++;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("auto_pause_sound_volume"));
         return Task.CompletedTask;
     }
 

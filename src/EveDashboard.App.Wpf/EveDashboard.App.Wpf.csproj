@@ -98,6 +98,12 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
+    <!-- Plan 50: audio engine for the auto-pause / auto-resume notification
+         sounds. Replaces System.Media.SoundPlayer so the volume slider can apply
+         a real per-sound gain (SoundPlayer has no volume API). Managed-only — it
+         P/Invokes Windows' own audio APIs, so it bundles into the single-file
+         self-contained EXE with no extra native payload. -->
+    <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
 
 </Project>

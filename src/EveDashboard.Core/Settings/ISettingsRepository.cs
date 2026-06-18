@@ -105,6 +105,25 @@ public interface ISettingsRepository
     Task SetAutoPauseSoundEnabledAsync(bool enabled, CancellationToken ct = default);
 
     /// <summary>
+    /// Plan 50: read the auto-pause / auto-resume notification volume as a percent
+    /// in <c>[0, 100]</c>. Returns <c>65</c> when missing. Stored values outside
+    /// <c>[0, 100]</c> are clamped (with Warning log); malformed (non-integer)
+    /// values return the default <c>65</c> (also with Warning log).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted volume percent in <c>[0, 100]</c>, or <c>65</c>.</returns>
+    Task<int> GetAutoPauseSoundVolumeAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Plan 50: persist the auto-pause notification volume percent. Values outside
+    /// <c>[0, 100]</c> are clamped (with Warning log). Raises
+    /// <see cref="SettingChanged"/> with key <c>"auto_pause_sound_volume"</c>.
+    /// </summary>
+    /// <param name="volume">Volume percent. Clamped to <c>[0, 100]</c>.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetAutoPauseSoundVolumeAsync(int volume, CancellationToken ct = default);
+
+    /// <summary>
     /// Read the currently selected station id (drives ISK calc in plan 18).
     /// Returns <c>60003760</c> (Jita) when missing, when the stored value is
     /// not a valid <see cref="long"/>, or when the saved id has no row in

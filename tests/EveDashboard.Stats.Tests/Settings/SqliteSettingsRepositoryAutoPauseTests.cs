@@ -187,6 +187,90 @@ public class SqliteSettingsRepositoryAutoPauseTests
         keys.Should().ContainSingle().Which.Should().Be("auto_pause_sound_enabled");
     }
 
+    // ---- Sound volume: defaults / clamp / malformed (plan 50) ----------------------
+
+    [Fact]
+    public async Task GetAutoPauseSoundVolumeAsync_returns_default_65_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var volume = await repo.GetAutoPauseSoundVolumeAsync();
+
+        volume.Should().Be(65);
+    }
+
+    [Theory]
+    [InlineData("-10", 0)]   // below range -> clamped to min
+    [InlineData("250", 100)] // above range -> clamped to max
+    public async Task GetAutoPauseSoundVolumeAsync_clamps_out_of_range_stored_value(string stored, int expected)
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "auto_pause_sound_volume", stored);
+        var capturing = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, capturing);
+
+        var volume = await repo.GetAutoPauseSoundVolumeAsync();
+
+        volume.Should().Be(expected);
+        capturing.Entries.Should().Contain(e => e.Message.Contains("clamping"));
+    }
+
+    [Fact]
+    public async Task GetAutoPauseSoundVolumeAsync_returns_default_with_warning_on_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "auto_pause_sound_volume", "loud");
+        var capturing = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, capturing);
+
+        var volume = await repo.GetAutoPauseSoundVolumeAsync();
+
+        volume.Should().Be(65);
+        capturing.Entries.Should().Contain(e => e.Message.Contains("not a valid integer"));
+    }
+
+    [Fact]
+    public async Task SetAutoPauseSoundVolumeAsync_persists_in_range_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetAutoPauseSoundVolumeAsync(40);
+
+        var volume = await repo.GetAutoPauseSoundVolumeAsync();
+        volume.Should().Be(40);
+    }
+
+    [Theory]
+    [InlineData(-5, 0)]
+    [InlineData(150, 100)]
+    public async Task SetAutoPauseSoundVolumeAsync_clamps_out_of_range(int input, int expected)
+    {
+        await using var db = await NewSchemaAsync();
+        var capturing = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, capturing);
+
+        await repo.SetAutoPauseSoundVolumeAsync(input);
+
+        var volume = await repo.GetAutoPauseSoundVolumeAsync();
+        volume.Should().Be(expected);
+        capturing.Entries.Should().Contain(e => e.Message.Contains("clamping"));
+    }
+
+    [Fact]
+    public async Task SetAutoPauseSoundVolumeAsync_raises_SettingChanged_with_correct_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetAutoPauseSoundVolumeAsync(30);
+
+        keys.Should().ContainSingle().Which.Should().Be("auto_pause_sound_volume");
+    }
+
     // ---- Seed defaults --------------------------------------------------------------
 
     [Fact]
@@ -199,6 +283,19 @@ public class SqliteSettingsRepositoryAutoPauseTests
 
         (await repo.GetAutoPauseIdleMinutesAsync()).Should().Be(5);
         (await repo.GetAutoPauseSoundEnabledAsync()).Should().BeTrue();
+        (await repo.GetAutoPauseSoundVolumeAsync()).Should().Be(65);
+    }
+
+    [Fact]
+    public async Task EnsureSeedDefaultsAsync_does_not_overwrite_existing_sound_volume()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "auto_pause_sound_volume", "20");
+        var repo = NewRepo(db);
+
+        await repo.EnsureSeedDefaultsAsync();
+
+        (await repo.GetAutoPauseSoundVolumeAsync()).Should().Be(20);
     }
 
     [Fact]

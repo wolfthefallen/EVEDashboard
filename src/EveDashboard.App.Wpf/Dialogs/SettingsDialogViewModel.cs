@@ -83,6 +83,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     private string _gamelogPath = string.Empty;
     private string _autoPauseIdleMinutesText = string.Empty;
     private bool _autoPauseSoundEnabled = true;
+    private int _autoPauseSoundVolume = 65;
     private bool _autoShowRefinedMaterials = true;
     private bool _showPilotRefinedOutput = true;
     private bool _dirty;
@@ -192,6 +193,17 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     {
         get => _autoPauseSoundEnabled;
         set => SetField(ref _autoPauseSoundEnabled, value);
+    }
+
+    /// <summary>
+    /// Plan 50 — auto-pause / auto-resume notification volume percent (0-100).
+    /// Bound to the Settings slider; setter marks the VM dirty. The repository
+    /// clamps to range on persist.
+    /// </summary>
+    public int AutoPauseSoundVolume
+    {
+        get => _autoPauseSoundVolume;
+        set => SetField(ref _autoPauseSoundVolume, value);
     }
 
     /// <summary>
@@ -315,6 +327,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // Plan 37 — auto-pause section.
         var idleMinutes = await _settings.GetAutoPauseIdleMinutesAsync(ct).ConfigureAwait(true);
         var soundEnabled = await _settings.GetAutoPauseSoundEnabledAsync(ct).ConfigureAwait(true);
+        var soundVolume = await _settings.GetAutoPauseSoundVolumeAsync(ct).ConfigureAwait(true);
         // Plan 43 — refined-output auto-show.
         var autoShowRefined = await _settings.GetAutoShowRefinedMaterialsAsync(ct).ConfigureAwait(true);
         // Plan 49 — per-pilot refined-output toggle.
@@ -339,6 +352,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // Plan 37 — populate the auto-pause fields.
         _autoPauseIdleMinutesText = idleMinutes.ToString(CultureInfo.InvariantCulture);
         _autoPauseSoundEnabled = soundEnabled;
+        _autoPauseSoundVolume = soundVolume;
         _autoShowRefinedMaterials = autoShowRefined;
         _showPilotRefinedOutput = showPilotRefined;
 
@@ -381,6 +395,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         var idleValue = int.Parse(_autoPauseIdleMinutesText, NumberStyles.Integer, CultureInfo.InvariantCulture);
         await _settings.SetAutoPauseIdleMinutesAsync(idleValue, ct).ConfigureAwait(true);
         await _settings.SetAutoPauseSoundEnabledAsync(_autoPauseSoundEnabled, ct).ConfigureAwait(true);
+        await _settings.SetAutoPauseSoundVolumeAsync(_autoPauseSoundVolume, ct).ConfigureAwait(true);
         await _settings.SetAutoShowRefinedMaterialsAsync(_autoShowRefinedMaterials, ct).ConfigureAwait(true);
         await _settings.SetShowPilotRefinedOutputAsync(_showPilotRefinedOutput, ct).ConfigureAwait(true);
 
