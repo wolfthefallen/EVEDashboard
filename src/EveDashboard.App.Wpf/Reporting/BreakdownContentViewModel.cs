@@ -3,7 +3,6 @@ namespace EveDashboard.App.Wpf.Reporting;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.App.Wpf.Reporting.Compare;
-using EveDashboard.App.Wpf.Reporting.Lifetime;
 using EveDashboard.App.Wpf.Reporting.Widgets;
 using EveDashboard.App.Wpf.Widgets.Pilot;
 using EveDashboard.App.Wpf.Widgets.Session;
@@ -21,9 +20,6 @@ public enum BreakdownContentMode
 
     /// <summary>Two or more sessions selected — render compare-mode comparison tables.</summary>
     Compare,
-
-    /// <summary>No session selected (plan 46) — render the all-time lifetime rollup.</summary>
-    Lifetime,
 }
 
 /// <summary>Triple of (per-pilot-stats, per-pilot-ore, per-pilot-refined) widgets for one pilot in the saved session — single mode.</summary>
@@ -94,10 +90,6 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     [ObservableProperty]
     private CompareSessionViewModel? _compareSession;
 
-    /// <summary>Plan 46: the empty-selection lifetime-rollup widget VM, or null when single / compare mode.</summary>
-    [ObservableProperty]
-    private LifetimeSummaryViewModel? _lifetimeSummary;
-
     // ---- Shared chrome --------------------------------------------------
 
     /// <summary>
@@ -165,11 +157,10 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     /// clears <see cref="IsLoading"/> so the spinner stays visible across a
     /// burst of rapid checkbox toggles.
     /// </summary>
-    /// <param name="sessionsInOrder">Selected sidebar rows, ordered by user click sequence. Empty list = lifetime mode (plan 46); 1 entry = single mode; 2+ entries = compare mode.</param>
-    /// <param name="lifetime">Plan 46: the cached all-time rollup, rendered when the selection is empty. When null on an empty selection the pane stays blank (defensive — e.g. a failed sidebar load).</param>
+    /// <param name="sessionsInOrder">Selected sidebar rows, ordered by user click sequence. Empty list = blank pane (plan 51); 1 entry = single mode; 2+ entries = compare mode.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="sessionsInOrder"/> is null.</exception>
-    public Task LoadAsync(IReadOnlyList<SessionSummaryRow> sessionsInOrder, LifetimeSummary? lifetime = null, CancellationToken ct = default)
+    public Task LoadAsync(IReadOnlyList<SessionSummaryRow> sessionsInOrder, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(sessionsInOrder);
 
@@ -190,7 +181,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         // arriving work always sees a consistent VM state (the cancelled
         // load's catch finishes before the new one starts).
         var previous = _loadChain;
-        var thisLoad = RunChainedAsync(previous, sessionsInOrder, lifetime, newCts.Token);
+        var thisLoad = RunChainedAsync(previous, sessionsInOrder, newCts.Token);
         _loadChain = thisLoad;
 
         // Only the last-queued task clears IsLoading. Mid-chain (cancelled)
@@ -221,7 +212,6 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     private async Task RunChainedAsync(
         Task previous,
         IReadOnlyList<SessionSummaryRow> sessionsInOrder,
-        LifetimeSummary? lifetime,
         CancellationToken ct)
     {
         // Yield at Background priority (4) so the dispatcher processes the
@@ -245,18 +235,10 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
             if (sessionsInOrder.Count == 0)
             {
-                // Plan 46: empty selection shows the cached all-time rollup. If no
-                // lifetime was supplied (e.g. a failed sidebar load), fall back to
-                // the blank single-mode pane defensively.
-                if (lifetime is not null)
-                {
-                    LifetimeSummary = new LifetimeSummaryViewModel(lifetime, _settings);
-                    Mode = BreakdownContentMode.Lifetime;
-                }
-                else
-                {
-                    Mode = BreakdownContentMode.Single;
-                }
+                // Plan 51: empty selection leaves the pane blank. Single mode with
+                // all bound props null renders nothing; the all-time rollup moved
+                // to its own window (the Reports "Lifetime Totals" button).
+                Mode = BreakdownContentMode.Single;
                 return;
             }
 
@@ -505,10 +487,5 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         // Plan 36: compare-mode subtree collapsed to a single VM.
         try { CompareSession?.Dispose(); } catch { /* defensive */ }
         CompareSession = null;
-
-        // Plan 46/47: lifetime rollup VM is now IDisposable (text-size subscription) —
-        // dispose then drop the reference so it does not bleed across modes.
-        try { LifetimeSummary?.Dispose(); } catch { /* defensive */ }
-        LifetimeSummary = null;
     }
 }

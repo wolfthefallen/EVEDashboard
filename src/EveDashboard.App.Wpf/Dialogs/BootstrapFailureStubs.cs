@@ -117,6 +117,14 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />
+    public Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
     public Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 

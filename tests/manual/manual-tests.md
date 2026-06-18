@@ -689,13 +689,15 @@ changes from viewing reports.
 
 ---
 
-## 9. Reports — empty-state lifetime totals
+## 9. Reports — Lifetime Totals window
 
-Verifies the all-time rollup shown in the right pane when no session is
-selected (plan 46): total active time tracked, total ISK, and the
-`Total Refined Output` table (`Material | Quantity | Total ISK`). The
-rollup is computed once in the sidebar's per-session pass and refreshed
-on Reports open / import / delete (NOT on mere checkbox toggles).
+Verifies the all-time rollup (plan 51). An empty selection now leaves the
+Reports content pane BLANK; the rollup lives in its OWN window, opened by a
+`Lifetime Totals` button in the Reports chrome strip (next to
+`Import Session...`). The window shows total active time tracked, total ISK, and
+a `Total Refined Output` table (`Material | Quantity | Total ISK`) summed across
+all sessions. It is modeless, hide-on-close, re-fetches the totals on every
+open, and persists its size + position.
 
 ### Setup
 
@@ -706,53 +708,70 @@ sums).
 
 ### Steps
 
-1. **Open with nothing selected -> Lifetime Totals.** Open Reports with
-   no sidebar checkboxes ticked (first open, or untick all first).
-   - Expected (right pane): a `Lifetime Totals` header with a separator
-     rule under it; then `Time Tracked:` + an `HH:mm:ss` value and
-     `Total ISK:` + an `N0` value; then a `Total Refined Output` header
-     and a table with `Material | Quantity | Total ISK` columns.
-2. **Total ISK reconciles to the sidebar sum.** Add up the sidebar's
+1. **Empty selection -> blank pane.** Open Reports with no sidebar checkboxes
+   ticked (first open, or untick all first).
+   - Expected: the right content pane is BLANK — no auto-shown rollup, no
+     placeholder. The chrome strip shows `Import Session...` and
+     `Lifetime Totals` buttons.
+2. **Button opens the Lifetime Totals window.** Click `Lifetime Totals`.
+   - Expected: a SEPARATE window titled `Lifetime Totals` opens (modeless — the
+     Reports window stays usable behind it). It shows a `Lifetime Totals` header
+     with a separator rule; then `Time Tracked:` + an `HH:mm:ss` value and
+     `Total ISK:` + an `N0` value; then a `Total Refined Output` header and a
+     table with `Material | Quantity | Total ISK` columns.
+3. **Total ISK reconciles to the sidebar sum.** Add up the sidebar's
    `Total ISK` column across every session.
    - Expected: the `Total ISK:` figure equals that sum exactly (each
      session is priced from its own captured rows, then summed — no
      cross-session pricing).
-3. **Time Tracked reconciles to the sidebar sum.** Add up the sidebar's
+4. **Time Tracked reconciles to the sidebar sum.** Add up the sidebar's
    `Duration` column across every session.
    - Expected: the `Time Tracked:` figure equals that sum. Hours are not
      wrapped at 24 (e.g. a 30-hour total reads `30:00:00`).
-4. **Refined table sums across sessions, sorted by quantity.**
+5. **Refined table sums across sessions, sorted by quantity.**
    - Expected: one row per refined material, quantity summed across all
      sessions, default sorted by `Quantity` descending. The sum of the
      table's `Total ISK` column reconciles to the `Total ISK:` figure
      (within sub-percent rounding).
-5. **Columns sort.** Click `Material`, then `Quantity`, then
+6. **Columns sort.** Click `Material`, then `Quantity`, then
    `Total ISK` headers -> rows resort; click again -> direction
    reverses.
-6. **Untick-all returns to Lifetime Totals.** Tick a session (single or
-   compare view appears), then untick everything.
-   - Expected: the right pane returns to the Lifetime Totals panel,
-     identical to step 1. (The figures do NOT change on toggles — the
-     rollup is cached from the last sidebar load.)
-7. **Refreshes after import.** With the lifetime panel showing, Import a
-   session (section 12) that adds new data.
-   - Expected: after the import completes the panel refreshes; Time /
-     ISK / refined figures grow to include the imported session.
-8. **Refreshes after delete.** Right-click a session you can spare
-   (Export it to JSON first if you want it back) -> Delete -> confirm.
-   With nothing checked afterwards (untick all):
-   - Expected: the lifetime figures shrink to exclude the deleted
+7. **Session selection is independent.** With the Lifetime Totals window open,
+   tick sessions in the Reports sidebar.
+   - Expected: the Reports right pane drives Single / Compare as usual; the
+     Lifetime Totals window is unaffected (it keeps showing the all-time rollup).
+8. **Close hides; reopen re-shows with current totals.** Close the Lifetime
+   Totals window (X), then click `Lifetime Totals` again.
+   - Expected: the window re-appears showing the SAME figures (nothing changed
+     in the DB between close and reopen).
+9. **Refreshes after import.** Import a session (section 12) that adds new data,
+   then open (or re-open) the Lifetime Totals window.
+   - Expected: the Time / ISK / refined figures grow to include the imported
      session.
-9. **Empty database (optional).** On a DB with no saved sessions (a
-   fresh install or a throwaway store — do NOT delete real sessions for
-   this):
-   - Expected: the panel shows `Time Tracked: 00:00:00`, `Total ISK: 0`,
-     and an empty `Total Refined Output` table.
+10. **Refreshes after delete.** Right-click a session you can spare (Export it to
+    JSON first if you want it back) -> Delete -> confirm. Re-open the Lifetime
+    Totals window.
+    - Expected: the figures shrink to exclude the deleted session.
+11. **Text size cog.** In the Lifetime Totals window, click the `A` (text size)
+    cog in the widget chrome.
+    - Expected: the popup lists `Title` / `Time Tracked` / `Total ISK` /
+      `Total Refined Output` / `Table`; raising a level enlarges that element.
+      (This is the `lifetime` text-size config, moved here from the pane.)
+12. **Geometry persists across restart.** Resize / move the Lifetime Totals
+    window, close it, fully close and relaunch the app, open Reports, click
+    `Lifetime Totals`.
+    - Expected: the window reopens at the size + position you left it.
+13. **Empty database (optional).** On a DB with no saved sessions (a
+    fresh install or a throwaway store — do NOT delete real sessions for
+    this):
+    - Expected: the window shows `Time Tracked: 00:00:00`, `Total ISK: 0`,
+      and an empty `Total Refined Output` table.
 
 ### Cleanup
 
-Untick all sessions. Close Reports (window hides). Re-import any session
-you exported + deleted in step 8 if you want it back.
+Close the Lifetime Totals window (hides). Untick all sessions. Close Reports
+(window hides). Re-import any session you exported + deleted in step 10 if you
+want it back.
 
 ---
 
@@ -817,9 +836,10 @@ for spinner / cancel-in-flight verification.
     compare (5-session ideal). Watch the spinner -- it either spins
     smoothly OR is gone; never frozen mid-spin. The empty-pane gap
     between spinner-hide and widget-render is expected.
-11. **Spinner hides when not visible.** Uncheck everything. Right
-    pane shows the Lifetime Totals rollup (plan 46, section 9), NOT a
-    blank pane; spinner subtree is Collapsed; CPU% idle.
+11. **Spinner hides when not visible.** Uncheck everything. The right
+    pane is BLANK (plan 51 — Lifetime Totals is now a separate window
+    opened from the Reports chrome button, section 9); spinner subtree is
+    Collapsed; CPU% idle.
 12. **Reopen Reports preserves checks AND skips spinner.** With
     (A, B) checked, X-close Reports. Click Reports again.
     - Expected: A + B still checked; compare view appears
@@ -921,9 +941,9 @@ crits`).
      NO extra columns; NO per-session expansion.
 10. **5-session compare.** Tick five sessions.
     - Expected: same shape; subheader lists all five names.
-11. **Empty selection shows Lifetime Totals.** Untick everything ->
-    right pane shows the all-time lifetime rollup (plan 46, section 9),
-    no spinner.
+11. **Empty selection blanks the pane.** Untick everything ->
+    the right pane is BLANK; Lifetime Totals is now a separate window
+    opened from the Reports chrome button (plan 51, section 9), no spinner.
 12. **Switch back to single.** Tick exactly one session -> single
     mode returns (per section 8); compare widget gone.
 
@@ -1043,14 +1063,15 @@ sizes each Reports table widget's elements per emphasis level (phase 1b).
 ### 12.5.1 Column resize + persistence (phase 1a)
 
 1. **All column text is left-aligned.** Glance at every Reports table (ore,
-   refined, compare, lifetime, sidebar).
+   refined, compare, sidebar) plus the refined table in the Lifetime Totals
+   window (plan 51 — opened from the Reports chrome button).
    - Expected: every cell's text — including the numeric columns (m³, ISK,
      Quantity, Total ISK) — is left-aligned, matching the left-aligned headers.
 2. **Grippers exist.** Hover the boundary between two column headers in the
    sidebar "Saved sessions" grid. Cursor becomes a horizontal resize arrow.
    - Expected: every Reports DataGrid (sidebar, ore, refined, compare tables,
-     lifetime refined) shows the resize cursor at header edges. NO horizontal
-     scrollbar ever appears.
+     plus the Lifetime Totals window's refined table) shows the resize cursor at
+     header edges. NO horizontal scrollbar ever appears.
 3. **Resize.** Drag a sidebar column edge (e.g. "Name") wider, then narrower.
    - Expected: the column resizes live; other columns reflow; no scrollbar.
 4. **Persist across reopen.** Note the new width. Close Reports (the window
@@ -1082,7 +1103,8 @@ Header0 (Bold 14), every table + data row defaults to None (plain).
      plus the `x` close button. The SessionStats and per-pilot STATS widgets
      keep their existing gear (stat-config) cog and do NOT gain an "A" cog.
 2. **Default look matches today.** Before touching anything, eyeball the ore /
-   refined / compare / lifetime widgets.
+   refined / compare widgets (and the lifetime widget in the Lifetime Totals
+   window, plan 51 — opened from the Reports chrome button).
    - Expected: the same look as before plan 47 — the titles + "TOTAL TIME/ISK" +
      "Lifetime Totals" + the section labels render Bold ~14; the data rows + table
      cells render plain. (Internally those headings now default to Header0 and the
@@ -1108,9 +1130,9 @@ Header0 (Bold 14), every table + data row defaults to None (plain).
 8. **Compare + lifetime.** Check 2+ sessions (compare mode): the compare "A" cog
    lists Header / TOTAL TIME / TOTAL ISK / the three section labels + tables; set a
    few to bigger levels and Apply -> those labels take the full size+weight (+accent
-   on Hero), the tables size only. Uncheck all sessions (lifetime mode): the lifetime
-   "A" cog lists Title / Time Tracked / Total ISK / Total Refined Output / Table;
-   verify the same.
+   on Hero), the tables size only. Open the Lifetime Totals window (plan 51 — the
+   Reports chrome button, section 9): its "A" cog lists Title / Time Tracked /
+   Total ISK / Total Refined Output / Table; verify the same.
 
 ### Cleanup
 

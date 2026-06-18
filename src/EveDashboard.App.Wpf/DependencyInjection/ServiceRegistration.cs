@@ -5,6 +5,7 @@ using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Geometry;
 using EveDashboard.App.Wpf.Layout;
 using EveDashboard.App.Wpf.Reporting;
+using EveDashboard.App.Wpf.Reporting.Lifetime;
 using EveDashboard.App.Wpf.Reporting.Widgets;
 using EveDashboard.App.Wpf.Services;
 using EveDashboard.App.Wpf.Widgets.Pilot;
@@ -360,6 +361,23 @@ public static class ServiceRegistration
                 log:           sp.GetRequiredService<ILogger<WindowGeometryService>>()),
             sp.GetRequiredService<ILogger<CrystalDiagramWindow>>()));
         services.AddSingleton<ICrystalDiagramWindow, CrystalDiagramWindowAdapter>();
+
+        // Plan 51 — Lifetime Totals window. Singleton + hide-on-close, mirrors
+        // Reports/Crystal so geometry survives in-session open/close cycles.
+        // Default 700x640 centered; geometry persisted via a Lifetime-flavoured
+        // WindowGeometryService. The adapter re-fetches the all-time rollup on
+        // every Show (the data is global and can change while hidden).
+        services.AddSingleton<LifetimeTotalsWindowViewModel>();
+        services.AddSingleton<LifetimeTotalsWindow>(sp => new LifetimeTotalsWindow(
+            sp.GetRequiredService<LifetimeTotalsWindowViewModel>(),
+            new WindowGeometryService(
+                readGeometry:  ct => settingsRepo.GetLifetimeTotalsWindowGeometryAsync(ct),
+                writeGeometry: g => settingsRepo.SetLifetimeTotalsWindowGeometryAsync(g),
+                defaultWidth:  700,
+                defaultHeight: 640,
+                log:           sp.GetRequiredService<ILogger<WindowGeometryService>>()),
+            sp.GetRequiredService<ILogger<LifetimeTotalsWindow>>()));
+        services.AddSingleton<ILifetimeTotalsWindow, LifetimeTotalsWindowAdapter>();
 
         // Plan 25: MainWindow factory captures the MainWindow-flavoured
         // WindowGeometryService (wired to Get/SetWindowGeometryAsync, default

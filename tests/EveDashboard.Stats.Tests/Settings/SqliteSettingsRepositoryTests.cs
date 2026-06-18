@@ -756,6 +756,73 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
+    // ---- LifetimeTotalsWindowGeometry (plan 51) ----------------------------------
+
+    [Fact]
+    public async Task GetLifetimeTotalsWindowGeometryAsync_returns_null_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var geom = await repo.GetLifetimeTotalsWindowGeometryAsync();
+
+        geom.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetLifetimeTotalsWindowGeometryAsync_then_GetLifetimeTotalsWindowGeometryAsync_round_trips()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var original = new WindowGeometry(
+            Width: 700, Height: 640, Left: 120, Top: 60, IsMaximized: false);
+
+        await repo.SetLifetimeTotalsWindowGeometryAsync(original);
+        var roundTrip = await repo.GetLifetimeTotalsWindowGeometryAsync();
+
+        roundTrip.Should().Be(original);
+    }
+
+    [Fact]
+    public async Task GetLifetimeTotalsWindowGeometryAsync_returns_null_and_logs_warning_when_json_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "lifetime_totals_window_geometry", "{not-json");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        var geom = await repo.GetLifetimeTotalsWindowGeometryAsync();
+
+        geom.Should().BeNull();
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Exception is System.Text.Json.JsonException);
+    }
+
+    [Fact]
+    public async Task SetLifetimeTotalsWindowGeometryAsync_raises_SettingChanged_with_key_lifetime_totals_window_geometry()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetLifetimeTotalsWindowGeometryAsync(new WindowGeometry(800, 600, 0, 0, false));
+
+        keys.Should().ContainSingle().Which.Should().Be("lifetime_totals_window_geometry");
+    }
+
+    [Fact]
+    public async Task SetLifetimeTotalsWindowGeometryAsync_throws_on_null_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        Func<Task> act = async () => await repo.SetLifetimeTotalsWindowGeometryAsync(null!);
+
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
     // ---- CrystalDiagramSelectedAnomaly (plan 35) ----------------------------------
 
     [Fact]

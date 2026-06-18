@@ -3,6 +3,7 @@ namespace EveDashboard.App.Wpf.Reporting;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EveDashboard.App.Wpf.Dialogs;
+using EveDashboard.App.Wpf.Reporting.Lifetime;
 using EveDashboard.Reporting;
 using EveDashboard.SessionIO.Import;
 using EveDashboard.SessionIO.Json;
@@ -19,6 +20,7 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
 {
     private readonly JsonSessionImporter _importer;
     private readonly IReportsFileDialog _fileDialog;
+    private readonly ILifetimeTotalsWindow _lifetimeWindow;
     private readonly ILogger<ReportsWindowViewModel> _log;
 
     /// <summary>The sortable sidebar of saved sessions.</summary>
@@ -41,6 +43,7 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     /// <param name="content">Breakdown content VM.</param>
     /// <param name="importer">Plan 29 — JSON importer wired to the Import Session header button.</param>
     /// <param name="fileDialog">Plan 29 — file dialog seam for open-path selection.</param>
+    /// <param name="lifetimeWindow">Plan 51 — Lifetime Totals window seam, opened by the chrome "Lifetime Totals" button.</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public ReportsWindowViewModel(
@@ -48,17 +51,20 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
         BreakdownContentViewModel content,
         JsonSessionImporter importer,
         IReportsFileDialog fileDialog,
+        ILifetimeTotalsWindow lifetimeWindow,
         ILogger<ReportsWindowViewModel> log)
     {
         ArgumentNullException.ThrowIfNull(sidebar);
         ArgumentNullException.ThrowIfNull(content);
         ArgumentNullException.ThrowIfNull(importer);
         ArgumentNullException.ThrowIfNull(fileDialog);
+        ArgumentNullException.ThrowIfNull(lifetimeWindow);
         ArgumentNullException.ThrowIfNull(log);
         Sidebar = sidebar;
         Content = content;
         _importer = importer;
         _fileDialog = fileDialog;
+        _lifetimeWindow = lifetimeWindow;
         _log = log;
         Sidebar.SelectionChanged += OnSidebarSelectionChanged;
         Sidebar.StatusReporter = msg => StatusMessage = msg;
@@ -72,17 +78,23 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     {
         try
         {
-            // Plan 46: pass the sidebar's cached lifetime rollup so the content
-            // pane can render it when the selection is empty. It was refreshed by
-            // the Sidebar.LoadAsync that fired this event, or is the last cached
-            // value across mere checkbox toggles (sessions unchanged).
-            await Content.LoadAsync(selected, Sidebar.Lifetime).ConfigureAwait(true);
+            // Plan 51: an empty selection now leaves the pane blank (Single mode,
+            // all nulls). The all-time rollup moved to its own window (ShowLifetimeTotals).
+            await Content.LoadAsync(selected).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Reports content failed to load for selection of {Count} session(s).", selected.Count);
         }
     }
+
+    /// <summary>
+    /// Plan 51 — open the standalone Lifetime Totals window. Modeless; the seam
+    /// re-fetches the all-time rollup on each Show so it reflects the current
+    /// set of saved sessions.
+    /// </summary>
+    [RelayCommand]
+    private void ShowLifetimeTotals() => _lifetimeWindow.Show();
 
     /// <summary>
     /// Import Session command. Picks a .json file via the dialog seam, runs

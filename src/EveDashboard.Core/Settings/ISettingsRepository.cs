@@ -186,6 +186,22 @@ public interface ISettingsRepository
     Task SetCrystalDiagramWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
+    /// Read the persisted Lifetime Totals child-window geometry (plan 51). Returns
+    /// <c>null</c> when missing or malformed (with Warning log on malformed).
+    /// A <c>null</c> result is interpreted as "use the Lifetime Totals default
+    /// size 700x640 centered, Normal state".
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted Lifetime Totals window geometry, or <c>null</c>.</returns>
+    Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default);
+
+    /// <summary>Persist new Lifetime Totals child-window geometry. Raises <see cref="SettingChanged"/> with key <c>"lifetime_totals_window_geometry"</c>.</summary>
+    /// <param name="value">Geometry to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
+
+    /// <summary>
     /// Read the persisted Crystal Diagram selected-anomaly id (plan 35). Returns
     /// <c>null</c> when missing. A <c>null</c> result is interpreted as
     /// "no preference; default to the 'all' entry".

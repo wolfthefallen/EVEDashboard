@@ -380,6 +380,32 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     }
 
     /// <inheritdoc />
+    public async Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'lifetime_totals_window_geometry'", ct: ct);
+        if (raw is null) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<WindowGeometry>(raw);
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "lifetime_totals_window_geometry JSON malformed - returning null.");
+            return null;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var json = JsonSerializer.Serialize(value);
+        await UpsertAsync("lifetime_totals_window_geometry", json, ct);
+        RaiseSettingChanged("lifetime_totals_window_geometry");
+    }
+
+    /// <inheritdoc />
     public Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default) =>
         _db.QueryScalarAsync<string>(
             "SELECT value FROM setting WHERE key = 'crystal_diagram_selected_anomaly'", ct: ct);
@@ -738,6 +764,7 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         // reports_column_widths.<gridKey> intentionally NOT seeded (plan 47 - null sentinel = use XAML default column widths)
         // reports_text_size.<widgetTypeKey> intentionally NOT seeded (plan 47 - null sentinel = all elements at StatEmphasis.None)
         // crystal_diagram_window_geometry intentionally NOT seeded (null sentinel = use Crystal default 900x650 centered)
+        // lifetime_totals_window_geometry intentionally NOT seeded (plan 51 - null sentinel = use Lifetime default 700x640 centered)
         // crystal_diagram_selected_anomaly intentionally NOT seeded (plan 35 - null sentinel = default to 'all' entry)
         // schema_version          owned by plan 11
         // non_sticky_station_defaults_seeded owned by SqliteMarketStationCatalog

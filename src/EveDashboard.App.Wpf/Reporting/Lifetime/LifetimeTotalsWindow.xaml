@@ -1,0 +1,42 @@
+<Window x:Class="EveDashboard.App.Wpf.Reporting.Lifetime.LifetimeTotalsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lifetime="clr-namespace:EveDashboard.App.Wpf.Reporting.Lifetime"
+        xmlns:statconfig="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
+        mc:Ignorable="d"
+        Title="Lifetime Totals - EVE Dashboard"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <!--
+        Plan 51: standalone Lifetime Totals window, launched by the "Lifetime
+        Totals" button in the Reports chrome strip. Modeless, singleton,
+        hide-on-close (mirrors Reports / Crystal). Hosts the reusable
+        LifetimeSummaryView widget (moved out of the Reports content pane). Size
+        and position persist via lifetime_totals_window_geometry (default
+        700x640 centered on first launch).
+    -->
+    <Window.Resources>
+        <!-- The lifetime-rollup widget VM <-> View pairing (moved here from
+             ReportsWindow.xaml when the in-pane lifetime mode was removed). -->
+        <DataTemplate DataType="{x:Type lifetime:LifetimeSummaryViewModel}">
+            <lifetime:LifetimeSummaryView />
+        </DataTemplate>
+
+        <!-- The widget's chrome "text size" Popup resolves its content
+             (TextSizePopupViewModel) through this implicit template. The mapping
+             is per-window (the chrome lives in app-wide Generic.xaml), so this
+             window needs its own copy alongside the widget template. -->
+        <DataTemplate DataType="{x:Type statconfig:TextSizePopupViewModel}">
+            <statconfig:TextSizePopupView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="8">
+        <ContentPresenter Content="{Binding Summary}" />
+    </ScrollViewer>
+</Window>
