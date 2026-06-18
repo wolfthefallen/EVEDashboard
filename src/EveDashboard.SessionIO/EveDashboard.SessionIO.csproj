@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EveDashboard.Core\EveDashboard.Core.csproj" />
     <ProjectReference Include="..\EveDashboard.Reporting\EveDashboard.Reporting.csproj" />
+    <ProjectReference Include="..\EveDashboard.Stats\EveDashboard.Stats.csproj" />
   </ItemGroup>
 
   <ItemGroup>

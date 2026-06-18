@@ -956,9 +956,9 @@ Untick all. Close Reports.
 ## 12. Reports — import / export / delete
 
 Verifies JSON round-trip, Excel export (Summary tab + per-table
-tabs + per-pilot tabs + role column), schema-version refusal,
-pilot-rename collision warning, bogus-file rejection, and the
-delete flow with the cancel branch.
+tabs + per-pilot tabs + role column + refined-output tables),
+schema-version refusal, pilot-rename collision warning,
+bogus-file rejection, and the delete flow with the cancel branch.
 
 ### Setup
 
@@ -983,13 +983,21 @@ artifacts, e.g. `D:\tmp\plan29\`. Open Reports.
    - `Summary` is the FIRST tab. Cells: Name, Notes, Start UTC,
      Stop UTC, Active duration, Paused duration, Pilot count,
      Total m^3, Total ISK. Then a Per pilot block (with Role
-     column) and a Per ore block.
+     column), a Per ore block, and a `Total Refined Output
+     (session)` block (`Material | Quantity | Total ISK`,
+     summed across pilots, sorted by quantity descending).
    - One tab per DB table: `session`, `session_time`, `pilot`,
      `session_pilot`, `log` (has `role` column 9),
      `market_stations`, `market_data`.
    - One tab per pilot named `Pilot - <pilot name>` (truncated to
      31 chars). Pilot names are clean (NO `[Role]` suffix in any
-     cell or sheet name).
+     cell or sheet name). Each pilot tab has its ore breakdown
+     table, then a `Refined output` table
+     (`type_id | type_name | quantity | isk`).
+   - Reconciliation: the Summary `Total Refined Output` ISK column
+     sums to the Summary `Total ISK` cell; each pilot tab's refined
+     `isk` column sums to that pilot's ISK in the Summary Per pilot
+     block (same ISK pipeline).
 3. **JSON round-trip import.** Click `Import Session...` in the
    Reports header -> pick the JSON from step 1. Expected:
    - Sidebar refreshes; newly imported session at the top.

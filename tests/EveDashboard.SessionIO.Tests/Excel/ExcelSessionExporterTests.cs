@@ -1,11 +1,13 @@
 namespace EveDashboard.SessionIO.Tests.Excel;
 
 using ClosedXML.Excel;
+using EveDashboard.Core.Sessions;
 using EveDashboard.Persistence.Storage;
 using EveDashboard.Reporting;
 using EveDashboard.Reporting.Queries;
 using EveDashboard.SessionIO.Excel;
 using EveDashboard.SessionIO.Tables;
+using EveDashboard.Stats.Queries;
 using EveDashboard.Stats.Schema;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -68,7 +70,8 @@ public sealed class ExcelSessionExporterTests : IAsyncLifetime, IDisposable
             },
         };
 
-        var exporter = new ExcelSessionExporter(reader, queries, NullLogger<ExcelSessionExporter>.Instance);
+        var statsRepo = new StubStatsRepository { Stats = MakeStats() };
+        var exporter = new ExcelSessionExporter(reader, queries, statsRepo, NullLogger<ExcelSessionExporter>.Instance);
         var path = Path.Combine(_tempDir, "session.xlsx");
 
         await exporter.ExportAsync(sid, path);
@@ -108,6 +111,70 @@ public sealed class ExcelSessionExporterTests : IAsyncLifetime, IDisposable
         // Row 2 onwards are data; we seeded 2 log rows.
         logSheet.Cell(2, 5).GetString().Should().Be("Tick");
         logSheet.Cell(3, 5).GetString().Should().Be("Tick");
+    }
+
+    [Fact]
+    public async Task ExportAsync_writes_refined_output_tables()
+    {
+        var sid = await SeedSampleSessionAsync();
+
+        var reader = new SessionTableReader(_db, NullLogger<SessionTableReader>.Instance);
+        var queries = new StubReportingQueries
+        {
+            Timeline = new SessionTimeline(
+                SessionStart:   new DateTimeOffset(2026, 5, 7, 10, 0, 0, TimeSpan.Zero),
+                ActiveDuration: TimeSpan.FromHours(1),
+                PauseWindows:   Array.Empty<PauseWindowRow>()),
+            Pilots = new[]
+            {
+                new PilotSummaryRow(90_000_001L, "Asgar", "Miner"),
+                new PilotSummaryRow(90_000_002L, "Bjorn", "Miner"),
+            },
+            SessionOre = new[]
+            {
+                new OreBreakdownRow(1230, "Veldspar", 10.0, 7_500_000.0),
+            },
+            PerPilotOre = new Dictionary<long, IReadOnlyList<OreBreakdownRow>>
+            {
+                [90_000_001L] = new[] { new OreBreakdownRow(1230, "Veldspar", 10.0, 7_500_000.0) },
+                [90_000_002L] = new[] { new OreBreakdownRow(1228, "Scordite", 30.0, 12_000_000.0) },
+            },
+        };
+        var statsRepo = new StubStatsRepository { Stats = MakeStats() };
+        var exporter = new ExcelSessionExporter(reader, queries, statsRepo, NullLogger<ExcelSessionExporter>.Instance);
+        var path = Path.Combine(_tempDir, "refined.xlsx");
+
+        await exporter.ExportAsync(sid, path);
+
+        using var workbook = new XLWorkbook(path);
+
+        // Summary tab: session-wide "Total Refined Output" block (Material | Quantity | Total ISK).
+        var summary = workbook.Worksheet("Summary");
+        var label = summary.Column(1).CellsUsed()
+            .FirstOrDefault(c => c.GetString() == "Total Refined Output (session)");
+        label.Should().NotBeNull("the Summary tab should carry a session-wide refined block");
+        var lr = label!.Address.RowNumber;
+        summary.Cell(lr + 1, 1).GetString().Should().Be("Material");
+        summary.Cell(lr + 1, 2).GetString().Should().Be("Quantity");
+        summary.Cell(lr + 1, 3).GetString().Should().Be("Total ISK");
+        summary.Cell(lr + 2, 1).GetString().Should().Be("Tritanium");
+        summary.Cell(lr + 2, 2).GetDouble().Should().Be(1000);
+        summary.Cell(lr + 2, 3).GetDouble().Should().BeApproximately(5_000_000.0, precision: 0.01);
+
+        // Per-pilot tab: "Refined output" table (type_id | type_name | quantity | isk).
+        var asgar = workbook.Worksheet("Pilot - Asgar");
+        var refLabel = asgar.Column(1).CellsUsed()
+            .FirstOrDefault(c => c.GetString() == "Refined output");
+        refLabel.Should().NotBeNull("each pilot tab should carry a refined-output table");
+        var rr = refLabel!.Address.RowNumber;
+        asgar.Cell(rr + 1, 1).GetString().Should().Be("type_id");
+        asgar.Cell(rr + 1, 2).GetString().Should().Be("type_name");
+        asgar.Cell(rr + 1, 3).GetString().Should().Be("quantity");
+        asgar.Cell(rr + 1, 4).GetString().Should().Be("isk");
+        asgar.Cell(rr + 2, 1).GetDouble().Should().Be(34);
+        asgar.Cell(rr + 2, 2).GetString().Should().Be("Tritanium");
+        asgar.Cell(rr + 2, 3).GetDouble().Should().Be(1000);
+        asgar.Cell(rr + 2, 4).GetDouble().Should().BeApproximately(5_000_000.0, precision: 0.01);
     }
 
     private async Task<string> SeedSampleSessionAsync()
@@ -171,5 +238,45 @@ public sealed class ExcelSessionExporterTests : IAsyncLifetime, IDisposable
 
         public Task<SessionTimeline> GetSessionTimelineAsync(string sessionId, CancellationToken ct = default) =>
             Task.FromResult(Timeline);
+    }
+
+    /// <summary>
+    /// Canned <see cref="SessionStats"/> snapshot matching the seeded sample
+    /// session: session-wide refined = Tritanium + Pyerite; Asgar refined =
+    /// Tritanium; Bjorn refined = Pyerite. Non-refined fields are placeholders
+    /// (the exporter only reads <c>RefinedOutput</c> / <c>ByCharacter[..].RefinedOutput</c>).
+    /// </summary>
+    private static SessionStats MakeStats()
+    {
+        var asgarRefined = new[] { new RefinedMaterialAmount(34, "Tritanium", 1000) { Isk = 5_000_000.0 } };
+        var bjornRefined = new[] { new RefinedMaterialAmount(35, "Pyerite", 400) { Isk = 3_200_000.0 } };
+        var sessionRefined = new[]
+        {
+            new RefinedMaterialAmount(34, "Tritanium", 1000) { Isk = 5_000_000.0 },
+            new RefinedMaterialAmount(35, "Pyerite",   400)  { Isk = 3_200_000.0 },
+        };
+        var byChar = new Dictionary<long, CharacterStats>
+        {
+            [90_000_001L] = new CharacterStats(
+                90_000_001L, null, 10.0, 0, 7_500_000.0, 0, 0, 0, 0, 0, 0, PilotRole.Miner)
+            { RefinedOutput = asgarRefined },
+            [90_000_002L] = new CharacterStats(
+                90_000_002L, null, 30.0, 0, 12_000_000.0, 0, 0, 0, 0, 0, 0, PilotRole.Miner)
+            { RefinedOutput = bjornRefined },
+        };
+        return new SessionStats(
+            "sess-excel-sample", TimeSpan.FromHours(1), default, 40.0, 0,
+            19_500_000.0, 0, 0, 0, 0, 0, 0, byChar)
+        { RefinedOutput = sessionRefined };
+    }
+
+    /// <summary>Hand-rolled <see cref="ISessionStatsRepository"/> stub returning a canned snapshot.</summary>
+    private sealed class StubStatsRepository : ISessionStatsRepository
+    {
+        public SessionStats Stats { get; init; } = null!;
+
+        public Task<SessionStats> GetSessionStatsAsync(
+            string sessionId, DateTimeOffset asOf, bool allowLazyFetch, CancellationToken ct = default) =>
+            Task.FromResult(Stats);
     }
 }

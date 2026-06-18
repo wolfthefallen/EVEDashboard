@@ -5,6 +5,7 @@ using ClosedXML.Excel;
 using EveDashboard.Reporting;
 using EveDashboard.Reporting.Queries;
 using EveDashboard.SessionIO.Tables;
+using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -16,23 +17,28 @@ public sealed class ExcelSessionExporter
 {
     private readonly SessionTableReader  _reader;
     private readonly IReportingQueries   _queries;
+    private readonly ISessionStatsRepository _statsRepo;
     private readonly ILogger<ExcelSessionExporter> _log;
 
     /// <summary>Construct the exporter.</summary>
     /// <param name="reader">Reader that materialises raw table rows.</param>
     /// <param name="queries">Reporting queries — reused for Summary tab + per-pilot ore breakdowns (do not duplicate aggregation SQL).</param>
+    /// <param name="statsRepo">Session-stats repository — reused for the refined-with-ISK output (<see cref="SessionStats.RefinedOutput"/> session-wide + per-pilot <see cref="CharacterStats.RefinedOutput"/>); the same path the on-screen Lifetime Totals + compare tables use, NOT a new query.</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public ExcelSessionExporter(
         SessionTableReader  reader,
         IReportingQueries   queries,
+        ISessionStatsRepository statsRepo,
         ILogger<ExcelSessionExporter> log)
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(queries);
+        ArgumentNullException.ThrowIfNull(statsRepo);
         ArgumentNullException.ThrowIfNull(log);
         _reader = reader;
         _queries = queries;
+        _statsRepo = statsRepo;
         _log = log;
     }
 
@@ -64,9 +70,19 @@ public sealed class ExcelSessionExporter
             perPilotOre[p.PilotId] = await _queries.GetOreBreakdownAsync(sessionId, p.PilotId, ct).ConfigureAwait(false);
         }
 
+        // Reuse the existing refined-with-ISK path (decisions 1.1 / 2.1): SessionStats
+        // carries session-wide RefinedOutput and per-pilot ByCharacter[id].RefinedOutput,
+        // both yield-applied + ISK-priced + sorted by quantity desc. This is the same data
+        // the on-screen Lifetime Totals + compare tables consume — NOT a new query/aggregation.
+        // allowLazyFetch:false = saved-session read (never re-price). asOf only bounds an OPEN
+        // session_time row, of which a Stopped session has none.
+        var stats = await _statsRepo
+            .GetSessionStatsAsync(sessionId, DateTimeOffset.UtcNow, allowLazyFetch: false, ct)
+            .ConfigureAwait(false);
+
         using var workbook = new XLWorkbook();
 
-        AppendSummarySheet(workbook, data, timeline, pilots, oreSession, perPilotOre);
+        AppendSummarySheet(workbook, data, timeline, pilots, oreSession, perPilotOre, stats.RefinedOutput);
         AppendSessionSheet(workbook, data.Session);
         AppendSessionTimeSheet(workbook, data.SessionTimes);
         AppendPilotSheet(workbook, data.Pilots);
@@ -76,7 +92,10 @@ public sealed class ExcelSessionExporter
         AppendMarketDataSheet(workbook, data.MarketData);
         foreach (var p in pilots)
         {
-            AppendPerPilotSheet(workbook, p, perPilotOre[p.PilotId]);
+            var pilotRefined = stats.ByCharacter.TryGetValue(p.PilotId, out var cs)
+                ? cs.RefinedOutput
+                : Array.Empty<RefinedMaterialAmount>();
+            AppendPerPilotSheet(workbook, p, perPilotOre[p.PilotId], pilotRefined);
         }
 
         workbook.SaveAs(filePath);
@@ -94,7 +113,8 @@ public sealed class ExcelSessionExporter
         SessionTimeline                                timeline,
         IReadOnlyList<PilotSummaryRow>                 pilots,
         IReadOnlyList<OreBreakdownRow>                 oreSession,
-        IReadOnlyDictionary<long, IReadOnlyList<OreBreakdownRow>> perPilotOre)
+        IReadOnlyDictionary<long, IReadOnlyList<OreBreakdownRow>> perPilotOre,
+        IReadOnlyList<RefinedMaterialAmount>           refinedSession)
     {
         var ws = workbook.Worksheets.Add("Summary");
         var session = data.Session[0];
@@ -149,6 +169,24 @@ public sealed class ExcelSessionExporter
             ws.Cell(row, 1).Value = o.TypeName;
             ws.Cell(row, 2).Value = o.VolumeM3;
             ws.Cell(row, 3).Value = o.Isk;
+            row++;
+        }
+        row++;
+
+        // Total Refined Output block (session-wide). Quantity + ISK, reusing
+        // SessionStats.RefinedOutput — the same data the on-screen Lifetime Totals
+        // table shows. Columns mirror the Summary "Per ore" block style (name +
+        // values, no type_id). Empty list => label + header only (matches the ore block).
+        ws.Cell(row, 1).Value = "Total Refined Output (session)"; row++;
+        ws.Cell(row, 1).Value = "Material";
+        ws.Cell(row, 2).Value = "Quantity";
+        ws.Cell(row, 3).Value = "Total ISK";
+        row++;
+        foreach (var m in refinedSession)
+        {
+            ws.Cell(row, 1).Value = m.Name;
+            ws.Cell(row, 2).Value = m.Quantity;
+            ws.Cell(row, 3).Value = m.Isk;
             row++;
         }
     }
@@ -286,7 +324,8 @@ public sealed class ExcelSessionExporter
     private static void AppendPerPilotSheet(
         XLWorkbook                       wb,
         PilotSummaryRow                  pilot,
-        IReadOnlyList<OreBreakdownRow>   ore)
+        IReadOnlyList<OreBreakdownRow>   ore,
+        IReadOnlyList<RefinedMaterialAmount> refined)
     {
         // Excel sheet names cap at 31 chars and forbid : \ / ? * [ ]
         var safe = SafeSheetName($"Pilot - {pilot.PilotName}");
@@ -309,6 +348,22 @@ public sealed class ExcelSessionExporter
             ws.Cell(row, 2).Value = o.TypeName;
             ws.Cell(row, 3).Value = o.VolumeM3;
             ws.Cell(row, 4).Value = o.Isk;
+        }
+
+        // Refined output table — one blank row after the ore data (rows 7..6+ore.Count),
+        // then a label, a 4-col header, and the refined rows. Columns match the sibling
+        // ore table (decision 2.2 = A); data reused from CharacterStats.RefinedOutput
+        // (quantity + ISK), the same path the on-screen tables use.
+        var refinedLabelRow = 7 + ore.Count + 1;
+        ws.Cell(refinedLabelRow, 1).Value = "Refined output";
+        WriteHeader(ws, headerRow: refinedLabelRow + 1, "type_id", "type_name", "quantity", "isk");
+        for (var i = 0; i < refined.Count; i++)
+        {
+            var m = refined[i]; var r = refinedLabelRow + 2 + i;
+            ws.Cell(r, 1).Value = m.TypeId;
+            ws.Cell(r, 2).Value = m.Name;
+            ws.Cell(r, 3).Value = m.Quantity;
+            ws.Cell(r, 4).Value = m.Isk;
         }
     }
 

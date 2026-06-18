@@ -251,6 +251,7 @@ public static class ServiceRegistration
         services.AddSingleton(sp => new ExcelSessionExporter(
             sp.GetRequiredService<SessionTableReader>(),
             sp.GetRequiredService<IReportingQueries>(),
+            sp.GetRequiredService<ISessionStatsRepository>(),
             sp.GetRequiredService<ILogger<ExcelSessionExporter>>()));
         services.AddSingleton<IReportsFileDialog, ReportsFileDialogAdapter>();
 
