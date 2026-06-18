@@ -1385,6 +1385,13 @@ Veldspar -> Tritanium; or Kylixium -> Tritanium / Pyerite / Mexallon).
      session's materials do not carry over. As you mine in the new session, only
      the new session's materials appear and their quantities reflect only this
      session (not added on top of the previous one).
+7. **Pilot-widget refined output can be disabled (issue #1).** With live refined
+   output showing (above), open Settings -> Refined output -> UNCHECK "Show
+   refined output on pilot widgets" -> Apply.
+   - Expected: every per-pilot widget's "Refined output" section disappears
+     immediately (no restart); the SESSION widget's section is unchanged. Re-check
+     the box + Apply -> the per-pilot sections come back. Default (fresh install)
+     is checked/on.
 
 ### Cleanup
 

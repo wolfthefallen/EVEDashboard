@@ -137,4 +137,49 @@ public class RefinedOutputSectionTests
 
         w.RefinedOutput.Select(r => r.Name).Should().Equal("Tritanium");
     }
+
+    [Fact]
+    public void Pilot_scope_hides_section_when_toggle_off()
+    {
+        // Plan 49 (issue #1): a per-pilot widget with the master toggle OFF never
+        // shows the refined-output section, regardless of auto-show / overrides.
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };
+        using var w = new TestWidget(settings, scopeKey: "123");
+
+        w.Merge(Mat(34, "Tritanium", 1000));
+
+        w.RefinedOutput.Should().BeEmpty("the per-pilot refined-output toggle is off");
+    }
+
+    [Fact]
+    public void Session_scope_unaffected_by_pilot_toggle()
+    {
+        // Plan 49: the Session widget (scope "") is NEVER gated by the per-pilot toggle.
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };
+        using var w = new TestWidget(settings, scopeKey: string.Empty);
+
+        w.Merge(Mat(34, "Tritanium", 1000));
+
+        w.RefinedOutput.Should().ContainSingle().Which.Name.Should().Be("Tritanium");
+    }
+
+    [Fact]
+    public async Task Pilot_scope_reshows_section_when_toggle_flipped_on()
+    {
+        // Plan 49: flipping the per-pilot toggle ON live-updates the section via the
+        // SettingChanged -> HydrateRefinedAsync path (no restart). Mirrors the
+        // SettingChanged async pattern in PerPilotWidgetViewModelStatsTests.
+        var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };
+        using var w = new TestWidget(settings, scopeKey: "123");
+        w.Merge(Mat(34, "Tritanium", 1000));
+        w.RefinedOutput.Should().BeEmpty();
+
+        settings.ShowPilotRefinedOutput = true;
+        settings.RaiseSettingChangedForTests("show_pilot_refined_output");
+        await Task.Yield();
+        await Task.Yield();
+        w.Merge(Mat(34, "Tritanium", 1000));
+
+        w.RefinedOutput.Should().ContainSingle().Which.Name.Should().Be("Tritanium");
+    }
 }

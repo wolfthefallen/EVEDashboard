@@ -554,7 +554,7 @@ public class SqliteSettingsRepositoryTests
     // ---- EnsureSeedDefaultsAsync --------------------------------------------------
 
     [Fact]
-    public async Task EnsureSeedDefaultsAsync_seeds_seven_keys_on_fresh_db_skips_window_geometry()
+    public async Task EnsureSeedDefaultsAsync_seeds_eight_keys_on_fresh_db_skips_window_geometry()
     {
         await using var db = await NewSchemaAsync();
         var repo = NewRepo(db);
@@ -568,8 +568,9 @@ public class SqliteSettingsRepositoryTests
         // schema_version is seeded by SchemaInitializer (plan 11); the repo
         // defaults are theme / price_mode / refining_yield_percent /
         // selected_station_id (plan 14), auto_pause_idle_minutes +
-        // auto_pause_sound_enabled (plan 37), and auto_show_refined_materials
-        // (plan 43). window_geometry intentionally NOT seeded (round-2 3.1 = B).
+        // auto_pause_sound_enabled (plan 37), auto_show_refined_materials
+        // (plan 43), and show_pilot_refined_output (plan 49). window_geometry
+        // intentionally NOT seeded (round-2 3.1 = B).
         keys.Should().BeEquivalentTo(new[]
         {
             "auto_pause_idle_minutes",
@@ -579,6 +580,7 @@ public class SqliteSettingsRepositoryTests
             "refining_yield_percent",
             "schema_version",
             "selected_station_id",
+            "show_pilot_refined_output",
             "theme",
         });
 
@@ -588,6 +590,7 @@ public class SqliteSettingsRepositoryTests
         (await repo.GetWindowGeometryAsync()).Should().BeNull();
         (await repo.GetAutoPauseIdleMinutesAsync()).Should().Be(5);
         (await repo.GetAutoPauseSoundEnabledAsync()).Should().BeTrue();
+        (await repo.GetShowPilotRefinedOutputAsync()).Should().BeTrue();
     }
 
     [Fact]
@@ -1046,5 +1049,45 @@ public class SqliteSettingsRepositoryTests
         await nullGetKey.Should().ThrowAsync<ArgumentNullException>();
         await nullSetKey.Should().ThrowAsync<ArgumentNullException>();
         await nullSetVal.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    // ---- ShowPilotRefinedOutput (plan 49 / issue #1) ------------------------------
+
+    [Fact]
+    public async Task GetShowPilotRefinedOutputAsync_returns_true_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var enabled = await repo.GetShowPilotRefinedOutputAsync();
+
+        enabled.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task SetShowPilotRefinedOutputAsync_then_get_round_trips(bool value)
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetShowPilotRefinedOutputAsync(value);
+        var roundTrip = await repo.GetShowPilotRefinedOutputAsync();
+
+        roundTrip.Should().Be(value);
+    }
+
+    [Fact]
+    public async Task SetShowPilotRefinedOutputAsync_raises_SettingChanged_with_key_show_pilot_refined_output()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetShowPilotRefinedOutputAsync(false);
+
+        keys.Should().ContainSingle().Which.Should().Be("show_pilot_refined_output");
     }
 }

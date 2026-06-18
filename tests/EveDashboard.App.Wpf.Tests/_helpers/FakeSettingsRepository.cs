@@ -229,6 +229,9 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
     /// <summary>Plan 43 — refined-output auto-show toggle (default on).</summary>
     public bool AutoShowRefinedMaterials { get; set; } = true;
 
+    /// <summary>Plan 49 (issue #1) — per-pilot refined-output section toggle (default on).</summary>
+    public bool ShowPilotRefinedOutput { get; set; } = true;
+
     /// <summary>Plan 43 — per-widget refined-materials visibility overrides, keyed by scope ("" or pilot id string).</summary>
     public Dictionary<string, IReadOnlyDictionary<long, bool>> RefinedMaterialsVisibility { get; } = new();
 
@@ -243,6 +246,14 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         AutoShowRefinedMaterials = enabled;
         SetAutoShowRefinedMaterialsCount++;
         SettingChanged?.Invoke(this, new SettingChangedEventArgs("auto_show_refined_materials"));
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> GetShowPilotRefinedOutputAsync(CancellationToken ct = default) => Task.FromResult(ShowPilotRefinedOutput);
+    public Task SetShowPilotRefinedOutputAsync(bool enabled, CancellationToken ct = default)
+    {
+        ShowPilotRefinedOutput = enabled;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("show_pilot_refined_output"));
         return Task.CompletedTask;
     }
 

@@ -228,6 +228,20 @@ public interface ISettingsRepository
     Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default);
 
     /// <summary>
+    /// Plan 49 (issue #1): whether the live "Refined output" section renders on the
+    /// per-pilot widgets. The Session widget is never gated by this. Returns
+    /// <c>true</c> when the key is absent (default on).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted toggle, or <c>true</c>.</returns>
+    Task<bool> GetShowPilotRefinedOutputAsync(CancellationToken ct = default);
+
+    /// <summary>Persist the per-pilot refined-output toggle (plan 49). Raises <see cref="SettingChanged"/> with key <c>"show_pilot_refined_output"</c>.</summary>
+    /// <param name="enabled">Whether the per-pilot widgets show the Refined output section.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetShowPilotRefinedOutputAsync(bool enabled, CancellationToken ct = default);
+
+    /// <summary>
     /// Read the per-widget explicit refined-material visibility overrides (plan 43,
     /// decision 2.2 = A — per-widget). Returns an empty map when none are set;
     /// a material absent from the map follows the auto-show default, a

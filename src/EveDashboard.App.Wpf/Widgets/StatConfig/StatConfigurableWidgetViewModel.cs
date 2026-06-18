@@ -111,9 +111,11 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
             return;
         }
         // Plan 43: re-resolve the refined-output section on a global auto-show
-        // change or this widget's own visibility-override change.
+        // change or this widget's own visibility-override change. Plan 49 adds the
+        // per-pilot master toggle so the section live-updates on that change too.
         if (_refinedScopeKey is not null
             && (string.Equals(e.Key, "auto_show_refined_materials", StringComparison.Ordinal)
+                || string.Equals(e.Key, "show_pilot_refined_output", StringComparison.Ordinal)
                 || string.Equals(e.Key, RefinedVisibilityKey(_refinedScopeKey), StringComparison.Ordinal)))
         {
             _ = HydrateRefinedAsync();
@@ -172,6 +174,9 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     private string? _refinedScopeKey;
     private bool _refinedAutoShow = true;
     private Dictionary<long, bool> _refinedOverrides = new();
+    // Plan 49 (issue #1): per-pilot master toggle for the refined-output section.
+    // Only meaningful for a per-pilot scope; Session scope ("") is never gated.
+    private bool _pilotRefinedEnabled = true;
     // The materials currently in the section. Mirrors the latest snapshot exactly
     // (cleared + repopulated by MergeRefinedOutput each call) — NOT an ever-growing
     // set. This is what lets a new session's empty snapshot reset the display
@@ -183,6 +188,14 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
 
     /// <summary>Plan 43: true when this widget shows the "Refined output" section (live SessionStats + per-pilot widgets opt in; saved/reporting widgets do not).</summary>
     public bool HasRefinedOutput => _refinedScopeKey is not null;
+
+    /// <summary>
+    /// Plan 49: true when this widget's refined-output section should render. The
+    /// Session scope ("") is always enabled; a per-pilot scope is gated by the
+    /// `show_pilot_refined_output` setting (issue #1).
+    /// </summary>
+    private bool RefinedSectionEnabled =>
+        _refinedScopeKey is not null && (_refinedScopeKey.Length == 0 || _pilotRefinedEnabled);
 
     /// <summary>Compose the per-widget refined-materials visibility setting key (must match the settings repository).</summary>
     private static string RefinedVisibilityKey(string scopeKey) =>
@@ -200,10 +213,12 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
         ArgumentNullException.ThrowIfNull(scopeKey);
         _refinedScopeKey = scopeKey;
         _popup.EnableRefinedMaterials(
-            seenMaterialsProvider: () => _refinedSeen.Values
-                .OrderByDescending(m => m.Quantity)
-                .Select(m => (m.TypeId, m.Name))
-                .ToList(),
+            seenMaterialsProvider: () => RefinedSectionEnabled
+                ? _refinedSeen.Values
+                    .OrderByDescending(m => m.Quantity)
+                    .Select(m => (m.TypeId, m.Name))
+                    .ToList()
+                : new List<(long TypeId, string Name)>(),
             loadAutoShow:   ct => Settings.GetAutoShowRefinedMaterialsAsync(ct),
             loadVisibility: ct => Settings.GetRefinedMaterialsVisibilityAsync(scopeKey, ct),
             saveVisibility: (map, ct) => Settings.SetRefinedMaterialsVisibilityAsync(scopeKey, map, ct));
@@ -244,6 +259,10 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
             _refinedAutoShow = await Settings.GetAutoShowRefinedMaterialsAsync().ConfigureAwait(true);
             var overrides = await Settings.GetRefinedMaterialsVisibilityAsync(_refinedScopeKey).ConfigureAwait(true);
             _refinedOverrides = new Dictionary<long, bool>(overrides);
+            if (_refinedScopeKey.Length > 0)
+            {
+                _pilotRefinedEnabled = await Settings.GetShowPilotRefinedOutputAsync().ConfigureAwait(true);
+            }
             RebuildRefinedRows();
         }
         catch (Exception ex)
@@ -261,6 +280,7 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     private void RebuildRefinedRows()
     {
         RefinedOutput.Clear();
+        if (!RefinedSectionEnabled) return;
         foreach (var m in _refinedSeen.Values
                      .OrderByDescending(x => x.Quantity)
                      .ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase))

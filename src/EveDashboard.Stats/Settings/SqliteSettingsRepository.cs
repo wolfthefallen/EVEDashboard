@@ -425,6 +425,28 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     }
 
     /// <inheritdoc />
+    public async Task<bool> GetShowPilotRefinedOutputAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'show_pilot_refined_output'", ct: ct);
+        if (raw is null) return true;
+        return raw switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => LogWarnAndReturn(
+                $"Unknown show_pilot_refined_output value '{raw}' - returning default 'true'.", true),
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task SetShowPilotRefinedOutputAsync(bool enabled, CancellationToken ct = default)
+    {
+        await UpsertAsync("show_pilot_refined_output", enabled ? "true" : "false", ct);
+        RaiseSettingChanged("show_pilot_refined_output");
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(scopeKey);
@@ -659,6 +681,8 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         await SeedAsync("auto_pause_sound_enabled", "true", ct);
         // Plan 43 — refined-output auto-show default on.
         await SeedAsync("auto_show_refined_materials", "true", ct);
+        // Plan 49 (issue #1) — per-pilot refined-output toggle default on.
+        await SeedAsync("show_pilot_refined_output", "true", ct);
         // refined_materials_visibility[.<pilot_id>]  intentionally NOT seeded (null sentinel = no explicit overrides)
         // window_geometry         intentionally NOT seeded (round-2 3.1 = B - null sentinel)
         // widget_layout           intentionally NOT seeded (plan 19 - null sentinel = use default layout)
