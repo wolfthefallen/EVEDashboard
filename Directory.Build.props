@@ -7,6 +7,6 @@
     <!-- App version (plan 41). SemVer; matches the git release tag v<Version>.
          Bump on the release topic branch before tagging. Read at runtime by the
          launch update check to compare against the latest GitHub release. -->
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
   </PropertyGroup>
 </Project>
