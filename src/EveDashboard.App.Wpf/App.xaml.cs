@@ -462,7 +462,7 @@ public partial class App : Application
             _parser!, discovery,
             characters,
             _bootstrapLoader!,
-            _priceClientRouter!, _marketPriceFetcher!, _iskCalculator!,
+            _priceClientRouter!, _esiPriceClient!, _marketPriceFetcher!, _iskCalculator!,
             _releaseClient!);
 
         var themeService = _services.GetRequiredService<ThemeService>();

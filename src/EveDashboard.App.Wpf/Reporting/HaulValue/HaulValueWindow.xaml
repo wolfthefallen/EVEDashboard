@@ -119,8 +119,9 @@
 
         <!-- Where to sell (per-station totals) -->
         <StackPanel Grid.Row="3">
-            <TextBlock Text="Where to sell (total per station, best first)"
+            <TextBlock Text="Where to sell - best first (prices via official ESI, covers all NPC hubs)"
                        FontWeight="Bold"
+                       TextWrapping="Wrap"
                        Margin="0,0,0,4"
                        Foreground="{DynamicResource ForegroundBrush}" />
             <DataGrid ItemsSource="{Binding StationResults}"

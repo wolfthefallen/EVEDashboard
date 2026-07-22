@@ -698,8 +698,11 @@ to the default size, delete the `about_window_geometry` row from the
 ## 7.6 Haul Value window (plan 55)
 
 Verifies the multi-hub Haul Value window: both input modes (paste + saved
-session), pricing across the market_stations catalog via the selected price
-source, and the results grids.
+session), pricing across the market_stations catalog, and the results grids.
+NOTE: Haul Value always prices via **official ESI** (which covers every NPC hub),
+independent of the Settings price source — GoonMetrics only serves Jita, so a
+multi-hub compare must use ESI. So all four empire hubs price even if your live
+session uses GoonMetrics.
 
 ### Setup
 

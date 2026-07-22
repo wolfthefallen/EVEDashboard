@@ -79,6 +79,7 @@ public static class ServiceRegistration
     /// <param name="allCharacters">Characters discovered at startup. Drives the Session widget's pilot list.</param>
     /// <param name="bootstrapLoader">YAML bootstrap config loader (plan 15). Plan 22.1's Settings dialog VM consumes it for <c>gamelog_path</c> read/write.</param>
     /// <param name="priceClient">Plan 53 price-source router (GoonMetrics vs official ESI, per the <c>price_source</c> setting); registered as the <see cref="IMarketPriceClient"/>.</param>
+    /// <param name="esiPriceClient">The official-ESI price client, used directly by the Haul Value calculator (GoonMetrics 404s the non-Jita empire hubs, so the multi-hub comparison must use ESI regardless of the <c>price_source</c> setting).</param>
     /// <param name="marketPriceFetcher">Plan 18 fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
     /// <param name="iskCalculator">Plan 18 ISK calculator (canonical recursive reprocessing algorithm).</param>
     /// <param name="releaseClient">Plan 41 GitHub release-check client for the launch update check.</param>
@@ -102,6 +103,7 @@ public static class ServiceRegistration
         IReadOnlyList<Character> allCharacters,
         IBootstrapConfigLoader bootstrapLoader,
         IMarketPriceClient priceClient,
+        EsiMarketPriceClient esiPriceClient,
         MarketPriceFetcher marketPriceFetcher,
         IskCalculator iskCalculator,
         GitHubReleaseClient releaseClient)
@@ -123,6 +125,7 @@ public static class ServiceRegistration
         ArgumentNullException.ThrowIfNull(allCharacters);
         ArgumentNullException.ThrowIfNull(bootstrapLoader);
         ArgumentNullException.ThrowIfNull(priceClient);
+        ArgumentNullException.ThrowIfNull(esiPriceClient);
         ArgumentNullException.ThrowIfNull(marketPriceFetcher);
         ArgumentNullException.ThrowIfNull(iskCalculator);
         ArgumentNullException.ThrowIfNull(releaseClient);
@@ -412,8 +415,11 @@ public static class ServiceRegistration
         // plan-53 price-source router.
         services.AddSingleton<ISdeTypeNameResolver>(sp => new SqliteSdeTypeNameResolver(
             sdeDb, sp.GetRequiredService<ILogger<SqliteSdeTypeNameResolver>>()));
-        services.AddSingleton<HaulValuationCalculator>(sp => new HaulValuationCalculator(
-            sp.GetRequiredService<IMarketPriceClient>()));
+        // Haul Value prices via ESI DIRECTLY (not the price_source router): GoonMetrics
+        // 404s the non-Jita empire hubs, so a multi-hub comparison must use the source
+        // that covers every NPC hub. The live-session ISK pipeline still honours
+        // price_source; only this ad-hoc appraisal is pinned to ESI.
+        services.AddSingleton<HaulValuationCalculator>(_ => new HaulValuationCalculator(esiPriceClient));
         services.AddSingleton<HaulValueWindowViewModel>();
         services.AddSingleton<HaulValueWindow>(sp => new HaulValueWindow(
             sp.GetRequiredService<HaulValueWindowViewModel>(),
