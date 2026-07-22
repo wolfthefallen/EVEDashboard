@@ -84,14 +84,18 @@ Database location: `session.sqlite` (alongside `session`, `session_time`, `pilot
 
 | Trigger | What gets written |
 |---|---|
-| `IMarketStationCatalog.EnsureSeedDefaultsAsync` on a fresh DB (first launch via plan 16's bootstrap chain) | INSERT Jita (`60003760`) + INSERT C-J6MT (`1049588174021`) + INSERT sentinel `non_sticky_station_defaults_seeded = '1'` into `setting`. |
-| `EnsureSeedDefaultsAsync` on a subsequent launch | `INSERT OR IGNORE` Jita (sticky default — re-seeded if the user deleted it). C-J6MT skipped because the sentinel is present. |
+| `IMarketStationCatalog.EnsureSeedDefaultsAsync` on a fresh DB (first launch via plan 16's bootstrap chain) | INSERT the four empire hubs (Jita `60003760`, Amarr `60008494`, Dodixie `60011866`, Rens `60004588`) + INSERT C-J6MT (`1049588174021`) + INSERT sentinel `non_sticky_station_defaults_seeded = '1'` into `setting`. |
+| `EnsureSeedDefaultsAsync` on a subsequent launch | `INSERT OR IGNORE` the four empire hubs (sticky defaults — re-seeded if the user deleted one; existing users get Amarr/Dodixie/Rens added on the next launch). C-J6MT skipped because the sentinel is present. |
 | User adds a station via Settings UI (plan 17) | `IMarketStationCatalog.AddAsync` -> INSERT one row. |
 | User edits a station via Settings UI (plan 17) | `IMarketStationCatalog.UpdateAsync` -> UPDATE the existing row. |
 | User deletes a station via Settings UI (plan 17) | `IMarketStationCatalog.RemoveAsync` -> DELETE the row. C-J6MT will NOT be re-seeded by `EnsureSeedDefaultsAsync` because the sentinel persists. Jita WILL be re-seeded on next launch. |
 
-**Default seeding policy** (per plan 14 round-2 1.5):
-- **Jita** (`60003760`) is the trade-hub baseline. Re-seeded every launch via `INSERT OR IGNORE` so the user always has a working default.
+**Default seeding policy** (per plan 14 round-2 1.5; empire hubs added 2026-07-22):
+- **The four NPC empire trade hubs** are the baseline, re-seeded every launch via `INSERT OR IGNORE` (sticky) so the user always has working hub defaults — station ids / regions verified against ESI:
+  - **Jita** (`60003760`) - Caldari, The Forge (`10000002`).
+  - **Amarr** (`60008494`) - Amarr, Domain (`10000043`).
+  - **Dodixie** (`60011866`) - Gallente, Sinq Laison (`10000032`).
+  - **Rens** (`60004588`) - Minmatar, Heimatar (`10000030`).
 - **C-J6MT** (`1049588174021`) is a player-owned nullsec station that can be destroyed in-game. Seeded once on first launch; never re-seeded after the sentinel is written. If the user removes it from the catalog, the user's choice persists.
 
 The catalog cross-touches the `setting` table for the `non_sticky_station_defaults_seeded` sentinel; this is the only `setting` key written by `IMarketStationCatalog`.
@@ -132,7 +136,7 @@ Because prices are session-bound, "what prices applied during session X" is now 
 
 - **`type_id`** is the EVE inventory type id. The "common" type_materials prefetched at session start are the union of `type_materials.material_type_id` for every ore in the SDE — ~35 entries in v1 (8 standard minerals + 20 moon materials + 7 ice products, per `MEMORY.md → project_pricing_model`).
 - **`type_id` is NOT a foreign key** in the SQL sense. The `types` table lives in `sde.sqlite` (a different database file); SQLite does not enforce cross-database foreign keys. The relationship is informational. Application code is responsible for ensuring referenced type_ids exist in the SDE before inserting.
-- **`station_id`** on `market_data` is an **intra-DB FK** to `market_stations.station_id` (the FK is intra-DB enforced). v1 defaults seeded into `market_stations`: `60003760` (Jita - "IV - Moon 4 - Caldari Navy Assembly Plant", region "The Forge" / `10000002`) and `1049588174021` (C-J6MT - "1st Taj Mahgoon", region "Insmother" / `10000009`). The `selected_station_id` setting key (default = Jita) selects which station the fetcher pulls prices **from**; plan 38 (amended) does **not** use it when reading prices for ISK — the read is station-blind (see *Read patterns*). `station_id` is kept on every row as provenance for a future "which hub did these prices come from" display.
+- **`station_id`** on `market_data` is an **intra-DB FK** to `market_stations.station_id` (the FK is intra-DB enforced). Defaults seeded into `market_stations`: the four empire hubs `60003760` (Jita / The Forge `10000002`), `60008494` (Amarr / Domain `10000043`), `60011866` (Dodixie / Sinq Laison `10000032`), `60004588` (Rens / Heimatar `10000030`), plus `1049588174021` (C-J6MT - "1st Taj Mahgoon", region "Insmother" / `10000009`). The `selected_station_id` setting key (default = Jita) selects which station the fetcher pulls prices **from**; plan 38 (amended) does **not** use it when reading prices for ISK — the read is station-blind (see *Read patterns*). `station_id` is kept on every row as provenance for a future "which hub did these prices come from" display.
 - **`fetched_at`** is `TEXT` in ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SS.fffZ`), matching the `eve_timestamp` convention in [`session-schema.md`](session-schema.md). Sorts lexicographically; human-readable in the SQLite CLI.
 - **`isk_buy` and `isk_sell` are REAL** (8-byte IEEE float, equivalent to C# `double`). The user's example value `100300200100.24` (≈10¹¹ ISK with 2 decimals) is well within `double`'s ~15-17 significant-digit precision. Either or both may be NULL when GoonMetrics doesn't return that side of the order book.
 - **`isk_buy` semantics:** the highest buy order price (someone willing to pay this much per unit). The "buy" leg of `price_mode = "buy"`.

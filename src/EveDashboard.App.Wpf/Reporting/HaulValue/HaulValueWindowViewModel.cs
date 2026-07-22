@@ -14,10 +14,28 @@ using EveDashboard.Reporting.Queries;
 using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
-/// <summary>A saved session offered in the Haul Value session picker.</summary>
-/// <param name="SessionId">Session sha256 id.</param>
-/// <param name="Display">Human label (session name).</param>
-public sealed record SessionPickItem(string SessionId, string Display);
+/// <summary>A saved session offered in the Haul Value session picker (multi-select).</summary>
+public sealed partial class SessionPickItem : ObservableObject
+{
+    /// <summary>Session sha256 id.</summary>
+    public string SessionId { get; }
+
+    /// <summary>Human label (session name).</summary>
+    public string Display { get; }
+
+    /// <summary>Whether this session is checked for inclusion in the haul.</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
+    /// <summary>Construct a picker item.</summary>
+    /// <param name="sessionId">Session sha256 id.</param>
+    /// <param name="display">Session display name.</param>
+    public SessionPickItem(string sessionId, string display)
+    {
+        SessionId = sessionId;
+        Display = display;
+    }
+}
 
 /// <summary>One station row in the results grid (pre-formatted for display).</summary>
 /// <param name="Station">Station label.</param>
@@ -68,13 +86,13 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _pasteText = string.Empty;
 
-    /// <summary>The session chosen in session mode.</summary>
-    [ObservableProperty]
-    private SessionPickItem? _selectedSession;
-
     /// <summary>Status / summary line shown under the results.</summary>
     [ObservableProperty]
-    private string _statusText = "Paste a haul or pick a session, then Value haul.";
+    private string _statusText = "Paste a haul or pick session(s), then Value haul.";
+
+    /// <summary>Header over the breakdown grid; names the best station after a valuation.</summary>
+    [ObservableProperty]
+    private string _breakdownHeader = "Breakdown (best station)";
 
     /// <summary><c>true</c> while a valuation is in flight (disables the button).</summary>
     [ObservableProperty]
@@ -109,21 +127,23 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
 
     /// <summary>
     /// (Re)load the saved-session picker. Called when the window opens and on each
-    /// re-show, so a just-finished session appears. Preserves the current selection
-    /// by id when possible.
+    /// re-show, so a just-finished session appears. Preserves the user's current
+    /// checkbox selections by session id.
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     public async Task RefreshSessionsAsync(CancellationToken ct = default)
     {
         var report = await _reporting.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
-        var priorId = SelectedSession?.SessionId;
+        var previouslyChecked = Sessions.Where(s => s.IsSelected).Select(s => s.SessionId).ToHashSet();
 
         Sessions.Clear();
         foreach (var s in report.Sessions)
         {
-            Sessions.Add(new SessionPickItem(s.SessionId, s.Name));
+            Sessions.Add(new SessionPickItem(s.SessionId, s.Name)
+            {
+                IsSelected = previouslyChecked.Contains(s.SessionId),
+            });
         }
-        SelectedSession = Sessions.FirstOrDefault(s => s.SessionId == priorId) ?? Sessions.FirstOrDefault();
     }
 
     /// <summary>
@@ -144,6 +164,7 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
 
             StationResults.Clear();
             Breakdown.Clear();
+            BreakdownHeader = "Breakdown (best station)";
 
             if (haul.Count == 0)
             {
@@ -175,6 +196,7 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
             var best = valuation.Stations.FirstOrDefault();
             if (best is not null)
             {
+                BreakdownHeader = $"Breakdown - {best.StationLabel}";
                 foreach (var line in best.Lines.OrderByDescending(l => l.LineValue ?? -1))
                 {
                     Breakdown.Add(new LineValueRow(
@@ -230,21 +252,32 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
         return (haul, note);
     }
 
-    /// <summary>Turn the selected session's refined output into haul lines.</summary>
+    /// <summary>Sum the checked sessions' refined output into one haul.</summary>
     private async Task<(IReadOnlyList<HaulLine> Haul, string Note)> BuildFromSessionAsync(CancellationToken ct)
     {
-        if (SelectedSession is null)
+        var selected = Sessions.Where(s => s.IsSelected).ToList();
+        if (selected.Count == 0)
         {
-            return (System.Array.Empty<HaulLine>(), "Pick a session first.");
+            return (System.Array.Empty<HaulLine>(), "Pick at least one session first.");
         }
 
-        var stats = await _stats.GetSessionStatsAsync(
-            SelectedSession.SessionId, DateTimeOffset.UtcNow, allowLazyFetch: false, ct).ConfigureAwait(true);
-        var haul = stats.RefinedOutput
+        // Gather each session's refined output and sum per material across them via
+        // the shared aggregator, so several sessions combine into one haul.
+        var perSession = new List<IReadOnlyList<RefinedMaterialAmount>>(selected.Count);
+        foreach (var s in selected)
+        {
+            var stats = await _stats.GetSessionStatsAsync(
+                s.SessionId, DateTimeOffset.UtcNow, allowLazyFetch: false, ct).ConfigureAwait(true);
+            perSession.Add(stats.RefinedOutput);
+        }
+
+        var haul = RefinedOutputAggregator.SumAcross(perSession)
             .Where(m => m.Quantity > 0)
             .Select(m => new HaulLine(m.TypeId, m.Name, m.Quantity))
             .ToList();
-        var note = haul.Count == 0 ? "That session has no refined output to value." : string.Empty;
+        var note = haul.Count == 0
+            ? "The selected session(s) have no refined output to value."
+            : (selected.Count > 1 ? $"Combined {selected.Count} sessions." : string.Empty);
         return (haul, note);
     }
 

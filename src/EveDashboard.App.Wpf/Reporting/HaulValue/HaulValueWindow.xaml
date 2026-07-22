@@ -58,15 +58,23 @@
                          FontFamily="Consolas" />
             </StackPanel>
 
-            <!-- Session mode -->
+            <!-- Session mode (multi-select via checkboxes) -->
             <StackPanel Visibility="{Binding UsePasteMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                <TextBlock Text="Value a saved session's refined output:"
+                <TextBlock Text="Value one or more saved sessions' refined output (checked sessions are combined):"
                            Margin="0,0,0,4"
+                           TextWrapping="Wrap"
                            Foreground="{DynamicResource ForegroundBrush}" />
-                <ComboBox ItemsSource="{Binding Sessions}"
-                          SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
-                          DisplayMemberPath="Display"
-                          Height="26" />
+                <ListBox ItemsSource="{Binding Sessions}"
+                         MaxHeight="120"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Display}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Foreground="{DynamicResource ForegroundBrush}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
         </StackPanel>
 
@@ -114,7 +122,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0"
-                       Text="Breakdown (best station)"
+                       Text="{Binding BreakdownHeader}"
                        FontWeight="Bold"
                        Margin="0,0,0,4"
                        Foreground="{DynamicResource ForegroundBrush}" />

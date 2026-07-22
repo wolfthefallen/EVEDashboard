@@ -716,10 +716,12 @@ price source (GoonMetrics default; ESI also works — plan 53).
    between name and quantity both work; thousands separators are tolerated).
    Click **Value haul**.
    - Expected: the "Where to sell" grid lists each catalog station with a total,
-     best first; the "Breakdown (best station)" grid lists Tritanium / Pyerite
-     with quantity, unit price, and value; the status line says "Valued 2 item(s)
-     at N station(s) using buy prices."
-   - Numbers should match Jita in-game for those minerals (at the current price
+     **best first** — the four empire hubs (Jita, Amarr, Dodixie, Rens) are all
+     seeded defaults, so all four appear (plus any you've added). The breakdown
+     header **names the winning station** (e.g. "Breakdown - Jita - 4-4"); the
+     grid lists Tritanium / Pyerite with quantity, unit price, and value; the
+     status line says "Valued 2 item(s) at N station(s) using buy prices."
+   - Numbers should match the in-game market at each hub (at the current price
      mode — change Price mode in Settings to see buy vs sell vs split).
 3. **Unresolved name.** Add a line `Notarealitem 5` and re-Value.
    - Expected: it is priced-skipped and the status line ends with
@@ -727,15 +729,18 @@ price source (GoonMetrics default; ESI also works — plan 53).
 4. **Non-ore item.** Paste a non-mining item, e.g. `Rifter	1`, and Value.
    - Expected: it resolves and prices (proves the paste box is not limited to
      ore/minerals).
-5. **Session mode.** Select "From saved session", pick a session from the
-   dropdown, click **Value haul**.
-   - Expected: the session's refined output is valued across the stations; the
-     breakdown lists that session's refined materials.
-6. **Refresh on reopen.** Close the window (it hides). Finish another session,
-   then click **Haul Value** again -> the new session appears in the dropdown.
+5. **Session mode (multi-select).** Select "From saved session" -> a checkbox
+   list of saved sessions appears. **Check one or more**, click **Value haul**.
+   - Expected: the checked sessions' refined output is **summed** and valued
+     across the stations; the breakdown lists the combined refined materials and
+     names the best station; with 2+ checked the status says "Combined N
+     sessions."
+6. **Refresh preserves checks.** Close the window (it hides). Finish another
+   session, then click **Haul Value** again -> the new session appears in the
+   list AND your previous checks are still ticked.
 7. **Empty / no selection.** Clear the paste box and Value -> status "Paste box
-   is empty." Switch to session mode with nothing selected and Value -> status
-   "Pick a session first."
+   is empty." Switch to session mode with nothing checked and Value -> status
+   "Pick at least one session first."
 
 ### Cleanup
 

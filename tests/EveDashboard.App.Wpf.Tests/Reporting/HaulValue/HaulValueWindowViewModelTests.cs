@@ -47,7 +47,7 @@ public class HaulValueWindowViewModelTests
     }
 
     [Fact]
-    public async Task RefreshSessions_populates_picker_and_selects_first()
+    public async Task RefreshSessions_populates_picker_with_nothing_checked()
     {
         var reporting = new FakeReporting(
             new SessionSummaryRow("s1", "Belt run", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0),
@@ -57,7 +57,23 @@ public class HaulValueWindowViewModelTests
         await vm.RefreshSessionsAsync();
 
         vm.Sessions.Should().HaveCount(2);
-        vm.SelectedSession!.SessionId.Should().Be("s1");
+        vm.Sessions.Should().OnlyContain(s => !s.IsSelected);
+    }
+
+    [Fact]
+    public async Task RefreshSessions_preserves_the_users_checks_by_id()
+    {
+        var reporting = new FakeReporting(
+            new SessionSummaryRow("s1", "Belt run", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0),
+            new SessionSummaryRow("s2", "Moon pop", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0));
+        var vm = Build(reporting: reporting);
+        await vm.RefreshSessionsAsync();
+        vm.Sessions.Single(s => s.SessionId == "s2").IsSelected = true;
+
+        await vm.RefreshSessionsAsync(); // e.g. window reshown
+
+        vm.Sessions.Single(s => s.SessionId == "s2").IsSelected.Should().BeTrue();
+        vm.Sessions.Single(s => s.SessionId == "s1").IsSelected.Should().BeFalse();
     }
 
     [Fact]
@@ -99,6 +115,7 @@ public class HaulValueWindowViewModelTests
             reporting: new FakeReporting(new SessionSummaryRow("s1", "Belt run", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0)),
             stats: stats, prices: prices);
         await vm.RefreshSessionsAsync();
+        vm.Sessions.Single(s => s.SessionId == "s1").IsSelected = true;
         vm.UsePasteMode = false; // session mode
 
         await vm.ValueHaulAsync();
@@ -106,19 +123,45 @@ public class HaulValueWindowViewModelTests
         vm.StationResults.Should().ContainSingle();
         vm.StationResults[0].TotalValue.Should().Contain("10,000"); // 5 * 2000
         vm.Breakdown.Should().ContainSingle(l => l.Name == "Tritanium");
+        vm.BreakdownHeader.Should().Contain("Jita"); // best station is named
+    }
+
+    [Fact]
+    public async Task Session_mode_combines_multiple_checked_sessions()
+    {
+        var stats = new FakeStats(new Dictionary<string, RefinedMaterialAmount[]>
+        {
+            ["s1"] = new[] { new RefinedMaterialAmount(34L, "Tritanium", 1000) },
+            ["s2"] = new[] { new RefinedMaterialAmount(34L, "Tritanium", 3000) },
+        });
+        var prices = new StubPriceClient(new() { [(Jita, 34L)] = (5.0, 6.0) });
+        var vm = Build(
+            reporting: new FakeReporting(
+                new SessionSummaryRow("s1", "A", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0),
+                new SessionSummaryRow("s2", "B", System.DateTimeOffset.UnixEpoch, System.TimeSpan.Zero, 1, 0)),
+            stats: stats, prices: prices);
+        await vm.RefreshSessionsAsync();
+        foreach (var s in vm.Sessions) s.IsSelected = true; // both
+        vm.UsePasteMode = false;
+
+        await vm.ValueHaulAsync();
+
+        // 1000 + 3000 = 4000 units summed across sessions; * 5 buy = 20,000.
+        vm.Breakdown.Should().ContainSingle(l => l.Name == "Tritanium" && l.Quantity == "4,000");
+        vm.StationResults[0].TotalValue.Should().Contain("20,000");
+        vm.StatusText.Should().Contain("Combined 2 sessions");
     }
 
     [Fact]
     public async Task Session_mode_with_no_selection_reports()
     {
         var vm = Build();
-        vm.UsePasteMode = false;
-        vm.SelectedSession = null;
+        vm.UsePasteMode = false; // nothing checked
 
         await vm.ValueHaulAsync();
 
         vm.StationResults.Should().BeEmpty();
-        vm.StatusText.Should().Contain("Pick a session");
+        vm.StatusText.Should().Contain("at least one session");
     }
 
     // ---- fakes ----
@@ -137,12 +180,23 @@ public class HaulValueWindowViewModelTests
 
     private sealed class FakeStats : ISessionStatsRepository
     {
-        private readonly IReadOnlyList<RefinedMaterialAmount> _refined;
-        public FakeStats(IReadOnlyList<RefinedMaterialAmount>? refined = null) => _refined = refined ?? System.Array.Empty<RefinedMaterialAmount>();
+        private readonly IReadOnlyList<RefinedMaterialAmount> _default;
+        private readonly Dictionary<string, IReadOnlyList<RefinedMaterialAmount>> _bySession = new();
+
+        public FakeStats(IReadOnlyList<RefinedMaterialAmount>? refined = null) =>
+            _default = refined ?? System.Array.Empty<RefinedMaterialAmount>();
+
+        public FakeStats(Dictionary<string, RefinedMaterialAmount[]> bySession)
+        {
+            _default = System.Array.Empty<RefinedMaterialAmount>();
+            foreach (var kv in bySession) _bySession[kv.Key] = kv.Value;
+        }
+
         public Task<SessionStats> GetSessionStatsAsync(string sessionId, System.DateTimeOffset asOf, bool allowLazyFetch, CancellationToken ct = default)
         {
+            var refined = _bySession.TryGetValue(sessionId, out var r) ? r : _default;
             var stats = new SessionStats(sessionId, System.TimeSpan.Zero, asOf, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                new Dictionary<long, CharacterStats>()) { RefinedOutput = _refined };
+                new Dictionary<long, CharacterStats>()) { RefinedOutput = refined };
             return Task.FromResult(stats);
         }
     }
