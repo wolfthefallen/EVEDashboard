@@ -64,17 +64,40 @@
                            Margin="0,0,0,4"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource ForegroundBrush}" />
-                <ListBox ItemsSource="{Binding Sessions}"
-                         MaxHeight="120"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox Content="{Binding Display}"
-                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                      Foreground="{DynamicResource ForegroundBrush}" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <!-- DataGrid (not ListBox) so the session name renders via a themed
+                     DataGridTextColumn, mirroring the Reports sidebar; a bare
+                     CheckBox.Content rendered dark-on-dark. The checkbox is a
+                     TemplateColumn so it toggles on first click even with the grid
+                     IsReadOnly. -->
+                <DataGrid ItemsSource="{Binding Sessions}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserSortColumns="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="None"
+                          GridLinesVisibility="None"
+                          Background="Transparent"
+                          Foreground="{DynamicResource ForegroundBrush}"
+                          RowBackground="Transparent"
+                          AlternatingRowBackground="{DynamicResource HoverOverlayBrush}"
+                          MaxHeight="120"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="Auto" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Session" Binding="{Binding Display}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </StackPanel>
         </StackPanel>
 
