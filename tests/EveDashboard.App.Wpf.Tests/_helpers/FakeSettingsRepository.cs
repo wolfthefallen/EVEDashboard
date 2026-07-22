@@ -16,6 +16,7 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
 {
     public ThemeMode Theme { get; set; } = ThemeMode.Dark;
     public PriceMode PriceMode { get; set; } = PriceMode.Buy;
+    public PriceSource PriceSource { get; set; } = PriceSource.GoonMetrics;
     public double RefiningYieldPercent { get; set; } = 90.6;
     public long SelectedStationId { get; set; } = 60003760L;
     public WindowGeometry? WindowGeometry { get; set; }
@@ -51,6 +52,13 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
     }
 
     public Task<PriceMode> GetPriceModeAsync(CancellationToken ct = default) => Task.FromResult(PriceMode);
+    public Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default) => Task.FromResult(PriceSource);
+    public Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default)
+    {
+        PriceSource = value;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("price_source"));
+        return Task.CompletedTask;
+    }
     public Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default)
     {
         PriceMode = value;

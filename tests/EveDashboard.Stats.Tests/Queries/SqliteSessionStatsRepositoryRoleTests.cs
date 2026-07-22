@@ -260,6 +260,8 @@ public class SqliteSessionStatsRepositoryRoleTests
         public Task SetThemeAsync(ThemeMode value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<PriceMode> GetPriceModeAsync(CancellationToken ct = default) => Task.FromResult(PriceMode.Buy);
         public Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default) => Task.FromResult(PriceSource.GoonMetrics);
+        public Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default) => Task.FromResult(90.6);
         public Task SetRefiningYieldPercentAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<long> GetSelectedStationIdAsync(CancellationToken ct = default) => Task.FromResult(60003760L);

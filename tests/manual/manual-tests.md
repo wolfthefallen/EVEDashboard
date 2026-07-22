@@ -135,8 +135,8 @@ folder. Delete `C:\temp\empty`. Clear any read-only attribute on
 ## 2. Settings dialog
 
 Verifies validation, Apply / Close semantics, dirty-flag discard prompt,
-theme live re-apply, station list edits, and refining-yield / price-mode
-persistence.
+theme live re-apply, station list edits, and refining-yield / price-mode /
+price-source persistence.
 
 ### Setup
 
@@ -155,6 +155,16 @@ Launch the app. The chrome bar has a `Settings` button at the right.
    95)". Set to `abc` -> Apply -> MessageBox "Refining yield is not a
    valid number (you entered 'abc')". Set to `75.5` -> Apply -> no
    prompt, persisted. Close + reopen -> shows 75.5.
+3b. **Price source selection + official ESI pricing (plan 53).** In the
+    Pricing section the new "Price source:" ComboBox lists
+    `GoonMetrics (third-party)` (default) and `Official ESI (CCP)`. Select
+    `Official ESI (CCP)` -> Apply -> Close -> reopen: still Official ESI.
+    Live check (optional): start a session and mine (or run
+    `tools/fake-mining-session.ps1`); ISK still populates, and the app log
+    (`%APPDATA%\EveDashboard\logs\EveDashboard_*.log`) shows the fetch hitting
+    `esi.evetech.net` instead of `goonmetrics`. Prices should match Jita in-game
+    for the mined ores' refined minerals. Restore to `GoonMetrics (third-party)`
+    -> Apply when done.
 4. **Gamelog folder validation.** Type `Z:\nope` -> Apply -> MessageBox
    "Gamelog folder does not exist". Browse to `C:\Windows` -> Apply ->
    "Gamelog folder contains no EVE gamelog files". Browse to the real

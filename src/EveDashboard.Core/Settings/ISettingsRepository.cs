@@ -54,6 +54,20 @@ public interface ISettingsRepository
     /// <param name="ct">Cancellation token.</param>
     Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default);
 
+    /// <summary>
+    /// Plan 53: read which market-price service the ISK pipeline fetches from.
+    /// Returns <see cref="PriceSource.GoonMetrics"/> when missing or when the
+    /// stored value is unrecognised (with Warning log on the latter).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted <see cref="PriceSource"/>, or the default (GoonMetrics).</returns>
+    Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default);
+
+    /// <summary>Persist a new price source (plan 53). Raises <see cref="SettingChanged"/> with key <c>"price_source"</c>.</summary>
+    /// <param name="value">Price source to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default);
+
     /// <summary>Read the configured refining yield percent. Returns <c>90.6</c> when missing.</summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The persisted refining yield percent, or <c>90.6</c>.</returns>

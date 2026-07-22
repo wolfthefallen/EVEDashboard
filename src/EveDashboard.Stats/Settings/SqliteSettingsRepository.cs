@@ -136,6 +136,35 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     }
 
     /// <inheritdoc />
+    public async Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'price_source'", ct: ct);
+        if (raw is null) return PriceSource.GoonMetrics;
+        return raw switch
+        {
+            "goonmetrics" => PriceSource.GoonMetrics,
+            "esi" => PriceSource.Esi,
+            _ => LogWarnAndReturn(
+                $"Unknown price_source value '{raw}' in setting table - returning default 'goonmetrics'.",
+                PriceSource.GoonMetrics),
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default)
+    {
+        var stored = value switch
+        {
+            PriceSource.GoonMetrics => "goonmetrics",
+            PriceSource.Esi => "esi",
+            _ => "goonmetrics",
+        };
+        await UpsertAsync("price_source", stored, ct);
+        RaiseSettingChanged("price_source");
+    }
+
+    /// <inheritdoc />
     public async Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default)
     {
         var raw = await _db.QueryScalarAsync<string>(
@@ -765,6 +794,7 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     {
         await SeedAsync("theme", "dark", ct);
         await SeedAsync("price_mode", "buy", ct);
+        await SeedAsync("price_source", "goonmetrics", ct);
         await SeedAsync("refining_yield_percent",
             YieldDefault.ToString("R", CultureInfo.InvariantCulture), ct);
         await SeedAsync("selected_station_id",

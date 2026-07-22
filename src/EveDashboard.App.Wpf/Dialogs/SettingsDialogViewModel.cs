@@ -78,6 +78,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
 
     private ThemeMode _theme;
     private PriceMode _priceMode;
+    private PriceSource _priceSource;
     private string _refiningYieldText = string.Empty;
     private long _selectedStationId;
     private string _gamelogPath = string.Empty;
@@ -149,6 +150,13 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     {
         get => _priceMode;
         set => SetField(ref _priceMode, value);
+    }
+
+    /// <summary>Selected price source (GoonMetrics vs official ESI). Setter marks the VM dirty.</summary>
+    public PriceSource PriceSource
+    {
+        get => _priceSource;
+        set => SetField(ref _priceSource, value);
     }
 
     /// <summary>
@@ -237,6 +245,9 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     /// <summary>Price-mode dropdown options.</summary>
     public IReadOnlyList<PriceMode> PriceModeOptions { get; } = new[] { PriceMode.Buy, PriceMode.Sell, PriceMode.Split };
 
+    /// <summary>The selectable price sources, in display order.</summary>
+    public IReadOnlyList<PriceSource> PriceSourceOptions { get; } = new[] { PriceSource.GoonMetrics, PriceSource.Esi };
+
     /// <summary>
     /// True after any setter or markets mutation has fired since the last
     /// <see cref="LoadAsync"/> or successful <see cref="ApplyAsync"/>.
@@ -320,6 +331,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // markets ObservableCollection rebuild) all happen synchronously below.
         var theme = await _settings.GetThemeAsync(ct).ConfigureAwait(true);
         var priceMode = await _settings.GetPriceModeAsync(ct).ConfigureAwait(true);
+        var priceSource = await _settings.GetPriceSourceAsync(ct).ConfigureAwait(true);
         var yield = await _settings.GetRefiningYieldPercentAsync(ct).ConfigureAwait(true);
         var selectedStationId = await _settings.GetSelectedStationIdAsync(ct).ConfigureAwait(true);
         var gamelogPath = await ReadCurrentGamelogPathAsync(ct).ConfigureAwait(true);
@@ -346,6 +358,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
 
         _theme = theme;
         _priceMode = priceMode;
+        _priceSource = priceSource;
         _refiningYieldText = yield.ToString("R", CultureInfo.InvariantCulture);
         _gamelogPath = gamelogPath;
         _selectedStationId = selectedStationId;
@@ -386,6 +399,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
 
         await _settings.SetThemeAsync(_theme, ct).ConfigureAwait(true);
         await _settings.SetPriceModeAsync(_priceMode, ct).ConfigureAwait(true);
+        await _settings.SetPriceSourceAsync(_priceSource, ct).ConfigureAwait(true);
 
         var yieldValue = double.Parse(_refiningYieldText, NumberStyles.Float, CultureInfo.InvariantCulture);
         await _settings.SetRefiningYieldPercentAsync(yieldValue, ct).ConfigureAwait(true);

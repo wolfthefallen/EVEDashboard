@@ -76,7 +76,7 @@ public static class ServiceRegistration
     /// <param name="discovery">Gamelog discovery service (already invoked at startup; registered for future re-discovery).</param>
     /// <param name="allCharacters">Characters discovered at startup. Drives the Session widget's pilot list.</param>
     /// <param name="bootstrapLoader">YAML bootstrap config loader (plan 15). Plan 22.1's Settings dialog VM consumes it for <c>gamelog_path</c> read/write.</param>
-    /// <param name="marketPriceClient">Plan 18 GoonMetrics HTTP client.</param>
+    /// <param name="priceClient">Plan 53 price-source router (GoonMetrics vs official ESI, per the <c>price_source</c> setting); registered as the <see cref="IMarketPriceClient"/>.</param>
     /// <param name="marketPriceFetcher">Plan 18 fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
     /// <param name="iskCalculator">Plan 18 ISK calculator (canonical recursive reprocessing algorithm).</param>
     /// <param name="releaseClient">Plan 41 GitHub release-check client for the launch update check.</param>
@@ -99,7 +99,7 @@ public static class ServiceRegistration
         GamelogDiscoveryService discovery,
         IReadOnlyList<Character> allCharacters,
         IBootstrapConfigLoader bootstrapLoader,
-        GoonMetricsPriceClient marketPriceClient,
+        IMarketPriceClient priceClient,
         MarketPriceFetcher marketPriceFetcher,
         IskCalculator iskCalculator,
         GitHubReleaseClient releaseClient)
@@ -120,7 +120,7 @@ public static class ServiceRegistration
         ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(allCharacters);
         ArgumentNullException.ThrowIfNull(bootstrapLoader);
-        ArgumentNullException.ThrowIfNull(marketPriceClient);
+        ArgumentNullException.ThrowIfNull(priceClient);
         ArgumentNullException.ThrowIfNull(marketPriceFetcher);
         ArgumentNullException.ThrowIfNull(iskCalculator);
         ArgumentNullException.ThrowIfNull(releaseClient);
@@ -164,8 +164,7 @@ public static class ServiceRegistration
         // Plan 18 — pricing pipeline singletons. Mirror the existing
         // dual-registration pattern (concrete + interface) used for the
         // SessionEventWriter at lines above.
-        services.AddSingleton(marketPriceClient);
-        services.AddSingleton<IMarketPriceClient>(marketPriceClient);
+        services.AddSingleton<IMarketPriceClient>(priceClient);
         services.AddSingleton(marketPriceFetcher);
         services.AddSingleton<IMarketPriceFetcher>(marketPriceFetcher);
         services.AddSingleton(iskCalculator);

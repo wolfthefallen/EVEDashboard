@@ -53,6 +53,14 @@ internal sealed class NoOpSettingsRepository : ISettingsRepository
         => throw new InvalidOperationException(Reason);
 
     /// <inheritdoc />
+    public Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
+    public Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default)
+        => throw new InvalidOperationException(Reason);
+
+    /// <inheritdoc />
     public Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default)
         => throw new InvalidOperationException(Reason);
 

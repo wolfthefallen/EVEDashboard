@@ -108,6 +108,8 @@ public partial class App : Application
     // Plan 18 — pricing pipeline. Constructed in chain step 8.5; the existing
     // _httpClient (chain step 5) is reused.
     private GoonMetricsPriceClient? _marketPriceClient;
+    private EsiMarketPriceClient?   _esiPriceClient;
+    private SelectablePriceClient?  _priceClientRouter;
     private MarketPriceFetcher?     _marketPriceFetcher;
     private IskCalculator?          _iskCalculator;
 
@@ -393,8 +395,17 @@ public partial class App : Application
             _marketPriceClient = new GoonMetricsPriceClient(
                 _httpClient,
                 LogProvider.Factory.CreateLogger<GoonMetricsPriceClient>());
+            // Plan 53: official-CCP price source via public ESI (no login). The fetcher
+            // talks to a router that picks GoonMetrics vs ESI per the price_source
+            // setting, live-switchable; default GoonMetrics = unchanged v1 behaviour.
+            _esiPriceClient = new EsiMarketPriceClient(
+                _httpClient,
+                _stationCatalog!,
+                LogProvider.Factory.CreateLogger<EsiMarketPriceClient>());
+            _priceClientRouter = new SelectablePriceClient(
+                _settingsRepo!, _marketPriceClient, _esiPriceClient);
             _marketPriceFetcher = new MarketPriceFetcher(
-                _marketPriceClient,
+                _priceClientRouter,
                 _sessionDb!,
                 _sdeLookup!,
                 _settingsRepo!,
@@ -451,7 +462,7 @@ public partial class App : Application
             _parser!, discovery,
             characters,
             _bootstrapLoader!,
-            _marketPriceClient!, _marketPriceFetcher!, _iskCalculator!,
+            _priceClientRouter!, _marketPriceFetcher!, _iskCalculator!,
             _releaseClient!);
 
         var themeService = _services.GetRequiredService<ThemeService>();

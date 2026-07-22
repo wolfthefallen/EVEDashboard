@@ -2,7 +2,11 @@
 
 The shape of the **market price data** persisted by the app at runtime. Companion to [`session-schema.md`](session-schema.md) (sessions / pilots / events / settings) and [`sde-schema.md`](sde-schema.md) (the EVE Static Data Export). Canonical reference for any code that fetches, reads, or writes market price rows.
 
-**Source:** the GoonMetrics API at `https://goonmetrics.apps.gnf.lt/api/price_data/?station_id=<id>&type_id=<csv>` (no auth, no documented rate limits per `MEMORY.md → project_pricing_model`).
+**Source (selectable, plan 53):** the `price_source` setting picks which service the fetcher calls, live-switchable via Settings -> Pricing:
+- `goonmetrics` (default) — the third-party GoonMetrics API at `https://goonmetrics.apps.gnf.lt/api/price_data/?station_id=<id>&type_id=<csv>` (no auth).
+- `esi` — official CCP data via the public ESI endpoint `GET https://esi.evetech.net/v1/markets/{region_id}/orders/?type_id=<id>&order_type=all` (no auth, ~300 req/min). The region is resolved from the selected station's `market_stations.region_id`; orders are filtered to the station's `location_id` and reduced to best buy (max) / best sell (min). NPC hub stations only (player structures need an authenticated scope). A station with no known `region_id` yields no ESI prices (values at 0), same as a GoonMetrics miss.
+
+Both sources write identical `market_data` rows; switching source only changes where future fetches come from (existing rows are immutable history).
 
 **Why this shape:** v1 ISK valuation needs prices for the type_materials reachable from each mined ore. Per the user's 2026-05-02 alignment, prices are persisted in the session SQLite database (NOT a transient cache) so v2 reporting can review the prices that applied at any point in the past. v1 has **no time-based periodic auto-refresh** — prices fetch at session start (and on Resume, and on a mid-session pricing-station change), plus a lazy on-demand fill for a material with no usable price for the active price mode, throttled to at most once per 15 minutes per session. v3 will add gas pricing.
 
