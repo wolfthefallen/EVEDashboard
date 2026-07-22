@@ -5,7 +5,9 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Threading;
 using EveDashboard.App.Wpf.Bootstrap;
+using EveDashboard.App.Wpf.Diagnostics;
 using EveDashboard.App.Wpf.DependencyInjection;
 using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Layout;
@@ -79,6 +81,9 @@ public partial class App : Application
 {
     /// <summary>App-lifetime <see cref="HttpClient"/> for everef.net SDE updates (per plan-16 alignment 1.4 = A).</summary>
     private HttpClient? _httpClient;
+
+    /// <summary>Plan 56: app-wide unhandled-exception policy (log the stack trace + graceful dialog).</summary>
+    private GlobalExceptionHandler? _globalExceptionHandler;
 
     /// <summary>App-lifetime DI container (chain step 10); disposed and rebuilt across plan-22.2 retries; final dispose at <see cref="OnExit"/>.</summary>
     private ServiceProvider? _services;
@@ -155,6 +160,12 @@ public partial class App : Application
         var logger = LogProvider.Factory.CreateLogger<App>();
         logger.LogInformation("EVE Dashboard starting up.");
 
+        // Plan 56: install the app-wide unhandled-exception handlers now that logging
+        // is up, so an unexpected throw (especially from an async void event handler)
+        // is logged with its stack trace and surfaced gracefully instead of the
+        // process vanishing silently.
+        InstallGlobalExceptionHandlers();
+
         // Plan 22.2 Bug 2 fix (2026-05-03): merge default Dark theme dictionary
         // into Application.Resources NOW so any UI shown before chain step 10
         // — notably the bootstrap-failure dialog — has theme brushes to bind
@@ -184,6 +195,32 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+    }
+
+    /// <summary>
+    /// Plan 56: subscribe the three top-level unhandled-exception sources to
+    /// <see cref="GlobalExceptionHandler"/>. UI-thread exceptions are marked handled
+    /// so the app keeps running; background + unobserved-task exceptions are logged
+    /// (the latter marked observed so it does not escalate).
+    /// </summary>
+    private void InstallGlobalExceptionHandlers()
+    {
+        _globalExceptionHandler = new GlobalExceptionHandler(
+            LogProvider.Factory.CreateLogger<GlobalExceptionHandler>(),
+            new MessageBoxErrorDialog(),
+            @"%APPDATA%\EveDashboard\logs");
+
+        DispatcherUnhandledException += (_, e) =>
+            e.Handled = _globalExceptionHandler.HandleDispatcherException(e.Exception);
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+            _globalExceptionHandler.HandleDomainException(e.ExceptionObject as Exception, e.IsTerminating);
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            _globalExceptionHandler.HandleUnobservedTaskException(e.Exception);
+            e.SetObserved();
+        };
     }
 
     /// <summary>

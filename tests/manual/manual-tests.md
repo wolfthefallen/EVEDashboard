@@ -123,6 +123,15 @@ so the recovery steps can restore your real path.
       (`SDE up-to-date` or an update), NOT a `no such column` ERROR.
       `PRAGMA table_info(meta);` now shows `last_modified` and `etag` re-added.
     Restore the backup when done.
+12. **App-wide unhandled-exception handler (plan 56).** Hard to force
+    deliberately; verified by unit tests (`GlobalExceptionHandlerTests`) and by
+    normal use. What to know: if an unexpected error ever occurs, the app no
+    longer vanishes silently — a UI-thread error logs its stack trace and shows an
+    "EVE Dashboard - unexpected error" dialog **and keeps running**; a fatal
+    background error logs at Critical. The full stack trace is always in the newest
+    `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`. If you hit the dialog, press
+    Ctrl+C to copy its text for a bug report. Normal launches show NO such dialog
+    and no ERROR/CRITICAL lines between "starting up" and "startup complete".
 
 ### Cleanup
 
