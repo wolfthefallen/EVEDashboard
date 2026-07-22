@@ -6,6 +6,7 @@ using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Geometry;
 using EveDashboard.App.Wpf.Layout;
 using EveDashboard.App.Wpf.Reporting;
+using EveDashboard.App.Wpf.Reporting.HaulValue;
 using EveDashboard.App.Wpf.Reporting.Lifetime;
 using EveDashboard.App.Wpf.Reporting.Widgets;
 using EveDashboard.App.Wpf.Services;
@@ -27,6 +28,7 @@ using EveDashboard.MarketData.Pricing;
 using EveDashboard.Core.Updates;
 using EveDashboard.Updates;
 using EveDashboard.Reporting.Queries;
+using EveDashboard.Sde.Lookup;
 using EveDashboard.Sde.Meta;
 using EveDashboard.Sde.Storage;
 using EveDashboard.Sde.Updater;
@@ -404,6 +406,20 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<AboutWindow>>()));
         services.AddSingleton<IAboutWindow, AboutWindowAdapter>();
 
+        // Plan 55 — Haul Value window (public-data multi-hub valuation; no geometry
+        // persistence in v1). Its non-window deps: a full-types name resolver (over
+        // the SDE db) for the paste box, and the valuation calculator over the
+        // plan-53 price-source router.
+        services.AddSingleton<ISdeTypeNameResolver>(sp => new SqliteSdeTypeNameResolver(
+            sdeDb, sp.GetRequiredService<ILogger<SqliteSdeTypeNameResolver>>()));
+        services.AddSingleton<HaulValuationCalculator>(sp => new HaulValuationCalculator(
+            sp.GetRequiredService<IMarketPriceClient>()));
+        services.AddSingleton<HaulValueWindowViewModel>();
+        services.AddSingleton<HaulValueWindow>(sp => new HaulValueWindow(
+            sp.GetRequiredService<HaulValueWindowViewModel>(),
+            sp.GetRequiredService<ILogger<HaulValueWindow>>()));
+        services.AddSingleton<IHaulValueWindow, HaulValueWindowAdapter>();
+
         // Plan 25: MainWindow factory captures the MainWindow-flavoured
         // WindowGeometryService (wired to Get/SetWindowGeometryAsync, default
         // 1280x800) inline so the type itself isn't auto-registered.
@@ -421,7 +437,8 @@ public static class ServiceRegistration
             sp.GetRequiredService<ICrystalDiagramWindow>(),
             sp.GetRequiredService<ISessionConfigDialog>(),
             sp.GetRequiredService<AutoPauseSoundPlayer>(),
-            sp.GetRequiredService<IAboutWindow>()));
+            sp.GetRequiredService<IAboutWindow>(),
+            sp.GetRequiredService<IHaulValueWindow>()));
 
         return services.BuildServiceProvider();
     }

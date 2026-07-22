@@ -695,6 +695,55 @@ to the default size, delete the `about_window_geometry` row from the
 
 ---
 
+## 7.6 Haul Value window (plan 55)
+
+Verifies the multi-hub Haul Value window: both input modes (paste + saved
+session), pricing across the market_stations catalog via the selected price
+source, and the results grids.
+
+### Setup
+
+Launch the app. Have at least one saved session (or run
+`tools/fake-mining-session.ps1` and stop a session). Settings -> Pricing has a
+price source (GoonMetrics default; ESI also works — plan 53).
+
+### Steps
+
+1. **Open.** Click the chrome **Haul Value** button (to the left of Crystal
+   Diagram). A modeless window opens at ~720x600, titled "Haul Value".
+2. **Paste mode.** With "Paste items" selected, paste a haul, e.g.:
+   `Tritanium	1000000` and on the next line `Pyerite	500000` (tab or space
+   between name and quantity both work; thousands separators are tolerated).
+   Click **Value haul**.
+   - Expected: the "Where to sell" grid lists each catalog station with a total,
+     best first; the "Breakdown (best station)" grid lists Tritanium / Pyerite
+     with quantity, unit price, and value; the status line says "Valued 2 item(s)
+     at N station(s) using buy prices."
+   - Numbers should match Jita in-game for those minerals (at the current price
+     mode — change Price mode in Settings to see buy vs sell vs split).
+3. **Unresolved name.** Add a line `Notarealitem 5` and re-Value.
+   - Expected: it is priced-skipped and the status line ends with
+     "Not found: Notarealitem."
+4. **Non-ore item.** Paste a non-mining item, e.g. `Rifter	1`, and Value.
+   - Expected: it resolves and prices (proves the paste box is not limited to
+     ore/minerals).
+5. **Session mode.** Select "From saved session", pick a session from the
+   dropdown, click **Value haul**.
+   - Expected: the session's refined output is valued across the stations; the
+     breakdown lists that session's refined materials.
+6. **Refresh on reopen.** Close the window (it hides). Finish another session,
+   then click **Haul Value** again -> the new session appears in the dropdown.
+7. **Empty / no selection.** Clear the paste box and Value -> status "Paste box
+   is empty." Switch to session mode with nothing selected and Value -> status
+   "Pick a session first."
+
+### Cleanup
+
+Close the window (X hides it; it disposes at app shutdown). No persisted state
+(v1 does not save geometry or inputs across app restarts).
+
+---
+
 ## 8. Reports — open, sidebar, geometry, single-session breakdown
 
 Verifies the modeless Reports window, sidebar sort, single-session

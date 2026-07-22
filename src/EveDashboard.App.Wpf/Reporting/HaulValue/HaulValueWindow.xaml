@@ -1,0 +1,136 @@
+<Window x:Class="EveDashboard.App.Wpf.Reporting.HaulValue.HaulValueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+        Title="Haul Value"
+        Width="720" Height="600"
+        MinWidth="520" MinHeight="420"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <!--
+        Plan 55: modeless, singleton, hide-on-close Haul Value window. Value a haul
+        (pasted item list OR a saved session's refined output) across every station
+        in the market catalog and see where it is worth the most. Prices come from
+        the plan-53 price-source router (GoonMetrics / official ESI, per the
+        price_source setting). v1 does not persist geometry.
+    -->
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    </Window.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Input mode + inputs -->
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <RadioButton Content="Paste items"
+                             GroupName="InputMode"
+                             Foreground="{DynamicResource ForegroundBrush}"
+                             IsChecked="{Binding UsePasteMode, Mode=TwoWay}" />
+                <RadioButton Content="From saved session"
+                             GroupName="InputMode"
+                             Margin="16,0,0,0"
+                             Foreground="{DynamicResource ForegroundBrush}"
+                             IsChecked="{Binding UsePasteMode, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!-- Paste mode -->
+            <StackPanel Visibility="{Binding UsePasteMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="Paste from EVE (name + quantity per line — inventory copy or 'Name 1000'):"
+                           Margin="0,0,0,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <TextBox Text="{Binding PasteText, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         VerticalScrollBarVisibility="Auto"
+                         Height="120"
+                         FontFamily="Consolas" />
+            </StackPanel>
+
+            <!-- Session mode -->
+            <StackPanel Visibility="{Binding UsePasteMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <TextBlock Text="Value a saved session's refined output:"
+                           Margin="0,0,0,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <ComboBox ItemsSource="{Binding Sessions}"
+                          SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
+                          DisplayMemberPath="Display"
+                          Height="26" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Action -->
+        <Button Grid.Row="1"
+                Content="Value haul"
+                HorizontalAlignment="Left"
+                Margin="0,12,0,4"
+                Padding="16,4"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
+                Click="ValueButton_Click" />
+
+        <!-- Status -->
+        <TextBlock Grid.Row="2"
+                   Text="{Binding StatusText}"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,10"
+                   Foreground="{DynamicResource ForegroundBrush}" />
+
+        <!-- Where to sell (per-station totals) -->
+        <StackPanel Grid.Row="3">
+            <TextBlock Text="Where to sell (total per station, best first)"
+                       FontWeight="Bold"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+            <DataGrid ItemsSource="{Binding StationResults}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False"
+                      MaxHeight="150"
+                      Margin="0,0,0,12">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Station" Binding="{Binding Station}" Width="*" />
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalValue}" Width="Auto" />
+                    <DataGridTextColumn Header="" Binding="{Binding Note}" Width="Auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <!-- Per-material breakdown for the best station -->
+        <Grid Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Text="Breakdown (best station)"
+                       FontWeight="Bold"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+            <DataGrid Grid.Row="1"
+                      ItemsSource="{Binding Breakdown}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" />
+                    <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="Auto" />
+                    <DataGridTextColumn Header="Unit price" Binding="{Binding UnitPrice}" Width="Auto" />
+                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="Auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>

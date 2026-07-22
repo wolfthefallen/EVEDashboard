@@ -131,6 +131,18 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
+                <!-- Plan 55 Haul Value button. Declared AFTER Crystal Diagram so it lands to its left.
+                     Opens a modeless Haul Value window (multi-hub valuation of a pasted list or a session). -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="HaulValueButton"
+                        Content="Haul Value"
+                        Width="90"
+                        Height="24"
+                        Margin="0,0,8,0"
+                        Click="HaulValueButton_Click"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
                 <!-- Plan 19 Hidden-widgets dropdown. Declared AFTER Reports so it lands further to the left.
                      Visible only when at least one widget is hidden. Toggles the popup containing the list of hidden widgets. -->
                 <ToggleButton DockPanel.Dock="Right"

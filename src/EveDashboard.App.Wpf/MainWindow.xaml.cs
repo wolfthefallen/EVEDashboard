@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     private readonly ISessionConfigDialog _sessionConfigDialog;
     private readonly AutoPauseSoundPlayer _soundPlayer;
     private readonly IAboutWindow _aboutWindow;
+    private readonly EveDashboard.App.Wpf.Reporting.HaulValue.IHaulValueWindow _haulValueWindow;
 
     /// <summary>Construct the MainWindow with its dependencies. DI-resolved.</summary>
     /// <param name="vm">The MainWindow VM exposing the layout coordinator.</param>
@@ -40,6 +41,7 @@ public partial class MainWindow : Window
     /// <param name="sessionConfigDialog">Post-plan-25 New Session dialog seam, opened by the chrome New Session button.</param>
     /// <param name="soundPlayer">Plan 37 auto-pause / auto-resume sound player. Subscribed to the session controller's sound-request events.</param>
     /// <param name="aboutWindow">Plan 52 About reference-window seam, opened by the chrome About button.</param>
+    /// <param name="haulValueWindow">Plan 55 Haul Value window seam, opened by the chrome Haul Value button.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public MainWindow(
         MainWindowViewModel vm,
@@ -50,7 +52,8 @@ public partial class MainWindow : Window
         ICrystalDiagramWindow crystalDiagramWindow,
         ISessionConfigDialog sessionConfigDialog,
         AutoPauseSoundPlayer soundPlayer,
-        IAboutWindow aboutWindow)
+        IAboutWindow aboutWindow,
+        EveDashboard.App.Wpf.Reporting.HaulValue.IHaulValueWindow haulValueWindow)
     {
         ArgumentNullException.ThrowIfNull(vm);
         ArgumentNullException.ThrowIfNull(geometryService);
@@ -61,6 +64,7 @@ public partial class MainWindow : Window
         ArgumentNullException.ThrowIfNull(sessionConfigDialog);
         ArgumentNullException.ThrowIfNull(soundPlayer);
         ArgumentNullException.ThrowIfNull(aboutWindow);
+        ArgumentNullException.ThrowIfNull(haulValueWindow);
         _vm = vm;
         _geometryService = geometryService;
         _log = log;
@@ -70,6 +74,7 @@ public partial class MainWindow : Window
         _sessionConfigDialog = sessionConfigDialog;
         _soundPlayer = soundPlayer;
         _aboutWindow = aboutWindow;
+        _haulValueWindow = haulValueWindow;
 
         InitializeComponent();
         DataContext = _vm;
@@ -122,6 +127,11 @@ public partial class MainWindow : Window
     private void AboutButton_Click(object sender, RoutedEventArgs e)
     {
         _aboutWindow.Show();
+    }
+
+    private void HaulValueButton_Click(object sender, RoutedEventArgs e)
+    {
+        _haulValueWindow.Show();
     }
 
     private void NewSessionButton_Click(object sender, RoutedEventArgs e)
