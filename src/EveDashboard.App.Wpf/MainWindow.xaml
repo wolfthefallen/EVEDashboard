@@ -82,12 +82,26 @@
                 Panel.ZIndex="1"
                 Effect="{DynamicResource ModalShadowEffect}">
             <DockPanel LastChildFill="False">
-                <!-- Settings (right-aligned). Declared FIRST with Dock=Right so it lands at the rightmost edge. -->
+                <!-- About (plan 52, right-aligned). Declared FIRST with Dock=Right so it lands
+                     at the rightmost edge. Opens a modeless AboutWindow with version, GitHub
+                     link, SDE date, thank-yous, and the CCP legal statement. -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="AboutButton"
+                        Content="About"
+                        Width="84"
+                        Height="24"
+                        Click="AboutButton_Click"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource ButtonForegroundBrush}" />
+
+                <!-- Settings. Declared AFTER About so it lands to About's left; the 8px
+                     right margin separates it from About (matching Reports/Crystal spacing). -->
                 <Button DockPanel.Dock="Right"
                         x:Name="SettingsButton"
                         Content="Settings"
                         Width="84"
                         Height="24"
+                        Margin="0,0,8,0"
                         Click="SettingsButton_Click"
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />

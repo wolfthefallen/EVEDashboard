@@ -589,6 +589,7 @@ public class SqliteSettingsRepositoryTests
         (await repo.GetPriceModeAsync()).Should().Be(PriceMode.Buy);
         (await repo.GetRefiningYieldPercentAsync()).Should().Be(90.6);
         (await repo.GetWindowGeometryAsync()).Should().BeNull();
+        (await repo.GetAboutWindowGeometryAsync()).Should().BeNull();
         (await repo.GetAutoPauseIdleMinutesAsync()).Should().Be(5);
         (await repo.GetAutoPauseSoundEnabledAsync()).Should().BeTrue();
         (await repo.GetShowPilotRefinedOutputAsync()).Should().BeTrue();
@@ -819,6 +820,73 @@ public class SqliteSettingsRepositoryTests
         var repo = NewRepo(db);
 
         Func<Task> act = async () => await repo.SetLifetimeTotalsWindowGeometryAsync(null!);
+
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    // ---- AboutWindowGeometry (plan 52) --------------------------------------------
+
+    [Fact]
+    public async Task GetAboutWindowGeometryAsync_returns_null_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var geom = await repo.GetAboutWindowGeometryAsync();
+
+        geom.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_then_GetAboutWindowGeometryAsync_round_trips()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var original = new WindowGeometry(
+            Width: 460, Height: 560, Left: 90, Top: 45, IsMaximized: false);
+
+        await repo.SetAboutWindowGeometryAsync(original);
+        var roundTrip = await repo.GetAboutWindowGeometryAsync();
+
+        roundTrip.Should().Be(original);
+    }
+
+    [Fact]
+    public async Task GetAboutWindowGeometryAsync_returns_null_and_logs_warning_when_json_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "about_window_geometry", "{not-json");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        var geom = await repo.GetAboutWindowGeometryAsync();
+
+        geom.Should().BeNull();
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Exception is System.Text.Json.JsonException);
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_raises_SettingChanged_with_key_about_window_geometry()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetAboutWindowGeometryAsync(new WindowGeometry(800, 600, 0, 0, false));
+
+        keys.Should().ContainSingle().Which.Should().Be("about_window_geometry");
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_throws_on_null_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        Func<Task> act = async () => await repo.SetAboutWindowGeometryAsync(null!);
 
         await act.Should().ThrowAsync<ArgumentNullException>();
     }

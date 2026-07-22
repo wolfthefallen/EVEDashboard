@@ -618,6 +618,54 @@ default starting point.
 
 ---
 
+## 7.5 About window
+
+Verifies the chrome `About` button (now the rightmost button), the
+modeless About window content (version, GitHub link, SDE date,
+thank-yous, CCP legal text), and geometry persistence on
+close + reopen.
+
+### Setup
+
+The app launched normally with a populated SDE (the bundled fallback
+SDE has a build time, so the SDE date line is never `unknown` on a
+fresh install).
+
+### Steps
+
+1. **Button placement.** Look at the chrome toolbar's right edge.
+   - Expected: order right -> left is `About`, `Settings`, `Reports`,
+     `Crystal Diagram`. `About` is the rightmost button; `Settings`
+     sits immediately to its left with an 8px gap.
+2. **Open the window.** Click the chrome `About` button.
+   - Expected: window opens at default 460x560 centered, current theme.
+3. **Read each line.** Top to bottom:
+   - `EVE Dashboard v<version>` (matches the running release, e.g.
+     `0.1.3`).
+   - A clickable GitHub link reading
+     `https://github.com/wolfthefallen/EVEDashboard`.
+   - `SDE data: <yyyy-MM-dd>` (a real date, not `unknown`).
+   - A horizontal rule, then three thank-you lines (BETA testers,
+     GoonMetrics, everef.net).
+   - A second horizontal rule, then the CCP legal paragraph.
+4. **GitHub link.** Click the link.
+   - Expected: the repo opens in your default browser; the About
+     window stays open (it does not navigate itself).
+5. **In-session geometry persistence.** Move and resize the window,
+   then X-close it and click `About` again.
+   - Expected: it reopens at the moved / resized geometry.
+6. **Cross-restart geometry persistence.** Same as step 5, but quit
+   the whole app and relaunch before reopening `About`.
+   - Expected: the moved / resized geometry is restored.
+
+### Cleanup
+
+None required (geometry persistence is expected behaviour). To reset
+to the default size, delete the `about_window_geometry` row from the
+`setting` table in the session store.
+
+---
+
 ## 8. Reports — open, sidebar, geometry, single-session breakdown
 
 Verifies the modeless Reports window, sidebar sort, single-session

@@ -687,6 +687,8 @@ public class SqliteReportingQueriesTests
         public Task SetCrystalDiagramWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
         public Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
+        public Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);
         public Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);

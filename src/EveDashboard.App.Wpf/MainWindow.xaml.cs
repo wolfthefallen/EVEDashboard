@@ -2,6 +2,7 @@ namespace EveDashboard.App.Wpf;
 
 using System.Windows;
 using System.Windows.Controls;
+using EveDashboard.App.Wpf.About;
 using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Geometry;
 using EveDashboard.App.Wpf.Reporting;
@@ -27,6 +28,7 @@ public partial class MainWindow : Window
     private readonly ICrystalDiagramWindow _crystalDiagramWindow;
     private readonly ISessionConfigDialog _sessionConfigDialog;
     private readonly AutoPauseSoundPlayer _soundPlayer;
+    private readonly IAboutWindow _aboutWindow;
 
     /// <summary>Construct the MainWindow with its dependencies. DI-resolved.</summary>
     /// <param name="vm">The MainWindow VM exposing the layout coordinator.</param>
@@ -37,6 +39,7 @@ public partial class MainWindow : Window
     /// <param name="crystalDiagramWindow">Crystal Diagram reference-window seam, opened by the chrome Crystal Diagram button.</param>
     /// <param name="sessionConfigDialog">Post-plan-25 New Session dialog seam, opened by the chrome New Session button.</param>
     /// <param name="soundPlayer">Plan 37 auto-pause / auto-resume sound player. Subscribed to the session controller's sound-request events.</param>
+    /// <param name="aboutWindow">Plan 52 About reference-window seam, opened by the chrome About button.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public MainWindow(
         MainWindowViewModel vm,
@@ -46,7 +49,8 @@ public partial class MainWindow : Window
         IReportsWindow reportsWindow,
         ICrystalDiagramWindow crystalDiagramWindow,
         ISessionConfigDialog sessionConfigDialog,
-        AutoPauseSoundPlayer soundPlayer)
+        AutoPauseSoundPlayer soundPlayer,
+        IAboutWindow aboutWindow)
     {
         ArgumentNullException.ThrowIfNull(vm);
         ArgumentNullException.ThrowIfNull(geometryService);
@@ -56,6 +60,7 @@ public partial class MainWindow : Window
         ArgumentNullException.ThrowIfNull(crystalDiagramWindow);
         ArgumentNullException.ThrowIfNull(sessionConfigDialog);
         ArgumentNullException.ThrowIfNull(soundPlayer);
+        ArgumentNullException.ThrowIfNull(aboutWindow);
         _vm = vm;
         _geometryService = geometryService;
         _log = log;
@@ -64,6 +69,7 @@ public partial class MainWindow : Window
         _crystalDiagramWindow = crystalDiagramWindow;
         _sessionConfigDialog = sessionConfigDialog;
         _soundPlayer = soundPlayer;
+        _aboutWindow = aboutWindow;
 
         InitializeComponent();
         DataContext = _vm;
@@ -111,6 +117,11 @@ public partial class MainWindow : Window
     private void CrystalDiagramButton_Click(object sender, RoutedEventArgs e)
     {
         _crystalDiagramWindow.Show();
+    }
+
+    private void AboutButton_Click(object sender, RoutedEventArgs e)
+    {
+        _aboutWindow.Show();
     }
 
     private void NewSessionButton_Click(object sender, RoutedEventArgs e)

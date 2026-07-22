@@ -23,6 +23,7 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
     public WindowGeometry? ReportsWindowGeometry { get; set; }
     public WindowGeometry? CrystalDiagramWindowGeometry { get; set; }
     public WindowGeometry? LifetimeTotalsWindowGeometry { get; set; }
+    public WindowGeometry? AboutWindowGeometry { get; set; }
     public string? SelectedCrystalAnomaly { get; set; }
     public double? ReportsSidebarWidth { get; set; }
 
@@ -149,6 +150,17 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         ArgumentNullException.ThrowIfNull(value);
         LifetimeTotalsWindowGeometry = value;
         SettingChanged?.Invoke(this, new SettingChangedEventArgs("lifetime_totals_window_geometry"));
+        return Task.CompletedTask;
+    }
+
+    public Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default) =>
+        Task.FromResult(AboutWindowGeometry);
+
+    public Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        AboutWindowGeometry = value;
+        SettingChanged?.Invoke(this, new SettingChangedEventArgs("about_window_geometry"));
         return Task.CompletedTask;
     }
 

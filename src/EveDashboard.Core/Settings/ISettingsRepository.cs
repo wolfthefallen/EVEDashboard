@@ -202,6 +202,22 @@ public interface ISettingsRepository
     Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
+    /// Read the persisted About child-window geometry (plan 52). Returns
+    /// <c>null</c> when missing or malformed (with Warning log on malformed).
+    /// A <c>null</c> result is interpreted as "use the About default size
+    /// 460x560 centered, Normal state".
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted About window geometry, or <c>null</c>.</returns>
+    Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default);
+
+    /// <summary>Persist new About child-window geometry. Raises <see cref="SettingChanged"/> with key <c>"about_window_geometry"</c>.</summary>
+    /// <param name="value">Geometry to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
+
+    /// <summary>
     /// Read the persisted Crystal Diagram selected-anomaly id (plan 35). Returns
     /// <c>null</c> when missing. A <c>null</c> result is interpreted as
     /// "no preference; default to the 'all' entry".

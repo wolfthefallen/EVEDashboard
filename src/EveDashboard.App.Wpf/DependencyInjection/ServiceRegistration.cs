@@ -1,5 +1,6 @@
 namespace EveDashboard.App.Wpf.DependencyInjection;
 
+using EveDashboard.App.Wpf.About;
 using EveDashboard.App.Wpf.Bootstrap;
 using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Geometry;
@@ -26,6 +27,7 @@ using EveDashboard.MarketData.Pricing;
 using EveDashboard.Core.Updates;
 using EveDashboard.Updates;
 using EveDashboard.Reporting.Queries;
+using EveDashboard.Sde.Meta;
 using EveDashboard.Sde.Storage;
 using EveDashboard.Sde.Updater;
 using EveDashboard.SessionIO.Excel;
@@ -63,7 +65,7 @@ public static class ServiceRegistration
     /// <param name="sessionStore">Session-store (path + schema-init facade).</param>
     /// <param name="sdeDb">Open SDE SQLite wrapper.</param>
     /// <param name="sdeStorage">SDE storage manager.</param>
-    /// <param name="sdeUpdater">SDE updater (already invoked at startup; registered for future v3 manual-update GUI).</param>
+    /// <param name="sdeUpdater">SDE updater (already invoked once at startup).</param>
     /// <param name="sdeLookup">In-memory ore+gas lookup, already loaded.</param>
     /// <param name="settingsRepo">Settings repository.</param>
     /// <param name="stationCatalog">Market-stations catalog.</param>
@@ -141,6 +143,11 @@ public static class ServiceRegistration
         services.AddSingleton(sdeStorage);
         services.AddSingleton(sdeUpdater);
         services.AddSingleton(sdeLookup);
+        // Plan 52 — SDE meta reader for the About window's "SDE data" line.
+        // Explicit sdeDb capture (NOT via ISqliteDatabase resolution), same
+        // reasoning as the query layers: sdeDb is the SDE connection, not session.
+        services.AddSingleton<ISdeMetaReader>(sp => new SdeMetaReader(
+            sdeDb, sp.GetRequiredService<ILogger<SdeMetaReader>>()));
         services.AddSingleton(settingsRepo);
         services.AddSingleton(stationCatalog);
         services.AddSingleton(activeSession);
@@ -380,6 +387,24 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<LifetimeTotalsWindow>>()));
         services.AddSingleton<ILifetimeTotalsWindow, LifetimeTotalsWindowAdapter>();
 
+        // Plan 52 — About window. Singleton + hide-on-close, mirrors
+        // Reports/Crystal/Lifetime so geometry survives in-session open/close
+        // cycles. Default 460x560 centered; geometry persisted via an
+        // About-flavoured WindowGeometryService. The VM auto-resolves (its deps
+        // ISdeMetaReader + ILogger<> are registered above).
+        services.AddSingleton<AboutWindowViewModel>();
+        services.AddSingleton<AboutWindow>(sp => new AboutWindow(
+            sp.GetRequiredService<AboutWindowViewModel>(),
+            new WindowGeometryService(
+                readGeometry:  ct => settingsRepo.GetAboutWindowGeometryAsync(ct),
+                writeGeometry: g => settingsRepo.SetAboutWindowGeometryAsync(g),
+                defaultWidth:  460,
+                defaultHeight: 560,
+                log:           sp.GetRequiredService<ILogger<WindowGeometryService>>()),
+            sp.GetRequiredService<IBrowserLauncher>(),
+            sp.GetRequiredService<ILogger<AboutWindow>>()));
+        services.AddSingleton<IAboutWindow, AboutWindowAdapter>();
+
         // Plan 25: MainWindow factory captures the MainWindow-flavoured
         // WindowGeometryService (wired to Get/SetWindowGeometryAsync, default
         // 1280x800) inline so the type itself isn't auto-registered.
@@ -396,7 +421,8 @@ public static class ServiceRegistration
             sp.GetRequiredService<IReportsWindow>(),
             sp.GetRequiredService<ICrystalDiagramWindow>(),
             sp.GetRequiredService<ISessionConfigDialog>(),
-            sp.GetRequiredService<AutoPauseSoundPlayer>()));
+            sp.GetRequiredService<AutoPauseSoundPlayer>(),
+            sp.GetRequiredService<IAboutWindow>()));
 
         return services.BuildServiceProvider();
     }

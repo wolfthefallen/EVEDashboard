@@ -1,0 +1,70 @@
+<Window x:Class="EveDashboard.App.Wpf.About.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <!--
+        Plan 52: modeless, singleton, hide-on-close About window (mirrors
+        CrystalDiagramWindow / LifetimeTotalsWindow). Size + position persist via
+        about_window_geometry (default 460x560 centered on first launch). The
+        content lives in a ScrollViewer so the legal paragraph never clips on a
+        small window. VersionText / SdeDataText / RepositoryUrl come from the VM;
+        the thank-you lines and CCP legal paragraph are static text here.
+    -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16">
+            <!-- App version. -->
+            <TextBlock Text="{Binding VersionText}"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <!-- Clickable GitHub repository link. -->
+            <TextBlock Margin="0,6,0,0" TextWrapping="Wrap">
+                <Hyperlink NavigateUri="{Binding RepositoryUrl}"
+                           RequestNavigate="OnRepositoryNavigate"
+                           Foreground="{DynamicResource AccentBrush}">
+                    <Run Text="{Binding RepositoryUrl, Mode=OneWay}" />
+                </Hyperlink>
+            </TextBlock>
+
+            <!-- SDE snapshot date. -->
+            <TextBlock Text="{Binding SdeDataText}"
+                       Margin="0,6,0,0"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <!-- Rule #1. -->
+            <Border Height="1"
+                    Margin="0,12"
+                    Background="{DynamicResource BorderBrush}" />
+
+            <!-- Thank-you lines. -->
+            <TextBlock Margin="0,0,0,4"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource ForegroundBrush}"
+                       Text="Thank you to the BETA testers for their time, patience, and feedback." />
+            <TextBlock Margin="0,0,0,4"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource ForegroundBrush}"
+                       Text="Thank you to GoonMetrics for the public market-data API that powers the ISK valuations." />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="{DynamicResource ForegroundBrush}"
+                       Text="Thank you to everef.net for the consumable Static Data Export download." />
+
+            <!-- Rule #2. -->
+            <Border Height="1"
+                    Margin="0,12"
+                    Background="{DynamicResource BorderBrush}" />
+
+            <!-- CCP legal statement (verbatim from README.md). -->
+            <TextBlock TextWrapping="Wrap"
+                       FontSize="11"
+                       Foreground="{DynamicResource SecondaryFontBrush}"
+                       Text="EVE Online and the EVE logo are the registered trademarks of CCP hf. All rights are reserved worldwide. All other trademarks are the property of their respective owners. EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf. CCP hf. has granted permission to EVE Dashboard to use EVE Online and all associated logos and designs for promotional and information purposes but does not endorse, and is not in any way affiliated with, EVE Dashboard. CCP is in no way responsible for the content on or functioning of this application, nor can it be liable for any damage arising from the use of this application." />
+        </StackPanel>
+    </ScrollViewer>
+</Window>
