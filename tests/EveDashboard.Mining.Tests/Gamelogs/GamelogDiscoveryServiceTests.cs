@@ -226,6 +226,33 @@ public class GamelogDiscoveryServiceTests
     }
 
     [Fact]
+    public async Task DiscoverCharactersAsync_skips_file_with_overlong_character_id_and_keeps_the_rest()
+    {
+        // The filename regex captures the char id as unbounded \d+, so a 20-digit
+        // id overflows Int64. A single such stray file must NOT abort discovery of
+        // the valid pilots (regression guard for the long.Parse -> TryParse fix).
+        var t = new DateTime(2026, 5, 3, 10, 0, 0, DateTimeKind.Utc);
+        var dir = CreateTempGamelogDir(
+            ("20260503_100000_99999999999999999999.txt", "Overflow Pilot", t),
+            ("20260503_100001_111.txt",                  "Valid Pilot",    t));
+        try
+        {
+            var sut = Build(out var logger, directoryOverride: dir);
+
+            var characters = await sut.DiscoverCharactersAsync();
+
+            characters.Select(c => c.Name).Should().Equal("Valid Pilot");
+            logger.Entries.Should().Contain(e =>
+                e.Level == LogLevel.Warning &&
+                e.Message.Contains("unparseable character id"));
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task DiscoverCharactersAsync_does_not_break_when_log_file_is_missing()
     {
         // Use a custom directory; after discovery deletes one file before the sort runs.

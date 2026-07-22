@@ -39,6 +39,31 @@ public class SqliteDatabaseTests
     }
 
     [Fact]
+    public async Task QueryScalarAsync_double_parses_text_invariantly_regardless_of_thread_culture()
+    {
+        await using var db = OpenInMemory();
+        await db.ExecuteScriptAsync("CREATE TABLE t (v TEXT NOT NULL); INSERT INTO t (v) VALUES ('1.5');");
+
+        var original = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            // Under de-DE, '.' is a group separator; a culture-sensitive Convert.ChangeType
+            // would read '1.5' as 15. The InvariantCulture fix must return 1.5 on any locale.
+            // (CurrentCulture flows across the await via ExecutionContext.)
+            System.Threading.Thread.CurrentThread.CurrentCulture =
+                new System.Globalization.CultureInfo("de-DE");
+
+            var value = await db.QueryScalarAsync<double>("SELECT v FROM t");
+
+            value.Should().Be(1.5);
+        }
+        finally
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = original;
+        }
+    }
+
+    [Fact]
     public void OpenFile_creates_file_if_missing()
     {
         var path = Path.Combine(Path.GetTempPath(), $"sqlite-test-{Guid.NewGuid():N}.db");

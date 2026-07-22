@@ -107,9 +107,13 @@ public sealed class StatRowsRenderer : IDisposable
         if (d.Format is null) return raw.ToString() ?? string.Empty;
         // Use IFormattable when available so we can pass the format string +
         // invariant culture; fall back to ToString() for non-formattable types.
+        // InvariantCulture (NOT CurrentCulture) so the live widgets render ISK/m3
+        // with the same digit grouping the Reports compare/lifetime panes use
+        // (which hardcode invariant) — otherwise a non-en-US locale shows the same
+        // value two different ways across panes.
         if (raw is IFormattable formattable)
         {
-            return formattable.ToString(d.Format, CultureInfo.CurrentCulture);
+            return formattable.ToString(d.Format, CultureInfo.InvariantCulture);
         }
         return raw.ToString() ?? string.Empty;
     }

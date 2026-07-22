@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 /// leave alone"):
 /// <list type="bullet">
 ///   <item><c>pilot</c> rows — EVE-stable ids reused across sessions; reachable only via the <c>session_pilot</c> join, not a direct FK.</item>
-///   <item><c>market_data</c> rows — no <c>session_id</c> column by design (see <c>docs/market-schema.md</c>).</item>
+///   <item><c>market_data</c> rows — the <c>session_id</c> column (added by plan 38) is a plain TEXT column, NOT an enforced FK, so deleting a session intentionally leaves harmless orphan price rows behind (see <c>docs/market-schema.md</c>).</item>
 ///   <item><c>market_stations</c> rows — same reason, plus they are the user-configurable catalog.</item>
 ///   <item><c>setting</c> rows — settings are user-global, not session-scoped.</item>
 /// </list>

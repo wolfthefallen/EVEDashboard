@@ -302,6 +302,16 @@ public partial class App : Application
             _sdeDb = new SqliteDatabase(
                 "Data Source=" + _sdeStorage.DatabasePath,
                 LogProvider.Factory.CreateLogger<SqliteDatabase>());
+
+            // Forward-migrate the live SDE store in place (idempotent). The fallback
+            // is only extracted when the file is ABSENT, so an upgrading user keeps
+            // their existing eve.sqlite; without this, a store predating the
+            // meta.last_modified / meta.etag columns would throw "no such column" on
+            // the updater's conditional-GET read (EverefSdeUpdater step 1) and lose
+            // SDE auto-update permanently. Fully-qualified to disambiguate from
+            // EveDashboard.Stats.Schema.SchemaInitializer (both namespaces imported).
+            await EveDashboard.Sde.Schema.SchemaInitializer
+                .EnsureSchemaAsync(_sdeDb, ct).ConfigureAwait(true);
         }
 
         // 5. SDE updater (plan 08). API-drift fix per 1.4 = A: pass HttpClient + sdeDb in ctor.

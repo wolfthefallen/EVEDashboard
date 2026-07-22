@@ -100,7 +100,17 @@ public sealed class GamelogDiscoveryService
                 continue;
             }
 
-            var charId = long.Parse(match.Groups[3].Value);
+            // TryParse (not Parse): the filename regex captures the char-id as
+            // unbounded \d+, so a stray file with an over-long id would otherwise
+            // throw OverflowException out of the whole discovery pass and drop
+            // EVERY pilot. Log-and-skip the bad file instead (mirrors the sibling
+            // path RealtimeLogWatcher.ResolveTrackedPilotId).
+            if (!long.TryParse(match.Groups[3].Value, out var charId))
+            {
+                _logger.LogWarning(
+                    "Skipping gamelog file with an unparseable character id in its name: {Filename}", filename);
+                continue;
+            }
             var timestamp14 = match.Groups[1].Value + match.Groups[2].Value;
 
             if (!byCharId.TryGetValue(charId, out var existing) ||

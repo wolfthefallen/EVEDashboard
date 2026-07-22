@@ -1,7 +1,9 @@
 using EveDashboard.Persistence.Storage;
 using EveDashboard.Sde.Schema;
+using EveDashboard.Tests.Shared;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -136,6 +138,24 @@ public class SchemaInitializerTests
         {
             "id", "build_time", "esi_sha256", "sde_sha256", "hoboleaks_sha256",
         });
+    }
+
+    [Fact]
+    public async Task EnsureSchemaAsync_on_already_migrated_db_logs_no_errors()
+    {
+        // Regression guard: EnsureSchemaAsync now runs on EVERY app launch (wired into
+        // the SDE-storage bootstrap). On an already-migrated DB the column-add must be
+        // a silent no-op — a blind ALTER would throw "duplicate column", which
+        // SqliteDatabase logs at Error (with a stack trace) before rethrowing, spamming
+        // the log for every existing user on every launch. TryAddColumnAsync pre-checks
+        // the column list to avoid the throw entirely.
+        var log = new CapturingLogger<SqliteDatabase>();
+        await using var db = new SqliteDatabase(InMemory, log);
+
+        await SchemaInitializer.EnsureSchemaAsync(db);   // creates the full schema incl. columns
+        await SchemaInitializer.EnsureSchemaAsync(db);   // columns present -> must not ALTER/throw/log
+
+        log.Entries.Should().NotContain(e => e.Level == LogLevel.Error);
     }
 
     [Fact]

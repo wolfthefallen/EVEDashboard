@@ -41,8 +41,11 @@ is the canonical reset.
 ## 1. App launch + bootstrap failure re-route
 
 Verifies the chain `BootstrapConfigLoader -> autodetect -> validate ->
-SDE update -> schema init` and its failure re-routes to the Settings
-dialog (decision 22.2-B).
+SDE schema-migrate + update -> session schema init` and its failure
+re-routes to the Settings dialog (decision 22.2-B). The SDE database is now
+forward-migrated in place on every launch (plan 52) so an SDE store predating
+the `meta.last_modified` / `meta.etag` columns self-heals instead of losing
+auto-update.
 
 ### Setup
 
@@ -104,6 +107,22 @@ so the recovery steps can restore your real path.
    Relaunch -- window opens at exactly those bounds. Maximize, wait,
    close, relaunch -- opens maximized; Restore-down snaps back to the
    pre-maximize bounds.
+10. **SDE forward-migration is silent on an up-to-date store (plan 52).**
+    Launch normally. In the newest `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`,
+    the SDE step must be clean between `EVE Dashboard starting up.` and
+    `EVE Dashboard startup complete.` -- NO `duplicate column` and NO
+    `no such column` ERROR lines. (The idempotent SDE schema-migrate now runs
+    every launch; a pre-check means the already-present columns produce no throw
+    and no log noise.)
+11. **SDE old-shape self-heal (plan 52; optional, heavier).** With the app
+    closed, back up `%APPDATA%\EveDashboard\sde\eve.sqlite`, then with
+    `tools\sqlite3.exe` run
+    `ALTER TABLE meta DROP COLUMN etag; ALTER TABLE meta DROP COLUMN last_modified;`
+    against it to simulate a store created before those columns existed. Launch.
+    - Expected: no crash, no bootstrap dialog; the log shows a normal SDE step
+      (`SDE up-to-date` or an update), NOT a `no such column` ERROR.
+      `PRAGMA table_info(meta);` now shows `last_modified` and `etag` re-added.
+    Restore the backup when done.
 
 ### Cleanup
 

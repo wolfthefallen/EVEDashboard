@@ -272,7 +272,15 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
                 Isk = iskMap.GetValueOrDefault(typeId, 0.0),
             });
         }
-        list.Sort(static (a, b) => b.Quantity.CompareTo(a.Quantity));
+        // Quantity descending, ties broken by type_id ascending — a deterministic
+        // order that matches RefinedOutputAggregator.SumAcross so the live/single
+        // path and the compare/lifetime rollup never disagree on tied materials
+        // (List.Sort is an unstable introsort, hence the explicit tie-break).
+        list.Sort(static (a, b) =>
+        {
+            var byQty = b.Quantity.CompareTo(a.Quantity);
+            return byQty != 0 ? byQty : a.TypeId.CompareTo(b.TypeId);
+        });
         return list;
     }
 
