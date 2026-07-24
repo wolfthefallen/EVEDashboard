@@ -49,24 +49,40 @@ public static class SchemaInitializer
     }
 
     /// <summary>
-    /// Add a column to an existing table if it is not already present. SQLite
-    /// has no <c>ALTER TABLE … ADD COLUMN IF NOT EXISTS</c>, so we attempt the
-    /// <c>ALTER</c> and treat a "duplicate column" error as a no-op success.
+    /// Add a column to an existing table if it is not already present. SQLite has
+    /// no <c>ALTER TABLE … ADD COLUMN IF NOT EXISTS</c>, so we PRE-CHECK the column
+    /// list via <c>pragma_table_info</c> and only <c>ALTER</c> when the column is
+    /// absent. The defensive catch below covers only the rare concurrent-add race.
     /// </summary>
     /// <param name="target">Database to mutate.</param>
-    /// <param name="table">Target table name (not parameterised — caller-controlled identifier).</param>
-    /// <param name="column">Column name to add (not parameterised — caller-controlled identifier).</param>
+    /// <param name="table">Target table name (not parameterised in the ALTER — caller-controlled identifier).</param>
+    /// <param name="column">Column name to add (not parameterised in the ALTER — caller-controlled identifier).</param>
     /// <param name="sqlType">SQLite column type (e.g. <c>TEXT</c>, <c>INTEGER</c>) — caller-controlled identifier.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <remarks>
-    /// Detection is by exception-message match: <c>Microsoft.Data.Sqlite</c> 10.x raises a
-    /// <see cref="DbException"/> whose message contains <c>"duplicate column"</c> when the
-    /// column already exists. If a future driver upgrade changes the wording, the migration
-    /// test in <c>SchemaInitializerTests</c> will fail loudly — update this catch then.
+    /// The pre-check matters because <see cref="EnsureSchemaAsync"/> runs on every
+    /// launch: a blind <c>ALTER</c> on an already-migrated DB throws a
+    /// <see cref="DbException"/> that <c>SqliteDatabase</c> logs at <c>Error</c>
+    /// (with a stack trace) before rethrowing, which would spam the log for every
+    /// existing user on every launch. The pre-check avoids the throw entirely on the
+    /// common path. Detection in the fallback catch is by exception-message match:
+    /// <c>Microsoft.Data.Sqlite</c> raises a <see cref="DbException"/> whose message
+    /// contains <c>"duplicate column"</c> when the column already exists.
     /// </remarks>
     private static async Task TryAddColumnAsync(
         ISqliteDatabase target, string table, string column, string sqlType, CancellationToken ct)
     {
+        // Pre-check: skip the ALTER (and its logged-then-rethrown exception) when the
+        // column already exists. The pragma argument is bound as a parameter.
+        var columns = await target.QueryAsync(
+            "SELECT name FROM pragma_table_info($t)",
+            r => r.GetString(0),
+            new Dictionary<string, object?> { ["$t"] = table }, ct);
+        if (columns.Any(c => string.Equals(c, column, StringComparison.OrdinalIgnoreCase)))
+        {
+            return; // already present — EnsureSchemaAsync is idempotent, no-op, no log noise
+        }
+
         try
         {
             await target.ExecuteScriptAsync($"ALTER TABLE {table} ADD COLUMN {column} {sqlType}", ct);
@@ -74,7 +90,7 @@ public static class SchemaInitializer
         catch (DbException ex)
             when (ex.Message.Contains("duplicate column", StringComparison.OrdinalIgnoreCase))
         {
-            // Column already present — fine. EnsureSchemaAsync is idempotent.
+            // Lost a concurrent-add race between the pre-check and the ALTER — fine.
         }
     }
 

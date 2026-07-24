@@ -152,6 +152,9 @@ public class SqliteSessionStatsRepositoryTests
         public Task SetThemeAsync(ThemeMode value, CancellationToken ct = default) { Theme = value; return Task.CompletedTask; }
         public Task<PriceMode> GetPriceModeAsync(CancellationToken ct = default) => Task.FromResult(PriceMode);
         public Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default) { PriceMode = value; return Task.CompletedTask; }
+        public PriceSource PriceSource = PriceSource.GoonMetrics;
+        public Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default) => Task.FromResult(PriceSource);
+        public Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default) { PriceSource = value; return Task.CompletedTask; }
         public Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default) => Task.FromResult(RefiningYield);
         public Task SetRefiningYieldPercentAsync(double value, CancellationToken ct = default) { RefiningYield = value; return Task.CompletedTask; }
         public Task<long> GetSelectedStationIdAsync(CancellationToken ct = default) => Task.FromResult(SelectedStationId);
@@ -170,6 +173,8 @@ public class SqliteSessionStatsRepositoryTests
         public Task SetCrystalDiagramWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
         public Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
+        public Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);
         public Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);

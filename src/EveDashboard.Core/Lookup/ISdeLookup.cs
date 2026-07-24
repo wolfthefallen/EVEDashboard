@@ -31,8 +31,8 @@ using EveDashboard.Core.Domain;
 /// <c>storage.EnsureDatabaseExistsAsync</c> →
 /// <c>updater.CheckAndUpdateAsync</c> →
 /// <c>lookup.LoadAsync</c>, then wires the updater's <c>Updated</c> event to
-/// call <see cref="LoadAsync"/> again on subsequent runs (relevant when the v3
-/// manual-update GUI button lands).
+/// call <see cref="LoadAsync"/> again on any subsequent update that commits a
+/// new payload.
 /// </para>
 /// <para>
 /// <b>Block-and-queue gate.</b> Lookups called BEFORE the first

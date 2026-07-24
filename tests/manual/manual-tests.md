@@ -41,8 +41,11 @@ is the canonical reset.
 ## 1. App launch + bootstrap failure re-route
 
 Verifies the chain `BootstrapConfigLoader -> autodetect -> validate ->
-SDE update -> schema init` and its failure re-routes to the Settings
-dialog (decision 22.2-B).
+SDE schema-migrate + update -> session schema init` and its failure
+re-routes to the Settings dialog (decision 22.2-B). The SDE database is now
+forward-migrated in place on every launch (plan 52) so an SDE store predating
+the `meta.last_modified` / `meta.etag` columns self-heals instead of losing
+auto-update.
 
 ### Setup
 
@@ -104,6 +107,31 @@ so the recovery steps can restore your real path.
    Relaunch -- window opens at exactly those bounds. Maximize, wait,
    close, relaunch -- opens maximized; Restore-down snaps back to the
    pre-maximize bounds.
+10. **SDE forward-migration is silent on an up-to-date store (plan 52).**
+    Launch normally. In the newest `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`,
+    the SDE step must be clean between `EVE Dashboard starting up.` and
+    `EVE Dashboard startup complete.` -- NO `duplicate column` and NO
+    `no such column` ERROR lines. (The idempotent SDE schema-migrate now runs
+    every launch; a pre-check means the already-present columns produce no throw
+    and no log noise.)
+11. **SDE old-shape self-heal (plan 52; optional, heavier).** With the app
+    closed, back up `%APPDATA%\EveDashboard\sde\eve.sqlite`, then with
+    `tools\sqlite3.exe` run
+    `ALTER TABLE meta DROP COLUMN etag; ALTER TABLE meta DROP COLUMN last_modified;`
+    against it to simulate a store created before those columns existed. Launch.
+    - Expected: no crash, no bootstrap dialog; the log shows a normal SDE step
+      (`SDE up-to-date` or an update), NOT a `no such column` ERROR.
+      `PRAGMA table_info(meta);` now shows `last_modified` and `etag` re-added.
+    Restore the backup when done.
+12. **App-wide unhandled-exception handler (plan 56).** Hard to force
+    deliberately; verified by unit tests (`GlobalExceptionHandlerTests`) and by
+    normal use. What to know: if an unexpected error ever occurs, the app no
+    longer vanishes silently — a UI-thread error logs its stack trace and shows an
+    "EVE Dashboard - unexpected error" dialog **and keeps running**; a fatal
+    background error logs at Critical. The full stack trace is always in the newest
+    `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`. If you hit the dialog, press
+    Ctrl+C to copy its text for a bug report. Normal launches show NO such dialog
+    and no ERROR/CRITICAL lines between "starting up" and "startup complete".
 
 ### Cleanup
 
@@ -116,8 +144,8 @@ folder. Delete `C:\temp\empty`. Clear any read-only attribute on
 ## 2. Settings dialog
 
 Verifies validation, Apply / Close semantics, dirty-flag discard prompt,
-theme live re-apply, station list edits, and refining-yield / price-mode
-persistence.
+theme live re-apply, station list edits, and refining-yield / price-mode /
+price-source persistence.
 
 ### Setup
 
@@ -136,6 +164,16 @@ Launch the app. The chrome bar has a `Settings` button at the right.
    95)". Set to `abc` -> Apply -> MessageBox "Refining yield is not a
    valid number (you entered 'abc')". Set to `75.5` -> Apply -> no
    prompt, persisted. Close + reopen -> shows 75.5.
+3b. **Price source selection + official ESI pricing (plan 53).** In the
+    Pricing section the new "Price source:" ComboBox lists
+    `GoonMetrics (third-party)` (default) and `Official ESI (CCP)`. Select
+    `Official ESI (CCP)` -> Apply -> Close -> reopen: still Official ESI.
+    Live check (optional): start a session and mine (or run
+    `tools/fake-mining-session.ps1`); ISK still populates, and the app log
+    (`%APPDATA%\EveDashboard\logs\EveDashboard_*.log`) shows the fetch hitting
+    `esi.evetech.net` instead of `goonmetrics`. Prices should match Jita in-game
+    for the mined ores' refined minerals. Restore to `GoonMetrics (third-party)`
+    -> Apply when done.
 4. **Gamelog folder validation.** Type `Z:\nope` -> Apply -> MessageBox
    "Gamelog folder does not exist". Browse to `C:\Windows` -> Apply ->
    "Gamelog folder contains no EVE gamelog files". Browse to the real
@@ -615,6 +653,111 @@ listing the folder.
 
 Optionally set the dropdown back to `All / Full Chart` as your
 default starting point.
+
+---
+
+## 7.5 About window
+
+Verifies the chrome `About` button (now the rightmost button), the
+modeless About window content (version, GitHub link, SDE date,
+thank-yous, CCP legal text), and geometry persistence on
+close + reopen.
+
+### Setup
+
+The app launched normally with a populated SDE (the bundled fallback
+SDE has a build time, so the SDE date line is never `unknown` on a
+fresh install).
+
+### Steps
+
+1. **Button placement.** Look at the chrome toolbar's right edge.
+   - Expected: order right -> left is `About`, `Settings`, `Reports`,
+     `Crystal Diagram`. `About` is the rightmost button; `Settings`
+     sits immediately to its left with an 8px gap.
+2. **Open the window.** Click the chrome `About` button.
+   - Expected: window opens at default 460x560 centered, current theme.
+3. **Read each line.** Top to bottom:
+   - `EVE Dashboard v<version>` (matches the running release, e.g.
+     `0.1.3`).
+   - A clickable GitHub link reading
+     `https://github.com/wolfthefallen/EVEDashboard`.
+   - `SDE data: <yyyy-MM-dd>` (a real date, not `unknown`).
+   - A horizontal rule, then three thank-you lines (BETA testers,
+     GoonMetrics, everef.net).
+   - A second horizontal rule, then the CCP legal paragraph.
+4. **GitHub link.** Click the link.
+   - Expected: the repo opens in your default browser; the About
+     window stays open (it does not navigate itself).
+5. **In-session geometry persistence.** Move and resize the window,
+   then X-close it and click `About` again.
+   - Expected: it reopens at the moved / resized geometry.
+6. **Cross-restart geometry persistence.** Same as step 5, but quit
+   the whole app and relaunch before reopening `About`.
+   - Expected: the moved / resized geometry is restored.
+
+### Cleanup
+
+None required (geometry persistence is expected behaviour). To reset
+to the default size, delete the `about_window_geometry` row from the
+`setting` table in the session store.
+
+---
+
+## 7.6 Haul Value window (plan 55)
+
+Verifies the multi-hub Haul Value window: both input modes (paste + saved
+session), pricing across the market_stations catalog, and the results grids.
+NOTE: Haul Value always prices via **official ESI** (which covers every NPC hub),
+independent of the Settings price source — GoonMetrics only serves Jita, so a
+multi-hub compare must use ESI. So all four empire hubs price even if your live
+session uses GoonMetrics.
+
+### Setup
+
+Launch the app. Have at least one saved session (or run
+`tools/fake-mining-session.ps1` and stop a session). Settings -> Pricing has a
+price source (GoonMetrics default; ESI also works — plan 53).
+
+### Steps
+
+1. **Open.** Click the chrome **Haul Value** button (to the left of Crystal
+   Diagram). A modeless window opens at ~720x600, titled "Haul Value".
+2. **Paste mode.** With "Paste items" selected, paste a haul, e.g.:
+   `Tritanium	1000000` and on the next line `Pyerite	500000` (tab or space
+   between name and quantity both work; thousands separators are tolerated).
+   Click **Value haul**.
+   - Expected: the "Where to sell" grid lists each catalog station with a total,
+     **best first** — the four empire hubs (Jita, Amarr, Dodixie, Rens) are all
+     seeded defaults, so all four appear (plus any you've added). The breakdown
+     header **names the winning station** (e.g. "Breakdown - Jita - 4-4"); the
+     grid lists Tritanium / Pyerite with quantity, unit price, and value; the
+     status line says "Valued 2 item(s) at N station(s) using buy prices."
+   - Numbers should match the in-game market at each hub (at the current price
+     mode — change Price mode in Settings to see buy vs sell vs split).
+3. **Unresolved name.** Add a line `Notarealitem 5` and re-Value.
+   - Expected: it is priced-skipped and the status line ends with
+     "Not found: Notarealitem."
+4. **Non-ore item.** Paste a non-mining item, e.g. `Rifter	1`, and Value.
+   - Expected: it resolves and prices (proves the paste box is not limited to
+     ore/minerals).
+5. **Session mode (multi-select).** Select "From saved session" -> a checkbox
+   list of saved sessions appears. **Check one or more**, click **Value haul**.
+   - Expected: the checked sessions' refined output is **summed** and valued
+     across the stations; the breakdown lists the combined refined materials and
+     names the best station; with 2+ checked the status says "Combined N
+     sessions."
+6. **Refresh preserves checks.** Close the window (it hides). Finish another
+   session, then click **Haul Value** again -> the new session appears in the
+   list AND your previous checks are still ticked.
+7. **Empty / no selection.** Clear the paste box and Value -> status "Paste box
+   is empty." Switch to session mode with nothing checked and Value -> status
+   "Pick at least one session first."
+
+### Cleanup
+
+Close the window (X hides it; it disposes at app shutdown). No persisted state
+(v1 does not save geometry or inputs across app restarts).
 
 ---
 

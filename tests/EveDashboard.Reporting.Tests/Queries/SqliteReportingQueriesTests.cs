@@ -669,6 +669,8 @@ public class SqliteReportingQueriesTests
         public Task SetThemeAsync(ThemeMode value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<PriceMode> GetPriceModeAsync(CancellationToken ct = default) => Task.FromResult(PriceMode.Buy);
         public Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default) => Task.FromResult(PriceSource.GoonMetrics);
+        public Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default) => Task.FromResult(90.6);
         public Task SetRefiningYieldPercentAsync(double value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<long> GetSelectedStationIdAsync(CancellationToken ct = default) => Task.FromResult(60003760L);
@@ -687,6 +689,8 @@ public class SqliteReportingQueriesTests
         public Task SetCrystalDiagramWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<WindowGeometry?> GetLifetimeTotalsWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
         public Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default) => Task.FromResult<WindowGeometry?>(null);
+        public Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);
         public Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default) => Task.CompletedTask;
         public Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default) => Task.FromResult<string?>(null);

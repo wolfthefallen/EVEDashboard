@@ -136,6 +136,35 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     }
 
     /// <inheritdoc />
+    public async Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'price_source'", ct: ct);
+        if (raw is null) return PriceSource.GoonMetrics;
+        return raw switch
+        {
+            "goonmetrics" => PriceSource.GoonMetrics,
+            "esi" => PriceSource.Esi,
+            _ => LogWarnAndReturn(
+                $"Unknown price_source value '{raw}' in setting table - returning default 'goonmetrics'.",
+                PriceSource.GoonMetrics),
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default)
+    {
+        var stored = value switch
+        {
+            PriceSource.GoonMetrics => "goonmetrics",
+            PriceSource.Esi => "esi",
+            _ => "goonmetrics",
+        };
+        await UpsertAsync("price_source", stored, ct);
+        RaiseSettingChanged("price_source");
+    }
+
+    /// <inheritdoc />
     public async Task<double> GetRefiningYieldPercentAsync(CancellationToken ct = default)
     {
         var raw = await _db.QueryScalarAsync<string>(
@@ -403,6 +432,32 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         var json = JsonSerializer.Serialize(value);
         await UpsertAsync("lifetime_totals_window_geometry", json, ct);
         RaiseSettingChanged("lifetime_totals_window_geometry");
+    }
+
+    /// <inheritdoc />
+    public async Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default)
+    {
+        var raw = await _db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'about_window_geometry'", ct: ct);
+        if (raw is null) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<WindowGeometry>(raw);
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "about_window_geometry JSON malformed - returning null.");
+            return null;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var json = JsonSerializer.Serialize(value);
+        await UpsertAsync("about_window_geometry", json, ct);
+        RaiseSettingChanged("about_window_geometry");
     }
 
     /// <inheritdoc />
@@ -739,6 +794,7 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     {
         await SeedAsync("theme", "dark", ct);
         await SeedAsync("price_mode", "buy", ct);
+        await SeedAsync("price_source", "goonmetrics", ct);
         await SeedAsync("refining_yield_percent",
             YieldDefault.ToString("R", CultureInfo.InvariantCulture), ct);
         await SeedAsync("selected_station_id",
@@ -765,6 +821,7 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         // reports_text_size.<widgetTypeKey> intentionally NOT seeded (plan 47 - null sentinel = all elements at StatEmphasis.None)
         // crystal_diagram_window_geometry intentionally NOT seeded (null sentinel = use Crystal default 900x650 centered)
         // lifetime_totals_window_geometry intentionally NOT seeded (plan 51 - null sentinel = use Lifetime default 700x640 centered)
+        // about_window_geometry   intentionally NOT seeded (plan 52 - null sentinel = use About default 460x560 centered)
         // crystal_diagram_selected_anomaly intentionally NOT seeded (plan 35 - null sentinel = default to 'all' entry)
         // schema_version          owned by plan 11
         // non_sticky_station_defaults_seeded owned by SqliteMarketStationCatalog

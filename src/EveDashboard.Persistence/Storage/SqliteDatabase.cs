@@ -1,6 +1,7 @@
 namespace EveDashboard.Persistence.Storage;
 
 using System.Data.Common;
+using System.Globalization;
 using EveDashboard.Core.Storage;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
@@ -359,7 +360,10 @@ public sealed class SqliteDatabase : ISqliteDatabase
         {
             var raw = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
             if (raw is null || raw is DBNull) return default;
-            return (T)Convert.ChangeType(raw, typeof(T));
+            // InvariantCulture: harmless for the current <long>/<string> callers, but
+            // future-proofs a string<->number conversion (e.g. QueryScalarAsync<double>
+            // against a TEXT column) against a comma-decimal locale mis-parsing the value.
+            return (T)Convert.ChangeType(raw, typeof(T), CultureInfo.InvariantCulture);
         }
         catch (SqliteException ex)
         {

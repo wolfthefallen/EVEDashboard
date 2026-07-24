@@ -12,7 +12,11 @@ public static class RefinedOutputAggregator
     /// Sum refined output per material across the supplied scopes. Quantities
     /// and ISK are added per <see cref="RefinedMaterialAmount.TypeId"/>; the
     /// display name is taken from the first occurrence of each material. The
-    /// result is sorted by total quantity descending (stable for ties).
+    /// result is sorted by total quantity descending, ties broken by
+    /// <see cref="RefinedMaterialAmount.TypeId"/> ascending — the same
+    /// deterministic ordering the live per-session refined list uses
+    /// (<c>SqliteSessionStatsRepository.BuildRefinedList</c>), so the two paths
+    /// never disagree on tied materials.
     /// </summary>
     /// <param name="perScope">One refined-output list per scope (e.g. per
     ///     session). Each inner list may be empty; the outer sequence may be
@@ -42,6 +46,7 @@ public static class RefinedOutputAggregator
         return byMaterial
             .Select(kvp => new RefinedMaterialAmount(kvp.Key, kvp.Value.Name, kvp.Value.Qty) { Isk = kvp.Value.Isk })
             .OrderByDescending(m => m.Quantity)
+            .ThenBy(m => m.TypeId)
             .ToArray();
     }
 }

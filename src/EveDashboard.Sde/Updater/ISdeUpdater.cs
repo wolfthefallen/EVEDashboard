@@ -33,9 +33,8 @@ public interface ISdeUpdater
     /// </returns>
     /// <remarks>
     /// Single attempt — no retry. Per plan 08 decision 8.6: callers wanting
-    /// to retry can reinvoke (e.g. via the planned manual-update GUI button
-    /// in v3). Throws only on programmer errors. All transient failures are
-    /// reported via <see cref="SdeUpdateResult.Unreachable"/>.
+    /// to retry can reinvoke. Throws only on programmer errors. All transient
+    /// failures are reported via <see cref="SdeUpdateResult.Unreachable"/>.
     /// </remarks>
     Task<SdeUpdateResult> CheckAndUpdateAsync(CancellationToken ct = default);
 

@@ -54,6 +54,20 @@ public interface ISettingsRepository
     /// <param name="ct">Cancellation token.</param>
     Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default);
 
+    /// <summary>
+    /// Plan 53: read which market-price service the ISK pipeline fetches from.
+    /// Returns <see cref="PriceSource.GoonMetrics"/> when missing or when the
+    /// stored value is unrecognised (with Warning log on the latter).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted <see cref="PriceSource"/>, or the default (GoonMetrics).</returns>
+    Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default);
+
+    /// <summary>Persist a new price source (plan 53). Raises <see cref="SettingChanged"/> with key <c>"price_source"</c>.</summary>
+    /// <param name="value">Price source to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default);
+
     /// <summary>Read the configured refining yield percent. Returns <c>90.6</c> when missing.</summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The persisted refining yield percent, or <c>90.6</c>.</returns>
@@ -200,6 +214,22 @@ public interface ISettingsRepository
     /// <param name="ct">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
+
+    /// <summary>
+    /// Read the persisted About child-window geometry (plan 52). Returns
+    /// <c>null</c> when missing or malformed (with Warning log on malformed).
+    /// A <c>null</c> result is interpreted as "use the About default size
+    /// 460x560 centered, Normal state".
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The persisted About window geometry, or <c>null</c>.</returns>
+    Task<WindowGeometry?> GetAboutWindowGeometryAsync(CancellationToken ct = default);
+
+    /// <summary>Persist new About child-window geometry. Raises <see cref="SettingChanged"/> with key <c>"about_window_geometry"</c>.</summary>
+    /// <param name="value">Geometry to persist.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
     /// Read the persisted Crystal Diagram selected-anomaly id (plan 35). Returns

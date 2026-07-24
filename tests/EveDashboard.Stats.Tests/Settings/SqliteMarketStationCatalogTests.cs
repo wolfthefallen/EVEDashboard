@@ -299,11 +299,42 @@ public class SqliteMarketStationCatalogTests
         await catalog.EnsureSeedDefaultsAsync();
 
         var rows = await catalog.GetAllAsync();
-        rows.Should().HaveCount(2);
+        rows.Should().HaveCount(5);
         rows.Select(r => r.StationId).Should().BeEquivalentTo(new[]
         {
-            JitaStationId,
+            JitaStationId,   // Caldari
+            60008494L,       // Amarr
+            60011866L,       // Dodixie (Gallente)
+            60004588L,       // Rens (Minmatar)
             Cj6MtStationId,
         });
+    }
+
+    [Fact]
+    public async Task EnsureSeedDefaultsAsync_seeds_the_four_empire_trade_hubs()
+    {
+        await using var db = await NewSchemaAsync();
+        var catalog = NewCatalog(db);
+
+        await catalog.EnsureSeedDefaultsAsync();
+
+        (await catalog.GetAsync(60008494L))!.RegionId.Should().Be(10000043L); // Amarr / Domain
+        (await catalog.GetAsync(60011866L))!.RegionId.Should().Be(10000032L); // Dodixie / Sinq Laison
+        (await catalog.GetAsync(60004588L))!.RegionId.Should().Be(10000030L); // Rens / Heimatar
+    }
+
+    [Fact]
+    public async Task EnsureSeedDefaultsAsync_re_seeds_amarr_after_user_deletion()
+    {
+        // The empire hubs are sticky like Jita (re-seeded every launch).
+        await using var db = await NewSchemaAsync();
+        var catalog = NewCatalog(db);
+        await catalog.EnsureSeedDefaultsAsync();
+        await catalog.RemoveAsync(60008494L);
+        (await catalog.GetAsync(60008494L)).Should().BeNull();
+
+        await catalog.EnsureSeedDefaultsAsync();
+
+        (await catalog.GetAsync(60008494L)).Should().NotBeNull();
     }
 }

@@ -6,6 +6,7 @@ using EveDashboard.App.Wpf.DependencyInjection;
 using EveDashboard.App.Wpf.Tests.Helpers;
 using EveDashboard.App.Wpf.Widgets.Session;
 using EveDashboard.Core.Domain;
+using EveDashboard.MarketData.Pricing;
 using EveDashboard.Mining.Gamelogs;
 using EveDashboard.Persistence.Storage;
 using EveDashboard.Stats.Schema;
@@ -71,7 +72,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var vm = sp.GetRequiredService<SessionController>();
@@ -128,7 +131,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var coord = sp.GetRequiredService<EveDashboard.App.Wpf.Widgets.Pilot.PerPilotWidgetCoordinator>();
@@ -182,7 +187,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var mainVm = sp.GetRequiredService<EveDashboard.App.Wpf.MainWindowViewModel>();
@@ -234,7 +241,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var layout = sp.GetRequiredService<EveDashboard.App.Wpf.Layout.LayoutCoordinator>();
@@ -284,7 +293,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var statsRepo = sp.GetRequiredService<EveDashboard.Stats.Queries.ISessionStatsRepository>();
@@ -336,7 +347,9 @@ public class ServiceRegistrationTests
                 fixture.ActiveSession, fixture.Writer, fixture.Watcher,
                 new FakeGamelogLineParser(), discovery, chars,
                 new FakeBootstrapConfigLoader(),
-                priceClient, priceFetcher, iskCalc,
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
                 new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
 
             var ctrl = sp.GetRequiredService<SessionController>();

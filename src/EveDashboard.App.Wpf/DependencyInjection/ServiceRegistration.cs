@@ -1,10 +1,12 @@
 namespace EveDashboard.App.Wpf.DependencyInjection;
 
+using EveDashboard.App.Wpf.About;
 using EveDashboard.App.Wpf.Bootstrap;
 using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Geometry;
 using EveDashboard.App.Wpf.Layout;
 using EveDashboard.App.Wpf.Reporting;
+using EveDashboard.App.Wpf.Reporting.HaulValue;
 using EveDashboard.App.Wpf.Reporting.Lifetime;
 using EveDashboard.App.Wpf.Reporting.Widgets;
 using EveDashboard.App.Wpf.Services;
@@ -26,6 +28,8 @@ using EveDashboard.MarketData.Pricing;
 using EveDashboard.Core.Updates;
 using EveDashboard.Updates;
 using EveDashboard.Reporting.Queries;
+using EveDashboard.Sde.Lookup;
+using EveDashboard.Sde.Meta;
 using EveDashboard.Sde.Storage;
 using EveDashboard.Sde.Updater;
 using EveDashboard.SessionIO.Excel;
@@ -63,7 +67,7 @@ public static class ServiceRegistration
     /// <param name="sessionStore">Session-store (path + schema-init facade).</param>
     /// <param name="sdeDb">Open SDE SQLite wrapper.</param>
     /// <param name="sdeStorage">SDE storage manager.</param>
-    /// <param name="sdeUpdater">SDE updater (already invoked at startup; registered for future v3 manual-update GUI).</param>
+    /// <param name="sdeUpdater">SDE updater (already invoked once at startup).</param>
     /// <param name="sdeLookup">In-memory ore+gas lookup, already loaded.</param>
     /// <param name="settingsRepo">Settings repository.</param>
     /// <param name="stationCatalog">Market-stations catalog.</param>
@@ -74,7 +78,8 @@ public static class ServiceRegistration
     /// <param name="discovery">Gamelog discovery service (already invoked at startup; registered for future re-discovery).</param>
     /// <param name="allCharacters">Characters discovered at startup. Drives the Session widget's pilot list.</param>
     /// <param name="bootstrapLoader">YAML bootstrap config loader (plan 15). Plan 22.1's Settings dialog VM consumes it for <c>gamelog_path</c> read/write.</param>
-    /// <param name="marketPriceClient">Plan 18 GoonMetrics HTTP client.</param>
+    /// <param name="priceClient">Plan 53 price-source router (GoonMetrics vs official ESI, per the <c>price_source</c> setting); registered as the <see cref="IMarketPriceClient"/>.</param>
+    /// <param name="esiPriceClient">The official-ESI price client, used directly by the Haul Value calculator (GoonMetrics 404s the non-Jita empire hubs, so the multi-hub comparison must use ESI regardless of the <c>price_source</c> setting).</param>
     /// <param name="marketPriceFetcher">Plan 18 fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
     /// <param name="iskCalculator">Plan 18 ISK calculator (canonical recursive reprocessing algorithm).</param>
     /// <param name="releaseClient">Plan 41 GitHub release-check client for the launch update check.</param>
@@ -97,7 +102,8 @@ public static class ServiceRegistration
         GamelogDiscoveryService discovery,
         IReadOnlyList<Character> allCharacters,
         IBootstrapConfigLoader bootstrapLoader,
-        GoonMetricsPriceClient marketPriceClient,
+        IMarketPriceClient priceClient,
+        EsiMarketPriceClient esiPriceClient,
         MarketPriceFetcher marketPriceFetcher,
         IskCalculator iskCalculator,
         GitHubReleaseClient releaseClient)
@@ -118,7 +124,8 @@ public static class ServiceRegistration
         ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(allCharacters);
         ArgumentNullException.ThrowIfNull(bootstrapLoader);
-        ArgumentNullException.ThrowIfNull(marketPriceClient);
+        ArgumentNullException.ThrowIfNull(priceClient);
+        ArgumentNullException.ThrowIfNull(esiPriceClient);
         ArgumentNullException.ThrowIfNull(marketPriceFetcher);
         ArgumentNullException.ThrowIfNull(iskCalculator);
         ArgumentNullException.ThrowIfNull(releaseClient);
@@ -141,6 +148,11 @@ public static class ServiceRegistration
         services.AddSingleton(sdeStorage);
         services.AddSingleton(sdeUpdater);
         services.AddSingleton(sdeLookup);
+        // Plan 52 — SDE meta reader for the About window's "SDE data" line.
+        // Explicit sdeDb capture (NOT via ISqliteDatabase resolution), same
+        // reasoning as the query layers: sdeDb is the SDE connection, not session.
+        services.AddSingleton<ISdeMetaReader>(sp => new SdeMetaReader(
+            sdeDb, sp.GetRequiredService<ILogger<SdeMetaReader>>()));
         services.AddSingleton(settingsRepo);
         services.AddSingleton(stationCatalog);
         services.AddSingleton(activeSession);
@@ -157,8 +169,7 @@ public static class ServiceRegistration
         // Plan 18 — pricing pipeline singletons. Mirror the existing
         // dual-registration pattern (concrete + interface) used for the
         // SessionEventWriter at lines above.
-        services.AddSingleton(marketPriceClient);
-        services.AddSingleton<IMarketPriceClient>(marketPriceClient);
+        services.AddSingleton<IMarketPriceClient>(priceClient);
         services.AddSingleton(marketPriceFetcher);
         services.AddSingleton<IMarketPriceFetcher>(marketPriceFetcher);
         services.AddSingleton(iskCalculator);
@@ -380,6 +391,41 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<LifetimeTotalsWindow>>()));
         services.AddSingleton<ILifetimeTotalsWindow, LifetimeTotalsWindowAdapter>();
 
+        // Plan 52 — About window. Singleton + hide-on-close, mirrors
+        // Reports/Crystal/Lifetime so geometry survives in-session open/close
+        // cycles. Default 460x560 centered; geometry persisted via an
+        // About-flavoured WindowGeometryService. The VM auto-resolves (its deps
+        // ISdeMetaReader + ILogger<> are registered above).
+        services.AddSingleton<AboutWindowViewModel>();
+        services.AddSingleton<AboutWindow>(sp => new AboutWindow(
+            sp.GetRequiredService<AboutWindowViewModel>(),
+            new WindowGeometryService(
+                readGeometry:  ct => settingsRepo.GetAboutWindowGeometryAsync(ct),
+                writeGeometry: g => settingsRepo.SetAboutWindowGeometryAsync(g),
+                defaultWidth:  460,
+                defaultHeight: 560,
+                log:           sp.GetRequiredService<ILogger<WindowGeometryService>>()),
+            sp.GetRequiredService<IBrowserLauncher>(),
+            sp.GetRequiredService<ILogger<AboutWindow>>()));
+        services.AddSingleton<IAboutWindow, AboutWindowAdapter>();
+
+        // Plan 55 — Haul Value window (public-data multi-hub valuation; no geometry
+        // persistence in v1). Its non-window deps: a full-types name resolver (over
+        // the SDE db) for the paste box, and the valuation calculator over the
+        // plan-53 price-source router.
+        services.AddSingleton<ISdeTypeNameResolver>(sp => new SqliteSdeTypeNameResolver(
+            sdeDb, sp.GetRequiredService<ILogger<SqliteSdeTypeNameResolver>>()));
+        // Haul Value prices via ESI DIRECTLY (not the price_source router): GoonMetrics
+        // 404s the non-Jita empire hubs, so a multi-hub comparison must use the source
+        // that covers every NPC hub. The live-session ISK pipeline still honours
+        // price_source; only this ad-hoc appraisal is pinned to ESI.
+        services.AddSingleton<HaulValuationCalculator>(_ => new HaulValuationCalculator(esiPriceClient));
+        services.AddSingleton<HaulValueWindowViewModel>();
+        services.AddSingleton<HaulValueWindow>(sp => new HaulValueWindow(
+            sp.GetRequiredService<HaulValueWindowViewModel>(),
+            sp.GetRequiredService<ILogger<HaulValueWindow>>()));
+        services.AddSingleton<IHaulValueWindow, HaulValueWindowAdapter>();
+
         // Plan 25: MainWindow factory captures the MainWindow-flavoured
         // WindowGeometryService (wired to Get/SetWindowGeometryAsync, default
         // 1280x800) inline so the type itself isn't auto-registered.
@@ -396,7 +442,9 @@ public static class ServiceRegistration
             sp.GetRequiredService<IReportsWindow>(),
             sp.GetRequiredService<ICrystalDiagramWindow>(),
             sp.GetRequiredService<ISessionConfigDialog>(),
-            sp.GetRequiredService<AutoPauseSoundPlayer>()));
+            sp.GetRequiredService<AutoPauseSoundPlayer>(),
+            sp.GetRequiredService<IAboutWindow>(),
+            sp.GetRequiredService<IHaulValueWindow>()));
 
         return services.BuildServiceProvider();
     }

@@ -5,7 +5,9 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Threading;
 using EveDashboard.App.Wpf.Bootstrap;
+using EveDashboard.App.Wpf.Diagnostics;
 using EveDashboard.App.Wpf.DependencyInjection;
 using EveDashboard.App.Wpf.Dialogs;
 using EveDashboard.App.Wpf.Layout;
@@ -80,6 +82,9 @@ public partial class App : Application
     /// <summary>App-lifetime <see cref="HttpClient"/> for everef.net SDE updates (per plan-16 alignment 1.4 = A).</summary>
     private HttpClient? _httpClient;
 
+    /// <summary>Plan 56: app-wide unhandled-exception policy (log the stack trace + graceful dialog).</summary>
+    private GlobalExceptionHandler? _globalExceptionHandler;
+
     /// <summary>App-lifetime DI container (chain step 10); disposed and rebuilt across plan-22.2 retries; final dispose at <see cref="OnExit"/>.</summary>
     private ServiceProvider? _services;
 
@@ -108,6 +113,8 @@ public partial class App : Application
     // Plan 18 — pricing pipeline. Constructed in chain step 8.5; the existing
     // _httpClient (chain step 5) is reused.
     private GoonMetricsPriceClient? _marketPriceClient;
+    private EsiMarketPriceClient?   _esiPriceClient;
+    private SelectablePriceClient?  _priceClientRouter;
     private MarketPriceFetcher?     _marketPriceFetcher;
     private IskCalculator?          _iskCalculator;
 
@@ -153,6 +160,12 @@ public partial class App : Application
         var logger = LogProvider.Factory.CreateLogger<App>();
         logger.LogInformation("EVE Dashboard starting up.");
 
+        // Plan 56: install the app-wide unhandled-exception handlers now that logging
+        // is up, so an unexpected throw (especially from an async void event handler)
+        // is logged with its stack trace and surfaced gracefully instead of the
+        // process vanishing silently.
+        InstallGlobalExceptionHandlers();
+
         // Plan 22.2 Bug 2 fix (2026-05-03): merge default Dark theme dictionary
         // into Application.Resources NOW so any UI shown before chain step 10
         // — notably the bootstrap-failure dialog — has theme brushes to bind
@@ -182,6 +195,32 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+    }
+
+    /// <summary>
+    /// Plan 56: subscribe the three top-level unhandled-exception sources to
+    /// <see cref="GlobalExceptionHandler"/>. UI-thread exceptions are marked handled
+    /// so the app keeps running; background + unobserved-task exceptions are logged
+    /// (the latter marked observed so it does not escalate).
+    /// </summary>
+    private void InstallGlobalExceptionHandlers()
+    {
+        _globalExceptionHandler = new GlobalExceptionHandler(
+            LogProvider.Factory.CreateLogger<GlobalExceptionHandler>(),
+            new MessageBoxErrorDialog(),
+            @"%APPDATA%\EveDashboard\logs");
+
+        DispatcherUnhandledException += (_, e) =>
+            e.Handled = _globalExceptionHandler.HandleDispatcherException(e.Exception);
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+            _globalExceptionHandler.HandleDomainException(e.ExceptionObject as Exception, e.IsTerminating);
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            _globalExceptionHandler.HandleUnobservedTaskException(e.Exception);
+            e.SetObserved();
+        };
     }
 
     /// <summary>
@@ -302,6 +341,16 @@ public partial class App : Application
             _sdeDb = new SqliteDatabase(
                 "Data Source=" + _sdeStorage.DatabasePath,
                 LogProvider.Factory.CreateLogger<SqliteDatabase>());
+
+            // Forward-migrate the live SDE store in place (idempotent). The fallback
+            // is only extracted when the file is ABSENT, so an upgrading user keeps
+            // their existing eve.sqlite; without this, a store predating the
+            // meta.last_modified / meta.etag columns would throw "no such column" on
+            // the updater's conditional-GET read (EverefSdeUpdater step 1) and lose
+            // SDE auto-update permanently. Fully-qualified to disambiguate from
+            // EveDashboard.Stats.Schema.SchemaInitializer (both namespaces imported).
+            await EveDashboard.Sde.Schema.SchemaInitializer
+                .EnsureSchemaAsync(_sdeDb, ct).ConfigureAwait(true);
         }
 
         // 5. SDE updater (plan 08). API-drift fix per 1.4 = A: pass HttpClient + sdeDb in ctor.
@@ -383,8 +432,17 @@ public partial class App : Application
             _marketPriceClient = new GoonMetricsPriceClient(
                 _httpClient,
                 LogProvider.Factory.CreateLogger<GoonMetricsPriceClient>());
+            // Plan 53: official-CCP price source via public ESI (no login). The fetcher
+            // talks to a router that picks GoonMetrics vs ESI per the price_source
+            // setting, live-switchable; default GoonMetrics = unchanged v1 behaviour.
+            _esiPriceClient = new EsiMarketPriceClient(
+                _httpClient,
+                _stationCatalog!,
+                LogProvider.Factory.CreateLogger<EsiMarketPriceClient>());
+            _priceClientRouter = new SelectablePriceClient(
+                _settingsRepo!, _marketPriceClient, _esiPriceClient);
             _marketPriceFetcher = new MarketPriceFetcher(
-                _marketPriceClient,
+                _priceClientRouter,
                 _sessionDb!,
                 _sdeLookup!,
                 _settingsRepo!,
@@ -441,7 +499,7 @@ public partial class App : Application
             _parser!, discovery,
             characters,
             _bootstrapLoader!,
-            _marketPriceClient!, _marketPriceFetcher!, _iskCalculator!,
+            _priceClientRouter!, _esiPriceClient!, _marketPriceFetcher!, _iskCalculator!,
             _releaseClient!);
 
         var themeService = _services.GetRequiredService<ThemeService>();

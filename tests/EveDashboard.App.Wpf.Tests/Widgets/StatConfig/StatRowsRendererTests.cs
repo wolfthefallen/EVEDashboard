@@ -29,7 +29,7 @@ public partial class StatRowsRendererTests
 
         renderer.Stats.Should().HaveCount(2);
         renderer.Stats[0].Key.Should().Be("Speed");
-        renderer.Stats[0].FormattedValue.Should().Be(3.14159.ToString("N2", System.Globalization.CultureInfo.CurrentCulture));
+        renderer.Stats[0].FormattedValue.Should().Be(3.14159.ToString("N2", System.Globalization.CultureInfo.InvariantCulture));
         renderer.Stats[1].Key.Should().Be("Count");
         renderer.Stats[1].FormattedValue.Should().Be("42");
     }
@@ -46,8 +46,34 @@ public partial class StatRowsRendererTests
         src.Speed = 2.5;
         src.Count = 99;
 
-        speedRow.FormattedValue.Should().Be(2.5.ToString("N2", System.Globalization.CultureInfo.CurrentCulture));
+        speedRow.FormattedValue.Should().Be(2.5.ToString("N2", System.Globalization.CultureInfo.InvariantCulture));
         countRow.FormattedValue.Should().Be("99");
+    }
+
+    [Fact]
+    public void FormattedValue_uses_invariant_culture_regardless_of_thread_culture()
+    {
+        // Regression guard: the live widgets must format ISK/m3 identically to the
+        // Reports panes (which hardcode InvariantCulture). Under a comma-decimal
+        // locale, a grouped value must still render invariant ("1,234.50"), NOT the
+        // locale form ("1.234,50"). All rendering here is synchronous, so setting
+        // the thread culture is safe under parallel test execution (no thread hop).
+        var original = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture =
+                new System.Globalization.CultureInfo("de-DE");
+
+            var src = new SampleVm { Speed = 1234.5, Count = 42 };
+            using var renderer = new StatRowsRenderer(src);
+            renderer.ApplyDescriptors(StatRowsBuilder.Resolve(typeof(SampleVm), null).Reorderable);
+
+            renderer.Stats.First(r => r.Key == "Speed").FormattedValue.Should().Be("1,234.50");
+        }
+        finally
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = original;
+        }
     }
 
     [Fact]

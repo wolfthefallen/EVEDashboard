@@ -230,11 +230,11 @@ public sealed class RealtimeLogWatcher : IAsyncDisposable
 
         var tails = _tails;
         if (tails is null) return;
-        if (!tails.TryGetValue(charId.Value, out var state)) return;
+        if (!tails.ContainsKey(charId.Value)) return; // only tail pilots we are tracking
 
-        // The Changed event might fire for a filename we recognise but whose
-        // path differs from the one we are tailing (only happens if Created
-        // arrived too late; defensive). Use the state's path.
+        // TailFileAsync re-fetches the current FileTailState for this pilot (including
+        // its path + offset) under the per-file gate, so a Changed event that raced a
+        // Created rotation reads whichever file we are now tracking — no stale path here.
         _ = Task.Run(() => TailFileAsync(charId.Value));
     }
 

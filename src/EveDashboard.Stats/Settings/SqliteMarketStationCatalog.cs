@@ -97,11 +97,23 @@ public sealed class SqliteMarketStationCatalog : IMarketStationCatalog
     /// <inheritdoc />
     public async Task EnsureSeedDefaultsAsync(CancellationToken ct = default)
     {
-        // Jita - sticky default; re-seeded every launch via INSERT OR IGNORE.
+        // The four NPC empire trade hubs - sticky defaults, re-seeded every launch
+        // via INSERT OR IGNORE (station ids / regions verified against ESI). These
+        // are universal "always available" hubs (unlike C-J6MT below, which is a
+        // one-time convenience seed).
         await _db.ExecuteNonQueryAsync(
             "INSERT OR IGNORE INTO market_stations (station_id, system_name, station_name, region_id, region_name) " +
             "VALUES ($sid, 'Jita', 'IV - Moon 4 - Caldari Navy Assembly Plant', 10000002, 'The Forge')",
             new Dictionary<string, object?> { ["$sid"] = JitaStationId }, ct);
+        await _db.ExecuteNonQueryAsync(
+            "INSERT OR IGNORE INTO market_stations (station_id, system_name, station_name, region_id, region_name) " +
+            "VALUES (60008494, 'Amarr', 'VIII (Oris) - Emperor Family Academy', 10000043, 'Domain')", null, ct);
+        await _db.ExecuteNonQueryAsync(
+            "INSERT OR IGNORE INTO market_stations (station_id, system_name, station_name, region_id, region_name) " +
+            "VALUES (60011866, 'Dodixie', 'IX - Moon 20 - Federation Navy Assembly Plant', 10000032, 'Sinq Laison')", null, ct);
+        await _db.ExecuteNonQueryAsync(
+            "INSERT OR IGNORE INTO market_stations (station_id, system_name, station_name, region_id, region_name) " +
+            "VALUES (60004588, 'Rens', 'VI - Moon 8 - Brutor Tribe Treasury', 10000030, 'Heimatar')", null, ct);
 
         // C-J6MT - non-sticky default; seeded once, then never again.
         var sentinel = await _db.QueryScalarAsync<string>(

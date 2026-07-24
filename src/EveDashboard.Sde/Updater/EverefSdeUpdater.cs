@@ -35,6 +35,18 @@ public sealed class EverefSdeUpdater : ISdeUpdater
     /// </summary>
     private const long DefaultMinTypeRowsForCommit = 10_000;
 
+    /// <summary>
+    /// Maximum time the archive download may go WITHOUT receiving any new bytes
+    /// before it is abandoned. The GET uses <see cref="HttpCompletionOption.ResponseHeadersRead"/>,
+    /// which removes <see cref="HttpClient.Timeout"/> from the body transfer, and the
+    /// production call passes <see cref="CancellationToken.None"/> — so without this an
+    /// upstream stall after headers would hang the whole bootstrap chain (and thus app
+    /// launch) indefinitely. This is an INACTIVITY budget, not a total-download cap, so a
+    /// slow-but-progressing download is never falsely aborted; 60s is well clear of any
+    /// legitimate read gap on a ~14 MB tarball.
+    /// </summary>
+    private static readonly TimeSpan DownloadInactivityTimeout = TimeSpan.FromSeconds(60);
+
     private readonly HttpClient _http;
     private readonly ISdeStorage _storage;
     private readonly ISqliteDatabase _db;
@@ -140,7 +152,9 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             // ResponseHeadersRead — body read is governed by ct only, not
             // HttpClient.Timeout (decision 8.17). Slow downloads (~100 KB/s on a
             // 14 MB tarball) can exceed the default 100s connection-and-body timeout;
-            // ResponseHeadersRead caps the timeout at "until headers arrive."
+            // ResponseHeadersRead caps the timeout at "until headers arrive." The
+            // body transfer is instead bounded by DownloadInactivityTimeout below,
+            // so a stall after headers cannot hang startup forever.
             getResp = await _http.SendAsync(
                 getReq, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
         }
@@ -177,7 +191,8 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             await using (var net = await getResp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false))
             await using (var file = File.Create(archivePath))
             {
-                await net.CopyToAsync(file, ct).ConfigureAwait(false);
+                await CopyWithInactivityTimeoutAsync(
+                    net, file, DownloadInactivityTimeout, ct).ConfigureAwait(false);
             }
 
             var jsonRoot = Path.Combine(tempDir, "extracted");
@@ -239,6 +254,49 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             {
                 _log.LogWarning(ex, "Permission denied cleaning up temp folder {Path}; will sweep next run", tempDir);
             }
+        }
+    }
+
+    /// <summary>
+    /// Copy <paramref name="source"/> to <paramref name="destination"/>, aborting
+    /// with a <see cref="TimeoutException"/> if no new bytes arrive for
+    /// <paramref name="inactivityTimeout"/>. This is an INACTIVITY budget (reset on
+    /// every successful read), not a total-download cap, so a slow-but-progressing
+    /// transfer is never falsely aborted. A genuine cancellation of
+    /// <paramref name="ct"/> propagates as <see cref="OperationCanceledException"/>;
+    /// only a stall with the caller's token still live is translated to a timeout.
+    /// </summary>
+    /// <param name="source">Stream to read from (the HTTP response body).</param>
+    /// <param name="destination">Stream to write to (the on-disk archive).</param>
+    /// <param name="inactivityTimeout">Maximum gap between received bytes.</param>
+    /// <param name="ct">Caller cancellation token.</param>
+    /// <exception cref="TimeoutException">Thrown when no data is received for the budget.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="ct"/> is cancelled.</exception>
+    internal static async Task CopyWithInactivityTimeoutAsync(
+        Stream source, Stream destination, TimeSpan inactivityTimeout, CancellationToken ct)
+    {
+        var buffer = new byte[81920];
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        while (true)
+        {
+            timeoutCts.CancelAfter(inactivityTimeout); // (re)arm the inactivity timer for this read
+            int read;
+            try
+            {
+                read = await source.ReadAsync(buffer.AsMemory(), timeoutCts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                // The inactivity timer fired, not the caller — surface as a timeout so
+                // CheckAndUpdateAsync's catch reports Unreachable (non-fatal) rather
+                // than treating it as a genuine cancellation.
+                throw new TimeoutException(
+                    $"SDE download stalled: no data received for {inactivityTimeout.TotalSeconds:F0}s.");
+            }
+
+            timeoutCts.CancelAfter(Timeout.InfiniteTimeSpan); // disarm so a slow disk write can't trip the timer
+            if (read == 0) break; // end of stream
+            await destination.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
         }
     }
 
@@ -323,19 +381,25 @@ public sealed class EverefSdeUpdater : ISdeUpdater
                     ["$et"] = (object?)newEtag    ?? DBNull.Value,
                 }, ct).ConfigureAwait(false);
 
-            // Read the new build_time before commit so we can return it.
+            // Read + validate + parse the new build_time BEFORE the COMMIT so that
+            // any failure here still has an active transaction to ROLLBACK. If this
+            // ran after COMMIT, the catch's ROLLBACK would fire with no active
+            // transaction (itself throwing) and a genuinely-committed update would be
+            // mis-reported as failed, so the Updated event would never fire.
             var buildTimeStr = await _db.QueryScalarAsync<string>(
                 "SELECT build_time FROM meta WHERE id = 1", null, ct).ConfigureAwait(false);
-
-            await _db.ExecuteNonQueryAsync("COMMIT", null, ct).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(buildTimeStr))
                 throw new InvalidDataException("meta.build_time is empty after import");
 
-            return DateTimeOffset.Parse(
+            var newBuildTime = DateTimeOffset.Parse(
                 buildTimeStr,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+
+            await _db.ExecuteNonQueryAsync("COMMIT", null, ct).ConfigureAwait(false);
+
+            return newBuildTime;
         }
         catch
         {

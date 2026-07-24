@@ -325,15 +325,7 @@ public sealed class IskCalculator : IIskCalculator
         }
 
         var (buy, sell) = rows[0];
-        var price = priceMode switch
-        {
-            PriceMode.Buy   => buy,
-            PriceMode.Sell  => sell,
-            PriceMode.Split => buy.HasValue && sell.HasValue
-                                ? (buy.Value + sell.Value) / 2.0
-                                : (buy ?? sell),
-            _               => buy,
-        };
+        var price = PriceModeSelector.Pick(buy, sell, priceMode);
 
         if (price is null)
         {

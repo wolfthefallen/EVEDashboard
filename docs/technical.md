@@ -564,6 +564,7 @@ Environment variables in `gamelog_path` (e.g. `%USERPROFILE%`) are expanded.
 | `theme` | string | `Light` or `Dark`. |
 | `refining_yield_percent` | float as text | Clamped to [50.0, 90.6]. |
 | `price_mode` | string | `Buy` / `Sell` / `Split`. |
+| `price_source` | string | `goonmetrics` (default) / `esi`. Which market service the fetcher calls (plan 53). |
 | `selected_station_id` | int as text | Default `60003760` (Jita IV - Moon 4 - Caldari Navy Assembly Plant). |
 | `window_geometry` | JSON | Window pos/size. |
 | `widget_layout` | JSON | Order + hidden flag for each widget. |

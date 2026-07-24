@@ -82,6 +82,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="160" />
@@ -108,6 +109,38 @@
                                   ItemsSource="{Binding PriceModeOptions}"
                                   SelectedItem="{Binding PriceMode, Mode=TwoWay}"
                                   Height="24" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="Price source:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,8,0,0"
+                                   Foreground="{DynamicResource ForegroundBrush}" />
+                        <ComboBox Grid.Row="2" Grid.Column="1"
+                                  x:Name="PriceSourceCombo"
+                                  ItemsSource="{Binding PriceSourceOptions}"
+                                  SelectedItem="{Binding PriceSource, Mode=TwoWay}"
+                                  Margin="0,8,0,0"
+                                  Height="24">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="GoonMetrics">
+                                                        <Setter Property="Text" Value="GoonMetrics (third-party)" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="Esi">
+                                                        <Setter Property="Text" Value="Official ESI (CCP)" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
                 </StackPanel>
 

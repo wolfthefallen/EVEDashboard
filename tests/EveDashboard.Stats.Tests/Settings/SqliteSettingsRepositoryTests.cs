@@ -186,6 +186,57 @@ public class SqliteSettingsRepositoryTests
             e.Message.Contains("barter", StringComparison.Ordinal));
     }
 
+    // ---- PriceSource (plan 53) ----------------------------------------------------
+
+    [Fact]
+    public async Task GetPriceSourceAsync_returns_goonmetrics_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        (await repo.GetPriceSourceAsync()).Should().Be(PriceSource.GoonMetrics);
+    }
+
+    [Theory]
+    [InlineData(PriceSource.GoonMetrics)]
+    [InlineData(PriceSource.Esi)]
+    public async Task SetPriceSourceAsync_then_GetPriceSourceAsync_round_trips(PriceSource source)
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        await repo.SetPriceSourceAsync(source);
+
+        (await repo.GetPriceSourceAsync()).Should().Be(source);
+    }
+
+    [Fact]
+    public async Task GetPriceSourceAsync_returns_default_and_logs_warning_when_value_unrecognised()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "price_source", "nasdaq");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        (await repo.GetPriceSourceAsync()).Should().Be(PriceSource.GoonMetrics);
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Message.Contains("nasdaq", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task SetPriceSourceAsync_raises_SettingChanged_with_price_source_key()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        string? raisedKey = null;
+        repo.SettingChanged += (_, e) => raisedKey = e.Key;
+
+        await repo.SetPriceSourceAsync(PriceSource.Esi);
+
+        raisedKey.Should().Be("price_source");
+    }
+
     [Fact]
     public async Task SetPriceModeAsync_raises_SettingChanged_with_key_price_mode()
     {
@@ -554,7 +605,7 @@ public class SqliteSettingsRepositoryTests
     // ---- EnsureSeedDefaultsAsync --------------------------------------------------
 
     [Fact]
-    public async Task EnsureSeedDefaultsAsync_seeds_nine_keys_on_fresh_db_skips_window_geometry()
+    public async Task EnsureSeedDefaultsAsync_seeds_ten_keys_on_fresh_db_skips_window_geometry()
     {
         await using var db = await NewSchemaAsync();
         var repo = NewRepo(db);
@@ -578,6 +629,7 @@ public class SqliteSettingsRepositoryTests
             "auto_pause_sound_volume",
             "auto_show_refined_materials",
             "price_mode",
+            "price_source",
             "refining_yield_percent",
             "schema_version",
             "selected_station_id",
@@ -587,8 +639,10 @@ public class SqliteSettingsRepositoryTests
 
         (await repo.GetThemeAsync()).Should().Be(ThemeMode.Dark);
         (await repo.GetPriceModeAsync()).Should().Be(PriceMode.Buy);
+        (await repo.GetPriceSourceAsync()).Should().Be(PriceSource.GoonMetrics);
         (await repo.GetRefiningYieldPercentAsync()).Should().Be(90.6);
         (await repo.GetWindowGeometryAsync()).Should().BeNull();
+        (await repo.GetAboutWindowGeometryAsync()).Should().BeNull();
         (await repo.GetAutoPauseIdleMinutesAsync()).Should().Be(5);
         (await repo.GetAutoPauseSoundEnabledAsync()).Should().BeTrue();
         (await repo.GetShowPilotRefinedOutputAsync()).Should().BeTrue();
@@ -819,6 +873,73 @@ public class SqliteSettingsRepositoryTests
         var repo = NewRepo(db);
 
         Func<Task> act = async () => await repo.SetLifetimeTotalsWindowGeometryAsync(null!);
+
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    // ---- AboutWindowGeometry (plan 52) --------------------------------------------
+
+    [Fact]
+    public async Task GetAboutWindowGeometryAsync_returns_null_when_key_missing()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        var geom = await repo.GetAboutWindowGeometryAsync();
+
+        geom.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_then_GetAboutWindowGeometryAsync_round_trips()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var original = new WindowGeometry(
+            Width: 460, Height: 560, Left: 90, Top: 45, IsMaximized: false);
+
+        await repo.SetAboutWindowGeometryAsync(original);
+        var roundTrip = await repo.GetAboutWindowGeometryAsync();
+
+        roundTrip.Should().Be(original);
+    }
+
+    [Fact]
+    public async Task GetAboutWindowGeometryAsync_returns_null_and_logs_warning_when_json_malformed()
+    {
+        await using var db = await NewSchemaAsync();
+        await UpsertSettingAsync(db, "about_window_geometry", "{not-json");
+        var log = new CapturingLogger<SqliteSettingsRepository>();
+        var repo = NewRepo(db, log);
+
+        var geom = await repo.GetAboutWindowGeometryAsync();
+
+        geom.Should().BeNull();
+        log.Entries.Should().ContainSingle(e =>
+            e.Level == LogLevel.Warning &&
+            e.Exception is System.Text.Json.JsonException);
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_raises_SettingChanged_with_key_about_window_geometry()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+        var keys = new List<string>();
+        repo.SettingChanged += (_, e) => keys.Add(e.Key);
+
+        await repo.SetAboutWindowGeometryAsync(new WindowGeometry(800, 600, 0, 0, false));
+
+        keys.Should().ContainSingle().Which.Should().Be("about_window_geometry");
+    }
+
+    [Fact]
+    public async Task SetAboutWindowGeometryAsync_throws_on_null_value()
+    {
+        await using var db = await NewSchemaAsync();
+        var repo = NewRepo(db);
+
+        Func<Task> act = async () => await repo.SetAboutWindowGeometryAsync(null!);
 
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
