@@ -27,6 +27,9 @@ Get the latest Windows build from the
 It is a self-contained `.exe` - no installer and no separate .NET runtime to set up. Download
 it, run it, done.
 
+Every release is built by GitHub Actions from the tagged commit on `master`; what changed in each
+version is in [`CHANGELOG.md`](CHANGELOG.md).
+
 **Staying current:** on launch EVE Dashboard checks GitHub for a newer release and, if one is
 out, asks whether to open the download page. It never downloads or installs anything itself -
 you stay in control of updating.

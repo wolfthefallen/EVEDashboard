@@ -600,6 +600,16 @@ For features that exercise the actual EVE client, real timing, or live UI behavi
 
 ---
 
+## Release pipeline
+
+Releases are cut by GitHub Actions (`.github/workflows/ci.yml`), not by hand:
+
+- **Every push to `master` and every pull request against `master`** runs `dotnet build` + `dotnet test` on a `windows-latest` runner (WPF needs Windows).
+- **On a push to `master`** the `release` job reads `<Version>` from `Directory.Build.props`. If the tag `v<Version>` does not exist yet, it runs the canonical single-file publish (`dotnet publish src/EveDashboard.App.Wpf -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true`), zips a copy, and creates the GitHub release `v<Version>` (tag + title, marked latest, target = the pushed commit) with two assets: `EVEDashboard.exe` and `EVEDashboard.zip` — the same shape every earlier release had, and what the launch update check (`GitHubReleaseClient`) reads from `releases/latest`. If the tag already exists the job only builds and tests (so docs-only commits never re-release).
+- **Release notes** are the `## v<Version>` section of `CHANGELOG.md`; when it is missing, GitHub's auto-generated notes are used and the job summary says so.
+
+To ship: bump `<Version>`, write its `CHANGELOG.md` section, merge to `master`. The in-app About window and the update check both read the same `<Version>`, so the three always agree.
+
 ## EVE Online ToS posture
 
 EVE Online's ToS permits third-party tools that read files the game writes and that call the public ESI / public market APIs. It forbids automation that interacts with the client and any reading or modifying of the game's process.

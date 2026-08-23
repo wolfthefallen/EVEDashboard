@@ -1,0 +1,153 @@
+# CI + automatic releases.
+#
+# Every push to master and every pull request against master is built and
+# tested on Windows (WPF needs it). On a push to master the release job then
+# reads <Version> from Directory.Build.props: if no tag v<Version> exists yet,
+# it publishes the single-file self-contained EVEDashboard.exe, zips a copy,
+# and creates the GitHub release (tag + title v<Version>, marked latest) with
+# both assets - the same shape every hand-made release has had, and exactly
+# what the app's launch update check reads from releases/latest.
+#
+# Release notes come from the "## v<Version>" section of CHANGELOG.md; if that
+# section is missing, GitHub's auto-generated notes are used instead.
+#
+# To ship: bump <Version>, write its CHANGELOG section, merge to master.
+# A master push whose version already has a tag builds and tests only.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build
+
+      - name: Test
+        run: dotnet test --no-build
+
+  release:
+    name: Release when the version is new
+    needs: build-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the tag list is the "already released?" gate
+
+      - name: Read the app version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText.Trim()
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Directory.Build.props <Version> '$version' is not MAJOR.MINOR.PATCH."
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      - name: Decide whether to release
+        id: gate
+        shell: pwsh
+        run: |
+          $tag = '${{ steps.version.outputs.tag }}'
+          if (git tag --list $tag) {
+            "release=false" >> $env:GITHUB_OUTPUT
+            "Tag **$tag** already exists - nothing to release. Bump ``<Version>`` in Directory.Build.props to cut the next one." >> $env:GITHUB_STEP_SUMMARY
+          }
+          else {
+            "release=true" >> $env:GITHUB_OUTPUT
+          }
+
+      - uses: actions/setup-dotnet@v4
+        if: steps.gate.outputs.release == 'true'
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish the single-file exe
+        if: steps.gate.outputs.release == 'true'
+        run: dotnet publish src/EveDashboard.App.Wpf -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Package the release assets
+        if: steps.gate.outputs.release == 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Copy-Item src/EveDashboard.App.Wpf/bin/Release/net8.0-windows/win-x64/publish/EVEDashboard.exe artifacts/EVEDashboard.exe
+          Compress-Archive -Path artifacts/EVEDashboard.exe -DestinationPath artifacts/EVEDashboard.zip -Force
+          Get-ChildItem artifacts | Format-Table Name, Length
+
+      - name: Release notes from CHANGELOG.md
+        id: notes
+        if: steps.gate.outputs.release == 'true'
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $source = 'generated'
+          if (Test-Path CHANGELOG.md) {
+            $lines = Get-Content CHANGELOG.md
+            $heading = $lines | Select-String -Pattern "^## v$([regex]::Escape($version))(\s|$)" | Select-Object -First 1
+            if ($heading) {
+              $body = @()
+              for ($i = $heading.LineNumber; $i -lt $lines.Count; $i++) {
+                if ($lines[$i] -match '^## ') { break }
+                $body += $lines[$i]
+              }
+              $text = ($body -join "`n").Trim()
+              if ($text) {
+                Set-Content -Path artifacts/notes.md -Value $text
+                $source = 'changelog'
+              }
+            }
+          }
+          "source=$source" >> $env:GITHUB_OUTPUT
+          if ($source -eq 'generated') {
+            "No ``## v$version`` section in CHANGELOG.md - the release notes were auto-generated from the commits and pull requests." >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Create the GitHub release
+        if: steps.gate.outputs.release == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ steps.version.outputs.tag }}'
+          $ghArgs = @(
+            'release', 'create', $tag,
+            'artifacts/EVEDashboard.exe', 'artifacts/EVEDashboard.zip',
+            '--title', $tag,
+            '--target', $env:GITHUB_SHA,
+            '--latest'
+          )
+          if ('${{ steps.notes.outputs.source }}' -eq 'changelog') {
+            $ghArgs += @('--notes-file', 'artifacts/notes.md')
+          }
+          else {
+            $ghArgs += '--generate-notes'
+          }
+          gh @ghArgs
+          "Released **$tag**: https://github.com/${{ github.repository }}/releases/tag/$tag" >> $env:GITHUB_STEP_SUMMARY
