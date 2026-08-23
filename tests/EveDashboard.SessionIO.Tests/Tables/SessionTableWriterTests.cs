@@ -38,7 +38,7 @@ public sealed class SessionTableWriterTests : IAsyncLifetime
 
         var result = await _writer.WriteAsync(data, fileSchemaVersion: 1);
 
-        // Plan 38: a non-sha256 source id ("42") is regenerated to a content-addressed id.
+        // A non-sha256 source id ("42") is regenerated to a content-addressed id.
         result.NewSessionId.Should().NotBe("42", "the source id is regenerated, not preserved");
         result.SessionName.Should().Be("Sample");
         result.Warnings.Should().BeEmpty();
@@ -56,6 +56,46 @@ public sealed class SessionTableWriterTests : IAsyncLifetime
             "SELECT session_id FROM session_time",
             static r => r.GetString(0));
         times.Should().ContainSingle().Which.Should().Be(result.NewSessionId);
+    }
+
+    [Fact]
+    public async Task WriteAsync_defaults_archived_and_merged_into_when_the_file_predates_them()
+    {
+        // A SessionRow built without the two newer fields (what an older export
+        // file deserialises to) must land as a normal, visible session.
+        var data = SampleData(sourceSessionId: "42", pilotId: 90_000_001L);
+        data.Session[0].Archived.Should().BeFalse();
+        data.Session[0].MergedInto.Should().BeNull();
+
+        var result = await _writer.WriteAsync(data, fileSchemaVersion: 1);
+
+        var row = await _db.QueryAsync(
+            "SELECT archived, merged_into FROM session WHERE session_id = $sid",
+            static r => (Archived: r.GetInt64(0), MergedInto: r.IsDBNull(1) ? null : r.GetString(1)),
+            new Dictionary<string, object?> { ["$sid"] = result.NewSessionId });
+        row.Should().ContainSingle();
+        row[0].Archived.Should().Be(0);
+        row[0].MergedInto.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task WriteAsync_carries_archived_and_merged_into_verbatim()
+    {
+        var sample = SampleData(sourceSessionId: "42", pilotId: 90_000_001L);
+        var data = sample with
+        {
+            Session = new[] { sample.Session[0] with { Archived = true, MergedInto = "feedface" } },
+        };
+
+        var result = await _writer.WriteAsync(data, fileSchemaVersion: 1);
+
+        var row = await _db.QueryAsync(
+            "SELECT archived, merged_into FROM session WHERE session_id = $sid",
+            static r => (Archived: r.GetInt64(0), MergedInto: r.IsDBNull(1) ? null : r.GetString(1)),
+            new Dictionary<string, object?> { ["$sid"] = result.NewSessionId });
+        row.Should().ContainSingle();
+        row[0].Archived.Should().Be(1, "an imported archived session stays hidden");
+        row[0].MergedInto.Should().Be("feedface", "the provenance pointer is carried verbatim, never dereferenced");
     }
 
     [Fact]
@@ -113,7 +153,7 @@ public sealed class SessionTableWriterTests : IAsyncLifetime
                 ["$st"]  = "IV - Moon 4 - Caldari Navy Assembly Plant",
             });
 
-        // Plan 38: this import carries no session_time rows, so the writer cannot
+        // This import carries no session_time rows, so the writer cannot
         // recompute an id from name+start — supply a real sha256 id it preserves.
         var sha = EveDashboard.Core.Sessions.SessionId.Compute("Test", "2026-05-07T10:00:00.000Z");
         var data = new SessionExportData(

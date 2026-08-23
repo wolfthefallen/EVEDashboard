@@ -40,6 +40,9 @@ public sealed partial class SessionRowViewModel : ObservableObject
     /// <summary>Pass-through to <see cref="SessionSummaryRow.Name"/>.</summary>
     public string Name => Data.Name;
 
+    /// <summary>Name for the sidebar cell: the stored name, suffixed "(archived)" for an archived session.</summary>
+    public string DisplayName => Data.Archived ? Data.Name + " (archived)" : Data.Name;
+
     /// <summary>Pass-through to <see cref="SessionSummaryRow.StartTime"/>.</summary>
     public DateTimeOffset StartTime => Data.StartTime;
 

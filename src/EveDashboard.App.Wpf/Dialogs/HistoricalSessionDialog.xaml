@@ -1,0 +1,164 @@
+<Window x:Class="EveDashboard.App.Wpf.Dialogs.HistoricalSessionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
+        Title="Build session from history"
+        Height="680" Width="600"
+        MinHeight="520" MinWidth="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource BorderBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <converters:StringEmptyToVisibilityConverter x:Key="StringEmptyToVis" />
+    </Window.Resources>
+    <Border Margin="6"
+            Background="{DynamicResource BackgroundBrush}"
+            Effect="{DynamicResource ModalShadowEffect}">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="{Binding HeaderText}"
+                       FontSize="16" FontWeight="Bold"
+                       Margin="0,0,0,8"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <!-- Blocked banner: a live session forbids building history. -->
+            <Border Grid.Row="1"
+                    Visibility="{Binding BlockedMessage, Converter={StaticResource StringEmptyToVis}}"
+                    BorderBrush="{DynamicResource WidgetBorderBrush}" BorderThickness="1"
+                    Padding="8" Margin="0,0,0,8">
+                <TextBlock Text="{Binding BlockedMessage}" TextWrapping="Wrap"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+            </Border>
+
+            <!-- Inputs -->
+            <Grid Grid.Row="2" IsEnabled="{Binding IsEnabled}" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Start (EVE time)" VerticalAlignment="Center" Margin="0,0,8,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding StartDate, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,4" />
+                <TextBox Grid.Row="0" Grid.Column="2" Width="64" Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
+                         ToolTip="HH:mm, EVE time (UTC)" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Stop (EVE time)" VerticalAlignment="Center" Margin="0,0,8,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding StopDate, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,4" />
+                <TextBox Grid.Row="1" Grid.Column="2" Width="64" Text="{Binding StopTimeText, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
+                         ToolTip="HH:mm, EVE time (UTC)" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Fleet" VerticalAlignment="Center" Margin="0,0,8,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                          ItemsSource="{Binding Fleets}" DisplayMemberPath="Name"
+                          SelectedItem="{Binding SelectedFleet}" Margin="0,0,0,4" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Name" VerticalAlignment="Center" Margin="0,0,8,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding SessionName, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
+                         ToolTip="Use {{$STARTDATE}}, {{$ENDDATE}}, {{$YYYY}}, {{$DATE}}, {{$TIME}}, {{$DATETIME}}, {{$CHARS}}" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes" VerticalAlignment="Top" Margin="0,4,8,4"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True" MinHeight="40" MaxHeight="80" VerticalScrollBarVisibility="Auto" Padding="4,2" Margin="0,0,0,4" />
+            </Grid>
+
+            <TextBlock Grid.Row="3"
+                       Text="Saved sessions that overlap this window (tick the ones to combine into the new session):"
+                       TextWrapping="Wrap" Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <!-- Overlap list -->
+            <Border Grid.Row="4" BorderBrush="{DynamicResource WidgetBorderBrush}" BorderThickness="1" MinHeight="80">
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Overlaps}" Margin="4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsChecked, Mode=TwoWay}" VerticalAlignment="Top" Margin="0,2,8,0"
+                                                  ToolTip="Combine this session into the new one" />
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Foreground="{DynamicResource ForegroundBrush}">
+                                                <Run Text="{Binding Name, Mode=OneWay}" FontWeight="Bold" />
+                                                <Run Text="  " />
+                                                <Run Text="{Binding SpanText, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding KindText}" FontSize="11" Opacity="0.8" TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource ForegroundBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Text="No overlapping sessions - the whole window comes from the gamelogs."
+                               Visibility="{Binding HasNoOverlaps, Converter={StaticResource BoolToVis}}"
+                               Opacity="0.7" Margin="8" VerticalAlignment="Top"
+                               Foreground="{DynamicResource ForegroundBrush}" />
+                </Grid>
+            </Border>
+
+            <!-- Exclusion notice (spec 3.b) -->
+            <TextBlock Grid.Row="5"
+                       Text="{Binding ExclusionNotice}"
+                       Visibility="{Binding ExclusionNotice, Converter={StaticResource StringEmptyToVis}}"
+                       TextWrapping="Wrap" FontSize="11" Margin="0,6,0,0"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <TextBlock Grid.Row="6"
+                       Text="{Binding StatusMessage}"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource StringEmptyToVis}}"
+                       TextWrapping="Wrap" Margin="0,6,0,0"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+
+            <!-- One action slot that walks the user through the workflow: "Check overlaps"
+                 until the current inputs have been checked, then "Build". Editing any
+                 input flips it back (HasChecked clears), so Build can never sit there
+                 disabled with no explanation. -->
+            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                <Button Content="Check overlaps"
+                        Command="{Binding CheckOverlapsCommand}"
+                        Visibility="{Binding HasChecked, Converter={StaticResource InverseBoolToVis}}"
+                        ToolTip="Find saved sessions that overlap this window before building"
+                        Padding="14,4" Margin="0,0,8,0" />
+                <Button Content="Build"
+                        Command="{Binding BuildCommand}"
+                        Visibility="{Binding HasChecked, Converter={StaticResource BoolToVis}}"
+                        Padding="14,4" Margin="0,0,8,0" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="14,4" IsCancel="True" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

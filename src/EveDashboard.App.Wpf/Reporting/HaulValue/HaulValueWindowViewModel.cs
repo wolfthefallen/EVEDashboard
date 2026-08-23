@@ -51,11 +51,11 @@ public sealed record StationValueRow(string Station, string TotalValue, string N
 public sealed record LineValueRow(string Name, string Quantity, string UnitPrice, string Value);
 
 /// <summary>
-/// View-model for the Haul Value window (plan 55): price a haul across every
+/// View-model for the Haul Value window: price a haul across every
 /// station in the market catalog at once and show where it is worth the most.
 /// Two input modes — a pasted item list (any items, resolved via
 /// <see cref="ISdeTypeNameResolver"/>) or a saved session's refined output.
-/// Uses the plan-53 price-source router (via <see cref="HaulValuationCalculator"/>),
+/// Uses the price-source router (via <see cref="HaulValuationCalculator"/>),
 /// so results honour the user's GoonMetrics/ESI choice; ad-hoc pricing never
 /// writes to <c>market_data</c>.
 /// </summary>
@@ -133,7 +133,7 @@ public sealed partial class HaulValueWindowViewModel : ObservableObject
     /// <param name="ct">Cancellation token.</param>
     public async Task RefreshSessionsAsync(CancellationToken ct = default)
     {
-        var report = await _reporting.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
+        var report = await _reporting.GetAllSessionSummariesAsync(ct: ct).ConfigureAwait(true);
         var previouslyChecked = Sessions.Where(s => s.IsSelected).Select(s => s.SessionId).ToHashSet();
 
         Sessions.Clear();

@@ -21,6 +21,7 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     private readonly JsonSessionImporter _importer;
     private readonly IReportsFileDialog _fileDialog;
     private readonly ILifetimeTotalsWindow _lifetimeWindow;
+    private readonly IHistoricalSessionDialog _historicalDialog;
     private readonly ILogger<ReportsWindowViewModel> _log;
 
     /// <summary>The sortable sidebar of saved sessions.</summary>
@@ -30,7 +31,7 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     public BreakdownContentViewModel Content { get; }
 
     /// <summary>
-    /// Plan 29 — one-line status surface at the bottom of the Reports window.
+    /// One-line status surface at the bottom of the Reports window.
     /// Reads "Imported: ..." after a successful import, "Exported: ..." after
     /// an export, and "Import failed: ..." / "Export failed: ..." on errors.
     /// Empty string => the row collapses (see <c>StringEmptyToVisibilityConverter</c>).
@@ -41,9 +42,10 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     /// <summary>Construct the root Reports VM.</summary>
     /// <param name="sidebar">Sidebar VM.</param>
     /// <param name="content">Breakdown content VM.</param>
-    /// <param name="importer">Plan 29 — JSON importer wired to the Import Session header button.</param>
-    /// <param name="fileDialog">Plan 29 — file dialog seam for open-path selection.</param>
-    /// <param name="lifetimeWindow">Plan 51 — Lifetime Totals window seam, opened by the chrome "Lifetime Totals" button.</param>
+    /// <param name="importer">JSON importer wired to the Import Session header button.</param>
+    /// <param name="fileDialog">File dialog seam for open-path selection.</param>
+    /// <param name="lifetimeWindow">Lifetime Totals window seam, opened by the chrome "Lifetime Totals" button.</param>
+    /// <param name="historicalDialog">Modal "Build session from history" dialog seam (date-range and combine modes).</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public ReportsWindowViewModel(
@@ -52,6 +54,7 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
         JsonSessionImporter importer,
         IReportsFileDialog fileDialog,
         ILifetimeTotalsWindow lifetimeWindow,
+        IHistoricalSessionDialog historicalDialog,
         ILogger<ReportsWindowViewModel> log)
     {
         ArgumentNullException.ThrowIfNull(sidebar);
@@ -59,14 +62,17 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(importer);
         ArgumentNullException.ThrowIfNull(fileDialog);
         ArgumentNullException.ThrowIfNull(lifetimeWindow);
+        ArgumentNullException.ThrowIfNull(historicalDialog);
         ArgumentNullException.ThrowIfNull(log);
         Sidebar = sidebar;
         Content = content;
         _importer = importer;
         _fileDialog = fileDialog;
         _lifetimeWindow = lifetimeWindow;
+        _historicalDialog = historicalDialog;
         _log = log;
         Sidebar.SelectionChanged += OnSidebarSelectionChanged;
+        Sidebar.SelectionChanged += (_, _) => CombineSelectedCommand.NotifyCanExecuteChanged();
         Sidebar.StatusReporter = msg => StatusMessage = msg;
     }
 
@@ -78,8 +84,8 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     {
         try
         {
-            // Plan 51: an empty selection now leaves the pane blank (Single mode,
-            // all nulls). The all-time rollup moved to its own window (ShowLifetimeTotals).
+            // An empty selection leaves the pane blank (Single mode, all nulls);
+            // the all-time rollup lives in its own window (ShowLifetimeTotals).
             await Content.LoadAsync(selected).ConfigureAwait(true);
         }
         catch (Exception ex)
@@ -89,12 +95,31 @@ public sealed partial class ReportsWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Plan 51 — open the standalone Lifetime Totals window. Modeless; the seam
+    /// Open the standalone Lifetime Totals window. Modeless; the seam
     /// re-fetches the all-time rollup on each Show so it reflects the current
     /// set of saved sessions.
     /// </summary>
     [RelayCommand]
     private void ShowLifetimeTotals() => _lifetimeWindow.Show();
+
+    /// <summary>Open the "Build session from history" dialog in date-range mode.</summary>
+    [RelayCommand]
+    private Task BuildFromHistoryAsync(CancellationToken ct) => RunHistoricalDialogAsync(null, ct);
+
+    private bool CanCombineSelected() => Sidebar.CheckedRows.Count >= 2;
+
+    /// <summary>Open the dialog in combine mode with the sidebar's ticked sessions (needs at least two).</summary>
+    [RelayCommand(CanExecute = nameof(CanCombineSelected))]
+    private Task CombineSelectedAsync(CancellationToken ct) =>
+        RunHistoricalDialogAsync(Sidebar.CheckedRows.Select(r => r.SessionId).ToList(), ct);
+
+    private async Task RunHistoricalDialogAsync(IReadOnlyList<string>? preselected, CancellationToken ct)
+    {
+        var outcome = _historicalDialog.Show(preselected);
+        if (outcome is null) return;
+        await Sidebar.LoadAsync(ct).ConfigureAwait(true);
+        StatusMessage = outcome.Summary;
+    }
 
     /// <summary>
     /// Import Session command. Picks a .json file via the dialog seam, runs

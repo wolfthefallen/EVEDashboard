@@ -171,7 +171,7 @@ public class HaulValueWindowViewModelTests
         private readonly SessionsReport _report;
         public FakeReporting(params SessionSummaryRow[] sessions) =>
             _report = new SessionsReport(sessions, LifetimeSummary.Empty);
-        public Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default) => Task.FromResult(_report);
+        public Task<SessionsReport> GetAllSessionSummariesAsync(bool includeArchived = false, CancellationToken ct = default) => Task.FromResult(_report);
         public Task<IReadOnlyList<PilotSummaryRow>> GetPilotsForSessionAsync(string sessionId, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<IReadOnlyList<OreBreakdownRow>> GetOreBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<IReadOnlyList<RefineMatBreakdownRow>> GetRefinedMatBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default) => throw new NotSupportedException();

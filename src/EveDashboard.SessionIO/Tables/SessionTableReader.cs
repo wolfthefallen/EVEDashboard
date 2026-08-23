@@ -12,10 +12,9 @@ using Microsoft.Extensions.Logging;
 /// <remarks>
 /// Used by both <c>JsonSessionExporter</c> and <c>ExcelSessionExporter</c> so
 /// the SQL definition of "what rides along with a session export" is stated
-/// exactly once in this file. Filtering decisions (which rows belong to the
-/// session) follow plan 29 alignment 3.1 = B for market_data: per
-/// <c>(type_id, station_id)</c> pair, the latest row where
-/// <c>fetched_at &lt;= session_end</c>.
+/// exactly once in this file. Prices are session-bound, so the
+/// <c>market_data</c> rows in scope are exactly those stamped with the
+/// session's <c>session_id</c> (see <c>ReadMarketDataAsync</c>).
 /// </remarks>
 public sealed class SessionTableReader
 {
@@ -37,7 +36,7 @@ public sealed class SessionTableReader
     /// <summary>
     /// Read every row that belongs to the given session: the session itself,
     /// its session_time intervals, the pilots associated through session_pilot,
-    /// every log row, the market_data rows in scope (per the plan-29 rule),
+    /// every log row, the market_data rows stamped with the session's id,
     /// and the market_stations referenced by those market_data rows.
     /// </summary>
     /// <param name="sessionId">Session id to scope the read to.</param>
@@ -69,11 +68,13 @@ public sealed class SessionTableReader
 
     private Task<IReadOnlyList<SessionRow>> ReadSessionAsync(string sessionId, CancellationToken ct) =>
         _db.QueryAsync(
-            "SELECT session_id, name, notes FROM session WHERE session_id = $sid",
+            "SELECT session_id, name, notes, archived, merged_into FROM session WHERE session_id = $sid",
             static r => new SessionRow(
-                SessionId: r.GetString(0),
-                Name:      r.GetString(1),
-                Notes:     r.IsDBNull(2) ? null : r.GetString(2)),
+                SessionId:  r.GetString(0),
+                Name:       r.GetString(1),
+                Notes:      r.IsDBNull(2) ? null : r.GetString(2),
+                Archived:   r.GetInt64(3) != 0,
+                MergedInto: r.IsDBNull(4) ? null : r.GetString(4)),
             new Dictionary<string, object?> { ["$sid"] = sessionId },
             ct);
 
@@ -92,7 +93,7 @@ public sealed class SessionTableReader
 
     private Task<IReadOnlyList<SessionPilotRow>> ReadSessionPilotsAsync(string sessionId, CancellationToken ct) =>
         _db.QueryAsync(
-            // Plan 35: include role column.
+            // role column included.
             "SELECT session_id, pilot_id, role FROM session_pilot WHERE session_id = $sid ORDER BY pilot_id",
             static r => new SessionPilotRow(
                 SessionId: r.GetString(0),
@@ -114,7 +115,7 @@ public sealed class SessionTableReader
 
     private Task<IReadOnlyList<LogRow>> ReadLogsAsync(string sessionId, CancellationToken ct) =>
         _db.QueryAsync(
-            // Plan 35: include role column.
+            // role column included.
             "SELECT log_id, session_id, pilot_id, eve_timestamp, event_kind, type_id, units, volume_m3, role " +
             "FROM log WHERE session_id = $sid ORDER BY log_id",
             static r => new LogRow(
@@ -131,9 +132,9 @@ public sealed class SessionTableReader
             ct);
 
     /// <summary>
-    /// Plan 38: prices are session-bound, so the export carries exactly the
+    /// Prices are session-bound, so the export carries exactly the
     /// session's own <c>market_data</c> rows — a plain <c>WHERE session_id =
-    /// $sid</c>. (Replaces the plan-29 time-window scoping.) Zero-sentinel rows
+    /// $sid</c>, no time-window scoping. Zero-sentinel rows
     /// belong to no session and are never selected.
     /// </summary>
     private Task<IReadOnlyList<MarketDataRow>> ReadMarketDataAsync(string sessionId, CancellationToken ct) =>

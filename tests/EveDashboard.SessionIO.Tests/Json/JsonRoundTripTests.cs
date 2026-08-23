@@ -51,7 +51,7 @@ public sealed class JsonRoundTripTests : IDisposable
 
         var result = await importer.ImportAsync(path);
 
-        // Plan 38: the new id is the content-addressed sha256 hex string. The
+        // The new id is the content-addressed sha256 hex string. The
         // source id already looks like a sha256, so the importer preserves it.
         EveDashboard.Core.Sessions.SessionId.LooksLikeSha256(result.NewSessionId).Should().BeTrue();
         result.SessionName.Should().Be("RoundTrip");
@@ -73,10 +73,43 @@ public sealed class JsonRoundTripTests : IDisposable
     }
 
     [Fact]
+    public async Task Export_then_import_preserves_archived_flag_and_merged_into()
+    {
+        // An archived (combined-away) session must round-trip its archive state
+        // so a restored backup is still hidden and still points at its combined
+        // session for troubleshooting.
+        await using var sourceDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
+        await SchemaInitializer.EnsureSchemaAsync(sourceDb);
+        var sourceSid = await SeedSampleSessionAsync(sourceDb);
+        await sourceDb.ExecuteNonQueryAsync(
+            "UPDATE session SET archived = 1, merged_into = 'feedface' WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$sid"] = sourceSid });
+
+        var reader = new SessionTableReader(sourceDb, NullLogger<SessionTableReader>.Instance);
+        var exporter = new JsonSessionExporter(reader, NullLogger<JsonSessionExporter>.Instance);
+        var path = Path.Combine(_tempDir, "archived.json");
+        await exporter.ExportAsync(sourceSid, path);
+
+        await using var destDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
+        await SchemaInitializer.EnsureSchemaAsync(destDb);
+        var writer = new SessionTableWriter(destDb, NullLogger<SessionTableWriter>.Instance);
+        var importer = new JsonSessionImporter(writer, NullLogger<JsonSessionImporter>.Instance);
+        var result = await importer.ImportAsync(path);
+
+        var row = await destDb.QueryAsync(
+            "SELECT archived, merged_into FROM session WHERE session_id = $sid",
+            static r => (Archived: r.GetInt64(0), MergedInto: r.IsDBNull(1) ? null : r.GetString(1)),
+            new Dictionary<string, object?> { ["$sid"] = result.NewSessionId });
+        row.Should().ContainSingle();
+        row[0].Archived.Should().Be(1);
+        row[0].MergedInto.Should().Be("feedface");
+    }
+
+    [Fact]
     public async Task Import_legacy_integer_id_file_recomputes_sha256_and_stamps_market_data()
     {
-        // Bug B regression (plan 38 amendment): pre-plan-38 export files carry
-        // INTEGER session_ids on session / session_time / session_pilot / log
+        // Legacy-import regression: export files from before content-addressed
+        // ids carry INTEGER session_ids on session / session_time / session_pilot / log
         // and a market_data block with NO session_id. This shape previously
         // threw at $.session_time[0].session_id because SessionTimeRow.SessionId
         // lacked a number-tolerant converter. It must now import cleanly: ids
@@ -166,7 +199,7 @@ public sealed class JsonRoundTripTests : IDisposable
 
     private static async Task<string> SeedSampleSessionAsync(SqliteDatabase db)
     {
-        // Plan 38: a realistic sha256 session id (matches the live recipe so the
+        // A realistic sha256 session id (matches the live recipe so the
         // exporter writes a valid id and the importer dedup / recompute paths see
         // a well-formed source id).
         var sid = EveDashboard.Core.Sessions.SessionId.Compute("RoundTrip", "2026-05-07T10:00:00.000Z");

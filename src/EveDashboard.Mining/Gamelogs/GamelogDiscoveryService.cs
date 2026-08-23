@@ -12,7 +12,7 @@ namespace EveDashboard.Mining.Gamelogs;
 /// </summary>
 /// <remarks>
 /// One-shot discovery: each call enumerates the directory afresh. There is no
-/// caching and no file watching — the live tailing service in a later plan
+/// caching and no file watching — the live tailing service (<c>RealtimeLogWatcher</c>)
 /// consumes the results of this service to know which files to follow.
 /// "Most recent" is determined by the <c>YYYYMMDDHHMMSS</c> portion of the
 /// filename, not by file modification time, because the filename timestamp
@@ -22,8 +22,8 @@ public sealed class GamelogDiscoveryService
 {
     /// <summary>
     /// Gamelog filename pattern: <c>YYYYMMDD_HHMMSS_&lt;characterID&gt;.txt</c>.
-    /// Promoted to <c>internal</c> in plan 12 so <c>RealtimeLogWatcher</c> can
-    /// reuse the same shape rather than duplicate the regex.
+    /// <c>internal</c> so <c>RealtimeLogWatcher</c> can reuse the same shape
+    /// rather than duplicate the regex.
     /// </summary>
     internal static readonly Regex FilenameRegex = new(
         @"^(\d{8})_(\d{6})_(\d+)\.txt$",
@@ -39,6 +39,9 @@ public sealed class GamelogDiscoveryService
 
     private readonly string _directory;
     private readonly ILogger<GamelogDiscoveryService> _logger;
+
+    /// <summary>The Gamelogs directory this service scans - shared with the historical reader so both look in the same place.</summary>
+    public string GamelogDirectory => _directory;
 
     /// <summary>
     /// Construct a discovery service bound to a specific Gamelogs directory.
@@ -63,7 +66,7 @@ public sealed class GamelogDiscoveryService
     /// (silent), or if every matched file fails to yield a Listener line
     /// (each failure logged at Warning).
     /// <para>
-    /// Plan 23: result is ordered by gamelog file <c>LastWriteTimeUtc</c>
+    /// The result is ordered by gamelog file <c>LastWriteTimeUtc</c>
     /// descending (most recently active character first); ties broken by
     /// <c>Name</c> ascending case-insensitive; characters whose log file no
     /// longer exists sort to the end via <see cref="DateTime.MinValue"/>.
@@ -155,7 +158,7 @@ public sealed class GamelogDiscoveryService
             result.Add(new Character(charId, listenerName, entry.FilePath));
         }
 
-        // Plan 23: sort by gamelog file mtime descending, tie-break Name asc.
+        // Sort by gamelog file mtime descending, tie-break Name asc.
         // Drives the Config-mode pilot list "newest first" ordering.
         result.Sort((a, b) =>
         {

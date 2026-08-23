@@ -1,5 +1,7 @@
 namespace EveDashboard.App.Wpf.DependencyInjection;
 
+using EveDashboard.Stats.Historical;
+using EveDashboard.Mining.Historical;
 using EveDashboard.App.Wpf.About;
 using EveDashboard.App.Wpf.Bootstrap;
 using EveDashboard.App.Wpf.Dialogs;
@@ -49,12 +51,12 @@ using Microsoft.Extensions.Logging;
 /// been constructed by hand.
 /// </summary>
 /// <remarks>
-/// Per plan 16 decision 1.2 = A: stock <c>Microsoft.Extensions.DependencyInjection</c>
-/// (transitive via MEL). All singletons constructed in the bootstrap chain are
-/// passed in by the caller; this builder just registers them and adds the
+/// Uses stock <c>Microsoft.Extensions.DependencyInjection</c> (transitive via
+/// MEL); no third-party container. All singletons constructed in the bootstrap
+/// chain are passed in by the caller; this builder just registers them and adds the
 /// app-only services (<see cref="ThemeService"/>, <see cref="WindowGeometryService"/>,
-/// <see cref="IConfirmDialog"/>, <see cref="ISettingsDialog"/> + <see cref="IAddStationDialog"/>
-/// (plan 22.1), <see cref="SessionController"/>, <see cref="MainWindow"/>).
+/// <see cref="IConfirmDialog"/>, <see cref="ISettingsDialog"/> + <see cref="IAddStationDialog"/>,
+/// <see cref="SessionController"/>, <see cref="MainWindow"/>).
 /// </remarks>
 public static class ServiceRegistration
 {
@@ -77,12 +79,12 @@ public static class ServiceRegistration
     /// <param name="parser">Gamelog line parser.</param>
     /// <param name="discovery">Gamelog discovery service (already invoked at startup; registered for future re-discovery).</param>
     /// <param name="allCharacters">Characters discovered at startup. Drives the Session widget's pilot list.</param>
-    /// <param name="bootstrapLoader">YAML bootstrap config loader (plan 15). Plan 22.1's Settings dialog VM consumes it for <c>gamelog_path</c> read/write.</param>
-    /// <param name="priceClient">Plan 53 price-source router (GoonMetrics vs official ESI, per the <c>price_source</c> setting); registered as the <see cref="IMarketPriceClient"/>.</param>
+    /// <param name="bootstrapLoader">YAML bootstrap config loader. The Settings dialog VM consumes it for <c>gamelog_path</c> read/write.</param>
+    /// <param name="priceClient">Price-source router (GoonMetrics vs official ESI, per the <c>price_source</c> setting); registered as the <see cref="IMarketPriceClient"/>.</param>
     /// <param name="esiPriceClient">The official-ESI price client, used directly by the Haul Value calculator (GoonMetrics 404s the non-Jita empire hubs, so the multi-hub comparison must use ESI regardless of the <c>price_source</c> setting).</param>
-    /// <param name="marketPriceFetcher">Plan 18 fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
-    /// <param name="iskCalculator">Plan 18 ISK calculator (canonical recursive reprocessing algorithm).</param>
-    /// <param name="releaseClient">Plan 41 GitHub release-check client for the launch update check.</param>
+    /// <param name="marketPriceFetcher">Market-price fetcher orchestrator (subscribes to <see cref="IActiveSessionContext.ActiveSessionChanged"/> in its ctor).</param>
+    /// <param name="iskCalculator">ISK calculator (canonical recursive reprocessing algorithm).</param>
+    /// <param name="releaseClient">GitHub release-check client for the launch update check.</param>
     /// <returns>A constructed <see cref="ServiceProvider"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public static ServiceProvider BuildServiceProvider(
@@ -148,7 +150,7 @@ public static class ServiceRegistration
         services.AddSingleton(sdeStorage);
         services.AddSingleton(sdeUpdater);
         services.AddSingleton(sdeLookup);
-        // Plan 52 — SDE meta reader for the About window's "SDE data" line.
+        // SDE meta reader for the About window's "SDE data" line.
         // Explicit sdeDb capture (NOT via ISqliteDatabase resolution), same
         // reasoning as the query layers: sdeDb is the SDE connection, not session.
         services.AddSingleton<ISdeMetaReader>(sp => new SdeMetaReader(
@@ -166,7 +168,7 @@ public static class ServiceRegistration
         services.AddSingleton(allCharacters);
         services.AddSingleton(bootstrapLoader);
 
-        // Plan 18 — pricing pipeline singletons. Mirror the existing
+        // Pricing pipeline singletons. Mirror the existing
         // dual-registration pattern (concrete + interface) used for the
         // SessionEventWriter at lines above.
         services.AddSingleton<IMarketPriceClient>(priceClient);
@@ -175,7 +177,7 @@ public static class ServiceRegistration
         services.AddSingleton(iskCalculator);
         services.AddSingleton<IIskCalculator>(iskCalculator);
 
-        // Plan 41 — launch update check. Release client dual-registered
+        // Launch update check. Release client dual-registered
         // (concrete + interface), mirroring the pricing client; the browser
         // launcher and notifier are app-only services. UpdateNotifier is
         // resolved once after MainWindow.Show and run fire-and-forget.
@@ -184,7 +186,7 @@ public static class ServiceRegistration
         services.AddSingleton<IBrowserLauncher, BrowserLauncher>();
         services.AddSingleton<UpdateNotifier>();
 
-        // Plan 42 — fleet repository (explicit sessionDb capture, same pattern as
+        // Fleet repository (explicit sessionDb capture, same pattern as
         // the stats repo). Owns the fleet / fleet_pilot tables; the New Session
         // dialog VM resolves it for load / create / delete.
         services.AddSingleton<IFleetRepository>(sp =>
@@ -201,7 +203,7 @@ public static class ServiceRegistration
                 sdeLookup,
                 sp.GetRequiredService<ILogger<SqliteSessionStatsRepository>>()));
 
-        // Plan 25 — Reporting query layer (uses the same explicit sessionDb capture pattern).
+        // Reporting query layer (uses the same explicit sessionDb capture pattern).
         services.AddSingleton<IReportingQueries>(sp =>
             new SqliteReportingQueries(
                 sessionDb,
@@ -213,27 +215,27 @@ public static class ServiceRegistration
 
         // App-only services.
         services.AddSingleton<ThemeService>();
-        // Plan 37: auto-pause / auto-resume sound player. Singleton — loads
-        // both WAVs once at construction and holds the SoundPlayer instances
-        // for the app lifetime. MainWindow's ctor subscribes the controller's
+        // Auto-pause / auto-resume sound player. Singleton — loads both WAVs
+        // once at construction and holds the byte buffers for the app
+        // lifetime. MainWindow's ctor subscribes the controller's
         // sound-request events to PlayPauseSound / PlayResumeSound.
         services.AddSingleton<AutoPauseSoundPlayer>();
         services.AddSingleton<IConfirmDialog, ConfirmDialogAdapter>();
-        // Plan 25: WindowGeometryService is no longer auto-registered. Each
-        // managed Window resolves its own instance via factory below, so two
-        // independent instances (MainWindow + ReportsWindow) wire to different
-        // ISettingsRepository typed methods and different default sizes.
+        // WindowGeometryService is deliberately not auto-registered. Each
+        // managed Window (MainWindow, Reports, Crystal Diagram, Lifetime
+        // Totals, About) gets its own instance via its factory below, wired to
+        // different ISettingsRepository typed methods and default sizes.
 
-        // Plan 22.2 bootstrap-error reporter test seam. Adapter delegates to
+        // Bootstrap-error reporter test seam. Adapter delegates to
         // the existing static helper for production; unit tests substitute a
         // fake to assert the second-consecutive-SaveAsync-failure fallback.
         services.AddSingleton<IBootstrapErrorReporter, BootstrapErrorReporterAdapter>();
 
-        // Plan 22.1 Settings UI. Adapter is singleton; the dialog Window and
-        // its ViewModel are transient so each Show() call gets a fresh
-        // instance with no carry-over state. SettingsDialogAdapter resolves
-        // SettingsDialog from IServiceProvider (decision 22.L); the
-        // AddStationDialogAdapter does the same for the sub-dialog.
+        // Settings UI. Adapter is singleton; the dialog Window and its
+        // ViewModel are transient so each Show() call gets a fresh instance
+        // with no carry-over state. SettingsDialogAdapter resolves
+        // SettingsDialog from IServiceProvider; the AddStationDialogAdapter
+        // does the same for the sub-dialog.
         services.AddSingleton<ISettingsDialog, SettingsDialogAdapter>();
         services.AddTransient<SettingsDialog>();
         services.AddTransient<SettingsDialogViewModel>();
@@ -241,7 +243,7 @@ public static class ServiceRegistration
         services.AddTransient<AddStationDialog>();
         services.AddTransient<AddStationDialogViewModel>();
 
-        // Plan 29 - SessionIO. Reader / Writer / Exporters / Importer all need
+        // SessionIO. Reader / Writer / Exporters / Importer all need
         // sessionDb, which is NOT registered as ISqliteDatabase (see the
         // dual-DB note above). Use factory lambdas with explicit capture.
         services.AddSingleton(sp => new SessionTableReader(
@@ -267,8 +269,8 @@ public static class ServiceRegistration
         services.AddSingleton<IReportsFileDialog, ReportsFileDialogAdapter>();
 
         // Session controller — explicit sessionDb capture; the rest via DI.
-        // Plan 24: this is the singleton that drives both the SessionConfig
-        // and SessionStats thin VMs (registered just below).
+        // This is the singleton that drives both the SessionStats thin VM and
+        // the New Session dialog VM (registered just below).
         services.AddSingleton(sp => new SessionController(
             db:            sessionDb,
             statsRepo:     sp.GetRequiredService<ISessionStatsRepository>(),
@@ -282,28 +284,52 @@ public static class ServiceRegistration
             settings:      sp.GetRequiredService<ISettingsRepository>(),
             log:           sp.GetRequiredService<ILogger<SessionController>>()));
 
-        // Plan 24 — thin VM for the SessionStats widget. Wraps the
-        // SessionController singleton and forwards bound fields. The companion
-        // SessionConfig widget moved to a modal dialog post-plan-25 (see
+        // Thin VM for the SessionStats widget. Wraps the SessionController
+        // singleton and forwards bound fields. Session configuration is not a
+        // widget — it lives in the modal New Session dialog (see the
         // ISessionConfigDialog registration below).
         services.AddSingleton(sp => new SessionStatsViewModel(
             sp.GetRequiredService<SessionController>(),
             sp.GetRequiredService<ISettingsRepository>(),
             sp.GetRequiredService<ILogger<SessionStatsViewModel>>()));
 
-        // Post-plan-25 — New Session dialog. VM is singleton (wraps the
+        // New Session dialog. VM is singleton (wraps the
         // singleton SessionController; no dialog-instance state). Window is
         // transient — fresh instance per Show() call.
         services.AddSingleton<SessionConfigDialogViewModel>();
         services.AddTransient<SessionConfigDialog>();
         services.AddSingleton<ISessionConfigDialog, SessionConfigDialogAdapter>();
 
-        // Per-pilot widget coordinator (plan 17) — explicit sessionDb capture
+        // Historical sessions (build from a date range / combine saved sessions).
+        // Explicit sessionDb capture like every other session-store service; the
+        // gamelog reader shares the discovery service's folder and the live parser.
+        services.AddSingleton<IHistoricalGamelogReader>(sp => new HistoricalGamelogReader(
+            discovery.GamelogDirectory,
+            parser,
+            sp.GetRequiredService<ILogger<HistoricalGamelogReader>>()));
+        services.AddSingleton<ISessionSpanQuery>(sp => new SqliteSessionSpanQuery(
+            sessionDb,
+            sp.GetRequiredService<ILogger<SqliteSessionSpanQuery>>()));
+        services.AddSingleton<IHistoricalSessionBuilder>(sp => new HistoricalSessionBuilder(
+            sessionDb,
+            sdeLookup,
+            sp.GetRequiredService<ILogger<HistoricalSessionBuilder>>()));
+        services.AddSingleton<IHistoricalMarketPricer>(sp => new HistoricalMarketPricer(
+            sessionDb,
+            sdeLookup,
+            settingsRepo,
+            marketPriceFetcher,
+            sp.GetRequiredService<ILogger<HistoricalMarketPricer>>()));
+        services.AddSingleton<HistoricalSessionDialogViewModel>();
+        services.AddTransient<HistoricalSessionDialog>();
+        services.AddSingleton<IHistoricalSessionDialog, HistoricalSessionDialogAdapter>();
+
+        // Per-pilot widget coordinator — explicit sessionDb capture
         // for the same reason the stats repo and Session VM use one (see the
         // dual-DB note above). Subscribes to events on construction; lives for
         // the app lifetime.
         //
-        // Plan 35 decision 2.3 cross = A: the setPilotRoleCallback resolves
+        // The setPilotRoleCallback resolves
         // SessionController LAZILY inside the delegate body — NOT in the factory
         // body. Resolving SessionController eagerly here would create a DI cycle
         // (coordinator -> controller would need to exist before controller's own
@@ -319,11 +345,11 @@ public static class ServiceRegistration
             setPilotRoleCallback:  (pilotId, role, ct) =>
                 sp.GetRequiredService<SessionController>().SetPilotRoleAsync(pilotId, role, ct)));
 
-        // Plan 19 — layout coordinator. Owns the unified Items collection,
+        // Layout coordinator. Owns the unified Items collection,
         // hidden-flag flips, and widget_layout persistence. Subscribes to
         // PerPilotWidgetCoordinator.Widgets.CollectionChanged AND to the
-        // SessionController's PropertyChanged on construction (plan 24
-        // lifecycle: Mode -> Running/Paused latches the _statsActivated flag,
+        // SessionController's PropertyChanged on construction (the first
+        // Mode -> Running/Paused transition latches the _statsActivated flag,
         // which gates SessionStats descriptor renderability). LoadAsync is
         // invoked by App.OnStartup after BuildServiceProvider.
         services.AddSingleton(sp => new LayoutCoordinator(
@@ -337,7 +363,7 @@ public static class ServiceRegistration
         // MainWindow VM — pure composition, all deps via DI.
         services.AddSingleton<MainWindowViewModel>();
 
-        // Plan 25 Reports — sidebar/content/root VMs (singletons; the Reports window holds
+        // Reports — sidebar/content/root VMs (singletons; the Reports window holds
         // them for its lifetime), the saved-data widget VMs (transient — constructed by
         // BreakdownContentViewModel.LoadAsync per session selection), and the Reports
         // window itself (singleton; the adapter holds the instance to preserve geometry
@@ -360,7 +386,7 @@ public static class ServiceRegistration
         // Crystal Diagram reference window — singleton + hide-on-close, mirrors
         // the Reports lifetime so geometry + dropdown selection survive in-session
         // open/close cycles. Default 900x650 centered; geometry persisted via the
-        // Crystal-flavoured WindowGeometryService; plan 35 anomaly selection
+        // Crystal-flavoured WindowGeometryService; the anomaly selection
         // persisted via the singleton CrystalDiagramWindowViewModel.
         services.AddSingleton<CrystalDiagramWindowViewModel>();
         services.AddSingleton<CrystalDiagramWindow>(sp => new CrystalDiagramWindow(
@@ -374,7 +400,7 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<CrystalDiagramWindow>>()));
         services.AddSingleton<ICrystalDiagramWindow, CrystalDiagramWindowAdapter>();
 
-        // Plan 51 — Lifetime Totals window. Singleton + hide-on-close, mirrors
+        // Lifetime Totals window. Singleton + hide-on-close, mirrors
         // Reports/Crystal so geometry survives in-session open/close cycles.
         // Default 700x640 centered; geometry persisted via a Lifetime-flavoured
         // WindowGeometryService. The adapter re-fetches the all-time rollup on
@@ -391,7 +417,7 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<LifetimeTotalsWindow>>()));
         services.AddSingleton<ILifetimeTotalsWindow, LifetimeTotalsWindowAdapter>();
 
-        // Plan 52 — About window. Singleton + hide-on-close, mirrors
+        // About window. Singleton + hide-on-close, mirrors
         // Reports/Crystal/Lifetime so geometry survives in-session open/close
         // cycles. Default 460x560 centered; geometry persisted via an
         // About-flavoured WindowGeometryService. The VM auto-resolves (its deps
@@ -409,10 +435,10 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<AboutWindow>>()));
         services.AddSingleton<IAboutWindow, AboutWindowAdapter>();
 
-        // Plan 55 — Haul Value window (public-data multi-hub valuation; no geometry
+        // Haul Value window (public-data multi-hub valuation; no geometry
         // persistence in v1). Its non-window deps: a full-types name resolver (over
         // the SDE db) for the paste box, and the valuation calculator over the
-        // plan-53 price-source router.
+        // official-ESI price client (see the note below).
         services.AddSingleton<ISdeTypeNameResolver>(sp => new SqliteSdeTypeNameResolver(
             sdeDb, sp.GetRequiredService<ILogger<SqliteSdeTypeNameResolver>>()));
         // Haul Value prices via ESI DIRECTLY (not the price_source router): GoonMetrics
@@ -426,7 +452,7 @@ public static class ServiceRegistration
             sp.GetRequiredService<ILogger<HaulValueWindow>>()));
         services.AddSingleton<IHaulValueWindow, HaulValueWindowAdapter>();
 
-        // Plan 25: MainWindow factory captures the MainWindow-flavoured
+        // MainWindow factory captures the MainWindow-flavoured
         // WindowGeometryService (wired to Get/SetWindowGeometryAsync, default
         // 1280x800) inline so the type itself isn't auto-registered.
         services.AddSingleton<MainWindow>(sp => new MainWindow(

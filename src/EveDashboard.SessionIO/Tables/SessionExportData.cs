@@ -16,7 +16,7 @@ using EveDashboard.SessionIO.Json;
 /// <param name="SessionPilots">Every <c>session_pilot</c> row whose <c>session_id</c> matches the exported session.</param>
 /// <param name="Logs">Every <c>log</c> row whose <c>session_id</c> matches the exported session.</param>
 /// <param name="MarketStations">Every <c>market_stations</c> row referenced (by <c>station_id</c>) by the exported <see cref="MarketData"/> rows.</param>
-/// <param name="MarketData">Filtered subset of <c>market_data</c> per the plan-29 scope rule: for each <c>(type_id, station_id)</c> pair, the latest row where <c>fetched_at &lt;= session_end</c>.</param>
+/// <param name="MarketData">The exported session's own <c>market_data</c> rows (every row whose <c>session_id</c> matches); prices are session-bound, so no time-window scoping applies.</param>
 /// <remarks>
 /// Locally-autoincrement PK columns (<c>session_id</c>, <c>session_time_id</c>,
 /// <c>log_id</c>, <c>marketdata_id</c>) are serialised verbatim by the exporter
@@ -38,14 +38,18 @@ public sealed record SessionExportData(
 /// <param name="SessionId">Auto-generated PK in the source DB. Ignored on import (regenerated).</param>
 /// <param name="Name">Template-expanded session name as stored in <c>session.name</c>.</param>
 /// <param name="Notes">Free-form notes; nullable.</param>
+/// <param name="Archived">Mirror of <c>session.archived</c>. Absent from files written before the column existed — defaults to <c>false</c>. An imported archived session stays archived (hidden).</param>
+/// <param name="MergedInto">Mirror of <c>session.merged_into</c> — the combined session this one was folded into, or <c>null</c>. Carried verbatim; it may name a session the target store does not have (informational only, never dereferenced).</param>
 public sealed record SessionRow(
     [property: JsonConverter(typeof(FlexibleSessionIdJsonConverter))] string SessionId,
     string  Name,
-    string? Notes);
+    string? Notes,
+    bool    Archived = false,
+    string? MergedInto = null);
 
 /// <summary>One row from the <c>session_time</c> table.</summary>
 /// <param name="SessionTimeId">Auto-generated PK in the source DB. Ignored on import (regenerated).</param>
-/// <param name="SessionId">FK to the parent session. Rewritten on import to the new session id. Pre-plan-38 files carry an integer here; <see cref="FlexibleSessionIdJsonConverter"/> reads it as its decimal string so legacy exports still deserialise.</param>
+/// <param name="SessionId">FK to the parent session. Rewritten on import to the new session id. Legacy export files carry an integer here; <see cref="FlexibleSessionIdJsonConverter"/> reads it as its decimal string so legacy exports still deserialise.</param>
 /// <param name="StartTime">ISO-8601 UTC string. When this active interval (or pause) began.</param>
 /// <param name="StopTime">ISO-8601 UTC string. Null if this row is the still-open tail of a running session — saved sessions never have a null stop_time.</param>
 /// <param name="IsPause">0 = active interval, 1 = pause window. SQLite CHECK constrains to {0, 1}.</param>
@@ -66,7 +70,7 @@ public sealed record PilotRow(
 /// <summary>One row from the <c>session_pilot</c> association table.</summary>
 /// <param name="SessionId">FK to <c>session</c>. Rewritten on import to the new session id.</param>
 /// <param name="PilotId">FK to <c>pilot</c>. Preserved on import (stable EVE id).</param>
-/// <param name="Role">Plan 35: current fleet role string (Miner / Booster / Cyno / Combat). On import from a pre-plan-35 file the custom <c>JsonConverter</c> defaults missing values to <c>"Miner"</c>.</param>
+/// <param name="Role">Current fleet role string (Miner / Booster / Cyno / Combat). On import from a legacy file that lacks the field, the custom <c>JsonConverter</c> defaults missing values to <c>"Miner"</c>.</param>
 public sealed record SessionPilotRow(
     string SessionId,
     long   PilotId,
@@ -77,11 +81,11 @@ public sealed record SessionPilotRow(
 /// <param name="SessionId">FK to <c>session</c>. Rewritten on import to the new session id.</param>
 /// <param name="PilotId">FK to <c>pilot</c>. Preserved on import (stable EVE id).</param>
 /// <param name="EveTimestamp">ISO-8601 UTC string from EVE's <c>[YYYY.MM.DD HH:MM:SS]</c> log line prefix.</param>
-/// <param name="EventKind">One of <c>Tick</c> / <c>Crit</c> / <c>Residue</c> / <c>Depleted</c> per session-schema.md CHECK.</param>
+/// <param name="EventKind">One of <c>Tick</c> / <c>Crit</c> / <c>Residue</c> / <c>Depleted</c> per the <c>log.event_kind</c> CHECK constraint.</param>
 /// <param name="TypeId">Source ore/material type id. Null for <c>Residue</c> and <c>Depleted</c> rows; non-null for <c>Tick</c> and <c>Crit</c>.</param>
 /// <param name="Units">Raw count from the log line. Null for <c>Depleted</c>.</param>
 /// <param name="VolumeM3">Denormalised <c>units * volume_per_unit</c> at write time. Null for <c>Residue</c> (no type_id) and <c>Depleted</c>.</param>
-/// <param name="Role">Plan 35: event-time fleet role (Miner / Booster / Cyno / Combat). On import from a pre-plan-35 file the custom <c>JsonConverter</c> defaults missing values to <c>"Miner"</c>.</param>
+/// <param name="Role">Event-time fleet role (Miner / Booster / Cyno / Combat). On import from a legacy file that lacks the field, the custom <c>JsonConverter</c> defaults missing values to <c>"Miner"</c>.</param>
 public sealed record LogRow(
     long    LogId,
     string  SessionId,
@@ -110,7 +114,7 @@ public sealed record MarketStationRow(
 /// <param name="MarketDataId">Auto-generated PK in the source DB. Ignored on import (regenerated).</param>
 /// <param name="TypeId">EVE inventory type id. Informational FK to the SDE; not enforced (cross-DB).</param>
 /// <param name="StationId">FK to <c>market_stations.station_id</c>. Preserved on import (stable EVE id).</param>
-/// <param name="SessionId">Plan 38: owning session's sha256 id. On export it is the session being exported; on import it is rewritten to the (declared or computed) session id.</param>
+/// <param name="SessionId">Owning session's sha256 id. On export it is the session being exported; on import it is rewritten to the (declared or computed) session id.</param>
 /// <param name="FetchedAt">ISO-8601 UTC string. When the price was fetched from GoonMetrics.</param>
 /// <param name="IskBuy">Highest buy order. Null when GoonMetrics did not return a buy side.</param>
 /// <param name="IskSell">Lowest sell order. Null when GoonMetrics did not return a sell side.</param>

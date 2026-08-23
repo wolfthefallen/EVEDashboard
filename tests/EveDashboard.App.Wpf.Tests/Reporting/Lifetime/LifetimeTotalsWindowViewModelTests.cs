@@ -9,7 +9,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 51: unit tests for <see cref="LifetimeTotalsWindowViewModel"/>. Covers
+/// Unit tests for <see cref="LifetimeTotalsWindowViewModel"/>. Covers
 /// the refresh-from-query population, the dispose-and-rebuild on re-refresh, and
 /// the swallow-and-keep-prior behaviour on a query failure.
 /// </summary>
@@ -84,7 +84,7 @@ public class LifetimeTotalsWindowViewModelTests
         public Func<Task<SessionsReport>> OnGetAll { get; set; } =
             () => Task.FromResult(new SessionsReport(Array.Empty<SessionSummaryRow>(), LifetimeSummary.Empty));
 
-        public Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default) => OnGetAll();
+        public Task<SessionsReport> GetAllSessionSummariesAsync(bool includeArchived = false, CancellationToken ct = default) => OnGetAll();
 
         public Task<IReadOnlyList<PilotSummaryRow>> GetPilotsForSessionAsync(string sessionId, CancellationToken ct = default) =>
             throw new NotImplementedException();

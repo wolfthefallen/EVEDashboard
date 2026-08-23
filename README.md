@@ -10,12 +10,21 @@ automation, no account login, no interaction with the game client.
 ## What it does
 
 - **Live mining tracker** - mining ticks appear on screen about a second after EVE writes them.
-- **Per-pilot stats** - units mined, volume (m3), ISK value, and ISK/hour for every character
-  in your fleet.
+- **Per-pilot stats** - volume mined (total m3 and m3/sec), ISK value, ISK/hour, crit stats, and
+  refined output for every character in your fleet.
 - **ISK valuations** - converts your ore to refined materials and prices it against Jita (or a
   station you choose) using public market data.
-- **Sessions** - group your mining into named sessions you can start, pause, resume, and stop.
-- **Reports & export** - review saved sessions and export them to JSON or Excel.
+- **Sessions** - group your mining into named sessions you can start, pause, continue, and stop.
+  Idle sessions auto-pause, and the first new mining tick auto-resumes them.
+- **Fleets & roles** - save fleets of pilots with roles (Miner / Booster / Cyno / Combat) and
+  start sessions from them.
+- **Reports & export** - review saved sessions, compare them, see lifetime totals, and export
+  them to JSON or Excel.
+- **Haul Value** - paste an EVE inventory (or pick saved sessions) and see what it is worth at
+  each of your market stations.
+- **Build from history** - forgot to press Start? Build a session from a past date/time window
+  straight from your gamelogs, or combine saved sessions into one. The originals are archived,
+  never deleted, and nothing is ever counted twice.
 - **A normal window** - size and dock it however you like (works great with FancyZones on an
   ultrawide). It is not an overlay and is never forced on top.
 
@@ -46,8 +55,9 @@ EVE Dashboard is built to be private:
 - It **never uploads your data**, never logs into your EVE account, and never sends anything
   about you anywhere.
 - The only network traffic is **read-only public data**: current market prices (from the
-  GoonMetrics API), EVE's Static Data Export (from everef.net), and a check against the public
-  GitHub Releases API on launch to see if a newer version is out. None of it is personal.
+  GoonMetrics API by default, or CCP's public ESI if you select it in Settings - neither needs
+  a login), EVE's Static Data Export (from everef.net), and a check against the public GitHub
+  Releases API on launch to see if a newer version is out. None of it is personal.
 
 ## Is this allowed? (EVE Online ToS)
 

@@ -6,7 +6,7 @@ using EveDashboard.Reporting.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 51: VM for the standalone Lifetime Totals window. Owns the reusable
+/// VM for the standalone Lifetime Totals window. Owns the reusable
 /// <see cref="LifetimeSummaryViewModel"/> widget VM and re-fetches the all-time
 /// rollup (<see cref="IReportingQueries.GetAllSessionSummariesAsync"/>) on every
 /// window show so the totals reflect sessions mined / imported / deleted while
@@ -64,7 +64,7 @@ public sealed partial class LifetimeTotalsWindowViewModel : ObservableObject, ID
     {
         try
         {
-            var report = await _queries.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
+            var report = await _queries.GetAllSessionSummariesAsync(ct: ct).ConfigureAwait(true);
             var fresh = new LifetimeSummaryViewModel(report.Lifetime, _settings);
             var old = Summary;
             Summary = fresh;
