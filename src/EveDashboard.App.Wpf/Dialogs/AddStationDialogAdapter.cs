@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// and returns the dialog's <see cref="AddStationDialog.Result"/>.
 /// </summary>
 /// <remarks>
-/// Per plan 22.1 decision 22.L: takes <see cref="IServiceProvider"/> so the
+/// Takes <see cref="IServiceProvider"/> so the
 /// container can compose the dialog with its ViewModel rather than the adapter
 /// hand-wiring construction.
 /// </remarks>

@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Widgets.StatConfig;
 
 /// <summary>
-/// Plan 43: one visible row in a live widget's "Refined output" section — the
+/// One visible row in a live widget's "Refined output" section — the
 /// refined material's display name and its yield-applied running quantity.
 /// Immutable; the section rebuilds its row collection on each merge.
 /// </summary>

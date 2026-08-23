@@ -5,7 +5,7 @@
         ResizeMode="CanResize"
         Background="{DynamicResource BackgroundBrush}">
     <!--
-        Plan 35: Row 0 holds the anomaly-picker ComboBox; Row 1 holds the
+        Row 0 holds the anomaly-picker ComboBox; Row 1 holds the
         Image. ItemsSource = VM.Entries; SelectedItem two-way bound to
         VM.SelectedEntry; the Image's Source binds to the selected entry's
         ImagePackUri so swapping the dropdown selection updates the image
@@ -13,7 +13,7 @@
 
         Initial size + position come from WindowGeometryService (default
         900x650 centered on first launch; persisted thereafter via
-        crystal_diagram_window_geometry — Bug 1). Stretch="Uniform" makes
+        crystal_diagram_window_geometry). Stretch="Uniform" makes
         the Image scale proportionally inside the row's allocated area on
         every resize (drag-resize AND FancyZones snap-resize).
     -->

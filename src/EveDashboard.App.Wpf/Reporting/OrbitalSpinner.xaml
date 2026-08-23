@@ -4,7 +4,7 @@
              Background="Transparent"
              IsHitTestVisible="False">
     <!--
-        Plan 34 (revised): mining-barge orbital loading spinner. The asteroid
+        Mining-barge orbital loading spinner. The asteroid
         is static in the centre; an outer Grid wraps the ship and is rotated
         0 -> 360 degrees by a Storyboard. Because the ship's TranslateTransform
         offsets it within the orbiting Grid's local coordinate space, the ship

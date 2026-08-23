@@ -171,7 +171,7 @@ public class StatConfigPopupViewModelTests
     [Fact]
     public void Generated_command_properties_match_the_names_XAML_binds_to()
     {
-        // Regression test for BUGS.md Bug 1 (2026-05-05): the popup XAML binds
+        // Regression test for a dead-button bug (2026-05-05): the popup XAML binds
         // to ApplyCommand / LoadCommand / CloseCommand. CommunityToolkit.Mvvm's
         // [RelayCommand] source generator strips the `Async` suffix from method
         // names, so [RelayCommand] async Task ApplyAsync() emits a property

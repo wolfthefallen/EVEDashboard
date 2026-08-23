@@ -8,7 +8,7 @@ using EveDashboard.App.Wpf.Services;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 52: modeless, singleton, hide-on-close About window (mirrors
+/// Modeless, singleton, hide-on-close About window (mirrors
 /// <see cref="CrystalDiagramWindow"/> / <see cref="Reporting.Lifetime.LifetimeTotalsWindow"/>)
 /// so the restored geometry survives in-session open/close cycles. Shows the app
 /// version (with a clickable GitHub link), the SDE snapshot date, three thank-you

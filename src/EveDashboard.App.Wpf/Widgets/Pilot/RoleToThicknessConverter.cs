@@ -6,10 +6,10 @@ using System.Windows.Data;
 using EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Plan 35: maps a <see cref="PilotRole"/> to the widget border thickness.
+/// Maps a <see cref="PilotRole"/> to the widget border thickness.
 /// Miner pilots keep the default <c>1</c>-pixel chrome; non-Miner roles get
 /// <c>2</c> pixels so the role color reads clearly without dominating the
-/// layout (decision baked silently during alignment).
+/// layout.
 /// </summary>
 public sealed class RoleToThicknessConverter : IValueConverter
 {

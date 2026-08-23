@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
 /// PerPilotWidgetViewModel test workhorse - covers ctor null-args, ApplyStats
-/// field copy, ISK stub assertion (per <c>MEMORY.md -&gt; feedback_no_test_shimming</c>),
+/// field copy, the zero-ISK stub assertion (asserts the real zero the stub returns),
 /// the no-op RefreshAsync override, and the LastUpdated stamp.
 /// </summary>
 public class PerPilotWidgetViewModelTests
@@ -177,7 +177,8 @@ public class PerPilotWidgetViewModelTests
     [Fact]
     public void ApplyStats_shows_refined_output_then_clears_it_on_an_empty_new_session_snapshot()
     {
-        // Bug 1 (2026-06-18) belt-and-suspenders for the per-pilot path. In
+        // Belt-and-suspenders for the per-pilot path of the refined-output
+        // clear-on-new-session fix. In
         // production the coordinator recreates per-pilot VMs per session, so this
         // could not be reproduced from the source; this locks in that the shared
         // base-class fix also resets a reused instance when a new session's first

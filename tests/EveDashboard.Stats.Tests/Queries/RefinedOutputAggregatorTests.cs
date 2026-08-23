@@ -4,7 +4,7 @@ using EveDashboard.Stats.Queries;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 46: unit tests for <see cref="RefinedOutputAggregator.SumAcross"/> — the
+/// Unit tests for <see cref="RefinedOutputAggregator.SumAcross"/> — the
 /// single source of the per-material refined sum+sort shared by the compare view
 /// and the empty-state lifetime rollup.
 /// </summary>

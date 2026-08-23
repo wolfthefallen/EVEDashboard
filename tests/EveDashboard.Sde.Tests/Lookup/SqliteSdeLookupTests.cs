@@ -48,7 +48,7 @@ public class SqliteSdeLookupTests
             (34,       18, 'Tritanium',     0.01,   100, 0),
             (16637,    -1, 'Tungsten',      0.01,     1, 0);
 
-        -- Plan 18: type_materials seed.
+        -- type_materials seed.
         --   Veldspar  -> 415 Tritanium per portion
         --   Bitumens  -> 100 Tungsten + 50 Tritanium per portion
         --   Glacial Mass refines (intentionally absent — exercises empty-list path for an ore)
@@ -221,7 +221,7 @@ public class SqliteSdeLookupTests
         act.Should().Throw<ArgumentNullException>();
     }
 
-    // ---- Plan 18: type_materials surface --------------------------------------------
+    // ---- type_materials surface -----------------------------------------------------
 
     [Fact]
     public async Task GetTypeMaterials_returns_expected_materials_for_an_ore_type()
@@ -301,7 +301,7 @@ public class SqliteSdeLookupTests
         refined.Should().BeEquivalentTo(new long[] { 34L, 16637L });
     }
 
-    // ---- Plan 43: TryGetRefinedMaterialName ------------------------------------------
+    // ---- TryGetRefinedMaterialName ---------------------------------------------------
 
     [Fact]
     public async Task TryGetRefinedMaterialName_resolves_name_from_material_types_row()

@@ -4,8 +4,8 @@ using EveDashboard.Core.Domain;
 
 /// <summary>
 /// Single-method consumer interface for parsed <see cref="MiningEvent"/>
-/// records. The watcher (plan 12, in <c>EveDashboard.Mining.Realtime</c>) pushes
-/// events through this; the writer (plan 12, in <c>EveDashboard.Stats.Writer</c>)
+/// records. The watcher (in <c>EveDashboard.Mining.Realtime</c>) pushes
+/// events through this; the writer (in <c>EveDashboard.Stats.Writer</c>)
 /// implements it. Decoupling via this interface keeps
 /// <c>EveDashboard.Mining</c> off any reference to <c>EveDashboard.Stats</c>.
 /// </summary>

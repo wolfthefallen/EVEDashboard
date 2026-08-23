@@ -13,11 +13,11 @@ internal static class JsonSerializerOptionsFactory
 {
     /// <summary>The shared options instance.</summary>
     /// <remarks>
-    /// Plan 35: registers <see cref="LogRowJsonConverter"/> and
-    /// <see cref="SessionPilotRowJsonConverter"/> so pre-plan-35 JSON files
+    /// Registers <see cref="LogRowJsonConverter"/> and
+    /// <see cref="SessionPilotRowJsonConverter"/> so older JSON files
     /// (which lack the <c>role</c> field on log + session_pilot rows) import
-    /// cleanly with missing values defaulted to <c>"Miner"</c>. Post-plan-35
-    /// files round-trip lossless.
+    /// cleanly with missing values defaulted to <c>"Miner"</c>. Files that
+    /// carry the field round-trip lossless.
     /// </remarks>
     public static readonly JsonSerializerOptions Default = CreateDefault();
 

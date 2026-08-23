@@ -3,7 +3,7 @@ namespace EveDashboard.Core.Sessions;
 /// <summary>
 /// A saved, reusable fleet: a named preset of pilots, each pre-assigned a
 /// <see cref="PilotRole"/>. A fleet is the only way to start a mining session
-/// (plan 42) — at Start its <see cref="Members"/> roles are written verbatim
+/// — at Start its <see cref="Members"/> roles are written verbatim
 /// into the session's <c>session_pilot</c> rows.
 /// </summary>
 /// <param name="FleetId">Content-addressed id from <see cref="Sessions.FleetId.Compute"/> (sha256 of name + sorted members).</param>

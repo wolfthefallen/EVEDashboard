@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// One row inside the cog popup's editable working copy (plan 20). Carries
+/// One row inside the cog popup's editable working copy. Carries
 /// the user's edits for hide / emphasis until they click <c>Apply</c>; on
 /// Apply the popup VM projects the working copy into a
 /// <see cref="WidgetStatsConfig"/> and writes via the settings repository.

@@ -6,7 +6,7 @@ using System.Windows;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 55: modeless, singleton, hide-on-close Haul Value window. Prices a haul
+/// Modeless, singleton, hide-on-close Haul Value window. Prices a haul
 /// (pasted item list or a saved session's refined output) across every station in
 /// the market catalog and shows where it is worth the most.
 /// </summary>

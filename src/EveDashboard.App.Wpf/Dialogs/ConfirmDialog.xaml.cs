@@ -4,9 +4,8 @@ using System.Windows;
 
 /// <summary>
 /// Themed modal confirm dialog. Title, body text, and the confirm- and
-/// cancel-button labels are supplied at construction time. Plan 29
-/// generalisation of the plan-16 stop-confirm dialog; plan 41 added the
-/// caller-supplied cancel label (for a Yes/No prompt).
+/// cancel-button labels are supplied at construction time, so one window
+/// serves every "are you sure?" flow in the app, including Yes/No prompts.
 /// </summary>
 /// <remarks>
 /// Production callers go through <see cref="IConfirmDialog"/> +

@@ -4,7 +4,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Plan 55: production <see cref="IHaulValueWindow"/> implementation. Holds a
+/// Production <see cref="IHaulValueWindow"/> implementation. Holds a
 /// single <see cref="HaulValueWindow"/> for the app lifetime; subsequent
 /// <see cref="Show"/> calls re-show / bring-to-front the same instance.
 /// </summary>

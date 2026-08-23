@@ -8,13 +8,13 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Default <see cref="IFleetRepository"/> implementation backed by an injected
 /// <see cref="ISqliteDatabase"/>. Owns the <c>fleet</c> / <c>fleet_pilot</c>
-/// tables; pilot names are reused from the existing <c>pilot</c> table
-/// (plan 42). Holds no mutable state — safe to register as a singleton alongside
+/// tables; pilot names are reused from the existing <c>pilot</c> table.
+/// Holds no mutable state — safe to register as a singleton alongside
 /// the singleton session <see cref="ISqliteDatabase"/>.
 /// </summary>
 public sealed class SqliteFleetRepository : IFleetRepository
 {
-    /// <summary>ISO-8601 UTC millisecond format, matching <c>session_time.start_time</c> (no shared helper yet — CLEANUP 2.1).</summary>
+    /// <summary>ISO-8601 UTC millisecond format, matching <c>session_time.start_time</c> (duplicated locally; no shared formatting helper exists yet).</summary>
     private const string IsoUtcFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
     private readonly ISqliteDatabase _db;
@@ -68,7 +68,7 @@ public sealed class SqliteFleetRepository : IFleetRepository
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(members);
 
-        // Decision 3.4 = A: trim once; the trimmed name feeds the hash, the
+        // Trim once; the trimmed name feeds the hash, the
         // uniqueness check, and the stored row so all three agree.
         var trimmed = name.Trim();
         var fleetId = FleetId.Compute(trimmed, members.Select(m => (m.PilotId, m.Role)).ToList());
@@ -76,8 +76,8 @@ public sealed class SqliteFleetRepository : IFleetRepository
 
         var result = await _db.WithTransactionAsync<FleetCreateResult>(async (tx, _) =>
         {
-            // Decision 2.4 = B: reject a duplicate display name. No separate
-            // id-existence check (decision 3.1 = A) — an identical id implies an
+            // Reject a duplicate display name. No separate
+            // id-existence check — an identical id implies an
             // identical name, already caught here. On a duplicate the body simply
             // returns without writing — WithTransactionAsync COMMITs an empty
             // transaction (no rows changed), equivalent to the old explicit ROLLBACK.

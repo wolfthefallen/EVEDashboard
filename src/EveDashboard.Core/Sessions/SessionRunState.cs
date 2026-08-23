@@ -4,9 +4,9 @@ namespace EveDashboard.Core.Sessions;
 /// The runtime state of the currently-selected mining session.
 /// </summary>
 /// <remarks>
-/// Read by the session-event writer (plan 12) on every parsed event to decide
-/// whether to enqueue or drop. Mutated by the session-controls UI (a
-/// v1-backlog plan) in response to user actions on Start / Pause / Resume / End.
+/// Read by the session-event writer on every parsed event to decide
+/// whether to enqueue or drop. Mutated by the session controller in
+/// response to user actions on Start / Pause / Resume / End.
 /// </remarks>
 public enum SessionRunState
 {

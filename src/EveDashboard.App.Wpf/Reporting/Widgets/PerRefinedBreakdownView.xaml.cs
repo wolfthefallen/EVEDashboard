@@ -5,7 +5,7 @@ using System.Windows.Input;
 using EveDashboard.App.Wpf.Reporting.Compare;
 using EveDashboard.App.Wpf.Widgets;
 
-/// <summary>Code-behind for the PerRefinedBreakdown widget (plan 43). The wheel-forwarding handler delegates to <see cref="DataGridWheelForwarder"/> (shared with the other Reports DataGrid views); plan 47 wires column-width persistence via <see cref="DataGridColumnWidthBinder"/>.</summary>
+/// <summary>Code-behind for the PerRefinedBreakdown widget. The wheel-forwarding handler delegates to <see cref="DataGridWheelForwarder"/> (shared with the other Reports DataGrid views); column-width persistence is wired via <see cref="DataGridColumnWidthBinder"/>.</summary>
 public partial class PerRefinedBreakdownView : WidgetBase
 {
     private DataGridColumnWidthBinder? _widthBinder;
@@ -20,7 +20,7 @@ public partial class PerRefinedBreakdownView : WidgetBase
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Plan 47: restore + persist the refined-table column widths (per type, key "refined").
+        // Restore + persist the refined-table column widths (per type, key "refined").
         if (_widthBinder is null && DataContext is IColumnWidthStore store)
         {
             _widthBinder = await DataGridColumnWidthBinder.AttachAsync(RefinedGrid, "refined", store);

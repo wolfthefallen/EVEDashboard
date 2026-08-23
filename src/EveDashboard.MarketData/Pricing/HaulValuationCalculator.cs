@@ -34,8 +34,9 @@ public sealed record HaulValuation(PriceMode PriceMode, IReadOnlyList<StationHau
 /// <summary>
 /// Values a haul (a set of type-id + quantity lines) across several market
 /// stations at once, so the user can see where it is worth the most. Calls the
-/// <see cref="IMarketPriceClient"/> directly (respecting the user's selected
-/// price source) — it does NOT go through the session-bound, throttled fetcher,
+/// <see cref="IMarketPriceClient"/> it is constructed with directly (the app wires
+/// the official ESI client, independent of the live-session price source, because
+/// GoonMetrics only serves Jita) — it does NOT go through the session-bound, throttled fetcher,
 /// so an ad-hoc appraisal never writes to <c>market_data</c> or pollutes a
 /// session's price history.
 /// </summary>
@@ -43,7 +44,7 @@ public sealed class HaulValuationCalculator
 {
     private readonly IMarketPriceClient _client;
 
-    /// <summary>Construct the calculator over a price client (typically the plan-53 router).</summary>
+    /// <summary>Construct the calculator over a price client (the app passes the <see cref="EsiMarketPriceClient"/> so every empire hub resolves).</summary>
     /// <param name="client">Price client used to fetch per-station prices.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="client"/> is null.</exception>
     public HaulValuationCalculator(IMarketPriceClient client)

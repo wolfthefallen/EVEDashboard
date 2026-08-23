@@ -8,7 +8,7 @@ namespace EveDashboard.Core.Configuration;
 /// <remarks>
 /// The private parameterless constructor is what makes the hierarchy closed:
 /// only nested types within <see cref="BootstrapConfigResult"/> can call it,
-/// so external assemblies cannot introduce a fourth case. Plan 16's startup
+/// so external assemblies cannot introduce a fourth case. The app startup
 /// chain pattern-matches against the three cases exhaustively.
 /// </remarks>
 public abstract record BootstrapConfigResult
@@ -19,7 +19,7 @@ public abstract record BootstrapConfigResult
     /// <c>config.yaml</c> existed and parsed cleanly with a non-empty
     /// <c>gamelog_path</c> value. The path may or may not exist on disk;
     /// downstream code (<c>EveDashboard.Mining.Gamelogs.GamelogDiscoveryService</c>
-    /// or plan 16's startup) validates and surfaces a popup if missing.
+    /// or the app startup chain) validates and surfaces a popup if missing.
     /// </summary>
     /// <param name="GamelogPath">The path read from the file, after env-var expansion via <see cref="System.Environment.ExpandEnvironmentVariables(string)"/>.</param>
     public sealed record Loaded(string GamelogPath) : BootstrapConfigResult;
@@ -34,8 +34,8 @@ public abstract record BootstrapConfigResult
 
     /// <summary>
     /// <c>config.yaml</c> did not exist AND the autodetect directory does
-    /// not exist on disk. Plan 16 surfaces a "where are your gamelogs?"
-    /// popup. The loader has already logged this at <c>Error</c>.
+    /// not exist on disk. The app startup chain surfaces a "where are your
+    /// gamelogs?" popup. The loader has already logged this at <c>Error</c>.
     /// </summary>
     /// <param name="AttemptedPath">The path the loader tried to find. Useful in the popup so the user sees what was looked for.</param>
     public sealed record AutodetectFailed(string AttemptedPath) : BootstrapConfigResult;

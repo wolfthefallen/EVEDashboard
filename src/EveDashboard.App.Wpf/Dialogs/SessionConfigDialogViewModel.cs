@@ -11,7 +11,7 @@ using EveDashboard.Core.Settings;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// ViewModel behind the <see cref="SessionConfigDialog"/> (plan 42). Owns the
+/// ViewModel behind the <see cref="SessionConfigDialog"/>. Owns the
 /// fleet list (single-select, with a caret expander and right-click Make-default
 /// / Delete), the Create-Fleet flow (a sortable pilot picker with per-pilot role
 /// dropdowns, then an inline confirm/name panel), and the Start command. A fleet
@@ -119,7 +119,7 @@ public sealed partial class SessionConfigDialogViewModel : ObservableObject, IDi
     /// <summary>The pilot picker rows (checkbox + role dropdown each), rebuilt when the sort changes.</summary>
     public ObservableCollection<PilotToggleViewModel> PilotPicker { get; } = new();
 
-    /// <summary>The four sort options for the picker's Sort-by dropdown (decision 1.6 = A).</summary>
+    /// <summary>The four sort options for the picker's Sort-by dropdown.</summary>
     public IReadOnlyList<PilotSortOrder> SortOptions { get; } = new[]
     {
         PilotSortOrder.LastActiveNewest,
@@ -128,7 +128,7 @@ public sealed partial class SessionConfigDialogViewModel : ObservableObject, IDi
         PilotSortOrder.NameDesc,
     };
 
-    /// <summary>The picker's current sort order. Persisted on change (decision 1.7 = A).</summary>
+    /// <summary>The picker's current sort order. Persisted on change.</summary>
     [ObservableProperty]
     private PilotSortOrder _sortOrder = PilotSortOrder.LastActiveNewest;
 

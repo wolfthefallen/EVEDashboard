@@ -9,12 +9,12 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Unit tests for <see cref="SettingsDialogViewModel"/> (plan 22.1 + 22.2).
+/// Unit tests for <see cref="SettingsDialogViewModel"/>.
 /// Covers Load, Apply success path, Apply validation failure (yield + path),
-/// markets pending Add/Remove flush semantics (decision 22.K), dirty flag
-/// tracking (decision 1.8 = B), and plan 22.2's bootstrap-failure-mode
-/// branches: gated LoadAsync (decision 22.T), gated ApplyAsync with retry-once
-/// on save failure (decision 2.4 = B), <see cref="SettingsDialogViewModel.IsBootstrapFailureMode"/>,
+/// markets pending Add/Remove flush semantics (edits reach the catalog only
+/// on Apply), dirty flag tracking, and the bootstrap-failure-mode
+/// branches: gated LoadAsync, gated ApplyAsync with retry-once
+/// on save failure, <see cref="SettingsDialogViewModel.IsBootstrapFailureMode"/>,
 /// <see cref="SettingsDialogViewModel.BannerMessage"/>, and the
 /// <c>BootstrapApplySucceeded</c> event.
 /// </summary>
@@ -478,7 +478,7 @@ public class SettingsDialogViewModelTests
         vm.SelectedStationId.Should().BeOneOf(Jita.StationId, 0L);
     }
 
-    /* ---------- Plan 22.2: bootstrap-failure mode ---------- */
+    /* ---------- Bootstrap-failure mode ---------- */
 
     [Fact]
     public void IsBootstrapFailureMode_is_false_in_normal_mode()

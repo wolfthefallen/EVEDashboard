@@ -7,7 +7,7 @@ using EveDashboard.Core.Sessions;
 /// <summary>
 /// One row of the fleet-builder pilot picker — a <see cref="Character"/> plus a
 /// togglable <see cref="IsSelected"/> bool and a selectable <see cref="Role"/>
-/// (plan 42; the picker lives in the New Session dialog).
+/// (the picker lives in the New Session dialog).
 /// </summary>
 public sealed partial class PilotToggleViewModel : ObservableObject
 {

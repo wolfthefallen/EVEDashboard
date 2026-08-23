@@ -8,7 +8,7 @@ using FluentAssertions;
 
 /// <summary>
 /// Reflection-grounded tests that the real widget VM types declare the
-/// expected <see cref="StatRowAttribute"/> set (plan 20). These tests guard
+/// expected <see cref="StatRowAttribute"/> set. These tests guard
 /// against accidentally dropping or misordering an attribute when the VMs
 /// are edited.
 /// </summary>
@@ -20,7 +20,7 @@ public class StatRowAttributeReflectionTests
         var resolution = StatRowsBuilder.Resolve(typeof(PerPilotWidgetViewModel), saved: null);
 
         resolution.Reorderable.Should().HaveCount(8);
-        // Plan 35: [StatRow("Pilot",...)] moved from PilotName to DisplayName so the header
+        // [StatRow("Pilot",...)] lives on DisplayName (not PilotName) so the header
         // line updates live when the role changes ("PilotName" -> "PilotName [Booster]").
         resolution.Reorderable.Select(r => r.Key).Should().Equal(
             "DisplayName",
@@ -39,7 +39,7 @@ public class StatRowAttributeReflectionTests
     [Fact]
     public void PerPilotWidgetViewModel_DisplayName_default_emphasis_is_Header0()
     {
-        // Plan 35: attribute moved from PilotName to DisplayName.
+        // The attribute lives on DisplayName, not PilotName.
         var resolution = StatRowsBuilder.Resolve(typeof(PerPilotWidgetViewModel), saved: null);
         var displayName = resolution.Reorderable.First(r => r.Key == "DisplayName");
 

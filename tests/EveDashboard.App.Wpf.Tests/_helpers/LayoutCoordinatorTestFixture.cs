@@ -8,10 +8,9 @@ using EveDashboard.Tests.Shared;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Real-but-isolated harness for <see cref="LayoutCoordinator"/> tests
-/// (plan 19; plan 24 added the SessionStats VM; the post-plan-25 follow-up
-/// removed the SessionConfig widget — it lives in a modal dialog now).
-/// Composes:
+/// Real-but-isolated harness for <see cref="LayoutCoordinator"/> tests.
+/// SessionConfig lives in a modal dialog rather than a widget, so no
+/// SessionConfig VM is composed here. Composes:
 /// <list type="bullet">
 /// <item><see cref="PerPilotWidgetTestFixture"/> — owns the per-pilot DB,
 ///   <c>ActiveSessionContext</c>, <c>FakeSessionEventNotifier</c>, and

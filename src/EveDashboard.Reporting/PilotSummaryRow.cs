@@ -9,7 +9,7 @@ namespace EveDashboard.Reporting;
 /// </summary>
 /// <param name="PilotId">EVE character id; matches <c>pilot.pilot_id</c> and the gamelog filename.</param>
 /// <param name="PilotName">EVE character display name.</param>
-/// <param name="Role">Plan 35: the pilot's current fleet role string (canonical: Miner / Booster / Cyno / Combat). Consumed by Excel Summary block.</param>
+/// <param name="Role">The pilot's current fleet role string (canonical: Miner / Booster / Cyno / Combat). Consumed by Excel Summary block.</param>
 public sealed record PilotSummaryRow(
     long   PilotId,
     string PilotName,

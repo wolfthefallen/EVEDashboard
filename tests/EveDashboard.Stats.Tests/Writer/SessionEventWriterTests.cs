@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Writer;
 
 /// <summary>
-/// Plan 12 writer tests: 9 tests covering the contract of
+/// Writer tests covering the contract of
 /// <see cref="SessionEventWriter"/> end-to-end against an in-memory SQLite
 /// with the canonical session schema applied.
 /// </summary>
@@ -298,8 +298,8 @@ public class SessionEventWriterTests
 
     /// <summary>
     /// Minimal <see cref="ISdeLookup"/> for writer tests. Returns a Veldspar-shaped
-    /// product for <see cref="VeldsparTypeId"/>, null otherwise. Plan 09 tests its
-    /// real implementation; the writer's responsibility is to multiply by
+    /// product for <see cref="VeldsparTypeId"/>, null otherwise. The SDE test
+    /// project covers the real implementation; the writer's responsibility is to multiply by
     /// <see cref="MiningProduct.VolumePerUnitM3"/> and we test that here.
     /// </summary>
     private sealed class FakeSdeLookup : ISdeLookup

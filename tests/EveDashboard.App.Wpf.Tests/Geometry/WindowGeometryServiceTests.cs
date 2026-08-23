@@ -6,13 +6,13 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Per plan 16 alignment 2.1 = C: drop apply-side tests (would require an STA
-/// Window construction); cover apply-side end-to-end via the manual test doc
-/// (<c>tests/manual/manual-tests.md</c> Section 1, step 9). Persistence-side
-/// is covered by the SessionController test fixture's stats round-trip.
+/// Apply-side (restore-onto-Window) behaviour is deliberately not unit-tested
+/// here: it would require constructing an STA Window, so it is covered by
+/// manual verification instead. Persistence-side is covered by the
+/// SessionController test fixture's stats round-trip.
 ///
-/// Plan 25 refactor: WindowGeometryService now takes read/write delegates
-/// instead of an ISettingsRepository. Tests construct via the delegate ctor.
+/// WindowGeometryService takes read/write delegates instead of an
+/// ISettingsRepository, so tests construct via the delegate ctor.
 /// </summary>
 public class WindowGeometryServiceTests
 {

@@ -11,7 +11,7 @@ using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Owns the lifecycle of the per-pilot widget collection (plan 17). Subscribes
+/// Owns the lifecycle of the per-pilot widget collection. Subscribes
 /// to <see cref="IActiveSessionContext.ActiveSessionChanged"/> to populate
 /// <see cref="Widgets"/> on session start, and to
 /// <see cref="ISessionEventNotifier.SessionEventAdded"/> to flip a dirty flag
@@ -20,13 +20,13 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per plan 17 decision 6.2 = A, the widget collection is NOT cleared on
+/// The widget collection is deliberately NOT cleared on
 /// session Stop - widgets remain visible with their final stats until the next
 /// session starts. On the next session start the collection is cleared and
 /// repopulated from the new <c>session_pilot</c> set.
 /// </para>
 /// <para>
-/// Per plan 17 decision 6.1 (corrected), the <c>session_pilot</c> set is fixed
+/// The <c>session_pilot</c> set is fixed
 /// at session Start; mid-session pilot adds are not supported. This coordinator
 /// enumerates pilots once at session-start time.
 /// </para>
@@ -54,9 +54,9 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
     private readonly ILogger<PerPilotWidgetCoordinator> _log;
 
     /// <summary>
-    /// Plan 35: callback that forwards a role change from a per-pilot widget
+    /// Callback that forwards a role change from a per-pilot widget
     /// to <c>SessionController.SetPilotRoleAsync</c>. Wired via a DI factory in
-    /// <c>ServiceRegistration.cs</c> (decision 2.3 cross = A) — the factory
+    /// <c>ServiceRegistration.cs</c> — the factory
     /// resolves <c>SessionController</c> lazily inside the delegate so the
     /// coordinator and controller singletons don't form a DI cycle.
     /// </summary>
@@ -76,8 +76,8 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
     /// <param name="statsRepo">Stats query layer; one call per dirty tick returns a session-wide snapshot.</param>
     /// <param name="notifier">Session-event notifier; flips the dirty flag on every new <c>log</c> row.</param>
     /// <param name="loggerFactory">Logger factory used to construct per-widget <see cref="ILogger{T}"/>s.</param>
-    /// <param name="settings">Settings repository (plan 20) — passed through to each per-pilot widget VM so it can subscribe to its <c>per_pilot_stats_config.&lt;PilotId&gt;</c> key.</param>
-    /// <param name="setPilotRoleCallback">Plan 35: forwards role-change requests from per-pilot widgets to <c>SessionController.SetPilotRoleAsync</c>. Wired via DI factory (decision 2.3 cross = A).</param>
+    /// <param name="settings">Settings repository — passed through to each per-pilot widget VM so it can subscribe to its <c>per_pilot_stats_config.&lt;PilotId&gt;</c> key.</param>
+    /// <param name="setPilotRoleCallback">Forwards role-change requests from per-pilot widgets to <c>SessionController.SetPilotRoleAsync</c>. Wired via DI factory so the coordinator and controller singletons don't form a DI cycle.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public PerPilotWidgetCoordinator(
         IActiveSessionContext activeSession,
@@ -141,7 +141,7 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
         if (state == SessionRunState.None || sid is null)
         {
             StopTickTimer();
-            // Per decision 6.2 = A: widgets remain visible with final stats. Do NOT clear.
+            // Widgets deliberately remain visible with final stats. Do NOT clear.
             return;
         }
 
@@ -152,7 +152,7 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
         }
 
         // Transition to a new active session: dispose existing per-pilot VMs (each
-        // subscribes to ISettingsRepository.SettingChanged per plan 20 — without
+        // subscribes to ISettingsRepository.SettingChanged — without
         // explicit Dispose the singleton repo's invocation list keeps the VMs
         // rooted indefinitely AND wrong-pilot rebuilds would still fire), then
         // clear and repopulate from session_pilot.
@@ -166,7 +166,7 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
 
         var rows = await _db.QueryAsync(
             EnumerateSessionPilotsSql,
-            // Plan 35: include sp.role so initialRole can flow to the new VM.
+            // Include sp.role so initialRole can flow to the new VM.
             r => (PilotId: r.GetInt64(0), Name: r.GetString(1), Role: r.GetString(2)),
             new Dictionary<string, object?> { ["$sid"] = sid });
 
@@ -182,7 +182,7 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
             Widgets.Add(new PerPilotWidgetViewModel(
                 row.PilotId,
                 row.Name,
-                // Plan 35: PilotRoleExtensions.Parse is strict-case against the four canonical
+                // PilotRoleExtensions.Parse is strict-case against the four canonical
                 // role strings; any other value throws (which would indicate corruption since
                 // the DB has a CHECK constraint).
                 PilotRoleExtensions.Parse(row.Role),
@@ -267,7 +267,7 @@ public sealed class PerPilotWidgetCoordinator : IDisposable
         }
     }
 
-    // Plan 35: sp.role added so the coordinator can pass initialRole to the VM at
+    // sp.role is selected so the coordinator can pass initialRole to the VM at
     // construction time (without this, the widget would briefly flash Miner before
     // the first stats snapshot updates Role).
     private const string EnumerateSessionPilotsSql = """

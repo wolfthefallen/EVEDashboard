@@ -2,7 +2,7 @@ namespace EveDashboard.App.Wpf.Dialogs;
 
 /// <summary>
 /// Identifies which <c>App.OnStartup</c> branch fired the bootstrap-failure
-/// re-route to the Settings dialog (plan 22.2 decision 22.O).
+/// re-route to the Settings dialog.
 /// </summary>
 /// <remarks>
 /// The three values map one-to-one to the three call sites in

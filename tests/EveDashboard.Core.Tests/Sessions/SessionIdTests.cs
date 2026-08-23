@@ -5,8 +5,8 @@ using FluentAssertions;
 using Xunit;
 
 /// <summary>
-/// Tests for <see cref="SessionId"/> — the content-addressed session id helper
-/// (plan 38). The recipe must be stable and identical across live creation,
+/// Tests for <see cref="SessionId"/> — the content-addressed session id helper.
+/// The recipe must be stable and identical across live creation,
 /// migration, and import, so these lock down determinism, format, the
 /// delimiter's collision-avoidance, the sentinel, and the validator.
 /// </summary>

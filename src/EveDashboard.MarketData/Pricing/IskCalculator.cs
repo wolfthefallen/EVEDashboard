@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// <see cref="IIskCalculator"/> implementing the canonical recursive
-/// reprocessing algorithm in <c>MEMORY.md -&gt; project_isk_calculation</c>.
+/// reprocessing algorithm: break each mined type down to base materials,
+/// apply the refining yield, price each material, and sum.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Steps (verbatim, from the canonical reference):
+/// Steps:
 /// <list type="number">
 ///   <item><description>Recursive reprocessing breakdown at 100% efficiency — accumulator keyed by base material type id.</description></item>
 ///   <item><description>Apply efficiency by SOURCE-item category. v1 only encounters ore (cat 25); gas has no <c>type_materials</c> so its accumulator entries are 0 already.</description></item>
@@ -21,7 +22,7 @@ using Microsoft.Extensions.Logging;
 /// </list>
 /// </para>
 /// <para>
-/// Plan 38: prices are session-bound and station-blind. The price read filters
+/// Prices are session-bound and station-blind. The price read filters
 /// on <c>session_id</c> + <c>type_id</c> only, so a session always reports the
 /// prices it captured, regardless of which station is selected now.
 /// <c>station_id</c> is fetch-target metadata (which hub to query) plus
@@ -34,18 +35,17 @@ using Microsoft.Extensions.Logging;
 /// with no usable price for the mode), throttled to one attempt per 15 minutes
 /// per session, so an already-priced material is never re-fetched. Reports /
 /// saved sessions pass <c>false</c> and never fetch. Any still-missing price
-/// contributes 0 ISK with a Warning log per the <c>docs/market-schema.md</c>
-/// "ISK gracefully degrades to 0" contract.
+/// contributes 0 ISK with a Warning log: ISK gracefully degrades to 0 rather
+/// than failing the whole calculation.
 /// </para>
 /// <para>
-/// Plan 25 algorithm refactor: the recursive breakdown runs INDEPENDENTLY per
-/// top-level input type id, with per-input accumulators rather than a single
-/// shared accumulator. This preserves per-input ISK contribution for the
-/// Reports per-ore breakdown widget (<see cref="IskCalculationResult.IskByInputType"/>).
-/// Floor rounding shifts from per-merged-material to per-(input, material);
-/// total ISK can drift by a sub-percent rounding amount vs. the prior
-/// implementation. Pre-release rule
-/// (<c>MEMORY.md -&gt; feedback_no_migrations_until_release</c>) accepts this.
+/// The recursive breakdown runs INDEPENDENTLY per top-level input type id,
+/// with per-input accumulators rather than a single shared accumulator. This
+/// preserves per-input ISK contribution for the Reports per-ore breakdown
+/// widget (<see cref="IskCalculationResult.IskByInputType"/>). Floor rounding
+/// is therefore applied per (input, material) rather than per merged material,
+/// so the total can differ from a merged-accumulator total by a sub-percent
+/// rounding amount; that drift is accepted in exchange for the per-input breakdown.
 /// </para>
 /// </remarks>
 public sealed class IskCalculator : IIskCalculator
@@ -122,10 +122,10 @@ public sealed class IskCalculator : IIskCalculator
         }
 
         // Step 1 — recursive reprocessing breakdown at 100% efficiency, ONE
-        // accumulator per top-level input type. Plan 25 refactor: preserves
-        // per-input contribution for the Reports per-ore widget. Plan 36: a
-        // parallel crit-only accumulator runs in lockstep when the caller
-        // supplied a non-empty critTypeIdToUnitsMined.
+        // accumulator per top-level input type, which preserves per-input
+        // contribution for the Reports per-ore widget. A parallel crit-only
+        // accumulator runs in lockstep when the caller supplied a non-empty
+        // critTypeIdToUnitsMined.
         var perInputAccumulator     = new Dictionary<long, Dictionary<long, long>>(typeIdToUnitsMined.Count);
         var perInputCritAccumulator = new Dictionary<long, Dictionary<long, long>>(typeIdToUnitsMined.Count);
         foreach (var kvp in typeIdToUnitsMined)
@@ -173,7 +173,7 @@ public sealed class IskCalculator : IIskCalculator
             return new IskCalculationResult(0.0, 0.0, emptyByInput);
         }
 
-        // Plan 38: only a LIVE session may fetch + persist missing prices.
+        // Only a LIVE session may fetch + persist missing prices.
         // Reports / saved sessions (allowLazyFetch == false) read whatever the
         // session already captured; a missing row contributes 0 (below).
         if (allowLazyFetch)
@@ -188,19 +188,19 @@ public sealed class IskCalculator : IIskCalculator
 
         // Steps 3 + 4 — multiply by price (weight = 1.0 in v1) and sum, per
         // input. Floor is applied per (input, material) pair; small rounding
-        // differences vs. a merged-accumulator approach are accepted (plan 25).
-        // Plan 36: the crit accumulator is processed in lockstep with the full
+        // differences vs. a merged-accumulator approach are accepted.
+        // The crit accumulator is processed in lockstep with the full
         // accumulator using the same priceCache so the price lookup is paid
         // exactly once per material across both totals.
         var totalIsk = 0.0;
         var critIsk  = 0.0;
         var iskByInputType = new Dictionary<long, double>(typeIdToUnitsMined.Count);
-        // Plan 43: yield-applied refined output, material type_id -> total units,
+        // Yield-applied refined output, material type_id -> total units,
         // summed across every input ore. Accumulated BEFORE the price gate so a
         // material with no captured price still reports its quantity (it just
         // contributes 0 ISK). Built from the FULL accumulator only (not crit).
         var refinedByMaterial = new Dictionary<long, long>();
-        // Plan 45: yield-applied ISK per refined material, accumulated in lockstep
+        // Yield-applied ISK per refined material, accumulated in lockstep
         // with the ISK total (only for priced materials), so it reconciles to
         // totalIsk exactly. Drives the Reports compare-view "Total Refined Output"
         // ISK column.
@@ -211,7 +211,7 @@ public sealed class IskCalculator : IIskCalculator
             var perInputIsk = 0.0;
             foreach (var (materialTypeId, rawQuantity) in inputAcc)
             {
-                // Plan 43: floor the yield-applied quantity once, up front, and
+                // Floor the yield-applied quantity once, up front, and
                 // record it (omit a material that floors to 0). This is the same
                 // floored value the ISK total uses, so quantity reconciles with ISK.
                 var adjustedQty = (long)Math.Floor(rawQuantity * oreEff);
@@ -228,10 +228,10 @@ public sealed class IskCalculator : IIskCalculator
                 }
                 if (price is null)
                 {
-                    continue;   // No price -> 0 ISK contribution per market-schema.md (quantity already recorded above).
+                    continue;   // No price -> 0 ISK contribution (quantity already recorded above).
                 }
                 perInputIsk += adjustedQty * price.Value;   // weight = 1.0 in v1.
-                // Plan 45: same priced amount, bucketed by material (summed across inputs).
+                // Same priced amount, bucketed by material (summed across inputs).
                 iskByMaterial[materialTypeId] =
                     iskByMaterial.GetValueOrDefault(materialTypeId) + adjustedQty * price.Value;
 
@@ -276,9 +276,9 @@ public sealed class IskCalculator : IIskCalculator
         var portionSize = _sdeLookup.TryGetProduct(typeId)?.PortionSize ?? 1;
         if (portionSize <= 0) portionSize = 1;
         var batches = quantity / portionSize;
-        // Leftover (= quantity % portionSize) intentionally dropped: per
-        // MEMORY.md -> project_isk_calculation, units below one full batch
-        // remain the original item and contribute 0 ISK in this project.
+        // Leftover (= quantity % portionSize) intentionally dropped: units
+        // below one full batch cannot be reprocessed, so they remain the
+        // original item and contribute 0 ISK.
         if (batches == 0)
         {
             return;
@@ -296,7 +296,7 @@ public sealed class IskCalculator : IIskCalculator
         PriceMode         priceMode,
         CancellationToken ct)
     {
-        // Plan 38 (amended): the price read is session-bound and STATION-BLIND.
+        // The price read is session-bound and STATION-BLIND.
         // A session owns its captured prices via session_id; station_id is
         // fetch-target metadata + provenance only, never a read filter. The
         // latest captured price for (session_id, type_id) wins — so a saved

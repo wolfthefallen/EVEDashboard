@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 47: unit tests for <see cref="StatEmphasisToFontWeightConverter"/>. Header0/1/2
+/// Unit tests for <see cref="StatEmphasisToFontWeightConverter"/>. Header0/1/2
 /// are Bold; None and Hero are Normal (matching the active-session emphasis rows).
 /// </summary>
 public class StatEmphasisToFontWeightConverterTests
@@ -49,7 +49,7 @@ public class StatEmphasisToFontWeightConverterTests
 }
 
 /// <summary>
-/// Plan 47: unit tests for <see cref="StatEmphasisToFontSizeConverter"/>. Verifies
+/// Unit tests for <see cref="StatEmphasisToFontSizeConverter"/>. Verifies
 /// the emphasis -&gt; size mapping and that None / non-emphasis values return
 /// <see cref="DependencyProperty.UnsetValue"/> so the bound element keeps its
 /// inherited (today's) size.

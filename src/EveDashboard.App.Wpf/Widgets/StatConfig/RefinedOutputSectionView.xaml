@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
     <!--
-        Plan 43: the live widget body's "Refined output" section. DataContext is
+        The live widget body's "Refined output" section. DataContext is
         the owning StatConfigurableWidgetViewModel; binds its RefinedOutput
         collection (already filtered to visible rows + sorted by quantity desc).
         Collapsed when empty so the section only appears once a material is

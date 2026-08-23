@@ -156,7 +156,7 @@ public class GamelogDiscoveryServiceTests
         act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
     }
 
-    /* ---------- Plan 23: Sort by file mtime descending ---------- */
+    /* ---------- Sort by file mtime descending ---------- */
 
     /// <summary>
     /// Build a temp directory with synthetic gamelog files for the sort tests.

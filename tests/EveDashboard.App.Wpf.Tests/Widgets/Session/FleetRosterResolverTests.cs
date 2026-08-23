@@ -6,8 +6,8 @@ using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 42 — <see cref="FleetRosterResolver.Resolve"/> pairs a fleet roster
-/// against a discovered-character snapshot at Start (decision 2.5 = A): matched
+/// <see cref="FleetRosterResolver.Resolve"/> pairs a fleet roster
+/// against a discovered-character snapshot at Start: matched
 /// ids resolve to (Character, role); unmatched ids are skipped.
 /// </summary>
 public class FleetRosterResolverTests

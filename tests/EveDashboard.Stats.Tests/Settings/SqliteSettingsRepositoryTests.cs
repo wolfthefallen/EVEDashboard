@@ -186,7 +186,7 @@ public class SqliteSettingsRepositoryTests
             e.Message.Contains("barter", StringComparison.Ordinal));
     }
 
-    // ---- PriceSource (plan 53) ----------------------------------------------------
+    // ---- PriceSource --------------------------------------------------------------
 
     [Fact]
     public async Task GetPriceSourceAsync_returns_goonmetrics_when_key_missing()
@@ -462,7 +462,7 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- WidgetLayout (plan 19) ---------------------------------------------------
+    // ---- WidgetLayout -------------------------------------------------------------
 
     [Fact]
     public async Task GetWidgetLayoutAsync_returns_null_when_key_missing()
@@ -503,8 +503,8 @@ public class SqliteSettingsRepositoryTests
     [Fact]
     public async Task GetWidgetLayoutAsync_returns_null_for_post_plan_25_removed_session_config_kind()
     {
-        // Post-plan-25 follow-up: WidgetDescriptor.SessionConfig was removed.
-        // Stale JSON with the now-removed "session_config" kind falls through
+        // WidgetDescriptor.SessionConfig was removed (session config became a
+        // dialog, not a widget). Stale JSON with the removed kind falls through
         // to the unknown-kind branch — repo logs Warning and returns null;
         // caller falls back to default layout.
         await using var db = await NewSchemaAsync();
@@ -524,10 +524,10 @@ public class SqliteSettingsRepositoryTests
     [Fact]
     public async Task GetWidgetLayoutAsync_returns_null_for_pre_plan_24_session_kind()
     {
-        // Plan 24 deleted WidgetDescriptor.Session; the old "session" kind discriminator
-        // is no longer registered. Per MEMORY.md -> feedback_no_migrations_until_release,
-        // stale JSON falls through unchanged: deserialize fails, repo logs Warning + returns null,
-        // caller falls back to default layout.
+        // WidgetDescriptor.Session was deleted; the old "session" kind discriminator
+        // is no longer registered. The accepted upgrade path is fall-back-to-default
+        // rather than a JSON migration: deserialize fails, repo logs Warning + returns
+        // null, caller falls back to default layout.
         await using var db = await NewSchemaAsync();
         await UpsertSettingAsync(db, "widget_layout",
             """{"items":[{"kind":"session","hidden":false}]}""");
@@ -616,12 +616,10 @@ public class SqliteSettingsRepositoryTests
             "SELECT key FROM setting ORDER BY key",
             r => r.GetString(0));
 
-        // schema_version is seeded by SchemaInitializer (plan 11); the repo
-        // defaults are theme / price_mode / refining_yield_percent /
-        // selected_station_id (plan 14), auto_pause_idle_minutes +
-        // auto_pause_sound_enabled (plan 37), auto_pause_sound_volume (plan 50),
-        // auto_show_refined_materials (plan 43), and show_pilot_refined_output
-        // (plan 49). window_geometry intentionally NOT seeded (round-2 3.1 = B).
+        // schema_version is seeded by SchemaInitializer; the repo seeds the
+        // remaining defaults asserted below. window_geometry is intentionally
+        // NOT seeded — a missing row means first launch keeps the default
+        // window placement.
         keys.Should().BeEquivalentTo(new[]
         {
             "auto_pause_idle_minutes",
@@ -676,7 +674,7 @@ public class SqliteSettingsRepositoryTests
         (await repo.GetThemeAsync()).Should().Be(ThemeMode.Dark);
     }
 
-    // ---- ReportsWindowGeometry (plan 25) ------------------------------------------
+    // ---- ReportsWindowGeometry ----------------------------------------------------
 
     [Fact]
     public async Task GetReportsWindowGeometryAsync_returns_null_when_key_missing()
@@ -810,7 +808,7 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- LifetimeTotalsWindowGeometry (plan 51) ----------------------------------
+    // ---- LifetimeTotalsWindowGeometry --------------------------------------------
 
     [Fact]
     public async Task GetLifetimeTotalsWindowGeometryAsync_returns_null_when_key_missing()
@@ -877,7 +875,7 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- AboutWindowGeometry (plan 52) --------------------------------------------
+    // ---- AboutWindowGeometry ------------------------------------------------------
 
     [Fact]
     public async Task GetAboutWindowGeometryAsync_returns_null_when_key_missing()
@@ -944,7 +942,7 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- CrystalDiagramSelectedAnomaly (plan 35) ----------------------------------
+    // ---- CrystalDiagramSelectedAnomaly --------------------------------------------
 
     [Fact]
     public async Task GetSelectedCrystalAnomalyAsync_returns_null_when_key_missing()
@@ -1006,7 +1004,7 @@ public class SqliteSettingsRepositoryTests
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- ReportsSidebarWidth (plan 25) --------------------------------------------
+    // ---- ReportsSidebarWidth ------------------------------------------------------
 
     [Fact]
     public async Task GetReportsSidebarWidthAsync_returns_null_when_key_missing()
@@ -1060,7 +1058,7 @@ public class SqliteSettingsRepositoryTests
         keys.Should().ContainSingle().Which.Should().Be("reports_sidebar_width");
     }
 
-    // ---- Reports column widths (plan 47) ------------------------------------------
+    // ---- Reports column widths ----------------------------------------------------
 
     [Fact]
     public async Task GetReportsColumnWidthsAsync_returns_null_when_key_missing()
@@ -1147,7 +1145,7 @@ public class SqliteSettingsRepositoryTests
         await nullSetVal.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- Reports text size (plan 47) ----------------------------------------------
+    // ---- Reports text size --------------------------------------------------------
 
     [Fact]
     public async Task GetReportsTextSizeAsync_returns_null_when_key_missing()
@@ -1241,7 +1239,7 @@ public class SqliteSettingsRepositoryTests
         await nullSetVal.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // ---- ShowPilotRefinedOutput (plan 49 / issue #1) ------------------------------
+    // ---- ShowPilotRefinedOutput (issue #1) ----------------------------------------
 
     [Fact]
     public async Task GetShowPilotRefinedOutputAsync_returns_true_when_key_missing()

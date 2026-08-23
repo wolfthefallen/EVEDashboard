@@ -7,10 +7,10 @@ using EveDashboard.Stats.Queries;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 36: unit tests for the decluttered compare-mode VM. Verifies the
+/// Unit tests for the decluttered compare-mode VM. Verifies the
 /// stacked session-name subheader, row counts/labels, totals/averages,
-/// corrected rate math (5.2 = C), divide-by-zero guards, and that rate rows
-/// have <c>null</c> Total cells (5.1 — Rates table has no Total column).
+/// rate math, divide-by-zero guards, and that rate rows
+/// have <c>null</c> Total cells (the Rates table has no Total column).
 /// </summary>
 public class CompareSessionViewModelTests
 {
@@ -25,7 +25,7 @@ public class CompareSessionViewModelTests
         double totalCritIsk = 0.0,
         double critIskPercent = 0.0) =>
         new(
-            // Plan 38: SessionStats.SessionId is a string id; the numeric arg is a
+            // SessionStats.SessionId is a string id; the numeric arg is a
             // convenient per-snapshot label for these compare-math tests.
             SessionId:          sessionId.ToString(System.Globalization.CultureInfo.InvariantCulture),
             TotalTimeMined:     TimeSpan.FromSeconds(totalSeconds),
@@ -41,7 +41,7 @@ public class CompareSessionViewModelTests
             CritChance:         0.0,
             ByCharacter:        ImmutableDictionary<long, CharacterStats>.Empty);
 
-    /// <summary>Plan 47: construct the VM with a throwaway settings fake (these tests exercise the compare math, not persistence).</summary>
+    /// <summary>Construct the VM with a throwaway settings fake (these tests exercise the compare math, not persistence).</summary>
     private static CompareSessionViewModel Vm(IReadOnlyList<SessionStats> snaps, IReadOnlyList<string> names) =>
         new(new FakeSettingsRepository(), snaps, names);
 
@@ -234,7 +234,7 @@ public class CompareSessionViewModelTests
             .Should().Be(15_000.ToString("N0", System.Globalization.CultureInfo.InvariantCulture));
     }
 
-    // ---- Plan 45: grand-total labels + Total Refined Output table ---------------
+    // ---- Grand-total labels + Total Refined Output table ------------------------
 
     [Fact]
     public void TotalTimeDisplay_and_TotalIskDisplay_render_union_totals()

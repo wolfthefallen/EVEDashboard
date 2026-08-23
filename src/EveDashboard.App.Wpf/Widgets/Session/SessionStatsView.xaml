@@ -7,13 +7,13 @@
                     xmlns:statconfig="clr-namespace:EveDashboard.App.Wpf.Widgets.StatConfig"
                     mc:Ignorable="d">
     <!--
-        Plan 20: replaced the previous header-TextBlocks + 7-row Grid with one
-        ItemsControl bound to Stats. DisplaySessionName (default Header1 emphasis),
-        TotalTimeMined (default Hero emphasis), and the 7 numeric stats all flow
+        The body is one ItemsControl bound to Stats (no hard-coded header
+        TextBlocks or stat Grid). DisplaySessionName (default Header1 emphasis),
+        TotalTimeMined (default Hero emphasis), and the numeric stats all flow
         as StatRowViewModel rows via the implicit DataTemplate in
         Themes/StatRowTemplates.xaml. WidgetBase chrome handles the LastUpdated
         line with Visibility bound to IsLastUpdatedVisible.
-        Plan 43: the "Refined output" section renders below the stats.
+        The "Refined output" section renders below the stats.
     -->
     <StackPanel>
         <ItemsControl ItemsSource="{Binding Stats}" />

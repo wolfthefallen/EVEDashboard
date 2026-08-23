@@ -18,9 +18,10 @@ using SharpCompress.Readers;
 /// </summary>
 /// <remarks>
 /// See <see cref="ISdeUpdater"/> for the contract. Single-attempt protocol
-/// (plan 08 decision 8.6); subscriber failures isolated per-handler
-/// (decision 8.20); orphan temp folders swept at entry (decision 8.23);
-/// validation threshold injected via test-seam constructor (decision 8.16).
+/// (one HEAD probe, one conditional GET, no retries — any failure is reported
+/// as <c>Unreachable</c> and the existing data is kept); subscriber failures
+/// isolated per-handler; orphan temp folders swept at entry; validation
+/// threshold injected via the internal test-seam constructor.
 /// </remarks>
 public sealed class EverefSdeUpdater : ISdeUpdater
 {
@@ -74,7 +75,7 @@ public sealed class EverefSdeUpdater : ISdeUpdater
     /// production constructor above is what call sites should use; this
     /// overload exists so unit-test fixtures (which produce far fewer than
     /// 10,000 types) can run the happy-path tests by passing a threshold the
-    /// fixture cleanly exceeds. Per plan 08 decision 8.16.
+    /// fixture cleanly exceeds.
     /// </summary>
     internal EverefSdeUpdater(
         HttpClient http,
@@ -103,13 +104,13 @@ public sealed class EverefSdeUpdater : ISdeUpdater
     /// <inheritdoc />
     public async Task<SdeUpdateResult> CheckAndUpdateAsync(CancellationToken ct = default)
     {
-        // 0. Sweep orphan temp folders left behind by prior crashes (decision 8.23).
+        // 0. Sweep orphan temp folders left behind by prior crashes.
         SweepStaleTempDirs();
 
         // 1. Read currently-stored cache tags from the live SDE.
         var (storedLastMod, storedEtag) = await ReadStoredCacheTagsAsync(ct).ConfigureAwait(false);
 
-        // 2. Plain HEAD probe — read response headers, compare locally (decision 8.15).
+        // 2. Plain HEAD probe — read response headers, compare locally.
         HttpResponseMessage headResp;
         try
         {
@@ -150,7 +151,7 @@ public sealed class EverefSdeUpdater : ISdeUpdater
                 getReq.Headers.IfNoneMatch.Add(etag);
 
             // ResponseHeadersRead — body read is governed by ct only, not
-            // HttpClient.Timeout (decision 8.17). Slow downloads (~100 KB/s on a
+            // HttpClient.Timeout. Slow downloads (~100 KB/s on a
             // 14 MB tarball) can exceed the default 100s connection-and-body timeout;
             // ResponseHeadersRead caps the timeout at "until headers arrive." The
             // body transfer is instead bounded by DownloadInactivityTimeout below,
@@ -185,7 +186,7 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             string? newLastMod = FormatRfc7231(getResp.Content.Headers.LastModified);
             string? newEtag = getResp.Headers.ETag?.Tag;
 
-            // Stream the archive to disk (decision 8.11 — keep memory low).
+            // Stream the archive to disk to keep memory low.
             Directory.CreateDirectory(tempDir);
             var archivePath = Path.Combine(tempDir, "everef.tar.xz");
             await using (var net = await getResp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false))
@@ -198,15 +199,15 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             var jsonRoot = Path.Combine(tempDir, "extracted");
             Directory.CreateDirectory(jsonRoot);
 
-            // Decompress xz + extract tar in one pass via SharpCompress (decision 8.7).
+            // Decompress xz + extract tar in one pass via SharpCompress.
             // Tarball internal layout has JSON files directly at the root — no
-            // wrapper folder (decision 8.19).
+            // wrapper folder.
             ExtractTarXz(archivePath, jsonRoot);
 
             var newBuildTime = await ImportInTransactionAsync(
                 jsonRoot, newLastMod, newEtag, ct).ConfigureAwait(false);
 
-            // Subscriber failures isolated per-handler (decision 8.20). Multicast
+            // Subscriber failures isolated per-handler. Multicast
             // delegates short-circuit on the first throw; iterate the invocation
             // list so every subscriber observes the event and every failure is
             // logged at Warning.
@@ -239,8 +240,8 @@ public sealed class EverefSdeUpdater : ISdeUpdater
             getResp.Dispose();
 
             // Put toys away — best-effort. A leftover temp folder is annoying but
-            // not data-corrupting; the next-run sweep (decision 8.23) catches any
-            // leak from here.
+            // not data-corrupting; the next-run sweep in SweepStaleTempDirs catches
+            // any leak from here.
             try
             {
                 if (Directory.Exists(tempDir))
@@ -304,7 +305,7 @@ public sealed class EverefSdeUpdater : ISdeUpdater
     /// Best-effort cleanup of orphan <c>tmp/&lt;guid&gt;/</c> folders left behind
     /// by previous crashes. Iterates folders under <c>&lt;sde-dir&gt;/tmp/</c>,
     /// recursively deletes each. Failures log at Warning and continue — sweep
-    /// is housekeeping, not a hard precondition. Per plan 08 decision 8.23.
+    /// is housekeeping, not a hard precondition.
     /// </summary>
     private void SweepStaleTempDirs()
     {
@@ -351,8 +352,9 @@ public sealed class EverefSdeUpdater : ISdeUpdater
     /// Open a transaction on the live SDE, call the converter's caller-owns-tx
     /// method, validate post-import (<c>COUNT(*) FROM types &gt;= _minTypeRowsForCommit</c>),
     /// update <c>meta.last_modified</c> / <c>meta.etag</c>, read the new
-    /// <c>meta.build_time</c>, and commit. On any throw, ROLLBACK and re-throw.
-    /// Per plan 08 decision 8.4 / 8.10 / 8.16 / 8.21.
+    /// <c>meta.build_time</c>, and commit. On any throw, ROLLBACK and re-throw,
+    /// so a failed or suspiciously small import never replaces the data already
+    /// on disk.
     /// </summary>
     /// <returns>The new <c>meta.build_time</c> as a <see cref="DateTimeOffset"/>.</returns>
     private async Task<DateTimeOffset> ImportInTransactionAsync(
@@ -363,7 +365,7 @@ public sealed class EverefSdeUpdater : ISdeUpdater
         {
             await _converter.ImportToOpenTransactionAsync(jsonRoot, _db, null, ct).ConfigureAwait(false);
 
-            // Validation (decisions 8.4 / 8.16).
+            // Validation: refuse to commit a payload with too few types to be a real snapshot.
             var typeCount = await _db.QueryScalarAsync<long>(
                 "SELECT COUNT(*) FROM types", null, ct).ConfigureAwait(false);
             if (typeCount < _minTypeRowsForCommit)

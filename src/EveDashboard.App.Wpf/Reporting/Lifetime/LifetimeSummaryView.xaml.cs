@@ -7,11 +7,11 @@ using EveDashboard.App.Wpf.Reporting.Compare;
 using EveDashboard.App.Wpf.Widgets;
 
 /// <summary>
-/// Plan 46: code-behind for the empty-state lifetime rollup widget. Static
-/// columns declared in XAML; forwards wheel-scroll past the refined-output
-/// DataGrid to the Reports outer ScrollViewer, shared with the compare/per-ore
-/// widgets via <see cref="DataGridWheelForwarder"/>. Plan 47 wires column-width
-/// persistence on the refined table (per type, key <c>lifetime.refined</c>).
+/// Code-behind for the lifetime rollup widget hosted by the Lifetime Totals
+/// window. Static columns declared in XAML; forwards wheel-scroll past the
+/// refined-output DataGrid to the window's outer ScrollViewer, shared with the
+/// compare/per-ore widgets via <see cref="DataGridWheelForwarder"/>. Column-width
+/// persistence is wired on the refined table (per type, key <c>lifetime.refined</c>).
 /// </summary>
 public partial class LifetimeSummaryView : WidgetBase
 {

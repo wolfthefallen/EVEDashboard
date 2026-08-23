@@ -8,17 +8,17 @@ using EveDashboard.Reporting;
 using EveDashboard.Stats.Queries;
 
 /// <summary>
-/// Plan 46: the empty-selection ("no session checked") widget VM for the Reports
-/// window's right pane. Renders the all-time rollup — total active time, total
-/// ISK, and a per-material "Total Refined Output" table — from a precomputed
-/// <see cref="LifetimeSummary"/> (built once in the sidebar's per-session pass).
-/// Mirrors <c>CompareSessionViewModel</c>: all values pre-rendered in the ctor.
-/// Plan 47: inherits <see cref="TextSizeConfigurableWidgetViewModel"/> for the
+/// Widget VM for the all-time rollup shown in the Lifetime Totals window.
+/// Renders total active time, total ISK, and a per-material "Total Refined
+/// Output" table from a precomputed <see cref="LifetimeSummary"/> (returned by
+/// <c>IReportingQueries.GetAllSessionSummariesAsync</c> alongside the per-session
+/// rows). Mirrors <c>CompareSessionViewModel</c>: all values pre-rendered in the
+/// ctor. Inherits <see cref="TextSizeConfigurableWidgetViewModel"/> for the
 /// "Text size" cog + column-width persistence (widget-type key <c>"lifetime"</c>).
 /// </summary>
 public sealed class LifetimeSummaryViewModel : TextSizeConfigurableWidgetViewModel
 {
-    /// <summary>Plan 47: sizeable elements + default emphasis (Layout 1 — Title + Refined label Header0, the Time/ISK rows + table plain).</summary>
+    /// <summary>Sizeable elements + default emphasis (Title + Refined label Header0, the Time/ISK rows + table plain).</summary>
     private static readonly IReadOnlyList<(string Key, string Label, StatEmphasis Default)> Elements = new[]
     {
         ("Title", "Lifetime Totals", StatEmphasis.Header0),
@@ -38,8 +38,8 @@ public sealed class LifetimeSummaryViewModel : TextSizeConfigurableWidgetViewMod
     public IReadOnlyList<RefinedMaterialAmount> RefinedRows { get; }
 
     /// <summary>Construct the lifetime-summary VM from a precomputed rollup.</summary>
-    /// <param name="summary">All-time aggregate produced by the sidebar's per-session pass.</param>
-    /// <param name="settings">Settings repository (plan 47: text size + column widths).</param>
+    /// <param name="summary">All-time aggregate from <c>IReportingQueries.GetAllSessionSummariesAsync</c>.</param>
+    /// <param name="settings">Settings repository (text size + column widths).</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="summary"/> or <paramref name="settings"/> is null.</exception>
     public LifetimeSummaryViewModel(LifetimeSummary summary, ISettingsRepository settings)
         : base(settings, "lifetime", Elements, log: null)
@@ -50,8 +50,8 @@ public sealed class LifetimeSummaryViewModel : TextSizeConfigurableWidgetViewMod
         TotalIskDisplay    = summary.TotalIsk.ToString("N0", CultureInfo.InvariantCulture);
         RefinedRows        = summary.Refined;
 
-        // The chrome's "Last updated" line reflects when this rollup was computed
-        // (Reports open / import / delete — see SessionsSidebarViewModel.LoadAsync).
+        // The chrome's "Last updated" line reflects when this rollup was computed;
+        // the Lifetime Totals window rebuilds it on every Show, so this is the last open.
         LastUpdated = DateTimeOffset.UtcNow;
     }
 

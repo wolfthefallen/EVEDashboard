@@ -6,9 +6,10 @@ using System.Windows.Data;
 using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// Plan 47: maps a <see cref="StatEmphasis"/> to a font size (points). Drives the
+/// Maps a <see cref="StatEmphasis"/> to a font size (points). Drives the
 /// Reports table widgets' label sizing (via the shared <c>ReportsEmphasisLabel</c>
-/// style) and each table <c>DataGrid.FontSize</c> (size only, per decision 2.2 = B).
+/// style) and each table <c>DataGrid.FontSize</c> (size only; table text keeps
+/// its normal weight).
 /// Sizes match the active-session emphasis levels (canonical values in
 /// <c>Themes/StatRowTemplates.xaml</c>): Header0-&gt;14, Header1-&gt;16,
 /// Header2-&gt;20, Hero-&gt;22. <see cref="StatEmphasis.None"/> and any unknown value
@@ -40,7 +41,7 @@ public sealed class StatEmphasisToFontSizeConverter : IValueConverter
 }
 
 /// <summary>
-/// Plan 47: maps a <see cref="StatEmphasis"/> to a <see cref="FontWeight"/> for
+/// Maps a <see cref="StatEmphasis"/> to a <see cref="FontWeight"/> for
 /// Reports table-widget labels (via the shared <c>ReportsEmphasisLabel</c> style),
 /// matching the active-session emphasis rows: Header0/1/2 are Bold; None and Hero
 /// are Normal (Hero leans on size + accent colour, not weight). One-way.

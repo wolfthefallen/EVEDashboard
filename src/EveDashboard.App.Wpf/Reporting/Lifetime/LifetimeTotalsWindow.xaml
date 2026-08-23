@@ -11,16 +11,15 @@
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
     <!--
-        Plan 51: standalone Lifetime Totals window, launched by the "Lifetime
-        Totals" button in the Reports chrome strip. Modeless, singleton,
-        hide-on-close (mirrors Reports / Crystal). Hosts the reusable
-        LifetimeSummaryView widget (moved out of the Reports content pane). Size
-        and position persist via lifetime_totals_window_geometry (default
-        700x640 centered on first launch).
+        Standalone Lifetime Totals window, launched by the "Lifetime Totals"
+        button in the Reports chrome strip. Modeless, singleton, hide-on-close
+        (mirrors Reports / Crystal). Hosts the reusable LifetimeSummaryView
+        widget. Size and position persist via lifetime_totals_window_geometry
+        (default 700x640 centered on first launch).
     -->
     <Window.Resources>
-        <!-- The lifetime-rollup widget VM <-> View pairing (moved here from
-             ReportsWindow.xaml when the in-pane lifetime mode was removed). -->
+        <!-- The lifetime-rollup widget VM <-> View pairing. This window is the
+             only host of the lifetime widget; the Reports pane never shows it. -->
         <DataTemplate DataType="{x:Type lifetime:LifetimeSummaryViewModel}">
             <lifetime:LifetimeSummaryView />
         </DataTemplate>

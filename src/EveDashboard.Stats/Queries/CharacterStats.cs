@@ -5,8 +5,8 @@ using EveDashboard.Core.Sessions;
 /// <summary>
 /// Snapshot of one pilot's mining statistics within a session, keyed by EVE
 /// character id. Per-pilot rates use the parent <see cref="SessionStats"/>'s
-/// <see cref="SessionStats.TotalTimeMined"/> as denominator (no per-pilot
-/// active-duration field — see plan 13 decision 2.4).
+/// <see cref="SessionStats.TotalTimeMined"/> as denominator (there is no
+/// per-pilot active-duration field).
 /// </summary>
 /// <param name="PilotId">EVE character id of this pilot. Matches the
 ///     <c>pilot_id</c> in the session SQLite <c>session_pilot</c> / <c>log</c>
@@ -16,24 +16,24 @@ using EveDashboard.Core.Sessions;
 ///     events yet (the per-pilot widget renders "No events yet" in that case).</param>
 /// <param name="TotalM3Mined">Sum of <c>volume_m3</c> across this pilot's
 ///     <c>log</c> rows for the session. Residue rows contribute 0 because
-///     their <c>volume_m3</c> is null (see plan 13 decision 5.1).</param>
+///     their <c>volume_m3</c> is null.</param>
 /// <param name="M3PerSecond">This pilot's <see cref="TotalM3Mined"/> divided
 ///     by the session-level <see cref="SessionStats.TotalTimeMined"/> in
 ///     seconds. <c>0</c> when the active duration is <c>0</c>
-///     (plan 13 decision 8.2).</param>
+///     (divide-by-zero guard).</param>
 /// <param name="TotalIskMined">Estimated ISK valuation per session, computed by
-///     the plan-18 ISK pipeline; see <c>MEMORY.md -&gt; project_isk_calculation</c>.
+///     the <c>IIskCalculator</c> ISK pipeline.
 ///     Returns <c>0</c> if SDE lookups or market prices are unavailable for any
 ///     of the pilot's mined products.</param>
-/// <param name="IskPerHour">Estimated ISK per hour, computed by the plan-18
+/// <param name="IskPerHour">Estimated ISK per hour, computed by the same
 ///     ISK pipeline. Returns <c>0</c> when SDE lookups or market prices are
 ///     unavailable, or when the active duration is <c>0</c>.</param>
 /// <param name="TotalIskFromCrits">Estimated ISK valuation for this pilot
 ///     considering ONLY rows where <c>event_kind = 'Crit'</c>. Computed by the
-///     plan-18 ISK pipeline over the crit-subset units in the same single
+///     ISK pipeline over the crit-subset units in the same single
 ///     <c>IIskCalculator.ComputeAsync</c> call that produces
 ///     <see cref="TotalIskMined"/>. Not currently surfaced on any per-pilot
-///     widget; exposed here so a future plan can wire per-pilot UI without
+///     widget; exposed here so per-pilot UI can be wired without
 ///     re-touching this layer.</param>
 /// <param name="CritIskPercent"><see cref="TotalIskFromCrits"/> divided by
 ///     <see cref="TotalIskMined"/>. Returns <c>0</c> when
@@ -44,8 +44,8 @@ using EveDashboard.Core.Sessions;
 ///     <c>event_kind = 'Crit'</c>.</param>
 /// <param name="CritChance"><see cref="CritCount"/> divided by
 ///     (<see cref="CritCount"/> + tick count). <c>0</c> when no
-///     crit-eligible events have been seen (plan 13 decision 3.2).</param>
-/// <param name="Role">Plan 35: the pilot's current fleet role in this session
+///     crit-eligible events have been seen.</param>
+/// <param name="Role">The pilot's current fleet role in this session
 ///     (read from <c>session_pilot.role</c>, NOT event-time role). Drives
 ///     per-pilot widget border color and DisplayName tag.</param>
 public sealed record CharacterStats(
@@ -63,7 +63,7 @@ public sealed record CharacterStats(
     PilotRole        Role)
 {
     /// <summary>
-    /// Plan 43: this pilot's refined-material output, yield-applied and sorted
+    /// This pilot's refined-material output, yield-applied and sorted
     /// by quantity descending. Init-only with an empty default so existing
     /// construction sites are unaffected.
     /// </summary>

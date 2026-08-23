@@ -14,7 +14,7 @@ public sealed class ActiveSessionContext : IActiveSessionContext
     private SessionRunState _state = SessionRunState.None;
 
     /// <summary>
-    /// Plan 35: per-pilot role map. Mirrors <c>session_pilot.role</c> for the
+    /// Per-pilot role map. Mirrors <c>session_pilot.role</c> for the
     /// active session. Populated by <see cref="SeedRoles"/> at session start,
     /// mutated by <see cref="SetRole"/> on user role-change, cleared by
     /// <see cref="ClearRoles"/> at session stop. Guarded by <c>_lock</c>.
@@ -71,7 +71,7 @@ public sealed class ActiveSessionContext : IActiveSessionContext
     }
 
     /// <summary>
-    /// Plan 35: mutate a pilot's role in the in-memory map. Raises
+    /// Mutate a pilot's role in the in-memory map. Raises
     /// <see cref="RolesChanged"/> once if the role actually changed (no event
     /// fires on a no-op). Called by <c>SessionController.SetPilotRoleAsync</c>
     /// after the SQL UPDATE commits.
@@ -97,7 +97,7 @@ public sealed class ActiveSessionContext : IActiveSessionContext
     }
 
     /// <summary>
-    /// Plan 35: bulk-populate the role map at session start. Clears any
+    /// Bulk-populate the role map at session start. Clears any
     /// pre-existing entries before copying in. Does NOT raise
     /// <see cref="RolesChanged"/> — seeding is initial setup, not a
     /// user-facing role change.
@@ -118,7 +118,7 @@ public sealed class ActiveSessionContext : IActiveSessionContext
     }
 
     /// <summary>
-    /// Plan 35: empty the role map. Called by <c>SessionController.StopInternalAsync</c>
+    /// Empty the role map. Called by <c>SessionController.StopInternalAsync</c>
     /// after the session ends so the map doesn't leak roles into the next
     /// session's seed.
     /// </summary>

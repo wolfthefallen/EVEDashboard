@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 47 base class for the Reports table widgets (ore / refined / compare /
+/// Base class for the Reports table widgets (ore / refined / compare /
 /// lifetime). Owns the per-element text-sizing plumbing — the "Text size" cog
 /// popup, the resolved element-key -&gt; <see cref="StatEmphasis"/> map (exposed
 /// via the <see cref="this[string]"/> indexer for XAML bindings), the
@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Text size is scoped per widget TYPE (decision 3.1 = A): every instance of a
+/// Text size is scoped per widget TYPE: every instance of a
 /// given widget type shares one saved map under <c>reports_text_size.&lt;widgetTypeKey&gt;</c>.
 /// Bind a sizeable element's <c>FontSize</c> to <c>{Binding [ElementKey], Converter={StaticResource EmphasisToFontSize}}</c>;
 /// the converter inherits (no change) at <see cref="StatEmphasis.None"/>.

@@ -60,4 +60,4 @@ Tests assert these counts and the per-row content.
 
 ## Files we deliberately do NOT include
 
-The everef.net archive has 19 files. Plan 06's converter only requires `meta.json`, `categories.json`, `groups.json`, `types.json`. The other 15 files are absent from this fixture folder — confirms the converter doesn't accidentally try to read them.
+The everef.net archive has 19 files. The converter only requires `meta.json`, `categories.json`, `groups.json`, `types.json`. The other 15 files are absent from this fixture folder — confirms the converter doesn't accidentally try to read them.

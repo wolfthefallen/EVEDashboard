@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Widgets.StatConfig;
 
 /// <summary>
-/// Result of <see cref="StatRowsBuilder.Resolve"/> (plan 20). The two lists
+/// Result of <see cref="StatRowsBuilder.Resolve"/>. The two lists
 /// are emitted separately because they flow into different rendering
 /// surfaces:
 /// <list type="bullet">

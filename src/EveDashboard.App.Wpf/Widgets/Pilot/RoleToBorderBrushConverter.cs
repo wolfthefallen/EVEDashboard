@@ -7,7 +7,7 @@ using System.Windows.Media;
 using EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Plan 35: maps a <see cref="PilotRole"/> to its widget border brush. Looks
+/// Maps a <see cref="PilotRole"/> to its widget border brush. Looks
 /// up the brush by key in <see cref="Application.Current"/>'s merged resource
 /// dictionaries (the active theme).
 /// </summary>
@@ -23,7 +23,7 @@ using EveDashboard.Core.Sessions;
 /// converter re-resolves.
 /// </para>
 /// <para>
-/// Brush key mapping (decision 1.2 cross = A; all keys verified present in
+/// Brush key mapping (all keys verified present in
 /// both <c>Themes/Light.xaml</c> and <c>Themes/Dark.xaml</c>):
 /// </para>
 /// <list type="bullet">

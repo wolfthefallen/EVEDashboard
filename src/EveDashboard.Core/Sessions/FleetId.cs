@@ -19,8 +19,8 @@ using System.Text;
 /// </para>
 /// <para>
 /// Sorting members by id makes the id independent of selection order; including
-/// each member's canonical role makes a role-only difference a distinct fleet
-/// (decision 1.2 = C). The delimiter is the ASCII Unit Separator (<c>0x1F</c>),
+/// each member's canonical role makes a role-only difference a distinct fleet.
+/// The delimiter is the ASCII Unit Separator (<c>0x1F</c>),
 /// mirroring <see cref="SessionId"/>, so a name ending in digits cannot blur
 /// into the first pilot id.
 /// </para>
@@ -38,7 +38,7 @@ public static class FleetId
     /// <summary>
     /// Compute the content-addressed fleet id for the given name and members.
     /// </summary>
-    /// <param name="name">The fleet's display name (already trimmed by the caller — see decision 3.4 = A).</param>
+    /// <param name="name">The fleet's display name (already trimmed by the caller).</param>
     /// <param name="members">The fleet's members as <c>(PilotId, Role)</c> pairs; order does not matter (sorted internally).</param>
     /// <returns>A 64-character lowercase hex SHA-256 string.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> or <paramref name="members"/> is null.</exception>

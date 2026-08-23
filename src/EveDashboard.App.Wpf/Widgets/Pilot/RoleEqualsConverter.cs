@@ -5,7 +5,7 @@ using System.Windows.Data;
 using EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Plan 35: returns <c>true</c> iff the bound <see cref="PilotRole"/> matches
+/// Returns <c>true</c> iff the bound <see cref="PilotRole"/> matches
 /// the string <c>ConverterParameter</c>. Used for the <c>IsChecked</c> binding
 /// on each MenuItem in the per-pilot widget's right-click context menu.
 /// </summary>

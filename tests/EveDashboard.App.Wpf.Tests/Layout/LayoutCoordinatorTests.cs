@@ -11,10 +11,10 @@ using FluentAssertions;
 /// LayoutCoordinator test workhorse — covers ctor null-args, LoadAsync default
 /// + saved + ghost-preserving + malformed paths, per-pilot collection
 /// grow/shrink merge, MoveItem persistence, Hide/Show flips, the
-/// HideRequested event bridge, dispose unsubscription, and the plan-24
-/// SessionStats-on-first-activation lifecycle (the post-plan-25 follow-up
-/// removed the inline SessionConfig widget — it lives in a modal dialog now,
-/// so the dashboard layout owns only SessionStats + Pilot kinds).
+/// HideRequested event bridge, dispose unsubscription, and the
+/// SessionStats-on-first-activation lifecycle (SessionConfig is a modal
+/// dialog, not an inline widget, so the dashboard layout owns only
+/// SessionStats + Pilot kinds).
 /// </summary>
 public class LayoutCoordinatorTests
 {
@@ -79,9 +79,9 @@ public class LayoutCoordinatorTests
     [Fact]
     public async Task LoadAsync_with_no_saved_layout_yields_alphabetical_pilots_only()
     {
-        // Post-plan-25: default layout no longer seeds SessionConfig (the
-        // widget moved to a modal dialog). SessionStats is added on first
-        // activation, not at load time. So Items is the per-pilot list.
+        // The default layout does not seed SessionConfig (it is a modal
+        // dialog, not a widget). SessionStats is added on first activation,
+        // not at load time. So Items is the per-pilot list.
         using var f = new LayoutCoordinatorTestFixture();
         var sid = await f.InsertSessionWithPilotsAsync(
             (101, "Charlie"), (102, "alice"), (103, "Bob"));
@@ -389,7 +389,7 @@ public class LayoutCoordinatorTests
         act.Should().NotThrow();
     }
 
-    /* ---------- Plan 24 SessionStats lifecycle (post-plan-25 cleanup: SessionConfig is now a dialog, not a widget) ---------- */
+    /* ---------- SessionStats lifecycle (SessionConfig is a dialog, not a widget) ---------- */
 
     [Fact]
     public async Task Mode_change_to_Running_activates_stats()

@@ -4,14 +4,15 @@
     xmlns:converters="clr-namespace:EveDashboard.App.Wpf.Converters"
     xmlns:emphasis="clr-namespace:EveDashboard.Core.Settings.WidgetStats;assembly=EveDashboard.Core">
 
-    <!-- Plan 47: emphasis -> font converters, registered app-wide (Controls.xaml is merged in
+    <!-- Emphasis -> font converters, registered app-wide (Controls.xaml is merged in
          App.xaml) so the Reports table widgets can size + weight their text off a StatEmphasis.
-         The DataGrid tables use EmphasisToFontSize directly (size only, decision 2.2 = B); the
-         labels use the ReportsEmphasisLabel style below for the full size+weight+accent look. -->
+         The DataGrid tables use EmphasisToFontSize directly (size only; the table text keeps
+         its normal weight); the labels use the ReportsEmphasisLabel style below for the full
+         size+weight+accent look. -->
     <converters:StatEmphasisToFontSizeConverter x:Key="EmphasisToFontSize" />
     <converters:StatEmphasisToFontWeightConverter x:Key="EmphasisToFontWeight" />
 
-    <!-- Plan 47: the full active-session emphasis look for a Reports table-widget label.
+    <!-- The full active-session emphasis look for a Reports table-widget label.
          Each label sets Tag="{Binding [ElementKey]}" (its resolved StatEmphasis) and
          Style="{StaticResource ReportsEmphasisLabel}". Size + weight come from the Tag via the
          converters; Hero swaps the foreground to the accent brush (DynamicResource, so it stays
@@ -33,13 +34,12 @@
         Theme-independent control styles. Brushes and effects are pulled via
         DynamicResource so the active theme dictionary (Dark.xaml or Light.xaml)
         wins. Loaded once at startup via App.xaml MergedDictionaries; theme
-        swap (plan 17 ThemeService) replaces only the Dark/Light dictionary,
+        swap (ThemeService) replaces only the Dark/Light dictionary,
         not this one.
 
-        Plan 22.1 amendment 2026-05-03: user-supplied palette wires hover /
-        active / focus overlays + card_shadow on every button so buttons stay
-        visible regardless of host surface (the in-light-theme "white button on
-        white card" case the user flagged).
+        The palette wires hover / active / focus overlays + card_shadow on
+        every button so buttons stay visible regardless of host surface (the
+        light-theme "white button on white card" case).
     -->
 
     <!-- Default Button: solid background, 1px border, hover/active overlays, focus ring, card shadow. -->
@@ -117,7 +117,7 @@
         </Setter>
     </Style>
 
-    <!-- Plan 25: theme-aware DataGrid styling for the Reports window (sidebar + per-ore widgets).
+    <!-- Theme-aware DataGrid styling for the Reports window (sidebar + per-ore widgets).
          Default WPF DataGrid renders white-on-white in dark mode (column headers use SystemColors).
          Implicit Style on DataGrid + DataGridColumnHeader + DataGridCell + DataGridRow ensures any
          DataGrid in the app picks up the active theme's brushes. -->
@@ -132,7 +132,7 @@
         <Setter Property="AlternatingRowBackground" Value="{DynamicResource HoverOverlayBrush}" />
     </Style>
 
-    <!-- Plan 47: column-resize gripper. The custom DataGridColumnHeader template below dropped the
+    <!-- Column-resize gripper. The custom DataGridColumnHeader template below dropped the
          default WPF header grippers, so columns could not be drag-resized. This invisible 8px-wide
          transparent Thumb (cursor SizeWE) is re-inserted into the header template as the named parts
          PART_LeftHeaderGripper / PART_RightHeaderGripper; the DataGrid drives column width through
@@ -176,7 +176,7 @@
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                         </Border>
-                        <!-- Plan 47: resize grippers MUST be named exactly PART_LeftHeaderGripper /
+                        <!-- Resize grippers MUST be named exactly PART_LeftHeaderGripper /
                              PART_RightHeaderGripper (the DataGrid finds resize parts by name) and sit
                              LAST in the Grid so they are top of z-order and hit-testable. -->
                         <Thumb x:Name="PART_LeftHeaderGripper"

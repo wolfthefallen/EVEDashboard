@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Reporting.Compare;
 
 /// <summary>
-/// Plan 36: one row inside the decluttered compare-mode widget. Values are
+/// One row inside the decluttered compare-mode widget. Values are
 /// pre-rendered strings — the view binds <c>Label</c>/<c>Avg</c>/<c>Total</c>
 /// directly with no XAML value converters.
 /// </summary>

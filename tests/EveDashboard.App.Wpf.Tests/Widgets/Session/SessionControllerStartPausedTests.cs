@@ -6,12 +6,12 @@ using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 37 — Start-as-paused. Start writes the first session_time row with
+/// Start-as-paused. Start writes the first session_time row with
 /// is_pause=1, lands in <see cref="SessionWidgetMode.Paused"/>, sets
 /// <see cref="IActiveSessionContext.State"/> to
 /// <see cref="SessionRunState.Paused"/>, and wires the writer's auto-resume
 /// callback. The tick timer is NOT started — it kicks off on the user's first
-/// Continue click (or an auto-resume). Plan 42: Start takes a fleet roster.
+/// Continue click (or an auto-resume). Start takes a fleet roster.
 /// </summary>
 public class SessionControllerStartPausedTests
 {
@@ -20,7 +20,7 @@ public class SessionControllerStartPausedTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        vm.SessionName = "Plan 37 Start";
+        vm.SessionName = "Start Paused";
 
         await vm.StartAsync(f.Roster());
         try
@@ -30,7 +30,7 @@ public class SessionControllerStartPausedTests
                 static r => r.GetInt32(0));
 
             rows.Should().ContainSingle();
-            rows[0].Should().Be(1, "Start lands in Paused (plan 37) — the first session_time row must carry is_pause=1");
+            rows[0].Should().Be(1, "Start lands in Paused — the first session_time row must carry is_pause=1");
         }
         finally
         {
@@ -43,7 +43,7 @@ public class SessionControllerStartPausedTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        vm.SessionName = "Plan 37 Start";
+        vm.SessionName = "Start Paused";
 
         await vm.StartAsync(f.Roster());
         try
@@ -62,7 +62,7 @@ public class SessionControllerStartPausedTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        vm.SessionName = "Plan 37 Start";
+        vm.SessionName = "Start Paused";
 
         await vm.StartAsync(f.Roster());
         try
@@ -82,7 +82,7 @@ public class SessionControllerStartPausedTests
     {
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();
-        vm.SessionName = "Plan 37 Continue Path";
+        vm.SessionName = "Continue Path";
 
         await vm.StartAsync(f.Roster());
         try
@@ -118,8 +118,8 @@ public class SessionControllerStartPausedTests
         // Bug-1 follow-up: defensive guard against double-Start (a UI signal
         // bug previously let the New Session dialog stay open after Start,
         // exposing the user to clicking Start a second time which then crashed
-        // inside _writer.StartAsync). Plan 42 decision 3.2 = A: the guard now
-        // returns SessionStartResult.Started (a session genuinely is active) so
+        // inside _writer.StartAsync). The guard returns
+        // SessionStartResult.Started (a session genuinely is active) so
         // the dialog still closes — but no second session is created.
         using var f = new SessionControllerTestFixture();
         using var vm = f.CreateViewModel();

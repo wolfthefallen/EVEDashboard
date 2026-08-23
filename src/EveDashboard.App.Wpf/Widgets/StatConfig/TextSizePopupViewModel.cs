@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 47: ViewModel behind the Reports "Text size" popup (the second chrome
+/// ViewModel behind the Reports "Text size" popup (the second chrome
 /// cog, gated by <c>WidgetBaseViewModel.HasTextSizeConfig</c>). Lets the user
 /// pick a <see cref="StatEmphasis"/> per named element of a table widget — each
 /// label line individually, plus one size for the whole table. Mirrors

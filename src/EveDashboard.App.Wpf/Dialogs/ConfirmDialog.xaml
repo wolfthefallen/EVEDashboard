@@ -7,8 +7,8 @@
         ShowInTaskbar="False"
         Background="{DynamicResource BorderBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
-    <!-- Plan 29: title, body, and confirm button label are set by the
-         adapter via the constructor before ShowDialog. -->
+    <!-- Title, body, and button labels are set by the adapter via the
+         constructor before ShowDialog. -->
     <Border Margin="6"
             Background="{DynamicResource BackgroundBrush}"
             Effect="{DynamicResource ModalShadowEffect}">

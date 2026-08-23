@@ -7,7 +7,7 @@ namespace EveDashboard.App.Wpf.Dialogs;
 /// without invoking WPF.
 /// </summary>
 /// <remarks>
-/// Plan 29: same shape as the other dialog seams in this folder
+/// Same shape as the other dialog seams in this folder
 /// (<see cref="IAddStationDialog"/>, <see cref="IConfirmDialog"/>) — the
 /// concrete adapter wraps the WPF-specific <c>OpenFileDialog</c> /
 /// <c>SaveFileDialog</c> from <c>Microsoft.Win32</c>; the interface stays

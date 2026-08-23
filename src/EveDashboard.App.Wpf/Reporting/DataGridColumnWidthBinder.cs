@@ -7,14 +7,15 @@ using System.Windows.Threading;
 using EveDashboard.App.Wpf.Widgets;
 
 /// <summary>
-/// Plan 47 (phase 1a-B): restores + persists one <see cref="DataGrid"/>'s column
-/// widths for a grid TYPE (decision 2.1 = A / 3.1 = A). A view's code-behind
-/// creates one binder per grid on <c>Loaded</c> and calls <see cref="Detach"/> on
-/// <c>Unloaded</c>. On attach it restores the saved pixel widths onto the matching
-/// columns; thereafter it watches each column's <see cref="DataGridColumn.Width"/>
-/// for user resizes (debounced) and persists back ONLY the columns the user
-/// actually sized (those whose width is a fixed <see cref="DataGridLengthUnitType.Pixel"/>),
-/// so untouched <c>*</c> / <c>Auto</c> columns keep stretching.
+/// Restores + persists one <see cref="DataGrid"/>'s column widths, keyed by
+/// grid TYPE (every instance of the same table shares one saved width set). A
+/// view's code-behind creates one binder per grid on <c>Loaded</c> and calls
+/// <see cref="Detach"/> on <c>Unloaded</c>. On attach it restores the saved
+/// pixel widths onto the matching columns; thereafter it watches each column's
+/// <see cref="DataGridColumn.Width"/> for user resizes (debounced) and persists
+/// back ONLY the columns the user actually sized (those whose width is a fixed
+/// <see cref="DataGridLengthUnitType.Pixel"/>), so untouched <c>*</c> /
+/// <c>Auto</c> columns keep stretching.
 /// </summary>
 /// <remarks>
 /// Capturing the column's <see cref="DataGridColumn.Width"/> (not its noisy

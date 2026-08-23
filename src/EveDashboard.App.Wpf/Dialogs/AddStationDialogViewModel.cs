@@ -11,8 +11,7 @@ using EveDashboard.Core.Settings;
 /// Pure POCO: no WPF refs beyond <see cref="INotifyPropertyChanged"/>.
 /// </summary>
 /// <remarks>
-/// Field shape mirrors <see cref="MarketStation"/> exactly (plan 22.1 decision
-/// 22.D, inherited from plan-17 alignment 3.1 = C). Region id and region name
+/// Field shape mirrors <see cref="MarketStation"/> exactly. Region id and region name
 /// are optional; if region id is supplied it must parse as a positive
 /// <see cref="long"/>. Validation runs once on OK click via
 /// <see cref="Validate"/>; <see cref="BuildStation"/> assumes validated state

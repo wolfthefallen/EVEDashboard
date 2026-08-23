@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// Production <see cref="IReportsWindow"/> implementation. Holds a single
 /// <see cref="ReportsWindow"/> instance for the app lifetime; subsequent
 /// <see cref="Show"/> calls re-show / bring-to-front the same instance so
-/// geometry + sidebar state survive in-session open/close cycles. Plan 25.
+/// geometry + sidebar state survive in-session open/close cycles.
 /// </summary>
 /// <remarks>
 /// Mirrors <see cref="Dialogs.SettingsDialogAdapter"/>'s service-locator

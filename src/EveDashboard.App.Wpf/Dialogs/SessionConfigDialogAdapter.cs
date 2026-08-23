@@ -42,8 +42,8 @@ public sealed class SessionConfigDialogAdapter : ISessionConfigDialog
     {
         // Reset the singleton VM BEFORE constructing the dialog so the dialog's
         // initial render reflects the cleared name + cleared create/confirm state.
-        // The fleet list itself is (re)hydrated on the dialog's Loaded event
-        // (plan 42), so the saved fleets and default selection are always fresh.
+        // The fleet list itself is (re)hydrated on the dialog's Loaded event,
+        // so the saved fleets and default selection are always fresh.
         var vm = _services.GetRequiredService<SessionConfigDialogViewModel>();
         vm.ResetForNewOpen();
 

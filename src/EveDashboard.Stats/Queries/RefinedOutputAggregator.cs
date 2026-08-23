@@ -1,8 +1,8 @@
 namespace EveDashboard.Stats.Queries;
 
 /// <summary>
-/// Single source of the "sum refined output across a set of scopes" math
-/// (plan 46). Both the compare-mode view (summing across the selected sessions)
+/// Single source of the "sum refined output across a set of scopes" math.
+/// Both the compare-mode view (summing across the selected sessions)
 /// and the empty-state lifetime rollup (summing across every saved session)
 /// call this so the per-material aggregation + sort lives in exactly one place.
 /// </summary>

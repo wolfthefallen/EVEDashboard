@@ -7,11 +7,10 @@
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
     <!--
-        Plan 20: shared chrome-button template for the cog + close buttons in
-        the WidgetBase chrome row. Both buttons want the same hover / active
+        Shared chrome-button template for the cog + close buttons in the
+        WidgetBase chrome row. Both buttons want the same hover / active
         overlay behaviour against a transparent background; defining the
-        ControlTemplate once here saves the duplication that Generic.xaml had
-        before this refactor.
+        ControlTemplate once here avoids duplicating it per button.
     -->
     <Style x:Key="WidgetChromeButton" TargetType="Button">
         <Setter Property="Width" Value="16" />
@@ -79,8 +78,8 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <!-- Plan 19 + 20 chrome row: LastUpdated text on the left, cog (settings) + x (close) on the right.
-                                 Plan 20 added the cog ToggleButton (between the LastUpdated text and the x button) with Visibility
+                            <!-- Chrome row: LastUpdated text on the left, cog (settings) + x (close) on the right.
+                                 The cog ToggleButton (between the LastUpdated text and the x button) has Visibility
                                  bound to HasStatConfig and IsChecked two-way bound to IsStatConfigOpen. The Popup also lives here;
                                  its IsOpen is two-way bound to IsStatConfigOpen so click-outside (StaysOpen=False) and the popup
                                  VM's Apply/Close commands all converge on the same flag. -->
@@ -88,12 +87,12 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
-                                    <!-- Plan 47: extra Auto column for the second ("text size") cog. -->
+                                    <!-- Extra Auto column for the second ("text size") cog. -->
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- LastUpdated chrome line. Hidden when LastUpdated is null OR when IsLastUpdatedVisible=false (plan 20). -->
+                                <!-- LastUpdated chrome line. Hidden when LastUpdated is null OR when IsLastUpdatedVisible=false. -->
                                 <TextBlock Grid.Column="0"
                                            Text="{Binding LastUpdated, StringFormat='Last updated: {0:HH:mm:ss}'}"
                                            FontSize="10"
@@ -120,7 +119,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <!-- Plan 20 cog button + popup. Visibility bound to HasStatConfig. -->
+                                <!-- Cog button + popup. Visibility bound to HasStatConfig. -->
                                 <ToggleButton Grid.Column="1"
                                               x:Name="WidgetSettingsButton"
                                               Content="&#x2699;"
@@ -178,9 +177,9 @@
                                     </Border>
                                 </Popup>
 
-                                <!-- Plan 47: second cog — per-element text sizing for the Reports table widgets.
+                                <!-- Second cog — per-element text sizing for the Reports table widgets.
                                      Visibility gated by HasTextSizeConfig (default false, so non-table widgets
-                                     never show it). Mirrors the plan-20 cog above (its own inline CogBorder
+                                     never show it). Mirrors the stat-config cog above (its own inline CogBorder
                                      template — the close button's WidgetChromeButton style is a different look). -->
                                 <ToggleButton Grid.Column="2"
                                               x:Name="WidgetTextSizeButton"
@@ -239,7 +238,7 @@
                                     </Border>
                                 </Popup>
 
-                                <!-- Plan 19 close button (Plan 47: shifted from col 2 to col 3 for the new cog). -->
+                                <!-- Close button (col 3, after the two cogs). -->
                                 <Button Grid.Column="3"
                                         x:Name="WidgetCloseButton"
                                         Style="{StaticResource WidgetChromeButton}"

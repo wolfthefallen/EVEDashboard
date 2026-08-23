@@ -5,7 +5,7 @@ using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 35: <c>SessionController.SetPilotRoleAsync</c> UPDATE-s
+/// <c>SessionController.SetPilotRoleAsync</c> UPDATE-s
 /// <c>session_pilot.role</c>, mirrors the change into
 /// <c>ActiveSessionContext</c>'s role map (which fires
 /// <see cref="IActiveSessionContext.RolesChanged"/>), and flips the

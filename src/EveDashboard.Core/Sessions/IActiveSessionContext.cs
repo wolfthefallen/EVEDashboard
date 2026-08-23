@@ -7,8 +7,7 @@ namespace EveDashboard.Core.Sessions;
 /// <remarks>
 /// <para>
 /// The single piece of in-memory runtime state that the SQL substrate cannot
-/// replace - see <c>MEMORY.md -&gt; project_sql_substrate</c>'s
-/// "Active-session context (small in-memory companion)" section. The truth
+/// replace: a small in-memory companion to the session store. The truth
 /// is still SQL (the active session can be re-derived from the latest
 /// <c>session</c> row with an open <c>session_time</c>); this interface is a
 /// navigational pointer cached in memory to avoid querying SQL on every
@@ -16,14 +15,14 @@ namespace EveDashboard.Core.Sessions;
 /// </para>
 /// <para>
 /// Mutation is via the concrete <see cref="ActiveSessionContext.Set"/> method;
-/// consumers (e.g. the session-event writer in plan 12) take the read-only
+/// consumers (e.g. the session-event writer) take the read-only
 /// interface here so they cannot accidentally mutate state.
 /// </para>
 /// </remarks>
 public interface IActiveSessionContext
 {
     /// <summary>
-    /// EVE Dashboard <c>session.session_id</c> (a plan-38 sha256 hex
+    /// EVE Dashboard <c>session.session_id</c> (a sha256 hex
     /// string) of the active session, or <c>null</c> when no session is active.
     /// </summary>
     string? ActiveSessionId { get; }
@@ -39,7 +38,7 @@ public interface IActiveSessionContext
     event EventHandler? ActiveSessionChanged;
 
     /// <summary>
-    /// Plan 35: lookup the fleet role for a pilot in the active session. Used
+    /// Lookup the fleet role for a pilot in the active session. Used
     /// by <c>SessionEventWriter</c> on every <c>log</c> INSERT to stamp the
     /// event-time role. Returns <see cref="PilotRole.Miner"/> if the pilot is
     /// not mapped (defensive — should not happen during a session whose
@@ -50,7 +49,7 @@ public interface IActiveSessionContext
     PilotRole GetRole(long pilotId);
 
     /// <summary>
-    /// Plan 35: fires when a pilot's role changes mid-session via
+    /// Fires when a pilot's role changes mid-session via
     /// <c>ActiveSessionContext.SetRole</c>. Per-pilot widget VMs subscribe and
     /// update their bound <c>Role</c> property when the pilot id matches.
     /// </summary>

@@ -42,7 +42,7 @@ internal sealed class StubSettingsRepository : ISettingsRepository
     public Task SetSelectedStationIdAsync(long stationId, CancellationToken ct = default)
     {
         // Mirror the real SqliteSettingsRepository: persist AND raise SettingChanged
-        // so the fetcher's station-change re-fetch (decision 1.4) is exercised.
+        // so the fetcher's station-change re-fetch is exercised.
         SelectedStationId = stationId;
         SettingChanged?.Invoke(this, new SettingChangedEventArgs("selected_station_id"));
         return Task.CompletedTask;

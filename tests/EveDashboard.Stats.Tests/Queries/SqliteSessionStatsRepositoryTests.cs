@@ -39,7 +39,7 @@ public class SqliteSessionStatsRepositoryTests
             sdeLookup ?? new StubSdeLookup(),
             log ?? NullLogger<SqliteSessionStatsRepository>.Instance);
 
-    /// <summary>Plan 43: SDE stub — resolves refined-material names from <see cref="RefinedNames"/>, empty otherwise.</summary>
+    /// <summary>SDE stub — resolves refined-material names from <see cref="RefinedNames"/>, empty otherwise.</summary>
     private sealed class StubSdeLookup : ISdeLookup
     {
         public Dictionary<long, string> RefinedNames { get; } = new();
@@ -79,7 +79,7 @@ public class SqliteSessionStatsRepositoryTests
 
     /// <summary>
     /// Test stub <see cref="IIskCalculator"/> with a per-pilot lookup table; computes ISK as the seeded value (no recursion).
-    /// Plan 36: two-dict overload is the only path the repository now calls; the single-dict overload remains for tests that exercise it directly.
+    /// The two-dict overload is the only path the repository calls; the single-dict overload remains for tests that exercise it directly.
     /// </summary>
     private sealed class StubIskCalculator : IIskCalculator
     {
@@ -126,7 +126,7 @@ public class SqliteSessionStatsRepositoryTests
                 var critUnitsTotal = critTypeIdToUnitsMined.Values.Sum();
                 crit = totalUnits == 0 ? 0.0 : isk * critUnitsTotal / totalUnits;
             }
-            // Plan 25: split the total proportionally by units across input types so
+            // Split the total proportionally by units across input types so
             // tests that ignore IskByInputType keep TotalIsk semantics, and tests that
             // do read it see a deterministic per-input value.
             var perInput = new Dictionary<long, double>(typeIdToUnitsMined.Count);
@@ -705,7 +705,7 @@ public class SqliteSessionStatsRepositoryTests
         }
     }
 
-    // ---- ISK pipeline (plan 18) ---------------------------------------------------
+    // ---- ISK pipeline -------------------------------------------------------------
 
     [Fact]
     public async Task GetSessionStatsAsync_TotalIskMined_is_zero_when_iskCalculator_returns_zero()
@@ -815,7 +815,7 @@ public class SqliteSessionStatsRepositoryTests
         }
     }
 
-    // ---- Crit ISK (plan 36) ------------------------------------------------------
+    // ---- Crit ISK ----------------------------------------------------------------
 
     [Fact]
     public async Task GetSessionStatsAsync_TotalIskFromCrits_is_non_zero_and_CritIskPercent_matches_when_session_has_crit_rows()

@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Queries;
 
 /// <summary>
-/// Plan 35: aggregate-filter behavior in <see cref="SqliteSessionStatsRepository"/>.
+/// Aggregate-filter behavior in <see cref="SqliteSessionStatsRepository"/>.
 /// Tests verify the four exclusion rules (Cyno / Combat / Booster-with-no-m^3 /
 /// Miner-counted) and that the Booster m^3 gate flips correctly.
 /// </summary>
@@ -43,7 +43,7 @@ public class SqliteSessionStatsRepositoryRoleTests
             new StubSdeLookup(),
             NullLogger<SqliteSessionStatsRepository>.Instance);
 
-    /// <summary>Plan 43: SDE stub — role tests do not exercise refined output (ZeroIskCalculator returns none).</summary>
+    /// <summary>SDE stub — role tests do not exercise refined output (ZeroIskCalculator returns none).</summary>
     private sealed class StubSdeLookup : ISdeLookup
     {
         public long? TryGetTypeId(string productName) => null;
@@ -181,7 +181,7 @@ public class SqliteSessionStatsRepositoryRoleTests
     [Fact]
     public async Task PerPilot_byCharacter_lists_Cyno_pilot_with_zeros()
     {
-        // Decision 1.2 = A: per-pilot widgets remain visible for excluded roles.
+        // Per-pilot widgets remain visible for excluded roles.
         using var db = await SeedAsync();
         await InsertTickAsync(db, PilotMinerId, "Miner", 500.0);
         await InsertTickAsync(db, PilotCynoId,  "Cyno",  500.0);

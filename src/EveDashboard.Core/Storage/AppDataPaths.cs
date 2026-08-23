@@ -6,8 +6,8 @@ namespace EveDashboard.Core.Storage;
 /// <remarks>
 /// Single source of truth for the literal folder name <c>EveDashboard</c>
 /// under <see cref="Environment.SpecialFolder.ApplicationData"/>. Consumed by
-/// <c>SessionStore</c> (plan 11), <c>SdeStorage</c> (plan 07), and
-/// <c>LoggingSetup</c> (plan 21). Lives in <c>EveDashboard.Core</c> per the
+/// <c>SessionStore</c>, <c>SdeStorage</c>, and
+/// <c>LoggingSetup</c>. Lives in <c>EveDashboard.Core</c> per the
 /// architecture mandate so siblings consume it without taking peer
 /// dependencies on each other.
 /// </remarks>

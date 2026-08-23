@@ -4,10 +4,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// <see cref="System.Text.Json"/> converter for <see cref="WidgetLayoutItem"/>
-/// (plan 19; plan 24 expanded the descriptor union; the post-plan-25 follow-
-/// up moved the SessionConfig widget to a modal dialog so the union is back
-/// to two kinds). Flattens <see cref="WidgetLayoutItem.Descriptor"/> and
+/// <see cref="System.Text.Json"/> converter for <see cref="WidgetLayoutItem"/>.
+/// Flattens <see cref="WidgetLayoutItem.Descriptor"/> and
 /// <see cref="WidgetLayoutItem.Hidden"/> into a single JSON object so the
 /// persisted shape matches the documented wire format:
 /// <code>
@@ -28,10 +26,10 @@ using System.Text.Json.Serialization;
 /// Unknown <c>kind</c> or missing required fields throw
 /// <see cref="JsonException"/>; the repository layer catches at the top of
 /// <c>GetWidgetLayoutAsync</c>, logs a Warning, and returns null so the app
-/// falls back to the default layout. Per
-/// <c>MEMORY.md -&gt; feedback_no_migrations_until_release</c>, stale JSON
-/// with the now-removed <c>"session_config"</c> kind falls through and the
-/// user lands on the default layout.
+/// falls back to the default layout. Stale JSON with the now-removed
+/// <c>"session_config"</c> kind falls through the same path and the user
+/// lands on the default layout — a deliberate one-time layout reset in place
+/// of a migration for that shape change.
 /// </para>
 /// </remarks>
 public sealed class WidgetLayoutItemJsonConverter : JsonConverter<WidgetLayoutItem>

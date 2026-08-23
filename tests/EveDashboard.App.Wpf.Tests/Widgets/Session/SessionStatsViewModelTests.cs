@@ -5,7 +5,7 @@ using EveDashboard.App.Wpf.Widgets.Session;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 24 thin VM tests for <see cref="SessionStatsViewModel"/>. Verifies
+/// Thin VM tests for <see cref="SessionStatsViewModel"/>. Verifies
 /// each forwarded stat field returns the controller's value, fires INPC
 /// when the matching controller property changes, forwards
 /// <c>LastUpdated</c>, no-ops <c>RefreshAsync</c>, and unsubscribes on

@@ -1,8 +1,8 @@
 namespace EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Read/write surface over the <c>fleet</c> / <c>fleet_pilot</c> tables
-/// (plan 42). Owns only those two tables; the default-fleet pointer and the
+/// Read/write surface over the <c>fleet</c> / <c>fleet_pilot</c> tables.
+/// Owns only those two tables; the default-fleet pointer and the
 /// persisted sort order are <c>setting</c> rows owned by
 /// <see cref="Settings.ISettingsRepository"/> and coordinated by the view-model.
 /// </summary>
@@ -21,7 +21,7 @@ public interface IFleetRepository
     Task<IReadOnlyList<Fleet>> GetFleetsAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Persist a new fleet. The name is trimmed (decision 3.4 = A) before the
+    /// Persist a new fleet. The name is trimmed before the
     /// content id is computed and the row is written. A name already in use is
     /// rejected with <see cref="FleetCreateStatus.DuplicateName"/>.
     /// </summary>
@@ -53,7 +53,7 @@ public sealed record FleetCreateResult(FleetCreateStatus Status, string? FleetId
 
 /// <summary>Outcome categories for a fleet-create attempt.</summary>
 /// <remarks>
-/// There is intentionally no <c>AlreadyExists</c> member (decision 3.1 = A): the
+/// There is intentionally no <c>AlreadyExists</c> member: the
 /// trimmed name is inside the content hash and is uniquely indexed and checked
 /// first, so an identical id always implies an identical name and surfaces as
 /// <see cref="DuplicateName"/>.

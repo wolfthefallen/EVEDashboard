@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Reporting.Lifetime;
 
 /// <summary>
-/// Plan 51: test seam for the Lifetime Totals window. Production wires
+/// Test seam for the Lifetime Totals window. Production wires
 /// <see cref="LifetimeTotalsWindowAdapter"/>; the "Lifetime Totals" button in
 /// the Reports chrome strip calls <see cref="Show"/> with no argument.
 /// </summary>

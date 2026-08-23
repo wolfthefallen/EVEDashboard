@@ -10,10 +10,10 @@
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
     <!--
-        Plan 55: modeless, singleton, hide-on-close Haul Value window. Value a haul
+        Modeless, singleton, hide-on-close Haul Value window. Value a haul
         (pasted item list OR a saved session's refined output) across every station
         in the market catalog and see where it is worth the most. Prices come from
-        the plan-53 price-source router (GoonMetrics / official ESI, per the
+        the price-source router (GoonMetrics / official ESI, per the
         price_source setting). v1 does not persist geometry.
     -->
     <Window.Resources>

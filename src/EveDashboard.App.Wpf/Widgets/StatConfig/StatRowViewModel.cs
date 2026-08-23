@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// One ROW currently rendered in a widget body's stat list (plan 20). Bound by
+/// One ROW currently rendered in a widget body's stat list. Bound by
 /// the <c>ItemsControl</c> in <c>PerPilotWidgetView.xaml</c> /
 /// <c>SessionStatsView.xaml</c>; the widget's body <c>DataTemplate</c> picks
 /// a typography style based on <see cref="Emphasis"/>.
@@ -15,8 +15,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 /// (<see cref="Key"/>); the renderer keeps a 1:1 map from VM property to
 /// <see cref="StatRowViewModel"/> instance for the lifetime of the rendered
 /// list. Property changes on the source VM update <see cref="FormattedValue"/>
-/// in place — no full <c>Stats</c> rebuild needed (per
-/// <c>plans/20</c> Step 4).
+/// in place — no full <c>Stats</c> rebuild needed.
 /// </para>
 /// <para>
 /// Hidden rows (<see cref="StatEntry.Hidden"/> = true) are NOT projected here —
@@ -36,7 +35,7 @@ public sealed partial class StatRowViewModel : ObservableObject
     [ObservableProperty]
     private string _formattedValue = string.Empty;
 
-    /// <summary>Visual emphasis level for this row (plan 20 amendment A1).</summary>
+    /// <summary>Visual emphasis level for this row.</summary>
     [ObservableProperty]
     private StatEmphasis _emphasis;
 

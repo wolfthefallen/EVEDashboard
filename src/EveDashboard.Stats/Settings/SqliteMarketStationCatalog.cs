@@ -16,8 +16,8 @@ using Microsoft.Extensions.Logging;
 /// the singleton <see cref="ISqliteDatabase"/>.
 /// </para>
 /// <para>
-/// <see cref="EnsureSeedDefaultsAsync"/> implements the hybrid seeding policy
-/// from plan 14 round-2 1.5: Jita is re-seeded on every launch via
+/// <see cref="EnsureSeedDefaultsAsync"/> implements a hybrid seeding
+/// policy: Jita is re-seeded on every launch via
 /// <c>INSERT OR IGNORE</c>; C-J6MT is seeded once and never again, gated by
 /// the <c>non_sticky_station_defaults_seeded</c> sentinel in the
 /// <c>setting</c> table.

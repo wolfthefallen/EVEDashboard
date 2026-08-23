@@ -3,7 +3,7 @@ namespace EveDashboard.App.Wpf.Reporting;
 using System.Windows.Controls;
 
 /// <summary>
-/// Plan 34 (revised) — render-thread-animated loading spinner. A static
+/// Render-thread-animated loading spinner. A static
 /// asteroid image sits in the centre; a mining-barge image orbits around it
 /// continuously via a <c>RotateTransform</c> animation on a parent container.
 /// Because <c>RotateTransform</c> is a <c>Freezable</c> and its <c>Angle</c>

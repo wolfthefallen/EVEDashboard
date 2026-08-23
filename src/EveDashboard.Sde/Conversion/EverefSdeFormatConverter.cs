@@ -44,7 +44,7 @@ public sealed class EverefSdeFormatConverter : ISdeFormatConverter
 
         // Schema init happens BEFORE the transaction. PRAGMA journal_mode = WAL
         // (run inside SchemaInitializer) cannot be issued inside an open
-        // transaction. Per plan 08 decision 8.22.
+        // transaction.
         await SchemaInitializer.EnsureSchemaAsync(target, ct).ConfigureAwait(false);
 
         await target.ExecuteNonQueryAsync("BEGIN TRANSACTION", null, ct).ConfigureAwait(false);
@@ -81,7 +81,7 @@ public sealed class EverefSdeFormatConverter : ISdeFormatConverter
         if (!Directory.Exists(jsonFolderPath))
             throw new DirectoryNotFoundException($"SDE JSON folder not found: {jsonFolderPath}");
 
-        // No schema init here — caller's responsibility (decision 8.22). The
+        // No schema init here — caller's responsibility. The
         // updater calls this against the live SDE which has been schema-initialised
         // at app startup; a caller invoking against an uninitialised database
         // will surface a clear missing-table error on the first INSERT.

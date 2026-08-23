@@ -4,7 +4,7 @@ using EveDashboard.Stats.Queries;
 
 /// <summary>
 /// All-time rollup across every saved session, shown in the Reports window's
-/// right pane when no session is selected (plan 46). Computed once during the
+/// right pane when no session is selected. Computed once during the
 /// sidebar's existing per-session pass (<see cref="Queries.IReportingQueries.GetAllSessionSummariesAsync"/>)
 /// by summing the per-session snapshots that pass already produces — never a
 /// second pass and never cross-session pricing.

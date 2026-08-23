@@ -6,10 +6,10 @@
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
                     mc:Ignorable="d">
     <!--
-        Plan 46: the empty-selection lifetime rollup. Shown in the Reports right
-        pane when no session is checked. "Lifetime Totals" header + a two-column
-        Time/ISK block + a Total Refined Output table (Material | Quantity | ISK).
-        Mirrors CompareSessionView (WidgetBase chrome + the same DataGrid chrome).
+        The all-time lifetime rollup widget, hosted by the Lifetime Totals
+        window. "Lifetime Totals" header + a two-column Time/ISK block + a
+        Total Refined Output table (Material | Quantity | ISK). Mirrors
+        CompareSessionView (WidgetBase chrome + the same DataGrid chrome).
     -->
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Lifetime Totals"

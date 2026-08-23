@@ -7,12 +7,15 @@ using System.Windows;
 /// <see cref="MessageBox"/> and shuts the application down with exit code 1.
 /// </summary>
 /// <remarks>
-/// Plan 16 ships this as the only bootstrap-failure UX for three branches:
-/// <see cref="EveDashboard.Core.Configuration.BootstrapConfigResult.AutodetectFailed"/>,
-/// thrown <see cref="EveDashboard.Core.Configuration.BootstrapConfigException"/>,
+/// This is the last-resort bootstrap-failure UX. The recoverable configuration
+/// branches — <see cref="EveDashboard.Core.Configuration.BootstrapConfigResult.AutodetectFailed"/>,
+/// a thrown <see cref="EveDashboard.Core.Configuration.BootstrapConfigException"/>,
 /// and "no characters detected at <c>gamelog_path</c>" surfaced by
-/// <see cref="EveDashboard.Mining.Gamelogs.GamelogDiscoveryService"/>. Plan 17
-/// supersedes by re-routing those branches to the in-app Settings dialog.
+/// <see cref="EveDashboard.Mining.Gamelogs.GamelogDiscoveryService"/> — are
+/// re-routed to the in-app Settings dialog instead, so the user can fix the
+/// gamelog path and retry. This dialog-and-exit path remains for failures with
+/// no in-app recovery: an unexpected exception in the bootstrap chain, a failed
+/// database migration, and the Settings dialog's second consecutive save failure.
 /// </remarks>
 public static class BootstrapErrorReporter
 {

@@ -7,10 +7,10 @@ namespace EveDashboard.App.Wpf.Bootstrap;
 /// taking the WPF process down.
 /// </summary>
 /// <remarks>
-/// Per plan 22.2 *Approach -&gt; Test-seam for the fallback*: the static helper
-/// stays for production use; the interface exists so the second-consecutive
-/// <c>SaveAsync</c> failure path in <c>SettingsDialogViewModel</c> is unit-
-/// testable. Mirrors the <c>IConfirmDialog</c> / <c>ISettingsDialog</c> /
+/// The static helper stays for production use; the interface exists so the
+/// second-consecutive <c>SaveAsync</c> failure path in
+/// <c>SettingsDialogViewModel</c> is unit-testable. Mirrors the
+/// <c>IConfirmDialog</c> / <c>ISettingsDialog</c> /
 /// <c>IAddStationDialog</c> precedent for UI-boundary test seams.
 /// </remarks>
 public interface IBootstrapErrorReporter

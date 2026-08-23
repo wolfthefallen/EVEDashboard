@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf;
 
 /// <summary>
-/// Plan 35: immutable descriptor for a single entry in the Crystal Diagram
+/// Immutable descriptor for a single entry in the Crystal Diagram
 /// window's anomaly dropdown. Pure data — no logic, no I/O.
 /// </summary>
 /// <param name="Id">Stable lowercase snake_case id (e.g. <c>"all"</c>, <c>"griemeer"</c>).

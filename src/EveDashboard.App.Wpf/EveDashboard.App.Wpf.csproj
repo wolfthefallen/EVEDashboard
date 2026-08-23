@@ -32,7 +32,7 @@
          and is reachable from XAML via "/Assets/logo.png" or the longer
          "pack://application:,,,/Assets/logo.png". -->
     <Resource Include="Assets\logo.png" />
-    <!-- Plan 34 (revised) orbital loading spinner assets. Two transparent
+    <!-- Orbital loading spinner assets. Two transparent
          PNGs linked from images/ (single source of truth): the asteroid
          stays static in the centre of the spinner, the mining barge orbits
          around it via a render-thread RotateTransform animation. Replaces
@@ -51,7 +51,7 @@
     <Resource Include="..\..\images\Mineral_to_asteroid_crystal.png">
       <Link>Assets\Mineral_to_asteroid_crystal.png</Link>
     </Resource>
-    <!-- Plan 35: per-anomaly cropped images for the Crystal Diagram window
+    <!-- Per-anomaly cropped images for the Crystal Diagram window
          dropdown. One PNG per nullsec SOV asteroid deposit, cropped from
          the same Mineral_to_asteroid_crystal.png source by the user. Pack
          URIs are pack://application:,,,/Assets/anomaly_<id>.png. -->
@@ -76,7 +76,7 @@
     <Resource Include="..\..\images\anomaly_mordunium.png">
       <Link>Assets\anomaly_mordunium.png</Link>
     </Resource>
-    <!-- Plan 37: auto-pause / auto-resume notification sounds. Linked from
+    <!-- Auto-pause / auto-resume notification sounds. Linked from
          audio/ (single source of truth) so System.Media.SoundPlayer can reach
          them via pack URIs:
            pack://application:,,,/Assets/Miners_have_stopped.wav (auto-pause)
@@ -98,7 +98,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
-    <!-- Plan 50: audio engine for the auto-pause / auto-resume notification
+    <!-- Audio engine for the auto-pause / auto-resume notification
          sounds. Replaces System.Media.SoundPlayer so the volume slider can apply
          a real per-sound gain (SoundPlayer has no volume API). Managed-only — it
          P/Invokes Windows' own audio APIs, so it bundles into the single-file

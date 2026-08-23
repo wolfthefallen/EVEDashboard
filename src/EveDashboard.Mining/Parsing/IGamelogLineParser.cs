@@ -9,9 +9,9 @@ using EveDashboard.Core.Domain;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 10's deliverable. Constructed once and shared across every character
-/// being watched (per-call <c>characterId</c>; the parser itself is per-app, not
-/// per-character). The watcher (plan 12) is the only production caller; tests
+/// Constructed once and shared across every character being watched
+/// (per-call <c>characterId</c>; the parser itself is per-app, not
+/// per-character). <c>RealtimeLogWatcher</c> is the only production caller; tests
 /// in <c>tests/EveDashboard.Mining.Tests/Parsing/</c> exercise the contract directly.
 /// </para>
 /// <para>
@@ -21,9 +21,9 @@ using EveDashboard.Core.Domain;
 ///   <item><description><c>You mined an additional N units of &lt;product&gt;</c> -> <see cref="MiningEventKind.Crit"/></description></item>
 ///   <item><description><c>Additional N units depleted from asteroid as residue</c> -> <see cref="MiningEventKind.Residue"/></description></item>
 /// </list>
-/// <see cref="MiningEventKind.Depleted"/> is intentionally NOT emitted in v1
-/// (decision 10.5 in <c>plans/10-log-line-parser.md</c>: needs a real captured
-/// log line; v2 follow-on plan).
+/// <see cref="MiningEventKind.Depleted"/> is intentionally NOT emitted in v1:
+/// no real captured asteroid-depleted log line exists yet to derive its
+/// pattern from, and log line shapes are never invented.
 /// </para>
 /// </remarks>
 public interface IGamelogLineParser
@@ -39,7 +39,7 @@ public interface IGamelogLineParser
     /// <see cref="MiningEvent.TypeId"/> field is <c>null</c> when the parser
     /// recognized the shape but <see cref="EveDashboard.Core.Lookup.ISdeLookup"/>
     /// did not recognize the captured product name; downstream consumers
-    /// (plan 12's writer) decide what to do with such events.
+    /// (the session-event writer) decide what to do with such events.
     /// Residue events always carry <c>ProductName = ""</c> and
     /// <c>TypeId = null</c> because the EVE residue line carries no ore name.
     /// </returns>

@@ -4,7 +4,7 @@ namespace EveDashboard.Core.Configuration;
 /// Reads and writes the application's bootstrap configuration: the small
 /// set of settings the app must know before SQLite can be opened. v1
 /// schema is exactly one key: <c>gamelog_path</c>. All other user-facing
-/// settings live in the SQL <c>setting</c> table (see plan 14).
+/// settings live in the SQL <c>setting</c> table.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -15,7 +15,7 @@ namespace EveDashboard.Core.Configuration;
 /// <para>
 /// Single-threaded usage assumed: <see cref="LoadAsync"/> runs once at
 /// app startup before the UI opens; <see cref="SaveAsync"/> runs on the
-/// UI thread from the Settings UI (plan 17) on user-edit-and-confirm.
+/// UI thread from the Settings UI on user-edit-and-confirm.
 /// </para>
 /// </remarks>
 public interface IBootstrapConfigLoader

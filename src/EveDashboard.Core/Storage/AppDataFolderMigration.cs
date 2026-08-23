@@ -3,9 +3,9 @@ namespace EveDashboard.Core.Storage;
 /// <summary>
 /// One-time move of the per-user data folder from the legacy
 /// <c>%APPDATA%\EveMiningDashboard</c> to the current
-/// <c>%APPDATA%\EveDashboard</c> (the plan-39 project rename). Runs once at
-/// startup so an existing user keeps every session, the SDE cache, config, and
-/// logs after the rename.
+/// <c>%APPDATA%\EveDashboard</c> (the project was renamed from
+/// EveMiningDashboard to EveDashboard). Runs once at startup so an existing
+/// user keeps every session, the SDE cache, config, and logs after the rename.
 /// </summary>
 /// <remarks>
 /// Idempotent: a no-op once the new folder exists. The move is an atomic
@@ -19,7 +19,7 @@ namespace EveDashboard.Core.Storage;
 /// </remarks>
 public static class AppDataFolderMigration
 {
-    /// <summary>The pre-plan-39 app-data folder name under <c>%APPDATA%</c>.</summary>
+    /// <summary>The pre-rename app-data folder name under <c>%APPDATA%</c>.</summary>
     private const string LegacyFolderName = "EveMiningDashboard";
 
     /// <summary>

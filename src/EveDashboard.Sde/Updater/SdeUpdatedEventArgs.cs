@@ -3,7 +3,7 @@ namespace EveDashboard.Sde.Updater;
 /// <summary>
 /// Payload for <see cref="ISdeUpdater.Updated"/>. Raised exactly once per
 /// successful in-place SDE commit; subscribers should rebuild any caches
-/// keyed off SDE contents (e.g. plan 09's <c>ISdeLookup</c>).
+/// keyed off SDE contents (e.g. <c>ISdeLookup</c>).
 /// </summary>
 public sealed class SdeUpdatedEventArgs : EventArgs
 {

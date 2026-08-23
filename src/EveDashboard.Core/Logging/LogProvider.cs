@@ -10,8 +10,8 @@ namespace EveDashboard.Core.Logging;
 /// (any logging is a no-op).
 /// </summary>
 /// <remarks>
-/// Static accessor pattern is intentional for the v1 first wave — keeps consumers
-/// to a one-line declaration without a DI container in the loop. A future plan
+/// Static accessor pattern is intentional — it keeps consumers
+/// to a one-line declaration without a DI container in the loop. A later change
 /// may migrate to <c>Microsoft.Extensions.DependencyInjection</c>; the migration
 /// is mechanical because every consumer goes through this single accessor.
 /// </remarks>

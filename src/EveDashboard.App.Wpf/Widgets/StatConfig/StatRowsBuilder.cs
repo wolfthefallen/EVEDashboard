@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Reflection helper that takes a widget-VM type plus the user's saved
 /// <see cref="WidgetStatsConfig"/> and returns the two ordered descriptor
-/// lists the renderer / popup need (plan 20).
+/// lists the renderer / popup need.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,12 +21,12 @@ using Microsoft.Extensions.Logging;
 ///   emit a descriptor (saved emphasis + saved hidden flag). For each
 ///   reorderable property NOT mentioned in the saved entries, insert at its
 ///   <see cref="StatRowAttribute.DefaultOrder"/> position
-///   (decision 7.1 = B — future-stat inheritance).</item>
+///   (future-stat inheritance).</item>
 /// <item><b>HideOnly</b>: emit all hide-only properties in
 ///   <see cref="StatRowAttribute.DefaultOrder"/> ascending order. Apply each
 ///   property's saved hidden flag if a matching saved entry exists.</item>
 /// <item>Saved entries with no matching property on the current VM are
-///   IGNORED (logged at Debug). Handles the "future plan removed a stat"
+///   IGNORED (logged at Debug). Handles the "a later version removed a stat"
 ///   edge case without a config-file rewrite.</item>
 /// </list>
 /// </para>
@@ -112,9 +112,9 @@ public static class StatRowsBuilder
         }
 
         // 2) Append any reorderable property NOT in the saved set, sorted by DefaultOrder.
-        // Per decision 7.1 = B "Existing user customisation persists with no implicit
-        // reordering of the user's already-positioned stats" — missing entries (which
-        // in practice means future-plan-added stats) appear AFTER the user's saved
+        // Existing user customisation persists with no implicit
+        // reordering of the user's already-positioned stats — missing entries (which
+        // in practice means stats added in later versions) appear AFTER the user's saved
         // prefix, sorted among themselves by DefaultOrder. Interleaving into the saved
         // order would scramble the user's chosen positions the next time a release
         // adds a new stat with a small DefaultOrder.

@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.About;
 
 /// <summary>
-/// Test seam for the About reference window (plan 52). Production wires
+/// Test seam for the About reference window. Production wires
 /// <see cref="AboutWindowAdapter"/>; the chrome "About" button on
 /// <see cref="MainWindow"/> calls <see cref="Show"/> with no argument.
 /// </summary>

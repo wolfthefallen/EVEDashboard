@@ -15,7 +15,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 35: <see cref="SqliteReportingQueries"/> applies the same role-exclusion
+/// <see cref="SqliteReportingQueries"/> applies the same role-exclusion
 /// CTE as the live stats repository. Verify both <c>OreBreakdown</c> queries
 /// and that <c>GetPilotsForSessionAsync</c> propagates <c>sp.role</c> into
 /// <see cref="PilotSummaryRow.Role"/>.
@@ -51,7 +51,7 @@ public class SqliteReportingQueriesRoleTests
 
     private static async Task<string> InsertSessionAsync(SqliteDatabase db, string name)
     {
-        // Plan 38: content-addressed sha256 hex session id; distinct names hash distinct.
+        // Content-addressed sha256 hex session id; distinct names hash distinct.
         var sessionId = EveDashboard.Core.Sessions.SessionId.Compute(name, ToIso(T0));
         await db.ExecuteNonQueryAsync(
             "INSERT INTO session (session_id, name, notes) VALUES ($sid, $n, NULL)",

@@ -7,8 +7,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 44 — the connection gate + <see cref="ISqliteDatabase.WithTransactionAsync{T}"/>.
-/// These reproduce the conditions behind BUGS.md Bug 1 (concurrent access to the
+/// Tests for the connection gate + <see cref="ISqliteDatabase.WithTransactionAsync{T}"/>.
+/// These reproduce the original concurrency defect (concurrent access to the
 /// single non-thread-safe connection corrupted the driver and threw a
 /// non-<c>DbException</c>) and verify the transaction wrapper's atomicity and the
 /// re-entrant un-gated path.

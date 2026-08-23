@@ -12,8 +12,8 @@ using System.Windows.Controls;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Templated <see cref="ContentControl"/> per plan-17 amendment 8.4 = B
-/// (templated <see cref="ContentControl"/>). The default <see cref="Control.Template"/>
+/// A code-only templated <see cref="ContentControl"/>, deliberately not a
+/// XAML UserControl. The default <see cref="Control.Template"/>
 /// lives in <c>Themes/Generic.xaml</c> and is auto-discovered by WPF via the
 /// assembly-level <see cref="ThemeInfoAttribute"/> in <c>AssemblyInfo.cs</c>.
 /// The template renders a border + Padding=10 + a <c>LastUpdated</c> chrome line

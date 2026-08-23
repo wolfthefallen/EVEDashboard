@@ -7,8 +7,8 @@ using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
 /// Projects the reorderable subset of a <see cref="StatRowsResolution"/> onto
-/// an <see cref="ObservableCollection{T}"/> of <see cref="StatRowViewModel"/>
-/// (plan 20). Subscribes to the source VM's <see cref="INotifyPropertyChanged"/>
+/// an <see cref="ObservableCollection{T}"/> of <see cref="StatRowViewModel"/>.
+/// Subscribes to the source VM's <see cref="INotifyPropertyChanged"/>
 /// so individual stat property changes update the matching row's
 /// <see cref="StatRowViewModel.FormattedValue"/> in place — no full
 /// <c>Stats</c> rebuild on every refresh.

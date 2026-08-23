@@ -6,7 +6,7 @@
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
     <!--
-        Plan 52: modeless, singleton, hide-on-close About window (mirrors
+        Modeless, singleton, hide-on-close About window (mirrors
         CrystalDiagramWindow / LifetimeTotalsWindow). Size + position persist via
         about_window_geometry (default 460x560 centered on first launch). The
         content lives in a ScrollViewer so the legal paragraph never clips on a
@@ -60,7 +60,7 @@
                     Margin="0,12"
                     Background="{DynamicResource BorderBrush}" />
 
-            <!-- CCP legal statement (verbatim from README.md). -->
+            <!-- CCP legal statement. Keep the wording identical to the notice in the repository README. -->
             <TextBlock TextWrapping="Wrap"
                        FontSize="11"
                        Foreground="{DynamicResource SecondaryFontBrush}"

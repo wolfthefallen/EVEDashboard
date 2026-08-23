@@ -6,7 +6,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 /// <summary>
 /// Resolved stat-row metadata combining <see cref="StatRowAttribute"/> from
 /// reflection with the user's saved per-row state from
-/// <see cref="WidgetStatsConfig"/> (plan 20). Produced by
+/// <see cref="WidgetStatsConfig"/>. Produced by
 /// <see cref="StatRowsBuilder.Resolve"/>; consumed by
 /// <see cref="StatRowsRenderer"/> (for the widget body) and the popup
 /// view-model (for the editable working copy).

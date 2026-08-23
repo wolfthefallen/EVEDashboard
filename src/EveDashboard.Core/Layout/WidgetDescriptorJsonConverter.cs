@@ -5,9 +5,7 @@ using System.Text.Json.Serialization;
 
 /// <summary>
 /// <see cref="System.Text.Json"/> polymorphic converter for
-/// <see cref="WidgetDescriptor"/> (plan 19; plan 24 expanded the union; the
-/// post-plan-25 follow-up moved the SessionConfig widget to a modal dialog,
-/// so the union is back to two kinds). Reads the <c>kind</c> string
+/// <see cref="WidgetDescriptor"/>. Reads the <c>kind</c> string
 /// discriminator and constructs the matching nested record
 /// (<see cref="WidgetDescriptor.SessionStats"/> or
 /// <see cref="WidgetDescriptor.Pilot"/>).
@@ -24,9 +22,10 @@ using System.Text.Json.Serialization;
 /// Unknown <c>kind</c> values throw <see cref="JsonException"/>; the
 /// repository layer catches at the top of <c>GetWidgetLayoutAsync</c>, logs
 /// a Warning, and returns null so the app falls back to the default layout.
-/// Per <c>MEMORY.md -&gt; feedback_no_migrations_until_release</c>, stale
-/// JSON with the now-removed <c>"session_config"</c> kind falls through to
-/// the unknown-kind branch and the user lands on the default layout.
+/// Stale JSON with the now-removed <c>"session_config"</c> kind falls through
+/// to the unknown-kind branch and the user lands on the default layout — a
+/// deliberate one-time layout reset in place of a migration for that shape
+/// change.
 /// </para>
 /// </remarks>
 public sealed class WidgetDescriptorJsonConverter : JsonConverter<WidgetDescriptor>

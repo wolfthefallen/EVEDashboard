@@ -88,7 +88,7 @@ public class SqliteFleetRepositoryTests
         fleets.Should().ContainSingle();
     }
 
-    // ---- Trim before save (decision 3.4 = A) --------------------------------------
+    // ---- Trim before save --------------------------------------
 
     [Fact]
     public async Task CreateFleetAsync_trims_name_before_save_so_padded_duplicate_is_rejected()

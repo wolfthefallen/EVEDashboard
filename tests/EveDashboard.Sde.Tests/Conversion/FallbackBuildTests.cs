@@ -8,7 +8,7 @@ using Xunit;
 namespace EveDashboard.Sde.Tests.Conversion;
 
 /// <summary>
-/// Manual-only test that drives Step 8 of plan 06: builds the shipped fallback
+/// Manual-only test that builds the shipped fallback
 /// SQLite from a freshly-extracted everef.net JSON folder. Skipped under default
 /// <c>dotnet test</c> runs.
 /// </summary>
@@ -27,7 +27,7 @@ namespace EveDashboard.Sde.Tests.Conversion;
 /// </remarks>
 public class FallbackBuildTests
 {
-    [Fact(Skip = "Run manually to regenerate fallback. See plan 06 step 8 / class XML doc.")]
+    [Fact(Skip = "Run manually to regenerate the fallback SDE; the class XML doc describes the procedure.")]
     public async Task RegenerateFallback()
     {
         var jsonPath = Environment.GetEnvironmentVariable("EVE_SDE_JSON_PATH")
@@ -71,7 +71,7 @@ public class FallbackBuildTests
         var oreCount = await verifyDb.QueryScalarAsync<long>("SELECT COUNT(*) FROM types WHERE is_ore = 1");
         oreCount.Should().BeGreaterThan(50, "expect plenty of mineable ore types");
 
-        // Print stats so the executor can record them in plan 06's execution notes.
+        // Print build stats so whoever regenerates the fallback can record them.
         Console.WriteLine($"=== Fallback build stats ===");
         Console.WriteLine($"  File:           {outputPath}");
         Console.WriteLine($"  File size:      {fileInfo.Length:N0} bytes ({fileInfo.Length / 1024.0 / 1024.0:F2} MB)");

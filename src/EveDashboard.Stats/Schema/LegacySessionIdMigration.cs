@@ -6,7 +6,7 @@ using EveDashboard.Core.Sessions;
 using EveDashboard.Core.Storage;
 
 /// <summary>
-/// One-time, in-place migration of a pre-plan-38 session database to the
+/// One-time, in-place migration of a legacy integer-id session database to the
 /// content-addressed (<see cref="SessionId"/>) schema: rewrites every
 /// <c>session_id</c> from an autoincrement integer to its sha256 hex id, and
 /// stamps each <c>market_data</c> row with the session that owns it (by
@@ -40,7 +40,7 @@ using EveDashboard.Core.Storage;
 public static class LegacySessionIdMigration
 {
     /// <summary>
-    /// True if <paramref name="db"/> is a pre-plan-38 database that needs the
+    /// True if <paramref name="db"/> is a legacy integer-id database that needs the
     /// sha256-id migration. False for a fresh DB and for an already-migrated DB
     /// (idempotent — safe to call on every launch).
     /// </summary>

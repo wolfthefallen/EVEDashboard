@@ -11,7 +11,7 @@ namespace EveDashboard.Core.Sessions;
 /// <see cref="PilotRoleExtensions.ToCanonicalString"/>. The canonical strings
 /// match the <c>CHECK</c> constraint on <c>session_pilot.role</c> and
 /// <c>log.role</c> exactly (case-sensitive) so the DB and the C# enum stay in
-/// lockstep. Plan 35.
+/// lockstep.
 /// </remarks>
 public enum PilotRole
 {

@@ -5,7 +5,7 @@ using EveDashboard.App.Wpf.Widgets;
 using EveDashboard.Core.Layout;
 
 /// <summary>
-/// One renderable entry in <see cref="LayoutCoordinator.Items"/> (plan 19).
+/// One renderable entry in <see cref="LayoutCoordinator.Items"/>.
 /// Wraps a typed <see cref="EveDashboard.Core.Layout.WidgetDescriptor"/>, the
 /// matching VM (Session or per-pilot), the user's preferred display name
 /// (rendered in the chrome popup's hidden-widget list), and an INPC-bindable
@@ -21,8 +21,8 @@ using EveDashboard.Core.Layout;
 /// </para>
 /// <para>
 /// <see cref="IsHidden"/> being <c>true</c> does NOT remove the item from
-/// the collection — it just collapses the View. Per round-1 decision 2.3 = A
-/// the underlying VM continues receiving stat refreshes from the per-pilot
+/// the collection — it just collapses the View. The underlying VM continues
+/// receiving stat refreshes from the per-pilot
 /// coordinator while hidden, so re-showing the widget is instant with live
 /// data.
 /// </para>
@@ -38,7 +38,7 @@ public sealed partial class WidgetItem : ObservableObject
     /// <summary>Display name used by the chrome popup's hidden-widget list. <c>"Session"</c> for the singleton, the pilot name for a per-pilot item.</summary>
     public string DisplayName { get; }
 
-    /// <summary>If true, the View is collapsed in the dashboard. The VM continues receiving stat refreshes per round-1 2.3 = A.</summary>
+    /// <summary>If true, the View is collapsed in the dashboard. The VM continues receiving stat refreshes while hidden.</summary>
     [ObservableProperty]
     private bool _isHidden;
 

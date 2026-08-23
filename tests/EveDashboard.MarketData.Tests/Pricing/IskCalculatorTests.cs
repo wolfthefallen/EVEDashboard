@@ -125,7 +125,7 @@ public class IskCalculatorTests
     [Fact]
     public async Task ComputeAsync_veldspar_worked_example_matches_canonical_algorithm()
     {
-        // Canonical worked example from MEMORY.md -> project_isk_calculation:
+        // Canonical worked example of the ISK algorithm:
         // 1,000 Veldspar (portion 100, 415 Tritanium per batch) at 90.63% yield, Tritanium @ 5.50:
         // batches = 10, raw Tritanium = 4150, floor(4150 * 0.9063) = 3761, * 5.50 = 20685.50.
         await using var db = await SeededDbAsync();
@@ -286,7 +286,7 @@ public class IskCalculatorTests
     [Fact]
     public async Task ComputeAsync_reads_price_regardless_of_station_id_argument()
     {
-        // Plan 38 amendment (Bug A): the price read is STATION-BLIND. The price
+        // The price read is STATION-BLIND. The price
         // was captured at Jita; valuing the session under a DIFFERENT selected
         // station (allowLazyFetch:false so no fetch can paper over it) must still
         // find and use the captured Jita price. station_id is fetch-target only.
@@ -304,7 +304,7 @@ public class IskCalculatorTests
             "the read keys on session_id + type_id only; the capture station is irrelevant to reporting");
     }
 
-    // ---- Plan 25: IskByInputType per-input breakdown ------------------------------
+    // ---- IskByInputType per-input breakdown ---------------------------------------
 
     [Fact]
     public async Task IskByInputType_empty_when_input_dict_empty()
@@ -398,7 +398,7 @@ public class IskCalculatorTests
         result.IskByInputType.Should().ContainKey(30375L).WhoseValue.Should().Be(0.0);
     }
 
-    // ---- Plan 43: RefinedQuantitiesByMaterial -------------------------------------
+    // ---- RefinedQuantitiesByMaterial ----------------------------------------------
 
     /// <summary>
     /// Two ores sharing a base material (Tritanium) plus a second material on the
@@ -531,7 +531,7 @@ public class IskCalculatorTests
         result.RefinedQuantitiesByMaterial.Should().BeEmpty();
     }
 
-    // ---- Plan 45: IskByMaterial -------------------------------------------------
+    // ---- IskByMaterial ----------------------------------------------------------
 
     [Fact]
     public async Task ComputeAsync_populates_IskByMaterial_reconciling_to_TotalIsk()

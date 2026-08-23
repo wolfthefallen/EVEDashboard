@@ -7,7 +7,7 @@ using EveDashboard.App.Wpf.Geometry;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 25 Reports child window — modeless, opened from the chrome-bar
+/// Reports child window — modeless, opened from the chrome-bar
 /// Reports button via <see cref="IReportsWindow.Show"/>. Manages its own
 /// geometry persistence via the Reports-flavoured
 /// <see cref="WindowGeometryService"/> (registered with the Reports settings
@@ -70,7 +70,7 @@ public partial class ReportsWindow : Window
             _log.LogWarning(ex, "Reports VM InitializeAsync failed; sidebar may be empty.");
         }
 
-        // Plan 47: restore + persist the sidebar grid's column widths (per type, key "sessions").
+        // Restore + persist the sidebar grid's column widths (per type, key "sessions").
         // The window is a Hide-on-close singleton, so this binds once for the app lifetime.
         if (_sidebarWidthBinder is null)
         {

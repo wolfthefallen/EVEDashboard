@@ -11,8 +11,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// <summary>
 /// SessionController test workhorse — covers state-machine transitions,
 /// lifecycle SQL row INSERTs/UPDATEs, IConfirmDialog cancel/confirm
-/// branches, template-variable expansion at Start, ISK-stub assertion per
-/// <c>MEMORY.md -&gt; feedback_no_test_shimming</c>, and Resume-mode hydration
+/// branches, template-variable expansion at Start, the ISK-stub assertion
+/// (asserts the real zero the stub returns), and Resume-mode hydration
 /// from prior open <c>session_time</c> rows.
 ///
 /// DispatcherTimer.Tick is not exercised in xUnit (no message loop without an
@@ -172,14 +172,14 @@ public class SessionControllerTests
     }
 
     /* ---------- Start lifecycle ----------
-       Plan 42: Start is driven by a fleet roster passed to the new
-       StartAsync(roster) method. The CanExecute logic (name + a selected fleet)
-       moved to SessionConfigDialogViewModel and is covered by its tests. */
+       Start is driven by a fleet roster passed to StartAsync(roster). The
+       CanExecute logic (name + a selected fleet) lives in
+       SessionConfigDialogViewModel and is covered by its tests. */
 
     [Fact]
     public async Task StartAsync_inserts_session_session_pilot_session_time_rows_and_transitions_to_Paused()
     {
-        // Plan 37: Start now lands in Paused (Start-as-paused) so the user can
+        // Start lands in Paused (Start-as-paused) so the user can
         // configure pilot roles before mining counts. The first session_time
         // row carries is_pause=1.
         using var f = new SessionControllerTestFixture();
@@ -210,7 +210,7 @@ public class SessionControllerTests
     [Fact]
     public async Task StartAsync_resets_TotalTimeMined_so_pre_tick_render_does_not_show_stale_prior_session_time()
     {
-        // Plan 24 Bug 2: after Stop the SessionStats widget continues to show
+        // Regression guard: after Stop the SessionStats widget continues to show
         // the just-ended session's frozen elapsed time. When Start fires, the
         // new TotalTimeMined must be zeroed BEFORE the first 1Hz tick so the
         // user doesn't see the stale time flash on screen for ~1 second.
@@ -259,7 +259,7 @@ public class SessionControllerTests
     [Fact]
     public async Task StartAsync_mutates_active_session_context_to_Paused_with_new_id()
     {
-        // Plan 37: ActiveSession.State now flips to Paused (was Running) so
+        // ActiveSession.State flips to Paused (not Running) so
         // the writer's drop rules treat events correctly until the user clicks
         // Continue or a Tick/Crit auto-resumes.
         using var f = new SessionControllerTestFixture();
@@ -325,7 +325,7 @@ public class SessionControllerTests
             var openActiveCount = await ScalarLongAsync(f, "SELECT COUNT(*) FROM session_time WHERE is_pause = 0 AND stop_time IS NULL");
             openActiveCount.Should().Be(1);
 
-            // Plan 37: the StartAsync helper does Start (writes is_pause=1) +
+            // The StartAsync helper does Start (writes is_pause=1) +
             // Resume (closes it), so by the time the explicit manual Pause + Resume
             // cycle finishes there are TWO closed pause rows in session_time:
             // one from Start-as-paused, one from the manual Pause/Resume.
@@ -367,7 +367,7 @@ public class SessionControllerTests
     [Fact]
     public async Task StopAsync_dialog_confirmed_closes_session_time_and_transitions_to_Stopped()
     {
-        // Plan 23 decision 1.1 = A — Stop now lands in Stopped mode (was Config).
+        // Stop lands in Stopped mode (not Config).
         using var f = new SessionControllerTestFixture(dialogResult: true);
         using var vm = f.CreateViewModel();
         await StartAsync(f, vm);
@@ -384,10 +384,10 @@ public class SessionControllerTests
     [Fact]
     public async Task StopAsync_resets_active_session_lifecycle_but_preserves_display_state()
     {
-        // Plan 23: lifecycle private fields + ActiveSessionContext still reset
+        // Lifecycle private fields + ActiveSessionContext still reset
         // (the session is genuinely over), but bound display props PRESERVED so
-        // the Stopped-mode view shows the just-ended session. (Plan 42 removed
-        // the controller's pilot list — the fleet picker now lives in the dialog.)
+        // the Stopped-mode view shows the just-ended session. (The controller
+        // has no pilot list — the fleet picker lives in the dialog.)
         using var f = new SessionControllerTestFixture(dialogResult: true);
         using var vm = f.CreateViewModel();
         await StartAsync(f, vm);
@@ -403,7 +403,7 @@ public class SessionControllerTests
             "DisplaySessionName must remain visible in Stopped mode");
     }
 
-    /* ---------- Resume from app-launch Paused (plan 24 collapsed Resume mode into Paused) ---------- */
+    /* ---------- Resume from app-launch Paused ---------- */
 
     [Fact]
     public async Task ResumeAsync_from_app_launch_paused_was_running_starts_writer_watcher_and_transitions_to_Running()
@@ -461,7 +461,7 @@ public class SessionControllerTests
     {
         // Reproduces the user's bug: EVE created a newer log file for the pilot
         // between app launch (when the Character record was captured) and Start.
-        // Plan 42 front-loads a FRESH discovery snapshot and resolves the roster
+        // Start front-loads a FRESH discovery snapshot and resolves the roster
         // against it, so the watcher follows the live file — the stale launch-time
         // path is never used (discovery IS the source now; the old post-COMMIT
         // "log file refreshed" reconcile is gone).
@@ -526,7 +526,7 @@ public class SessionControllerTests
         }
     }
 
-    /* ---------- ISK stub assertion (per MEMORY.md feedback_no_test_shimming) ---------- */
+    /* ---------- ISK stub assertion (assert the real stub value, never shim it) ---------- */
 
     [Fact]
     public async Task IskFields_render_zero_until_plan_18()
@@ -567,8 +567,8 @@ public class SessionControllerTests
 
     /// <summary>
     /// Helper that brings the controller to the Running state in one step.
-    /// Plan 37: Start lands in Paused (Start-as-paused), so tests that want a
-    /// Running session must follow up with ResumeCommand. Plan 42: Start takes a
+    /// Start lands in Paused (Start-as-paused), so tests that want a
+    /// Running session must follow up with ResumeCommand. Start takes a
     /// fleet roster — callers that want to assert on the post-Start state call
     /// <c>vm.StartAsync(f.Roster())</c> directly instead of this helper.
     /// </summary>
@@ -601,7 +601,7 @@ public class SessionControllerTests
         var pilots = participatingPilots ?? f.Characters;
         var nowIso = DateTimeOffset.UtcNow.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
 
-        // Plan 38: session_id is a content-addressed sha256 hex string (no
+        // session_id is a content-addressed sha256 hex string (no
         // autoincrement). Compute one from the (unique) session name so each seed
         // gets a distinct, well-formed id.
         var sid = EveDashboard.Core.Sessions.SessionId.Compute(sessionName, nowIso);

@@ -6,17 +6,17 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Loads the right WPF <see cref="ResourceDictionary"/> for the current theme
-/// at app startup, and (for plan 17's Settings UI) re-applies the dictionary
-/// when the persisted theme value changes.
+/// at app startup, and re-applies the dictionary when the persisted theme
+/// value changes (the Settings dialog's theme picker).
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per plan 16 decisions 2.2 = A and 16.U: the WPF view tree references all
-/// theme-derived brushes via <c>{DynamicResource ...}</c>, which means
-/// re-merging a different <c>ResourceDictionary</c> at runtime is enough to
-/// retheme every visible control with no restart. Plan 16 ships with no UI
-/// to fire the swap; the subscription is dormant until plan 17's Settings UI
-/// calls <see cref="ISettingsRepository.SetThemeAsync"/>.
+/// The WPF view tree references all theme-derived brushes via
+/// <c>{DynamicResource ...}</c>, which means re-merging a different
+/// <c>ResourceDictionary</c> at runtime is enough to retheme every visible
+/// control with no restart. The swap fires through the
+/// <see cref="ISettingsRepository.SettingChanged"/> subscription whenever the
+/// Settings dialog calls <see cref="ISettingsRepository.SetThemeAsync"/>.
 /// </para>
 /// <para>
 /// The service is idempotent — applying the same theme twice in a row is a
@@ -97,12 +97,11 @@ public sealed class ThemeService
 
         // Replace any prior theme dictionary by Source. Idempotent — re-applying
         // the same theme removes the old entry and adds the new one.
-        // Bug 2 fix (2026-05-03): match Light.xaml / Dark.xaml LITERALLY, not
-        // any path under /Themes/. Plan 22.1 introduced Themes/Controls.xaml
-        // (the global Button + TextBox style sheet) which the previous
-        // /Themes/ substring predicate accidentally removed on every Apply,
-        // taking the global Button style out of scope and reverting all
-        // buttons to OS Aero defaults.
+        // Match Light.xaml / Dark.xaml LITERALLY, not any path under /Themes/:
+        // Themes/Controls.xaml (the global Button + TextBox style sheet) also
+        // lives there, and an earlier /Themes/ substring predicate removed it
+        // on every Apply, taking the global Button style out of scope and
+        // reverting all buttons to OS Aero defaults.
         for (int i = merged.Count - 1; i >= 0; i--)
         {
             var src = merged[i].Source;

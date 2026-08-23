@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Settings;
 
 /// <summary>
-/// Plan 20: per-widget stat customisation. Covers the four new methods on
+/// Per-widget stat customisation. Covers the four methods on
 /// <see cref="SqliteSettingsRepository"/> — <c>Get/SetSessionStatsConfigAsync</c>
 /// and <c>Get/SetPerPilotStatsConfigAsync</c> — plus their setting key shapes,
 /// null/malformed branches, and SettingChanged-event semantics.

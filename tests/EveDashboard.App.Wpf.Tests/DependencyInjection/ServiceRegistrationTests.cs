@@ -62,7 +62,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,
@@ -96,7 +96,7 @@ public class ServiceRegistrationTests
     [Fact]
     public async Task Resolved_PerPilotWidgetCoordinator_uses_sessionDb_for_session_pilot_query()
     {
-        // Plan 17 regression: PerPilotWidgetCoordinator queries session_pilot via the
+        // Regression: PerPilotWidgetCoordinator queries session_pilot via the
         // sessionDb factory lambda (NOT via ISqliteDatabase resolution per the dual-DB
         // note in ServiceRegistration.cs). If wired to sdeDb this throws "no such table:
         // session_pilot" inside the internal HandleActiveSessionChangedAsync.
@@ -121,7 +121,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,
@@ -152,7 +152,7 @@ public class ServiceRegistrationTests
     [Fact]
     public async Task Resolved_MainWindowViewModel_composes_layout_coordinator_and_session()
     {
-        // Plan 19 wiring: MainWindowViewModel takes (LayoutCoordinator).
+        // MainWindowViewModel takes (LayoutCoordinator).
         // DI must resolve LayoutCoordinator as a singleton; MainWindowViewModel.Session
         // routes back to the coordinator's SessionViewModel proxy (same singleton as the
         // SessionController resolved directly).
@@ -177,7 +177,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,
@@ -208,7 +208,7 @@ public class ServiceRegistrationTests
     [Fact]
     public async Task Resolved_LayoutCoordinator_uses_sessionDb_for_widget_layout_io()
     {
-        // Plan 19 wiring: LayoutCoordinator must read/write widget_layout against sessionDb.
+        // LayoutCoordinator must read/write widget_layout against sessionDb.
         // If wired to sdeDb (no setting table), GetWidgetLayoutAsync throws.
         await using var sessionDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
         await SchemaInitializer.EnsureSchemaAsync(sessionDb);
@@ -231,7 +231,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,
@@ -283,7 +283,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,
@@ -314,7 +314,7 @@ public class ServiceRegistrationTests
     [Fact]
     public async Task Resolved_SessionConfigViewModel_and_SessionStatsViewModel_share_singleton_controller()
     {
-        // Plan 24: both thin VMs are singletons that wrap the singleton SessionController.
+        // Both thin VMs are singletons that wrap the singleton SessionController.
         // DI must hand back the same controller reference to both.
         await using var sessionDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
         await SchemaInitializer.EnsureSchemaAsync(sessionDb);
@@ -337,7 +337,7 @@ public class ServiceRegistrationTests
             var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
             IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
 
-            var (priceClient, priceFetcher, iskCalc) = Plan18PricingFactory.Build(
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
                 sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
             using var sp = ServiceRegistration.BuildServiceProvider(
                 NullLoggerFactory.Instance,

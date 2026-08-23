@@ -16,8 +16,8 @@ namespace EveDashboard.Core.Pricing;
 /// </param>
 /// <param name="FetchedAt">Wall-clock timestamp the price was fetched at (UTC).</param>
 /// <remarks>
-/// Persisted as one row in the <c>market_data</c> table per
-/// <c>docs/market-schema.md</c>. Every fetch is a new INSERT; old rows are
+/// Persisted as one row in the <c>market_data</c> table.
+/// Every fetch is a new INSERT; old rows are
 /// immutable history.
 /// </remarks>
 public sealed record MarketPrice(

@@ -14,15 +14,13 @@
         Background="{DynamicResource BackgroundBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
     <!--
-        Plan 19 layout: outer 2-row Grid.
+        Layout: outer 2-row Grid.
         Row 0 = chrome row (Auto height); session controls (left) + Hidden-widgets popup
                 trigger + Settings (right).
         Row 1 = a single ScrollViewer + ItemsControl + WrapPanel containing
                 ALL widgets (Session + per-pilots) in user-definable order.
                 Drag-and-drop reorder via GongSolutions; per-widget hide via the
-                chrome-template "x" button (plan 19 Generic.xaml).
-        The previous plan-22.1 3-column row 1 (Session column | GridSplitter |
-        per-pilot UniformGrid) is gone — replaced by the unified flow.
+                chrome-template "x" button (Generic.xaml).
     -->
     <Window.Resources>
         <session:SessionModeToVisibilityConverter x:Key="ModeToVis" />
@@ -32,8 +30,8 @@
         <!-- Implicit DataTemplates for the heterogeneous flow.
              ItemsSource is ObservableCollection<WidgetItem> bound to Layout.Items;
              each WidgetItem is rendered by the WidgetItem template below, which
-             switches on ViewModel type via implicit DataType=. Post-plan-25
-             follow-up: the SessionConfig widget moved to a modal dialog
+             switches on ViewModel type via implicit DataType=. The
+             SessionConfig widget lives in a modal dialog
              (SessionConfigDialog), so only the SessionStats VM template
              remains here. -->
         <DataTemplate DataType="{x:Type session:SessionStatsViewModel}">
@@ -43,7 +41,7 @@
             <pilot:PerPilotWidgetView />
         </DataTemplate>
 
-        <!-- Plan 20: implicit DataTemplate for the cog popup VM. The chrome's
+        <!-- Implicit DataTemplate for the cog popup VM. The chrome's
              Popup ContentPresenter resolves StatConfigPopupViewModel through this. -->
         <DataTemplate DataType="{x:Type sc:StatConfigPopupViewModel}">
             <sc:StatConfigPopupView />
@@ -65,15 +63,14 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Plan 22.1 chrome row + plan 19 Hidden-widgets dropdown + plan 24 button reshape.
-             ALL session controls (left) + Hidden-widgets popup + Settings (right).
+        <!-- Chrome row: ALL session controls (left) + Hidden-widgets popup + Settings (right).
              Buttons toggle visibility based on Session.Mode:
                 Config  -> Start
                 Running -> Pause + Stop
                 Paused  -> Resume + Stop
                 Stopped -> New Session
              ModalShadowEffect gives the chrome row a visual lift above the widget grid below.
-             Per MEMORY.md -> feedback_chrome_bar_buttons_only, the chrome row holds buttons ONLY (no status text). -->
+             By explicit user preference, the chrome row holds buttons ONLY (no status text). -->
         <Border Grid.Row="0"
                 Background="{DynamicResource BackgroundBrush}"
                 BorderBrush="{DynamicResource WidgetBorderBrush}"
@@ -82,7 +79,7 @@
                 Panel.ZIndex="1"
                 Effect="{DynamicResource ModalShadowEffect}">
             <DockPanel LastChildFill="False">
-                <!-- About (plan 52, right-aligned). Declared FIRST with Dock=Right so it lands
+                <!-- About (right-aligned). Declared FIRST with Dock=Right so it lands
                      at the rightmost edge. Opens a modeless AboutWindow with version, GitHub
                      link, SDE date, thank-yous, and the CCP legal statement. -->
                 <Button DockPanel.Dock="Right"
@@ -106,7 +103,7 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
-                <!-- Plan 25 Reports button. Declared AFTER Settings so it lands to Settings' left.
+                <!-- Reports button. Declared AFTER Settings so it lands to Settings' left.
                      Modeless: Show() rather than ShowDialog() — user can keep mining while reviewing. -->
                 <Button DockPanel.Dock="Right"
                         x:Name="ReportsButton"
@@ -131,7 +128,7 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
-                <!-- Plan 55 Haul Value button. Declared AFTER Crystal Diagram so it lands to its left.
+                <!-- Haul Value button. Declared AFTER Crystal Diagram so it lands to its left.
                      Opens a modeless Haul Value window (multi-hub valuation of a pasted list or a session). -->
                 <Button DockPanel.Dock="Right"
                         x:Name="HaulValueButton"
@@ -143,7 +140,7 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
-                <!-- Plan 19 Hidden-widgets dropdown. Declared AFTER Reports so it lands further to the left.
+                <!-- Hidden-widgets dropdown. Declared AFTER Reports so it lands further to the left.
                      Visible only when at least one widget is hidden. Toggles the popup containing the list of hidden widgets. -->
                 <ToggleButton DockPanel.Dock="Right"
                               x:Name="HiddenWidgetsButton"
@@ -217,9 +214,9 @@
                     </Border>
                 </Popup>
 
-                <!-- Pause (Running mode, left-aligned). Plan 24 split the prior toggle into
-                     two separate buttons (Pause + Resume) with literal Content; the
-                     BoolToPauseLabelConverter is gone with the IsPaused field. -->
+                <!-- Pause (Running mode, left-aligned). Pause and Resume are
+                     two separate buttons with literal Content, not one toggle
+                     with a converted label. -->
                 <Button DockPanel.Dock="Left"
                         x:Name="PauseButton"
                         Content="Pause"
@@ -231,10 +228,10 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
-                <!-- Continue (Paused mode, left-aligned). Plan 37 renamed Resume -> Continue
-                     so the first action on a brand-new session (which now lands in Paused
+                <!-- Continue (Paused mode, left-aligned). Labelled "Continue" (not "Resume")
+                     so the first action on a brand-new session (which lands in Paused
                      mode per Start-as-paused) reads naturally. Covers manual Pause,
-                     Start-as-paused, auto-pause (plan 37), and app-launch-with-open-session-row.
+                     Start-as-paused, auto-pause, and app-launch-with-open-session-row.
                      SessionController.ResumeAsync dispatches between the light path (in-session,
                      including Start-as-paused) and heavy path (app-launch) via the
                      _sessionStartUtc null-check; the binding to Session.ResumeCommand is
@@ -250,8 +247,8 @@
                         Background="{DynamicResource ButtonBackgroundBrush}"
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
-                <!-- Stop (Running OR Paused mode, left-aligned). Plan 24 broadened
-                     visibility to cover both modes; the merged StopAsync always shows
+                <!-- Stop (Running OR Paused mode, left-aligned). Visible in
+                     both modes; the shared StopAsync always shows
                      the confirm dialog regardless of source. -->
                 <Button DockPanel.Dock="Left"
                         x:Name="StopButton"
@@ -265,7 +262,7 @@
                         Foreground="{DynamicResource ButtonForegroundBrush}" />
 
                 <!-- New Session (Config or Stopped mode, left-aligned). Visible when no active session.
-                     Click opens the SessionConfigDialog modal (plan 25 follow-up); the dialog hosts
+                     Click opens the SessionConfigDialog modal; the dialog hosts
                      the pilot list + name editor + Start button. Width 100 because "New Session"
                      doesn't fit in the 84-px standard. -->
                 <Button DockPanel.Dock="Left"
@@ -281,9 +278,9 @@
             </DockPanel>
         </Border>
 
-        <!-- Plan 19 unified dashboard flow. One ScrollViewer + one ItemsControl + one WrapPanel
+        <!-- Unified dashboard flow. One ScrollViewer + one ItemsControl + one WrapPanel
              holding ALL widgets (Session + per-pilots) in user-definable order. Drag-drop
-             reorder via GongSolutions DefaultDropHandler (insert semantics, decision 19.E). -->
+             reorder via GongSolutions DefaultDropHandler (insert semantics). -->
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">

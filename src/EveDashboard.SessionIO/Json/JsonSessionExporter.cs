@@ -19,10 +19,10 @@ public sealed class JsonSessionExporter
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     /// <remarks>
-    /// Plan 42 decision 4.1 = B: the exporter no longer reads the DB
-    /// <c>schema_version</c>. The manifest now carries the decoupled
-    /// <see cref="SessionExportFormat.CurrentVersion"/> (the export shape), so a
-    /// DB-schema bump never affects export/import compatibility.
+    /// The exporter does not read the DB <c>schema_version</c>. The manifest
+    /// carries the decoupled <see cref="SessionExportFormat.CurrentVersion"/>
+    /// (the export shape), so a DB-schema bump never affects export/import
+    /// compatibility.
     /// </remarks>
     public JsonSessionExporter(
         SessionTableReader  reader,

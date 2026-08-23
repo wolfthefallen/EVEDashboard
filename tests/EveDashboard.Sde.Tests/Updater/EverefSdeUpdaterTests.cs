@@ -18,9 +18,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// <see cref="FakeHttpMessageHandler"/>-backed <see cref="HttpClient"/> — no
 /// network call is ever made. The committed <c>sde-fixtures.tar.xz</c>
 /// payload (8 published types) is fed back via the fake handler to exercise
-/// the full decompress + import path. Per plan 08 decisions 8.16 (test-seam
-/// threshold), 8.20 (subscriber isolation), 8.23 (temp sweep), 8.26 (shipped
-/// binary fixture).
+/// the full decompress + import path. Also covered: the validation threshold
+/// (an import below it rolls back), subscriber isolation on the Updated
+/// event, and the temp-folder sweep on both success and failure.
 /// </summary>
 public sealed class EverefSdeUpdaterTests
 {
@@ -275,7 +275,7 @@ public sealed class EverefSdeUpdaterTests
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Subscriber isolation (decision 8.20)
+    // Subscriber isolation
     // ─────────────────────────────────────────────────────────────────────────
 
     [Fact]
@@ -316,7 +316,7 @@ public sealed class EverefSdeUpdaterTests
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Temp folder cleanup + stale-orphan sweep (decision 8.23)
+    // Temp folder cleanup + stale-orphan sweep
     // ─────────────────────────────────────────────────────────────────────────
 
     [Fact]

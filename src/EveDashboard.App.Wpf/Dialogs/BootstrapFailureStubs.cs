@@ -8,15 +8,15 @@ using EveDashboard.Core.Settings.WidgetStats;
 /// <summary>
 /// Throwing stub for <see cref="ISettingsRepository"/> used by
 /// <see cref="SettingsDialogViewModel"/> when the dialog is opened in
-/// bootstrap-failure mode (plan 22.2 decisions 22.T / 22.U).
+/// bootstrap-failure mode.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per <c>MEMORY.md -&gt; feedback_no_test_shimming</c>: this stub is NOT a shim
-/// around unbuilt code — the real <c>SqliteSettingsRepository</c> ships in plan
-/// 14. The stub exists because at the bootstrap-failure points (line 84 / 102
-/// in <c>App.xaml.cs</c>), <c>SqliteSettingsRepository</c> has not yet been
-/// constructed (it depends on the session SQLite which hasn't been opened).
+/// This stub is NOT a shim around unbuilt code — the real
+/// <c>SqliteSettingsRepository</c> exists. The stub exists because at the
+/// bootstrap-failure points in <c>App.xaml.cs</c>,
+/// <c>SqliteSettingsRepository</c> has not yet been constructed (it depends
+/// on the session SQLite which hasn't been opened).
 /// The dialog's <c>IsBootstrapFailureMode</c> gate (on
 /// <see cref="SettingsDialogViewModel"/>) suppresses every reachable call to
 /// this type; the throws exist as defense in depth so a future regression

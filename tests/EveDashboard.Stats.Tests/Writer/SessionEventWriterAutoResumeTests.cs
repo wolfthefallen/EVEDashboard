@@ -13,8 +13,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Writer;
 
 /// <summary>
-/// Plan 37 auto-resume tests for <see cref="SessionEventWriter"/>. Asserts
-/// that the new inline callback path (1) flips state through a registered
+/// Auto-resume tests for <see cref="SessionEventWriter"/>. Asserts
+/// that the inline callback path (1) flips state through a registered
 /// callback, (2) preserves the triggering Tick/Crit into the <c>log</c>
 /// table once state is Running, (3) drops non-trigger paused events
 /// silently, (4) single-flights concurrent invocations, and (5) clears the

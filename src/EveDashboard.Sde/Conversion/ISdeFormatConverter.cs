@@ -8,11 +8,11 @@ using EveDashboard.Core.Storage;
 /// database (fallback build) and on a populated one (runtime update).
 /// </summary>
 /// <remarks>
-/// Plan 06 ships the conversion primitive (caller-owns-tx variant added by
-/// plan 08). HTTP, decompression, conditional-GET cache validation, and the
-/// in-place runtime update flow live in plan 08
-/// (<see cref="EveDashboard.Sde.Updater.EverefSdeUpdater"/>).
-/// DELETE-for-removed-rows is explicitly out of scope per plan 08 decision 8.3.
+/// This is the conversion primitive only. HTTP, decompression, conditional-GET
+/// cache validation, and the in-place runtime update flow live in
+/// <see cref="EveDashboard.Sde.Updater.EverefSdeUpdater"/>.
+/// The import is UPSERT-only: rows that disappear from a newer snapshot are
+/// never DELETEd and simply persist.
 /// </remarks>
 public interface ISdeFormatConverter
 {
@@ -67,10 +67,9 @@ public interface ISdeFormatConverter
     /// <see cref="EveDashboard.Sde.Schema.SchemaInitializer.EnsureSchemaAsync"/>
     /// before opening their transaction. This method does NOT initialise
     /// schema and must not be called against an uninitialised database — the
-    /// first <c>INSERT</c> would fail with a missing-table error. (Per plan 08
-    /// decision 8.22: <c>PRAGMA journal_mode = WAL</c> cannot run inside an
-    /// open transaction, so schema initialisation cannot be deferred to inside
-    /// the inner import.)
+    /// first <c>INSERT</c> would fail with a missing-table error.
+    /// (<c>PRAGMA journal_mode = WAL</c> cannot run inside an open transaction,
+    /// so schema initialisation cannot be deferred to inside the inner import.)
     ///
     /// Caller must also have an active transaction on <paramref name="target"/>
     /// before invoking. The first DDL/DML inside the import will surface a

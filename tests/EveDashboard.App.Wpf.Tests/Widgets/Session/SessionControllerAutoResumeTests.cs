@@ -6,7 +6,7 @@ using EveDashboard.Core.Sessions;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 37 — <see cref="SessionController.AutoResumeAsync"/> performs the
+/// <see cref="SessionController.AutoResumeAsync"/> performs the
 /// shared Paused -&gt; Running SQL transition, raises the
 /// AutoResumeSoundRequested event, and is idempotent. DispatcherTimer
 /// behaviour (tick-driven auto-pause) is exercised by manual tests; this file

@@ -7,8 +7,8 @@ namespace EveDashboard.App.Wpf.Dialogs;
 /// </summary>
 /// <remarks>
 /// Mirrors <see cref="IConfirmDialog"/> in shape. The dialog owns the saved-fleet
-/// list + Create-Fleet flow + session-name editor + Start/Cancel buttons (plan 42
-/// — a fleet is the only way to start a session). Start calls
+/// list + Create-Fleet flow + session-name editor + Start/Cancel buttons (a
+/// fleet is the only way to start a session). Start calls
 /// <c>SessionController.StartAsync(roster)</c> with the selected fleet and closes
 /// on success; Cancel just closes.
 /// </remarks>

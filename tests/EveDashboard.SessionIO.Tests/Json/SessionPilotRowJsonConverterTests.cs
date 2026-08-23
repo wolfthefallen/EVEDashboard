@@ -5,9 +5,9 @@ using EveDashboard.SessionIO.Tables;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 35: <see cref="EveDashboard.SessionIO.Json.SessionPilotRowJsonConverter"/>
-/// defaults missing <c>role</c> to <c>"Miner"</c> so pre-plan-35 JSON files
-/// reimport cleanly.
+/// <see cref="EveDashboard.SessionIO.Json.SessionPilotRowJsonConverter"/>
+/// defaults missing <c>role</c> to <c>"Miner"</c> so JSON files exported
+/// before pilot roles existed reimport cleanly.
 /// </summary>
 public class SessionPilotRowJsonConverterTests
 {

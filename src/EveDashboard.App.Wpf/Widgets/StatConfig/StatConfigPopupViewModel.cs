@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// ViewModel behind the cog popup that lets the user reorder, hide, and
-/// emphasise stats inside ONE widget body (plan 20). Constructed once per
+/// emphasise stats inside ONE widget body. Constructed once per
 /// widget VM and held as a field; the same type serves both per-pilot widgets
 /// (load/save delegates capture the pilot id) and the SessionStats widget
 /// (delegates have no extra arg).
@@ -53,10 +53,10 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
     /// <summary>The user's working copy of hide-only rows (only the Hidden flag is editable).</summary>
     public ObservableCollection<StatConfigRowViewModel> HideOnly { get; } = new();
 
-    /// <summary>Plan 43 (decision 2.1 = C): the "Refined materials" subsection working copy — one row per seen material with a Visible checkbox. Empty unless <see cref="EnableRefinedMaterials"/> was called.</summary>
+    /// <summary>The "Refined materials" subsection working copy — one row per seen material with a Visible checkbox. Empty unless <see cref="EnableRefinedMaterials"/> was called.</summary>
     public ObservableCollection<RefinedMaterialConfigRowViewModel> RefinedMaterials { get; } = new();
 
-    /// <summary>Plan 43: true when the refined-materials subsection is shown (the live SessionStats + per-pilot widgets opt in).</summary>
+    /// <summary>True when the refined-materials subsection is shown (the live SessionStats + per-pilot widgets opt in).</summary>
     public bool HasRefinedMaterials => _refinedEnabled;
 
     private bool _refinedEnabled;
@@ -91,7 +91,7 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
     }
 
     /// <summary>
-    /// Plan 43 (decision 2.1 = C): opt in to the "Refined materials" subsection.
+    /// Opt in to the "Refined materials" subsection.
     /// Wired by <c>StatConfigurableWidgetViewModel.EnableRefinedOutput</c> for
     /// the live widgets only; saved/reporting widgets never call this, so the
     /// subsection stays empty + hidden for them.
@@ -152,7 +152,7 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
                 emphasis: d.Emphasis));
         }
 
-        // Plan 43: refill the "Refined materials" subsection from the materials
+        // Refill the "Refined materials" subsection from the materials
         // seen so far + the saved overrides (resolved against the auto-show flag).
         if (_refinedEnabled)
         {
@@ -198,7 +198,7 @@ public sealed partial class StatConfigPopupViewModel : ObservableObject, IDispos
         {
             await _save(newConfig, ct).ConfigureAwait(true);
 
-            // Plan 43: persist the refined-materials visibility overrides. A row
+            // Persist the refined-materials visibility overrides. A row
             // matching the auto-show default DROPS its override (back to default);
             // a deviation is stored as an explicit, sticky override.
             if (_refinedEnabled)

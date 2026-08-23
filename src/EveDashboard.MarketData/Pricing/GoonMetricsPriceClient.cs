@@ -21,8 +21,8 @@ using Microsoft.Extensions.Logging;
 /// <para>
 /// On any transport failure (HTTP error, timeout, malformed XML, method/version
 /// mismatch on the response root) returns an empty list and logs a Warning.
-/// No retry, no backoff (per <c>docs/market-schema.md</c>: "If the API is
-/// unreachable, the affected type_material gets ISK = 0 with a Warning log").
+/// No retry, no backoff: if the API is unreachable, the affected material
+/// simply gets ISK = 0 with a Warning log downstream.
 /// </para>
 /// </remarks>
 public sealed class GoonMetricsPriceClient : IMarketPriceClient

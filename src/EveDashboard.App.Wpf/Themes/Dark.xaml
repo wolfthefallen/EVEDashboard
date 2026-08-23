@@ -3,9 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Dark theme. Default per ISettingsRepository.GetThemeAsync default and
-        plan 14 round-2 1.6. Keys mirror Themes/Light.xaml exactly so theme
-        swap (plan 17's Settings UI) is a one-dictionary-replace operation.
+        Dark theme. This is the default: ISettingsRepository.GetThemeAsync
+        returns Dark when no theme setting is stored. Keys mirror
+        Themes/Light.xaml exactly so the theme swap (ThemeService, fired from
+        the Settings dialog) is a one-dictionary-replace operation.
 
         Palette (user-supplied 2026-05-03):
           background      #1F2125    deeper neutral

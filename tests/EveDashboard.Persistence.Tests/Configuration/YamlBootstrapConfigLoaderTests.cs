@@ -151,7 +151,7 @@ public class YamlBootstrapConfigLoaderTests : IDisposable
 
         var result = await loader.LoadAsync();
 
-        // Per round-1 5.2 = A: the loader's job is narrow; downstream validates
+        // The loader's job is deliberately narrow; downstream validates
         // disk presence and surfaces the popup.
         result.Should().BeOfType<BootstrapConfigResult.Loaded>()
             .Which.GamelogPath.Should().Be(@"D:\does\not\exist\anywhere");

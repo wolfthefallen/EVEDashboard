@@ -282,7 +282,7 @@ public class GamelogLineParserTests
     [Fact]
     public void Parse_TickLine_LookupReceivesVerbatimName_NoStripping()
     {
-        // Per MEMORY.md feedback_ore_is_just_ore: parser does NOT classify or
+        // Ore is just ore: the parser does NOT classify or
         // normalize. The captured name is forwarded verbatim (after .Trim()).
         // The rarity-tier suffix " III-Grade" stays attached.
         var (parser, sde, _) = BuildParser();

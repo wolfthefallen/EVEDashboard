@@ -6,7 +6,7 @@ using EveDashboard.Core.Sessions;
 
 /// <summary>
 /// Maps a <see cref="PilotSortOrder"/> to its human-readable dropdown label
-/// (plan 42, decision 1.6 = A) via <see cref="PilotSortOrderExtensions.DisplayLabel"/>.
+/// via <see cref="PilotSortOrderExtensions.DisplayLabel"/>.
 /// Used by the New Session dialog's sort ComboBox so the items read
 /// "Last active (newest)" rather than the enum name.
 /// </summary>
@@ -17,7 +17,7 @@ public sealed class PilotSortOrderLabelConverter : IValueConverter
     /// <param name="targetType">Unused; binding target is a string.</param>
     /// <param name="parameter">Unused.</param>
     /// <param name="culture">Unused.</param>
-    /// <returns>The decision-1.6 = A label, or the value's <c>ToString()</c> if it is not a known order.</returns>
+    /// <returns>The dropdown label, or the value's <c>ToString()</c> if it is not a known order.</returns>
     public object Convert(object value, Type targetType, object? parameter, CultureInfo culture)
         => value is PilotSortOrder order
             ? PilotSortOrderExtensions.DisplayLabel(order)

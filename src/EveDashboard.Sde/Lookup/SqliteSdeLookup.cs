@@ -13,8 +13,7 @@ using Microsoft.Extensions.Logging;
 /// same <see cref="MiningProduct"/> instances.
 /// </summary>
 /// <remarks>
-/// See <see cref="ISdeLookup"/> for the contract. Concurrency model
-/// (plan 09 decisions 9.1, 9.3, 9.5):
+/// See <see cref="ISdeLookup"/> for the contract. Concurrency model:
 /// <list type="bullet">
 ///   <item><description>Reads use <c>Volatile.Read</c> against the dictionary references — lock-free after the first <see cref="LoadAsync"/>.</description></item>
 ///   <item><description>Rebuilds publish via <c>Volatile.Write</c> on the same fields — readers see either the old or the new dictionary, never a torn state.</description></item>
@@ -28,7 +27,7 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
     /// EVE SDE group id <c>711</c> ("Harvestable Cloud") — the single group
     /// holding every gas type the parser may encounter (fullerites,
     /// cytoserocins, mykoserocins, etc.). Verified against the shipped fallback
-    /// at plan-09 drafting time. If CCP renumbers (extremely unlikely),
+    /// SDE snapshot. If CCP renumbers (extremely unlikely),
     /// the lookup tests against gas type ids fail loudly on the next SDE update.
     /// </summary>
     private const long GasGroupId = 711;
@@ -128,10 +127,10 @@ public sealed class SqliteSdeLookup : ISdeLookup, IDisposable
                 byId[p.TypeId] = p;
             }
 
-            // Plan 18: load the type_materials recipe for every is_ore = 1 type.
+            // Load the type_materials recipe for every is_ore = 1 type.
             // Drives both IskCalculator (recursive reprocessing) and
             // MarketPriceFetcher (the prefetch type-id list).
-            // Plan 43: the JOIN to the material's own `types` row carries its
+            // The JOIN to the material's own `types` row carries its
             // display name (Tritanium, etc.) so we can cache refined-material
             // names — these are NOT in the ore/gas MiningProduct cache.
             var materialRows = await _db.QueryAsync(

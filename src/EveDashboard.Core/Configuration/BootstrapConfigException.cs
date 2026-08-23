@@ -4,7 +4,7 @@ namespace EveDashboard.Core.Configuration;
 /// Thrown by <see cref="IBootstrapConfigLoader.LoadAsync"/> when
 /// <c>config.yaml</c> is present but unusable: malformed YAML, missing
 /// <c>gamelog_path</c> key, or empty/whitespace-only value. Callers
-/// (plan 16's startup) catch this and surface a "config.yaml is malformed
+/// (the app startup chain) catch this and surface a "config.yaml is malformed
 /// at &lt;path&gt;; please edit and confirm" popup.
 /// </summary>
 /// <remarks>

@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Schema;
 
 /// <summary>
-/// Plan 35: verify the <c>role</c> columns on <c>session_pilot</c> and
-/// <c>log</c>, plus the new <c>idx_session_pilot_pilot</c> index that supports
+/// Verify the <c>role</c> columns on <c>session_pilot</c> and
+/// <c>log</c>, plus the <c>idx_session_pilot_pilot</c> index that supports
 /// the default-to-last-role lookup.
 /// </summary>
 public class PilotRoleSchemaTests

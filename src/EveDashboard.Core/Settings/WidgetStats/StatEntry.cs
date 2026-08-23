@@ -1,9 +1,9 @@
 namespace EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// One persisted entry inside a <see cref="WidgetStatsConfig"/> (plan 20).
-/// Identifies a stat by its C# property name on the widget VM (per decision
-/// 6.4 = B — <c>nameof(VM.PropertyName)</c>; no mapping table) and carries
+/// One persisted entry inside a <see cref="WidgetStatsConfig"/>.
+/// Identifies a stat by its C# property name on the widget VM
+/// (<c>nameof(VM.PropertyName)</c>; no mapping table) and carries
 /// the user's hide flag plus visual emphasis.
 /// </summary>
 /// <param name="StatKey">
@@ -15,10 +15,10 @@ namespace EveDashboard.Core.Settings.WidgetStats;
 /// <param name="Hidden">
 /// <c>true</c> means the row is hidden from the widget body. The entry stays
 /// in the persisted list at its current position so re-showing the row
-/// restores its original slot (per decision 5.2 = A).
+/// restores its original slot.
 /// </param>
 /// <param name="Emphasis">
-/// User-selected visual emphasis level for this row (plan 20 amendment A1).
+/// User-selected visual emphasis level for this row.
 /// When the saved entry has <c>None</c> AND the property's
 /// <see cref="StatRowAttribute.DefaultEmphasis"/> is non-<c>None</c>, the
 /// renderer uses the saved value verbatim (the user has explicitly chosen

@@ -1,9 +1,8 @@
 namespace EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Order in which the fleet-builder's pilot picker lists discovered pilots
-/// (plan 42, decision 1.6 = A). Persisted across restarts as a <c>setting</c>
-/// row (decision 1.7 = A).
+/// Order in which the fleet-builder's pilot picker lists discovered pilots.
+/// Persisted across restarts as a <c>setting</c> row.
 /// </summary>
 public enum PilotSortOrder
 {
@@ -76,7 +75,7 @@ public static class PilotSortOrderExtensions
         return order;
     }
 
-    /// <summary>Human-readable label for the sort dropdown (decision 1.6 = A).</summary>
+    /// <summary>Human-readable label for the sort dropdown.</summary>
     /// <param name="order">Enum value to label.</param>
     /// <returns>One of <c>"Last active (newest)"</c>, <c>"Last active (oldest)"</c>, <c>"Name (A-Z)"</c>, <c>"Name (Z-A)"</c>.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="order"/> is not a defined enum value.</exception>
