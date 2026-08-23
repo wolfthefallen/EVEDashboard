@@ -11,6 +11,22 @@ publishes release `v<Version>` with the matching `## v<Version>` section of this
 To ship a version: bump `<Version>`, write its `## v<Version>` section here, merge to `master`.
 Inside a version section use `###` or lower for sub-headings - `##` marks the next version.
 
+## v0.1.4
+
+**New**
+- **Build from history** — forgot to press Start? Reports has a new `Build from history...` button: pick a date/time window (EVE time) and a fleet, and the session is rebuilt straight from your gamelogs. Saved sessions that overlap the window are listed so you choose what to combine; anything you leave out is excluded for those pilots, so nothing is ever counted twice.
+- **Combine sessions** — tick two or more saved sessions in the Reports sidebar, right-click, `Combine selected...`, and they become one session. If a session brings pilots your fleet doesn't have, the app offers to create a union fleet.
+- **Archived sessions** — the originals of a combine are archived, not deleted: hidden from the sidebar, Lifetime Totals, and Haul Value. A `Show archived` checkbox in the sidebar reveals them, and deleting the combined session brings them back.
+- **Session name tokens** — `{{$STARTDATE}}`, `{{$ENDDATE}}` (e.g. `16Aug`) and `{{$YYYY}}`; history builds default to `16Aug - 19Aug 2026 history`.
+
+**Improved**
+- Historical sessions are valued with the market prices the app captured during that window when it has them; otherwise today's prices are used and the summary says so.
+- Idle stretches inside a rebuilt window are treated exactly like a live session would: paused after your auto-pause idle minutes, so ISK/hour stays honest.
+- Documentation refreshed to match the app.
+
+**Under the hood**
+- Your database upgrades itself on first launch (adds the archive fields); sessions, prices, and settings carry over, and older exports still import.
+
 ## v0.1.3
 
 **New**

@@ -685,7 +685,7 @@ fresh install).
    - Expected: window opens at default 460x560 centered, current theme.
 3. **Read each line.** Top to bottom:
    - `EVE Dashboard v<version>` (matches the running release, e.g.
-     `0.1.3`).
+     `0.1.4`).
    - A clickable GitHub link reading
      `https://github.com/wolfthefallen/EVEDashboard`.
    - `SDE data: <yyyy-MM-dd>` (a real date, not `unknown`).
@@ -1602,7 +1602,7 @@ re-appears every launch until updated, and a failure (offline) is silent.
 ### Setup
 
 - Build + run from source per Shared setup. The app version comes from `<Version>`
-  in `Directory.Build.props` (currently `0.1.3`; release tags are `v<Version>`).
+  in `Directory.Build.props` (currently `0.1.4`; release tags are `v<Version>`).
 
 ### Steps
 
@@ -1610,7 +1610,7 @@ re-appears every launch until updated, and a failure (offline) is silent.
    BELOW the latest published release (e.g. `0.0.1`). Rebuild and launch
    (`dotnet run --project src/EveDashboard.App.Wpf`).
    - Expected: shortly after the main window appears, a modal dialog titled
-     "Update available" names the latest release (e.g. `v0.1.3`) and shows two
+     "Update available" names the latest release (e.g. `v0.1.4`) and shows two
      buttons, **Yes** and **No** (not "Cancel"). The main window finished showing
      first - the check did not block startup.
 2. **Yes opens the download page.** Click **Yes**.
@@ -1623,7 +1623,7 @@ re-appears every launch until updated, and a failure (offline) is silent.
 4. **No opens nothing.** Relaunch; click **No**.
    - Expected: the dialog closes, no browser opens, the app runs normally.
 5. **Up to date - no prompt.** Restore `<Version>` to match (or exceed) the latest
-   release tag (`0.1.3`). Rebuild and launch.
+   release tag (`0.1.4`). Rebuild and launch.
    - Expected: no dialog. The log shows an Information line that the running
      version is current with the latest release.
 6. **Offline - silent.** Disconnect the network (or block api.github.com). Launch.
@@ -1633,7 +1633,7 @@ re-appears every launch until updated, and a failure (offline) is silent.
 
 ### Cleanup
 
-- Restore `<Version>` in `Directory.Build.props` to `0.1.3` (or the real current
+- Restore `<Version>` in `Directory.Build.props` to `0.1.4` (or the real current
   version) and rebuild.
 - Re-enable the network if you disabled it in step 6.
 
