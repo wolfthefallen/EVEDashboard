@@ -10,11 +10,11 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Writes a <see cref="SessionExportData"/> payload into a session SQLite
-/// database as a brand-new session, atomically. Implements the plan-29
-/// alignment 2.1 / 2.2 = B "skip + Warning" pilot/station collision policy and
-/// (plan 42 decision 4.1 = B) an export-FORMAT version check decoupled from the
-/// DB schema_version — a file from a newer export format than this app supports
-/// is rejected; an equal-or-older format imports.
+/// database as a brand-new session, atomically. Implements the "skip + Warning"
+/// pilot/station collision policy (an existing row wins; a differing name is
+/// reported, never overwritten) and an export-FORMAT version check decoupled
+/// from the DB schema_version — a file from a newer export format than this app
+/// supports is rejected; an equal-or-older format imports.
 /// </summary>
 /// <remarks>
 /// Locally-autoincremented PKs (<c>session_id</c>, <c>session_time_id</c>,
@@ -46,7 +46,7 @@ public sealed class SessionTableWriter
     /// database. Any failure rolls back to the pre-import state.
     /// </summary>
     /// <param name="data">Session payload to write.</param>
-    /// <param name="fileSchemaVersion">Export-format version from the import file's manifest (its <c>schema_version</c> wire field — see <see cref="SessionExportFormat"/>). Decoupled from the DB schema_version (plan 42 decision 4.1 = B).</param>
+    /// <param name="fileSchemaVersion">Export-format version from the import file's manifest (its <c>schema_version</c> wire field — see <see cref="SessionExportFormat"/>). Decoupled from the DB schema_version.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An <see cref="ImportResult"/> with the new session id, name, collision warnings, and per-table row counts.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="data"/> contains zero or more than one <c>session</c> row (single-session export contract).</exception>
@@ -64,7 +64,7 @@ public sealed class SessionTableWriter
                 nameof(data));
         }
 
-        // Plan 42 decision 4.1 = B: the manifest's version is the export-FORMAT
+        // The manifest's version is the export-FORMAT
         // version (SessionExportFormat.CurrentVersion), decoupled from the DB
         // schema_version. Reject only a file written by a NEWER export format
         // than this app understands; an equal-or-older format is importable (an
@@ -75,12 +75,12 @@ public sealed class SessionTableWriter
             throw new SchemaVersionMismatchException(fileSchemaVersion, SessionExportFormat.CurrentVersion);
         }
 
-        // Plan 38: resolve the content-addressed session id — the file's id when
+        // Resolve the content-addressed session id — the file's id when
         // it already looks like a sha256 (new exports), else recompute from name
         // + first start_time (legacy integer-id files).
         var sessionId = ResolveSessionId(data);
 
-        // Plan 38 (decision 3.1 = A): re-import dedup. If this session already
+        // Re-import dedup. If this session already
         // exists, write nothing and report AlreadyPresent.
         var existing = await _db.QueryScalarAsync<long>(
             "SELECT COUNT(*) FROM session WHERE session_id = $sid",
@@ -226,12 +226,16 @@ public sealed class SessionTableWriter
 
     private Task WriteSessionAsync(SessionRow session, string sessionId, CancellationToken ct) =>
         _db.ExecuteNonQueryAsync(
-            "INSERT INTO session (session_id, name, notes) VALUES ($sid, $n, $notes)",
-            new Dictionary<string, object?> { ["$sid"] = sessionId, ["$n"] = session.Name, ["$notes"] = session.Notes },
+            "INSERT INTO session (session_id, name, notes, archived, merged_into) VALUES ($sid, $n, $notes, $archived, $merged)",
+            new Dictionary<string, object?>
+            {
+                ["$sid"] = sessionId, ["$n"] = session.Name, ["$notes"] = session.Notes,
+                ["$archived"] = session.Archived ? 1 : 0, ["$merged"] = session.MergedInto,
+            },
             ct);
 
     /// <summary>
-    /// Plan 38: resolve the session id to write. Returns the file's id verbatim
+    /// Resolve the session id to write. Returns the file's id verbatim
     /// when it already looks like a sha256 (new exports); otherwise recomputes
     /// from the session name and the earliest <c>session_time.start_time</c>
     /// (the first inserted row — matches the live + migration recipe).
@@ -284,8 +288,8 @@ public sealed class SessionTableWriter
         var inserted = 0;
         foreach (var r in rows)
         {
-            // Plan 35: include role column. JsonConverter already defaulted missing values
-            // to "Miner" at deserialise time, so r.Role is always non-null.
+            // The role column is always written: the JsonConverter already defaulted
+            // missing values to "Miner" at deserialise time, so r.Role is never null.
             await _db.ExecuteNonQueryAsync(
                 "INSERT INTO session_pilot (session_id, pilot_id, role) VALUES ($sid, $pid, $role)",
                 new Dictionary<string, object?>
@@ -306,8 +310,8 @@ public sealed class SessionTableWriter
         var inserted = 0;
         foreach (var r in rows)
         {
-            // Plan 35: include role column. JsonConverter already defaulted missing values
-            // to "Miner" at deserialise time, so r.Role is always non-null.
+            // The role column is always written: the JsonConverter already defaulted
+            // missing values to "Miner" at deserialise time, so r.Role is never null.
             await _db.ExecuteNonQueryAsync(
                 "INSERT INTO log (session_id, pilot_id, eve_timestamp, event_kind, type_id, units, volume_m3, role) " +
                 "VALUES ($sid, $pid, $ts, $kind, $tid, $u, $v, $role)",
@@ -332,8 +336,8 @@ public sealed class SessionTableWriter
         IReadOnlyList<MarketDataRow> rows, string sessionId, CancellationToken ct)
     {
         // Plain INSERT (no OR IGNORE): market_data has no unique constraint
-        // and the design accumulates rows forever (docs/market-schema.md).
-        // Plan 38: every imported price row is stamped with the (declared or
+        // and the design accumulates rows forever.
+        // Every imported price row is stamped with the (declared or
         // computed) session id, keeping overlapping imports isolated.
         var inserted = 0;
         foreach (var r in rows)

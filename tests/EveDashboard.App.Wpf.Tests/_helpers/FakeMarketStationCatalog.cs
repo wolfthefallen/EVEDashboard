@@ -4,7 +4,7 @@ using EveDashboard.Core.Settings;
 
 /// <summary>
 /// Hand-rolled fake of <see cref="IMarketStationCatalog"/> for unit tests
-/// (plan 22.1 decision 22.M). Stored stations live in an ordered dictionary;
+/// (no Moq / NSubstitute in this project). Stored stations live in an ordered dictionary;
 /// <see cref="GetAllAsync"/> returns a snapshot list. Counters expose Add /
 /// Remove invocations so VM tests can assert pending markets edits flush
 /// to the catalog only on Apply.

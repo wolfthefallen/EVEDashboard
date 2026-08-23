@@ -11,7 +11,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
 /// <summary>
-/// Plan 37 / plan 50: plays the auto-pause and auto-resume notification WAVs. The
+/// Plays the auto-pause and auto-resume notification WAVs. The
 /// two WAV files (<c>Miners_have_stopped.wav</c> for auto-pause and
 /// <c>Mining_detected.wav</c> for auto-resume) ship as <c>&lt;Resource&gt;</c>
 /// entries in the WPF csproj and are loaded once into <c>byte[]</c> buffers at
@@ -21,8 +21,8 @@ using NAudio.Wave.SampleProviders;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 50 replaced the original <c>System.Media.SoundPlayer</c> engine (which has
-/// no volume API) with NAudio so the <c>auto_pause_sound_volume</c> setting can
+/// NAudio replaced the original <c>System.Media.SoundPlayer</c> engine (which has
+/// no volume API) so the <c>auto_pause_sound_volume</c> setting can
 /// apply a real per-sound gain. The WAVs stay embedded in the single-file EXE; the
 /// bytes are read once via <see cref="Application.GetResourceStream(Uri)"/>.
 /// </para>
@@ -32,7 +32,7 @@ using NAudio.Wave.SampleProviders;
 /// (percent 0-100, <see cref="_soundVolume"/>). Both are hydrated once at
 /// construction and refreshed via <see cref="ISettingsRepository.SettingChanged"/>
 /// so Settings -&gt; Apply takes effect immediately. <see cref="PlayIfEnabled"/>
-/// reads the cached values synchronously without async/await — bug-1 fix: a prior
+/// reads the cached values synchronously without async/await — a prior
 /// implementation used <c>GetAwaiter().GetResult()</c> on the UI thread and
 /// deadlocked when the underlying repo's continuation tried to resume on the
 /// captured <see cref="SynchronizationContext"/>.

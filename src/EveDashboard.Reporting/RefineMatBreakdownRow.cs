@@ -2,9 +2,10 @@ namespace EveDashboard.Reporting;
 
 /// <summary>
 /// One refined-material row in the Reports "Refined output" breakdown widget
-/// (plan 43) — the yield-applied quantity of a single refined material
+/// — the yield-applied quantity of a single refined material
 /// (Tritanium, etc.) produced within a session (or a session+pilot scope).
-/// Reporting shows ALL materials (decision 1.3 = A) and is quantity-only
+/// Reporting shows ALL materials (it ignores the live widget's auto-show /
+/// hide) and is quantity-only
 /// (per-material ISK is out of scope — the per-ore breakdown already shows ISK).
 /// </summary>
 /// <param name="TypeId">EVE refined-material type id.</param>

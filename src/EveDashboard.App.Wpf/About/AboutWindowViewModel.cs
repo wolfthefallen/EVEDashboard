@@ -7,7 +7,7 @@ using EveDashboard.Sde.Meta;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 52 VM for <see cref="AboutWindow"/>. Exposes the app version line, the
+/// VM for <see cref="AboutWindow"/>. Exposes the app version line, the
 /// GitHub repository URL (for the clickable hyperlink), and the SDE snapshot
 /// date. The thank-you lines and CCP legal paragraph are static text in the
 /// XAML, so the VM stays minimal.

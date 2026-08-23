@@ -2,12 +2,12 @@ namespace EveDashboard.Core.Settings;
 
 /// <summary>
 /// CRUD surface over the <c>market_stations</c> table — the user-configurable
-/// list of stations the app may fetch GoonMetrics prices from. Plan 18's ISK
+/// list of stations the app may fetch GoonMetrics prices from. The ISK
 /// pipeline resolves <see cref="ISettingsRepository.GetSelectedStationIdAsync"/>
 /// against this catalog.
 /// </summary>
 /// <remarks>
-/// Direct SQL on the table; no in-memory cache. Plan 17's Settings UI binds
+/// Direct SQL on the table; no in-memory cache. The Settings UI binds
 /// to this catalog and to <see cref="ISettingsRepository"/> for the active
 /// station's id.
 /// </remarks>
@@ -43,7 +43,7 @@ public interface IMarketStationCatalog
     Task RemoveAsync(long stationId, CancellationToken ct = default);
 
     /// <summary>
-    /// Seed the two default rows on first launch (per plan 14 round-2 1.5):
+    /// Seed the two default rows on first launch:
     /// Jita is re-seeded on every launch via <c>INSERT OR IGNORE</c>; C-J6MT
     /// is seeded once and never again. Cross-touches the <c>setting</c> table
     /// for the <c>non_sticky_station_defaults_seeded</c> sentinel that gates

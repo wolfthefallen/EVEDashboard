@@ -8,7 +8,7 @@ namespace EveDashboard.Persistence.Configuration;
 /// <remarks>
 /// YamlDotNet's <c>UnderscoredNamingConvention</c> maps the YAML key
 /// <c>gamelog_path</c> to the property <c>GamelogPath</c>. Unknown keys
-/// in the YAML file are ignored (forward-compat, per plan 15 decision 15.M).
+/// in the YAML file are ignored (forward-compat).
 /// </remarks>
 internal sealed class BootstrapConfigDto
 {

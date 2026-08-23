@@ -1,8 +1,8 @@
 namespace EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// Visual emphasis level applied to a single stat row inside a widget body
-/// (plan 20). Drives the row template's typography (font size + weight + brush)
+/// Visual emphasis level applied to a single stat row inside a widget body.
+/// Drives the row template's typography (font size + weight + brush)
 /// without affecting reorder / hide semantics. Persisted per-row via
 /// <see cref="StatEntry.Emphasis"/>; default per-property comes from
 /// <see cref="StatRowAttribute.DefaultEmphasis"/>.

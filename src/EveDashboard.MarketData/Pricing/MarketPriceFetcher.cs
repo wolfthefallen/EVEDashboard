@@ -56,14 +56,14 @@ using Microsoft.Extensions.Logging;
 /// </para>
 /// <para>
 /// Persistence: returned <see cref="MarketPrice"/> rows are INSERTed (no UPDATE);
-/// old rows are immutable history (see <c>docs/market-schema.md</c>).
+/// old rows are immutable history.
 /// </para>
 /// </remarks>
 public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
 {
     /// <summary>
     /// An uncovered (no usable price for the active mode) material is re-fetched at
-    /// most once per this window per (session, type id) -- decision 1.1 = D. A
+    /// most once per this window per (session, type id). A
     /// material that already has a usable price is never re-fetched by the live path.
     /// </summary>
     private static readonly TimeSpan RetryWindow = TimeSpan.FromMinutes(15);
@@ -80,9 +80,9 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
 
     // (sessionId, typeId) -> last fetch ATTEMPT time (UTC). Stamped on every
     // attempt, even when the API returned no data, so a genuinely-priceless
-    // material is retried at most once per RetryWindow instead of every tick
-    // (decision 1.1 = D). In-memory only: a restart re-runs the unconditional start
-    // prefetch (decision 1.3 = B), re-stamping everything. No sentinel row is ever
+    // material is retried at most once per RetryWindow instead of every tick.
+    // In-memory only: a restart re-runs the unconditional start
+    // prefetch, re-stamping everything. No sentinel row is ever
     // written to market_data (user-confirmed: no null-holder rows in the DB).
     private readonly Dictionary<(string SessionId, long TypeId), DateTimeOffset> _lastAttempt = new();
 
@@ -150,7 +150,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
             stationId, typeIds.Count, sessionId);
 
         // The session-start / resume / station-change fetch is unconditional: fetch
-        // every refined-material id (decisions 1.3 = B and 1.4) and stamp the attempt
+        // every refined-material id and stamp the attempt
         // map so the live lazy path is throttled for the whole material set.
         var inserted = await FetchInsertAndStampAsync(
             typeIds, stationId, sessionId, DateTimeOffset.UtcNow, ct).ConfigureAwait(false);
@@ -179,7 +179,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         var latest = await GetLatestPricesAsync(distinct, sessionId, ct).ConfigureAwait(false);
         var now = DateTimeOffset.UtcNow;
 
-        // Two independent gates per requested id (decisions 1.1 = D, 1.2 = B):
+        // Two independent gates per requested id:
         //  1. Coverage: if the latest captured price is usable for the active mode,
         //     never re-fetch.
         //  2. Attempt throttle: an uncovered id is fetched only if no attempt was
@@ -215,7 +215,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
 
     /// <summary>
     /// True when the latest captured (buy, sell) pair is a usable price for
-    /// <paramref name="mode"/> -- i.e. the material is NOT a gap (decision 1.2 = B).
+    /// <paramref name="mode"/> -- i.e. the material is NOT a gap.
     /// A price is "usable" only when it is non-null and strictly positive; null or
     /// &lt;= 0 is treated as no price. For Split, the pair is covered if EITHER side
     /// is usable, so a Split gap requires BOTH sides to be 0/null.
@@ -304,7 +304,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         }
 
         // Stamp the attempt up front for every requested id so a still-unpriced
-        // material is throttled to one attempt per RetryWindow (decision 1.1 = D).
+        // material is throttled to one attempt per RetryWindow.
         lock (_attemptLock)
         {
             foreach (var id in distinct)
@@ -373,7 +373,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
     {
         try
         {
-            // Decision 1.4: a mid-session pricing-station change re-fetches all
+            // A mid-session pricing-station change re-fetches all
             // materials at the new hub (only while Running; a change while Paused is
             // picked up by the unconditional refetch on the next Resume).
             if (e.Key != "selected_station_id")

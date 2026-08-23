@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 /// <remarks>
 /// Setting key passed to the base is <c>per_pilot_stats_config.&lt;pilotId&gt;</c>
 /// — same as the live VM for the same pilot. Show/hide preferences are
-/// deliberately shared. Plan 25.
+/// deliberately shared.
 /// </remarks>
 public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidgetViewModel
 {
@@ -31,7 +31,7 @@ public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidge
     public string PilotName { get; }
 
     /// <summary>
-    /// Plan 35: human-readable header text. <c>"PilotName"</c> for Miner;
+    /// Human-readable header text. <c>"PilotName"</c> for Miner;
     /// <c>"PilotName [Booster]"</c> etc for non-Miner. Recomputed when
     /// <see cref="Role"/> changes.
     /// </summary>
@@ -39,7 +39,7 @@ public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidge
     public string DisplayName =>
         Role == PilotRole.Miner ? PilotName : $"{PilotName} [{Role}]";
 
-    /// <summary>Plan 35: pilot's role in the saved session (flows in via <see cref="ApplyStats"/>).</summary>
+    /// <summary>Pilot's role in the saved session (flows in via <see cref="ApplyStats"/>).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayName))]
     private PilotRole _role = PilotRole.Miner;
@@ -115,7 +115,7 @@ public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidge
         PilotId = pilotId;
         PilotName = pilotName;
 
-        // Plan 35: re-theme the role border when the theme changes (the same
+        // Re-theme the role border when the theme changes (the same
         // pattern as the live PerPilotWidgetViewModel). Saved widgets are
         // read-only — no RolesChanged subscription, no SetRoleCommand.
         Settings.SettingChanged += OnSettingChanged;
@@ -143,7 +143,7 @@ public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidge
         TotalM3FromCrits = stats.TotalM3FromCrits;
         CritCount        = stats.CritCount;
         CritChance       = stats.CritChance;
-        Role             = stats.Role;   // plan 35
+        Role             = stats.Role;
         LastUpdated      = DateTimeOffset.UtcNow;
     }
 
@@ -154,7 +154,7 @@ public sealed partial class SavedPerPilotWidgetViewModel : StatConfigurableWidge
     }
 
     /// <summary>
-    /// Plan 35: re-raise <see cref="Role"/> PropertyChanged on a theme swap so
+    /// Re-raise <see cref="Role"/> PropertyChanged on a theme swap so
     /// the role border brush re-resolves against the new theme dictionary.
     /// </summary>
     private void OnSettingChanged(object? sender, SettingChangedEventArgs e)

@@ -4,8 +4,8 @@ using EveDashboard.App.Wpf.Layout;
 using EveDashboard.App.Wpf.Widgets.Session;
 
 /// <summary>
-/// Composition root for the MainWindow's bound state. Plan 19 retrofit:
-/// holds a single <see cref="LayoutCoordinator"/> reference; the dashboard
+/// Composition root for the MainWindow's bound state. Holds a single
+/// <see cref="LayoutCoordinator"/> reference; the dashboard
 /// flow binds to <see cref="Layout"/>'s <c>Items</c> / <c>HasHiddenWidgets</c>
 /// / <c>HiddenItems</c>, and the chrome-bar buttons bind to
 /// <see cref="Session"/> (a proxy that returns the coordinator's singleton
@@ -20,7 +20,7 @@ using EveDashboard.App.Wpf.Widgets.Session;
 /// </remarks>
 public sealed class MainWindowViewModel
 {
-    /// <summary>The dashboard layout coordinator. Bound by the MainWindow XAML for the unified flow + hidden-widgets popup (plan 19).</summary>
+    /// <summary>The dashboard layout coordinator. Bound by the MainWindow XAML for the unified flow + hidden-widgets popup.</summary>
     public LayoutCoordinator Layout { get; }
 
     /// <summary>Singleton Session widget VM proxy. Routes to <see cref="LayoutCoordinator.SessionViewModel"/> so the chrome-bar buttons (Start / Pause / Resume / Stop / New Session / etc) keep their existing <c>Session.&lt;Command&gt;</c> bindings unchanged.</summary>

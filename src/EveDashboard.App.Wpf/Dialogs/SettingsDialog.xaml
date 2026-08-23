@@ -12,7 +12,7 @@
         Background="{DynamicResource BorderBrush}"
         Foreground="{DynamicResource ForegroundBrush}">
     <Window.Resources>
-        <!-- Plan 22.2: BCL converter shows the banner when in bootstrap-failure mode;
+        <!-- BCL converter shows the banner when in bootstrap-failure mode;
              custom inverse hides Display / Pricing / Markets in the same mode. -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
@@ -28,7 +28,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Plan 22.2: bootstrap-failure banner. Visible only when
+        <!-- Bootstrap-failure banner. Visible only when
              IsBootstrapFailureMode is true; renders BannerMessage. -->
         <Border Grid.Row="0"
                 Background="{DynamicResource StatusErrorBrush}"
@@ -46,7 +46,7 @@
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
                 <!-- ============================================== Display ============================================== -->
-                <!-- Plan 22.2: section hidden in bootstrap-failure mode. -->
+                <!-- Section hidden in bootstrap-failure mode. -->
                 <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <TextBlock Text="Display"
                                FontSize="16"
@@ -71,7 +71,7 @@
                 </StackPanel>
 
                 <!-- ============================================== Pricing ============================================== -->
-                <!-- Plan 22.2: section hidden in bootstrap-failure mode. -->
+                <!-- Section hidden in bootstrap-failure mode. -->
                 <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <TextBlock Text="Pricing"
                                FontSize="16"
@@ -145,7 +145,7 @@
                 </StackPanel>
 
                 <!-- ============================================== Markets ============================================== -->
-                <!-- Plan 22.2: section hidden in bootstrap-failure mode. -->
+                <!-- Section hidden in bootstrap-failure mode. -->
                 <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <TextBlock Text="Markets"
                                FontSize="16"
@@ -235,7 +235,7 @@
                 </StackPanel>
 
                 <!-- ============================================== Auto-pause ============================================== -->
-                <!-- Plan 37: section hidden in bootstrap-failure mode. -->
+                <!-- Section hidden in bootstrap-failure mode. -->
                 <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <TextBlock Text="Auto-pause"
                                FontSize="16"
@@ -270,8 +270,8 @@
                                   IsChecked="{Binding AutoPauseSoundEnabled, Mode=TwoWay}"
                                   Foreground="{DynamicResource ForegroundBrush}" />
 
-                        <!-- Plan 50: notification volume. Disabled (greyed) while the
-                             sound checkbox above is unchecked (decision 5.2 = A). -->
+                        <!-- Notification volume. Disabled (greyed) while the
+                             sound checkbox above is unchecked. -->
                         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                     Orientation="Horizontal"
                                     Margin="0,8,0,0"
@@ -295,7 +295,7 @@
                 </StackPanel>
 
                 <!-- ============================================== Refined output ============================================== -->
-                <!-- Plan 43: section hidden in bootstrap-failure mode. -->
+                <!-- Section hidden in bootstrap-failure mode. -->
                 <StackPanel Visibility="{Binding IsBootstrapFailureMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <TextBlock Text="Refined output"
                                FontSize="16"

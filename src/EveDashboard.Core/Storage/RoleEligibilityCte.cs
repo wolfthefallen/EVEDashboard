@@ -2,12 +2,12 @@ namespace EveDashboard.Core.Storage;
 
 /// <summary>
 /// Common-table-expression body that filters <c>log</c> rows by event-time
-/// role per plan 35's three filter rules. Consumer queries interpolate this
-/// constant in front of a SELECT against <c>eligible_log</c>.
+/// role per the filter rules listed in the remarks. Consumer queries
+/// interpolate this constant in front of a SELECT against <c>eligible_log</c>.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 35 decision 2.4 cross = A: extracted from
+/// Extracted from
 /// <c>SqliteSessionStatsRepository</c> and <c>SqliteReportingQueries</c> so
 /// the role-filter SQL lives in exactly one place. Both consumers use the
 /// canonical <c>$sid</c> parameter name for the session id; callers must bind

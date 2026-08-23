@@ -36,27 +36,27 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Interaction logic for App.xaml. Owns the bootstrap chain that wires every
-/// prior plan together before the MainWindow is shown.
+/// subsystem together before the MainWindow is shown.
 /// </summary>
 /// <remarks>
 /// <para>
-/// API-drift corrections applied per plan-16 alignment 1.1-1.4 = A:
-/// <see cref="SessionEventWriter"/> ctor takes <c>ISdeLookup</c> (1.1);
+/// Construction / lifecycle contracts honoured by the chain:
+/// <see cref="SessionEventWriter"/>'s ctor takes <c>ISdeLookup</c>;
 /// <see cref="SessionEventWriter"/>/<see cref="RealtimeLogWatcher"/> have
 /// per-session lifecycle managed by <c>SessionController</c>, NOT
-/// started here (1.2); <see cref="GamelogDiscoveryService"/> takes the
-/// directory at construction (1.3); <see cref="EverefSdeUpdater"/> takes
-/// <see cref="HttpClient"/> + <see cref="EveDashboard.Core.Storage.ISqliteDatabase"/> in its ctor (1.4).
+/// started here; <see cref="GamelogDiscoveryService"/> takes the
+/// directory at construction; <see cref="EverefSdeUpdater"/> takes
+/// <see cref="HttpClient"/> + <see cref="EveDashboard.Core.Storage.ISqliteDatabase"/> in its ctor.
 /// </para>
 /// <para>
-/// The wrapping <c>try</c>/<c>catch</c> is the documented exception to
-/// CLAUDE.md's "no blanket-catch to keep the UI alive" rule (per plan-16
-/// risk note): the UI is not yet alive at this point, so the catch surfaces
+/// The wrapping <c>try</c>/<c>catch</c> is a deliberate, documented exception
+/// to this project's "no blanket-catch to keep the UI alive" rule: the UI is
+/// not yet alive at this point, so the catch surfaces
 /// unhandled bootstrap failures via the same MessageBox-and-shutdown path as
 /// the typed errors instead of a silent crash.
 /// </para>
 /// <para>
-/// Plan 22.2: the chain body is extracted into
+/// The chain body is extracted into
 /// <see cref="RunBootstrapChainAsync"/> so the bootstrap-failure dialog's
 /// Apply-success handler can re-run it after the user fixes the gamelog
 /// folder. Each chain step is null-aware via <c>??=</c> against an instance
@@ -67,7 +67,7 @@ using Microsoft.Extensions.Logging;
 /// MainWindow singleton.
 /// </para>
 /// <para>
-/// Plan 22.2: <see cref="_bootstrapDialogServices"/> is a separate
+/// <see cref="_bootstrapDialogServices"/> is a separate
 /// "mini-container" used only when the bootstrap chain fires a re-route
 /// before <see cref="_services"/> is built (failure points fire at chain
 /// steps 2 / 9 — chain step 10 is what builds <see cref="_services"/>). It
@@ -79,20 +79,20 @@ using Microsoft.Extensions.Logging;
 /// </remarks>
 public partial class App : Application
 {
-    /// <summary>App-lifetime <see cref="HttpClient"/> for everef.net SDE updates (per plan-16 alignment 1.4 = A).</summary>
+    /// <summary>App-lifetime <see cref="HttpClient"/> for everef.net SDE updates.</summary>
     private HttpClient? _httpClient;
 
-    /// <summary>Plan 56: app-wide unhandled-exception policy (log the stack trace + graceful dialog).</summary>
+    /// <summary>App-wide unhandled-exception policy (log the stack trace + graceful dialog).</summary>
     private GlobalExceptionHandler? _globalExceptionHandler;
 
-    /// <summary>App-lifetime DI container (chain step 10); disposed and rebuilt across plan-22.2 retries; final dispose at <see cref="OnExit"/>.</summary>
+    /// <summary>App-lifetime DI container (chain step 10); disposed and rebuilt across bootstrap-failure retries; final dispose at <see cref="OnExit"/>.</summary>
     private ServiceProvider? _services;
 
-    /// <summary>Plan 22.2: mini-container for the bootstrap-failure dialog re-route. Built lazily on first failure; cached for subsequent retries; disposed at <see cref="OnExit"/>.</summary>
+    /// <summary>Mini-container for the bootstrap-failure dialog re-route. Built lazily on first failure; cached for subsequent retries; disposed at <see cref="OnExit"/>.</summary>
     private ServiceProvider? _bootstrapDialogServices;
 
-    // Plan 22.2: chain-step singletons promoted from method-locals to
-    // instance fields so they survive across RunBootstrapChainAsync calls
+    // Chain-step singletons are instance fields (not method-locals) so they
+    // survive across RunBootstrapChainAsync calls
     // (already-constructed singletons skipped on retry via ??= or the
     // is-null pattern below).
     private YamlBootstrapConfigLoader? _bootstrapLoader;
@@ -110,7 +110,7 @@ public partial class App : Application
     private SessionEventWriter? _sessionEventWriter;
     private RealtimeLogWatcher? _watcher;
 
-    // Plan 18 — pricing pipeline. Constructed in chain step 8.5; the existing
+    // Pricing pipeline. Constructed in chain step 8.5; the existing
     // _httpClient (chain step 5) is reused.
     private GoonMetricsPriceClient? _marketPriceClient;
     private EsiMarketPriceClient?   _esiPriceClient;
@@ -118,7 +118,7 @@ public partial class App : Application
     private MarketPriceFetcher?     _marketPriceFetcher;
     private IskCalculator?          _iskCalculator;
 
-    // Plan 41 — launch update check. The release client reuses the app-lifetime
+    // Launch update check. The release client reuses the app-lifetime
     // _httpClient; the fire-and-forget notify task is rooted in _updateCheckTask
     // so it is not collected before it completes.
     private GitHubReleaseClient? _releaseClient;
@@ -132,7 +132,7 @@ public partial class App : Application
     /// <param name="e">The startup event arguments.</param>
     protected override async void OnStartup(StartupEventArgs e)
     {
-        // 0. Plan 39: one-time data-folder rename (EveMiningDashboard -> EveDashboard).
+        // 0. One-time data-folder rename (EveMiningDashboard -> EveDashboard).
         //    MUST run BEFORE LoggingSetup.Configure (which creates the new folder) —
         //    otherwise the move is skipped and the old data is stranded. Logging is
         //    not up yet, so a failure surfaces via a plain MessageBox + shutdown; the
@@ -154,19 +154,19 @@ public partial class App : Application
             return;
         }
 
-        // 1. Configure logging (plan 02 + plan 21). Must run first so subsequent failures get logged.
+        // 1. Configure logging. Must run first so subsequent failures get logged.
         //    Default-overload resolves %APPDATA%\EveDashboard\logs and creates the folder.
         LoggingSetup.Configure();
         var logger = LogProvider.Factory.CreateLogger<App>();
         logger.LogInformation("EVE Dashboard starting up.");
 
-        // Plan 56: install the app-wide unhandled-exception handlers now that logging
+        // Install the app-wide unhandled-exception handlers now that logging
         // is up, so an unexpected throw (especially from an async void event handler)
         // is logged with its stack trace and surfaced gracefully instead of the
         // process vanishing silently.
         InstallGlobalExceptionHandlers();
 
-        // Plan 22.2 Bug 2 fix (2026-05-03): merge default Dark theme dictionary
+        // Merge the default Dark theme dictionary
         // into Application.Resources NOW so any UI shown before chain step 10
         // — notably the bootstrap-failure dialog — has theme brushes to bind
         // against. Without this, DynamicResource lookups for BackgroundBrush /
@@ -198,7 +198,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Plan 56: subscribe the three top-level unhandled-exception sources to
+    /// Subscribes the three top-level unhandled-exception sources to
     /// <see cref="GlobalExceptionHandler"/>. UI-thread exceptions are marked handled
     /// so the app keeps running; background + unobserved-task exceptions are logged
     /// (the latter marked observed so it does not escalate).
@@ -224,14 +224,14 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Plan 22.2: the bootstrap chain itself. Called once from <see cref="OnStartup"/>;
+    /// The bootstrap chain itself. Called once from <see cref="OnStartup"/>;
     /// called again from the bootstrap-failure dialog's Apply-success handler
     /// after the user fixes the gamelog folder. Each step is null-aware so
     /// already-constructed singletons are reused.
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <remarks>
-    /// Internal accessibility (plan 22.2 decision 22.V) so the dialog
+    /// Internal accessibility so the dialog
     /// code-behind can re-invoke via <c>(App)Application.Current</c>, and
     /// so <c>EveDashboard.App.Wpf.Tests</c> can drive it directly via
     /// <c>InternalsVisibleTo</c>.
@@ -240,7 +240,7 @@ public partial class App : Application
     {
         var logger = LogProvider.Factory.CreateLogger<App>();
 
-        // 2. Load YAML bootstrap config (plan 15). Resolves gamelog_path or fails.
+        // 2. Load YAML bootstrap config. Resolves gamelog_path or fails.
         _bootstrapLoader ??= new YamlBootstrapConfigLoader(
             LogProvider.Factory.CreateLogger<YamlBootstrapConfigLoader>());
 
@@ -278,7 +278,7 @@ public partial class App : Application
                 throw new InvalidOperationException("Unhandled BootstrapConfigResult subtype.");
         }
 
-        // 3. Session SQLite bootstrap (plan 11). Caller owns parent-dir creation.
+        // 3. Session SQLite bootstrap. Caller owns parent-dir creation.
         if (_sessionDb is null)
         {
             _sessionStore = new SessionStore(LogProvider.Factory.CreateLogger<SessionStore>());
@@ -291,7 +291,7 @@ public partial class App : Application
                 "Data Source=" + _sessionStore.DatabasePath,
                 LogProvider.Factory.CreateLogger<SqliteDatabase>());
 
-            // Plan 38: one-time in-place migration of a pre-sha256 database.
+            // One-time in-place migration of a pre-sha256 database.
             // Backed up + announced + aborted-on-failure so a tester's real data
             // is never silently corrupted. Runs BEFORE EnsureSchemaAsync (which
             // then sees the migrated tables and only (re)creates indexes).
@@ -333,7 +333,7 @@ public partial class App : Application
             await _sessionStore.EnsureSchemaAsync(_sessionDb, ct).ConfigureAwait(true);
         }
 
-        // 4. SDE storage (plan 07). Extracts the embedded fallback if needed.
+        // 4. SDE storage. Extracts the embedded fallback if needed.
         if (_sdeDb is null)
         {
             _sdeStorage = new SdeStorage(LogProvider.Factory.CreateLogger<SdeStorage>());
@@ -353,7 +353,7 @@ public partial class App : Application
                 .EnsureSchemaAsync(_sdeDb, ct).ConfigureAwait(true);
         }
 
-        // 5. SDE updater (plan 08). API-drift fix per 1.4 = A: pass HttpClient + sdeDb in ctor.
+        // 5. SDE updater. HttpClient + sdeDb are passed in the ctor.
         //    Result is non-fatal — Unreachable just logs Warning and continues with the local SDE.
         if (_sdeUpdater is null)
         {
@@ -379,7 +379,7 @@ public partial class App : Application
             }
         }
 
-        // 6. SDE lookup (plan 09). Loads ore + gas into the in-memory cache.
+        // 6. SDE lookup. Loads ore + gas into the in-memory cache.
         //    The Updated subscription happens once-only here — ??= on _sdeLookup
         //    skips the entire block on retries, preventing double-subscription.
         if (_sdeLookup is null)
@@ -394,7 +394,7 @@ public partial class App : Application
             };
         }
 
-        // 7. Settings repo + market-stations catalog (plan 14). Seed on first launch.
+        // 7. Settings repo + market-stations catalog. Seed on first launch.
         if (_settingsRepo is null)
         {
             _settingsRepo = new SqliteSettingsRepository(_sessionDb!,
@@ -405,10 +405,10 @@ public partial class App : Application
             await _stationCatalog.EnsureSeedDefaultsAsync(ct).ConfigureAwait(true);
         }
 
-        // 8. Realtime watcher + writer + active-session context (plan 12).
-        //    Constructed here, NOT started — per plan-16 alignment 1.2 = A
+        // 8. Realtime watcher + writer + active-session context.
+        //    Constructed here, NOT started —
         //    the SessionController manages the per-session lifecycle.
-        //    API-drift fix per 1.1 = A: writer ctor takes ISdeLookup.
+        //    The writer ctor takes ISdeLookup.
         if (_watcher is null)
         {
             _parser = new GamelogLineParser(_sdeLookup!,
@@ -421,7 +421,7 @@ public partial class App : Application
                 LogProvider.Factory.CreateLogger<RealtimeLogWatcher>());
         }
 
-        // 8.5. Pricing services (plan 18). Constructed AFTER step 8 because
+        // 8.5. Pricing services. Constructed AFTER step 8 because
         //      MarketPriceFetcher's ctor subscribes to IActiveSessionContext.
         //      Constructed BEFORE step 10 because BuildServiceProvider takes
         //      them as parameters. _httpClient was already created at chain
@@ -432,7 +432,7 @@ public partial class App : Application
             _marketPriceClient = new GoonMetricsPriceClient(
                 _httpClient,
                 LogProvider.Factory.CreateLogger<GoonMetricsPriceClient>());
-            // Plan 53: official-CCP price source via public ESI (no login). The fetcher
+            // Official-CCP price source via public ESI (no login). The fetcher
             // talks to a router that picks GoonMetrics vs ESI per the price_source
             // setting, live-switchable; default GoonMetrics = unchanged v1 behaviour.
             _esiPriceClient = new EsiMarketPriceClient(
@@ -455,14 +455,14 @@ public partial class App : Application
                 LogProvider.Factory.CreateLogger<IskCalculator>());
         }
 
-        // 8.6. Plan 41 — GitHub release-check client for the launch update
+        // 8.6. GitHub release-check client for the launch update
         //      check. Reuses the app-lifetime _httpClient created at chain
         //      step 5 (guaranteed non-null after step 8.5).
         _releaseClient ??= new GitHubReleaseClient(
             _httpClient!,
             LogProvider.Factory.CreateLogger<GitHubReleaseClient>());
 
-        // 9. Validate gamelog_path. API-drift fix per 1.3 = A: discovery ctor
+        // 9. Validate gamelog_path. The discovery ctor
         //    takes the directory; DiscoverCharactersAsync takes only a CT.
         //    Path-dependent: rebuilt every call so a retry uses the new path.
         var discovery = new GamelogDiscoveryService(
@@ -505,7 +505,7 @@ public partial class App : Application
         var themeService = _services.GetRequiredService<ThemeService>();
         await themeService.LoadInitialAsync().ConfigureAwait(true);
 
-        // Plan 19 — load persisted dashboard layout BEFORE MainWindow.Show so the
+        // Load the persisted dashboard layout BEFORE MainWindow.Show so the
         // first paint reflects the user's saved order + hidden state. Must run AFTER
         // BuildServiceProvider (the coordinator is constructed inside DI) and AFTER
         // ThemeService.LoadInitialAsync (so theme brushes are available before the
@@ -520,7 +520,7 @@ public partial class App : Application
 
         logger.LogInformation("EVE Dashboard startup complete.");
 
-        // Plan 41 — fire-and-forget launch update check. Runs AFTER Show() so it
+        // Fire-and-forget launch update check. Runs AFTER Show() so it
         // never delays startup; UpdateNotifier swallows + logs all failures.
         // Rooted in _updateCheckTask so the task is not collected mid-flight.
         var runningVersion = Assembly.GetEntryAssembly()?.GetName().Version;
@@ -536,7 +536,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Plan 22.2: build the bootstrap-failure mini-container on first call,
+    /// Builds the bootstrap-failure mini-container on first call,
     /// then resolve and show the Settings dialog with the supplied failure
     /// context. The dialog blocks; on Apply success its code-behind re-invokes
     /// <see cref="RunBootstrapChainAsync"/>; on Cancel/Close the dialog itself

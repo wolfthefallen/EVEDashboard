@@ -10,27 +10,26 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Watches the EVE Gamelogs directory for live mining-tick output, parses each
 /// new line, and pushes the resulting <see cref="MiningEvent"/> records to an
-/// <see cref="IMiningEventSink"/>. Plan 12's Logs-side deliverable.
+/// <see cref="IMiningEventSink"/>.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Uses one <see cref="FileSystemWatcher"/> over the gamelog directory; per-file
 /// dispatch happens in the <c>Changed</c> / <c>Created</c> handlers based on
 /// the filename. Only files for pilots passed at <see cref="StartAsync"/> are
-/// followed (per decision 11.2 - unknown pilots are ignored).
+/// followed; files for unknown pilots are ignored.
 /// </para>
 /// <para>
-/// Initial read position is end-of-file (decision 9.1) - pre-existing log
-/// content is not replayed. The per-file read offset lives in memory only
-/// (decision 9.2). On a new <c>Created</c> file for a known pilot (the user
+/// Initial read position is end-of-file - pre-existing log content is not
+/// replayed. The per-file read offset lives in memory only. On a new
+/// <c>Created</c> file for a known pilot (the user
 /// logged that character back in mid-session), the watcher repoints the
 /// pilot's tail to the new file at offset 0 (the new file's content all
 /// post-dates <see cref="StartAsync"/>).
 /// </para>
 /// <para>
 /// The pilot list passed at <see cref="StartAsync"/> is treated as immutable
-/// for the lifetime of that start. To add a pilot mid-session (a
-/// session-controls UI feature, v1-backlog), callers must
+/// for the lifetime of that start. To change the pilot set, callers must
 /// <see cref="StopAsync"/> and start again.
 /// </para>
 /// </remarks>
@@ -48,7 +47,7 @@ public sealed class RealtimeLogWatcher : IAsyncDisposable
 
     /// <summary>Construct a watcher.</summary>
     /// <param name="parser">Parser used to convert each complete log line to a typed <see cref="MiningEvent"/>.</param>
-    /// <param name="sink">Where parsed events go. The writer (plan 12) implements this.</param>
+    /// <param name="sink">Where parsed events go. The session-event writer implements this.</param>
     /// <param name="log">Logger for FSW errors and IO failures.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public RealtimeLogWatcher(IGamelogLineParser parser, IMiningEventSink sink, ILogger<RealtimeLogWatcher> log)
@@ -203,14 +202,13 @@ public sealed class RealtimeLogWatcher : IAsyncDisposable
     private void OnFileCreated(object sender, FileSystemEventArgs e)
     {
         var charId = ResolveTrackedPilotId(e.Name ?? string.Empty);
-        if (charId is null) return; // unknown pilot or non-gamelog filename - decision 11.2 = A.
+        if (charId is null) return; // unknown pilot or non-gamelog filename.
 
         var tails = _tails;
         if (tails is null) return;
 
         // Pilot logged back into EVE; repoint their tail to the new file at
         // offset 0 (the new file is fresh, all content post-dates StartAsync).
-        // Decision 11.1 = A.
         tails[charId.Value] = new FileTailState
         {
             Path = e.FullPath,

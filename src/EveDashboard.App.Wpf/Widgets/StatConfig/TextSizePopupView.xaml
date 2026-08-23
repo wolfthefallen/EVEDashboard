@@ -9,7 +9,7 @@
              MinWidth="240" MaxWidth="320">
 
     <UserControl.Resources>
-        <!-- Plan 47: same emphasis enum source as the stat-config popup. -->
+        <!-- Same emphasis enum source as the stat-config popup. -->
         <ObjectDataProvider x:Key="EmphasisValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="settings:StatEmphasis" />

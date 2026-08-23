@@ -19,7 +19,7 @@
                 -->
                 <ResourceDictionary Source="/Themes/Controls.xaml" />
                 <!--
-                    Plan 20: implicit DataTemplate for StatRowViewModel + emphasis
+                    Implicit DataTemplate for StatRowViewModel + emphasis
                     styling. Loaded once at app start; theme swap leaves it alone.
                 -->
                 <ResourceDictionary Source="/Themes/StatRowTemplates.xaml" />

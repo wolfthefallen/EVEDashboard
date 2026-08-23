@@ -3,7 +3,7 @@ namespace EveDashboard.App.Wpf.Widgets.Session;
 /// <summary>
 /// Visible mode of the Session widget set (SessionConfig + SessionStats).
 /// Drives chrome-bar button visibility and which Session-area widget is in
-/// the layout (per plan 24): <see cref="Config"/> renders SessionConfig;
+/// the layout: <see cref="Config"/> renders SessionConfig;
 /// <see cref="Running"/>, <see cref="Paused"/>, and <see cref="Stopped"/>
 /// render SessionStats.
 /// </summary>
@@ -26,7 +26,7 @@ public enum SessionWidgetMode
     /// <summary>
     /// A session is paused. Either an in-session pause (user clicked Pause
     /// from <see cref="Running"/>) OR an app-launch detection of an open
-    /// <c>session_time</c> row from a prior run (per round-6 11.7 the widget
+    /// <c>session_time</c> row from a prior run (the widget deliberately
     /// never auto-resumes — user must click). Both cases surface the same
     /// chrome buttons (<c>Resume</c> + <c>Stop</c>) and render the same
     /// SessionStats widget content; the dispatch between in-session-resume
@@ -44,9 +44,9 @@ public enum SessionWidgetMode
     /// can review what they just mined. Chrome-bar shows a single
     /// <c>New Session</c> button (visible only in this mode); clicking it
     /// transitions back to <see cref="Config"/> with the prior pilot
-    /// selection preserved (per plan 23 decision 1.2 = A). Plan 23 ships
-    /// this mode; without it the widget flips back to Config on Stop and
-    /// the user loses sight of the just-ended session's totals.
+    /// selection preserved. Without this mode the widget would flip back to
+    /// Config on Stop and the user would lose sight of the just-ended
+    /// session's totals.
     /// </summary>
     Stopped,
 }

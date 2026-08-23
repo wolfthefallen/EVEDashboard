@@ -7,13 +7,13 @@ using EveDashboard.Stats.Queries;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 46: unit tests for the empty-state lifetime-rollup VM. Verifies the
+/// Unit tests for the empty-state lifetime-rollup VM. Verifies the
 /// pre-rendered Time/ISK labels and that the refined rows mirror the supplied
 /// <see cref="LifetimeSummary"/> in order, including the empty case.
 /// </summary>
 public class LifetimeSummaryViewModelTests
 {
-    /// <summary>Plan 47: construct the VM with a throwaway settings fake (these tests exercise the rollup rendering, not persistence).</summary>
+    /// <summary>Construct the VM with a throwaway settings fake (these tests exercise the rollup rendering, not persistence).</summary>
     private static LifetimeSummaryViewModel Vm(LifetimeSummary summary) =>
         new(summary, new FakeSettingsRepository());
 

@@ -55,7 +55,7 @@ public interface ISettingsRepository
     Task SetPriceModeAsync(PriceMode value, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 53: read which market-price service the ISK pipeline fetches from.
+    /// Read which market-price service the ISK pipeline fetches from.
     /// Returns <see cref="PriceSource.GoonMetrics"/> when missing or when the
     /// stored value is unrecognised (with Warning log on the latter).
     /// </summary>
@@ -63,7 +63,7 @@ public interface ISettingsRepository
     /// <returns>The persisted <see cref="PriceSource"/>, or the default (GoonMetrics).</returns>
     Task<PriceSource> GetPriceSourceAsync(CancellationToken ct = default);
 
-    /// <summary>Persist a new price source (plan 53). Raises <see cref="SettingChanged"/> with key <c>"price_source"</c>.</summary>
+    /// <summary>Persist a new price source. Raises <see cref="SettingChanged"/> with key <c>"price_source"</c>.</summary>
     /// <param name="value">Price source to persist.</param>
     /// <param name="ct">Cancellation token.</param>
     Task SetPriceSourceAsync(PriceSource value, CancellationToken ct = default);
@@ -83,7 +83,7 @@ public interface ISettingsRepository
     Task SetRefiningYieldPercentAsync(double value, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 37: read the auto-pause idle threshold in minutes. Returns <c>5</c>
+    /// Read the auto-pause idle threshold in minutes. Returns <c>5</c>
     /// when missing. Stored values outside <c>[1, 60]</c> are clamped to that
     /// range (with Warning log). Malformed (non-integer) stored values return
     /// the default <c>5</c> (also with Warning log).
@@ -93,7 +93,7 @@ public interface ISettingsRepository
     Task<int> GetAutoPauseIdleMinutesAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 37: persist a new auto-pause idle threshold in minutes. Values
+    /// Persist a new auto-pause idle threshold in minutes. Values
     /// outside <c>[1, 60]</c> are clamped (with Warning log). Raises
     /// <see cref="SettingChanged"/> with key <c>"auto_pause_idle_minutes"</c>.
     /// </summary>
@@ -102,7 +102,7 @@ public interface ISettingsRepository
     Task SetAutoPauseIdleMinutesAsync(int minutes, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 37: read whether the auto-pause / auto-resume notification sounds
+    /// Read whether the auto-pause / auto-resume notification sounds
     /// play. Returns <c>true</c> when missing or when the stored value is not
     /// recognised (with Warning log on unrecognised).
     /// </summary>
@@ -111,7 +111,7 @@ public interface ISettingsRepository
     Task<bool> GetAutoPauseSoundEnabledAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 37: persist the auto-pause sound on/off toggle. Raises
+    /// Persist the auto-pause sound on/off toggle. Raises
     /// <see cref="SettingChanged"/> with key <c>"auto_pause_sound_enabled"</c>.
     /// </summary>
     /// <param name="enabled">Whether the notification sounds should play.</param>
@@ -119,7 +119,7 @@ public interface ISettingsRepository
     Task SetAutoPauseSoundEnabledAsync(bool enabled, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 50: read the auto-pause / auto-resume notification volume as a percent
+    /// Read the auto-pause / auto-resume notification volume as a percent
     /// in <c>[0, 100]</c>. Returns <c>65</c> when missing. Stored values outside
     /// <c>[0, 100]</c> are clamped (with Warning log); malformed (non-integer)
     /// values return the default <c>65</c> (also with Warning log).
@@ -129,7 +129,7 @@ public interface ISettingsRepository
     Task<int> GetAutoPauseSoundVolumeAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 50: persist the auto-pause notification volume percent. Values outside
+    /// Persist the auto-pause notification volume percent. Values outside
     /// <c>[0, 100]</c> are clamped (with Warning log). Raises
     /// <see cref="SettingChanged"/> with key <c>"auto_pause_sound_volume"</c>.
     /// </summary>
@@ -138,7 +138,8 @@ public interface ISettingsRepository
     Task SetAutoPauseSoundVolumeAsync(int volume, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the currently selected station id (drives ISK calc in plan 18).
+    /// Read the currently selected station id (the hub the market-price
+    /// fetcher pulls prices from).
     /// Returns <c>60003760</c> (Jita) when missing, when the stored value is
     /// not a valid <see cref="long"/>, or when the saved id has no row in
     /// <c>market_stations</c> (with Warning log on the malformed/orphan cases).
@@ -154,8 +155,8 @@ public interface ISettingsRepository
 
     /// <summary>
     /// Read the persisted main-window geometry. Returns <c>null</c> when missing
-    /// or malformed (with Warning log on malformed). Plan 16 interprets <c>null</c>
-    /// as "let WPF/OS pick placement."
+    /// or malformed (with Warning log on malformed). A <c>null</c> result is
+    /// interpreted as "let WPF/OS pick placement."
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The persisted geometry, or <c>null</c>.</returns>
@@ -168,10 +169,10 @@ public interface ISettingsRepository
     Task SetWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted Reports child-window geometry (plan 25). Returns
+    /// Read the persisted Reports child-window geometry. Returns
     /// <c>null</c> when missing or malformed (with Warning log on malformed).
-    /// Plan 25 interprets <c>null</c> as "use the Reports default size 1100x700
-    /// centered, Normal state".
+    /// A <c>null</c> result is interpreted as "use the Reports default size
+    /// 1100x700 centered, Normal state".
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The persisted Reports window geometry, or <c>null</c>.</returns>
@@ -200,7 +201,7 @@ public interface ISettingsRepository
     Task SetCrystalDiagramWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted Lifetime Totals child-window geometry (plan 51). Returns
+    /// Read the persisted Lifetime Totals child-window geometry. Returns
     /// <c>null</c> when missing or malformed (with Warning log on malformed).
     /// A <c>null</c> result is interpreted as "use the Lifetime Totals default
     /// size 700x640 centered, Normal state".
@@ -216,7 +217,7 @@ public interface ISettingsRepository
     Task SetLifetimeTotalsWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted About child-window geometry (plan 52). Returns
+    /// Read the persisted About child-window geometry. Returns
     /// <c>null</c> when missing or malformed (with Warning log on malformed).
     /// A <c>null</c> result is interpreted as "use the About default size
     /// 460x560 centered, Normal state".
@@ -232,7 +233,7 @@ public interface ISettingsRepository
     Task SetAboutWindowGeometryAsync(WindowGeometry value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted Crystal Diagram selected-anomaly id (plan 35). Returns
+    /// Read the persisted Crystal Diagram selected-anomaly id. Returns
     /// <c>null</c> when missing. A <c>null</c> result is interpreted as
     /// "no preference; default to the 'all' entry".
     /// </summary>
@@ -240,14 +241,14 @@ public interface ISettingsRepository
     /// <returns>The persisted stable anomaly id (e.g. <c>"all"</c>, <c>"griemeer"</c>), or <c>null</c>.</returns>
     Task<string?> GetSelectedCrystalAnomalyAsync(CancellationToken ct = default);
 
-    /// <summary>Persist the Crystal Diagram selected-anomaly id (plan 35). Raises <see cref="SettingChanged"/> with key <c>"crystal_diagram_selected_anomaly"</c>.</summary>
+    /// <summary>Persist the Crystal Diagram selected-anomaly id. Raises <see cref="SettingChanged"/> with key <c>"crystal_diagram_selected_anomaly"</c>.</summary>
     /// <param name="value">Stable anomaly id to persist (e.g. <c>"all"</c>, <c>"griemeer"</c>).</param>
     /// <param name="ct">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     Task SetSelectedCrystalAnomalyAsync(string value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the id of the default fleet (plan 42). Returns <c>null</c> when no
+    /// Read the id of the default fleet. Returns <c>null</c> when no
     /// default has been set (the <c>default_fleet_id</c> row is absent).
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
@@ -255,7 +256,7 @@ public interface ISettingsRepository
     Task<string?> GetDefaultFleetIdAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Set or clear the default fleet (plan 42). A non-null id is upserted; a
+    /// Set or clear the default fleet. A non-null id is upserted; a
     /// <c>null</c> clears the default by deleting the <c>default_fleet_id</c> row
     /// (the setting value is NOT NULL, so absence is the "no default" sentinel).
     /// Raises <see cref="SettingChanged"/> with key <c>"default_fleet_id"</c>.
@@ -265,7 +266,7 @@ public interface ISettingsRepository
     Task SetDefaultFleetIdAsync(string? fleetId, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted pilot-picker sort order (plan 42). Returns
+    /// Read the persisted pilot-picker sort order. Returns
     /// <see cref="PilotSortOrder.LastActiveNewest"/> when missing or when the
     /// stored value is unrecognised (with Warning log on the latter).
     /// </summary>
@@ -273,27 +274,27 @@ public interface ISettingsRepository
     /// <returns>The persisted sort order, or the default.</returns>
     Task<PilotSortOrder> GetPilotSortOrderAsync(CancellationToken ct = default);
 
-    /// <summary>Persist the pilot-picker sort order (plan 42). Raises <see cref="SettingChanged"/> with key <c>"pilot_sort_order"</c>.</summary>
+    /// <summary>Persist the pilot-picker sort order. Raises <see cref="SettingChanged"/> with key <c>"pilot_sort_order"</c>.</summary>
     /// <param name="order">Sort order to persist.</param>
     /// <param name="ct">Cancellation token.</param>
     Task SetPilotSortOrderAsync(PilotSortOrder order, CancellationToken ct = default);
 
     /// <summary>
     /// Read whether newly-produced refined materials auto-show in the live
-    /// widgets' "Refined output" section (plan 43). Returns <c>true</c> when
+    /// widgets' "Refined output" section. Returns <c>true</c> when
     /// missing or when the stored value is unrecognised (Warning log on the latter).
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The persisted auto-show flag, or <c>true</c>.</returns>
     Task<bool> GetAutoShowRefinedMaterialsAsync(CancellationToken ct = default);
 
-    /// <summary>Persist the refined-materials auto-show toggle (plan 43). Raises <see cref="SettingChanged"/> with key <c>"auto_show_refined_materials"</c>.</summary>
+    /// <summary>Persist the refined-materials auto-show toggle. Raises <see cref="SettingChanged"/> with key <c>"auto_show_refined_materials"</c>.</summary>
     /// <param name="enabled">Whether newly-produced materials auto-show.</param>
     /// <param name="ct">Cancellation token.</param>
     Task SetAutoShowRefinedMaterialsAsync(bool enabled, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 49 (issue #1): whether the live "Refined output" section renders on the
+    /// Read whether the live "Refined output" section renders on the
     /// per-pilot widgets. The Session widget is never gated by this. Returns
     /// <c>true</c> when the key is absent (default on).
     /// </summary>
@@ -301,14 +302,14 @@ public interface ISettingsRepository
     /// <returns>The persisted toggle, or <c>true</c>.</returns>
     Task<bool> GetShowPilotRefinedOutputAsync(CancellationToken ct = default);
 
-    /// <summary>Persist the per-pilot refined-output toggle (plan 49). Raises <see cref="SettingChanged"/> with key <c>"show_pilot_refined_output"</c>.</summary>
+    /// <summary>Persist the per-pilot refined-output toggle. Raises <see cref="SettingChanged"/> with key <c>"show_pilot_refined_output"</c>.</summary>
     /// <param name="enabled">Whether the per-pilot widgets show the Refined output section.</param>
     /// <param name="ct">Cancellation token.</param>
     Task SetShowPilotRefinedOutputAsync(bool enabled, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the per-widget explicit refined-material visibility overrides (plan 43,
-    /// decision 2.2 = A — per-widget). Returns an empty map when none are set;
+    /// Read the explicit refined-material visibility overrides, scoped per
+    /// widget (not global). Returns an empty map when none are set;
     /// a material absent from the map follows the auto-show default, a
     /// <c>false</c> entry is a sticky hide, a <c>true</c> entry an explicit show.
     /// </summary>
@@ -319,8 +320,8 @@ public interface ISettingsRepository
     Task<IReadOnlyDictionary<long, bool>> GetRefinedMaterialsVisibilityAsync(string scopeKey, CancellationToken ct = default);
 
     /// <summary>
-    /// Persist the per-widget explicit refined-material visibility overrides
-    /// (plan 43). Raises <see cref="SettingChanged"/> with key
+    /// Persist the per-widget explicit refined-material visibility overrides.
+    /// Raises <see cref="SettingChanged"/> with key
     /// <c>"refined_materials_visibility"</c> (Session) or
     /// <c>"refined_materials_visibility.&lt;pilot_id&gt;"</c> (per pilot).
     /// </summary>
@@ -331,8 +332,8 @@ public interface ISettingsRepository
     Task SetRefinedMaterialsVisibilityAsync(string scopeKey, IReadOnlyDictionary<long, bool> visibility, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted Reports-window sidebar expanded width in pixels
-    /// (plan 25). Returns <c>null</c> when missing (interpret as default 280 px)
+    /// Read the persisted Reports-window sidebar expanded width in pixels.
+    /// Returns <c>null</c> when missing (interpret as default 280 px)
     /// or malformed (with Warning log on malformed).
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
@@ -345,10 +346,10 @@ public interface ISettingsRepository
     Task SetReportsSidebarWidthAsync(double value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted dashboard widget layout (plan 19). Returns
+    /// Read the persisted dashboard widget layout. Returns
     /// <c>null</c> when missing, when the stored JSON is malformed, or when
     /// the stored JSON has an unknown <c>kind</c> discriminator (with Warning
-    /// log on the malformed/unknown cases). Plan 19 interprets <c>null</c>
+    /// log on the malformed/unknown cases). A <c>null</c> result is interpreted
     /// as "use the default layout: Session at index 0, then per-pilots
     /// alphabetical, none hidden."
     /// </summary>
@@ -363,7 +364,7 @@ public interface ISettingsRepository
     Task SetWidgetLayoutAsync(WidgetLayout value, CancellationToken ct = default);
 
     /// <summary>
-    /// Read the persisted SessionStats widget stat customisation (plan 20).
+    /// Read the persisted SessionStats widget stat customisation.
     /// Returns <c>null</c> when missing, when the stored JSON is malformed, or
     /// when the stored JSON is otherwise unreadable (with Warning log on the
     /// malformed case). The renderer interprets <c>null</c> as "use the default
@@ -381,9 +382,9 @@ public interface ISettingsRepository
 
     /// <summary>
     /// Read the persisted per-pilot widget stat customisation for a single
-    /// pilot (plan 20). Returns <c>null</c> when missing or malformed (with
+    /// pilot. Returns <c>null</c> when missing or malformed (with
     /// Warning log on malformed). Each pilot has an independent config keyed
-    /// <c>per_pilot_stats_config.&lt;pilot_id&gt;</c> (decision 3.1 = B).
+    /// <c>per_pilot_stats_config.&lt;pilot_id&gt;</c>.
     /// </summary>
     /// <param name="pilotId">EVE character id of the pilot whose config to read.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -398,7 +399,7 @@ public interface ISettingsRepository
     Task SetPerPilotStatsConfigAsync(long pilotId, WidgetStatsConfig value, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 47: read the persisted Reports DataGrid column widths for one grid
+    /// Read the persisted Reports DataGrid column widths for one grid
     /// type. Returns <c>null</c> when missing or malformed (with Warning log on
     /// malformed). A <c>null</c> result means "no user-resized columns; keep the
     /// XAML default widths." The map is column-index -> pixel width, and contains
@@ -411,7 +412,7 @@ public interface ISettingsRepository
     Task<IReadOnlyDictionary<int, double>?> GetReportsColumnWidthsAsync(string gridKey, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 47: persist the Reports DataGrid column widths for one grid type.
+    /// Persist the Reports DataGrid column widths for one grid type.
     /// Raises <see cref="SettingChanged"/> with key
     /// <c>"reports_column_widths.&lt;gridKey&gt;"</c>.
     /// </summary>
@@ -422,7 +423,7 @@ public interface ISettingsRepository
     Task SetReportsColumnWidthsAsync(string gridKey, IReadOnlyDictionary<int, double> widths, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 47: read the per-element text-size (emphasis) overrides for one
+    /// Read the per-element text-size (emphasis) overrides for one
     /// Reports table widget type. Returns <c>null</c> when missing or malformed
     /// (with Warning log on malformed). A <c>null</c> result means "every element
     /// at the default <see cref="WidgetStats.StatEmphasis.None"/> look." The map
@@ -436,7 +437,7 @@ public interface ISettingsRepository
     Task<IReadOnlyDictionary<string, WidgetStats.StatEmphasis>?> GetReportsTextSizeAsync(string widgetTypeKey, CancellationToken ct = default);
 
     /// <summary>
-    /// Plan 47: persist the per-element text-size (emphasis) overrides for one
+    /// Persist the per-element text-size (emphasis) overrides for one
     /// Reports table widget type. Raises <see cref="SettingChanged"/> with key
     /// <c>"reports_text_size.&lt;widgetTypeKey&gt;"</c>.
     /// </summary>
@@ -449,11 +450,12 @@ public interface ISettingsRepository
     /// <summary>
     /// Seed default values for any setting key not yet present in the
     /// <c>setting</c> table. Idempotent — re-running is a no-op once defaults
-    /// are present. Does NOT seed <c>schema_version</c> (plan 11 owns that),
+    /// are present. Does NOT seed <c>schema_version</c> (the schema initializer
+    /// owns that),
     /// <c>window_geometry</c> (intentionally null sentinel on first launch),
-    /// <c>widget_layout</c> (intentionally null sentinel on first launch — plan 19),
-    /// <c>session_stats_config</c> (intentionally null sentinel on first launch — plan 20),
-    /// the family of <c>per_pilot_stats_config.&lt;pilot_id&gt;</c> keys (intentionally null sentinel — plan 20),
+    /// <c>widget_layout</c> (intentionally null sentinel on first launch),
+    /// <c>session_stats_config</c> (intentionally null sentinel on first launch),
+    /// the family of <c>per_pilot_stats_config.&lt;pilot_id&gt;</c> keys (intentionally null sentinel),
     /// or <c>non_sticky_station_defaults_seeded</c> (catalog's sentinel).
     /// </summary>
     /// <param name="ct">Cancellation token.</param>

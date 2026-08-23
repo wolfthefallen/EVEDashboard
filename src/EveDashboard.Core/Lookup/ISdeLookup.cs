@@ -5,28 +5,26 @@ using EveDashboard.Core.Domain;
 /// <summary>
 /// Runtime lookup service for the EVE Static Data Export (SDE). Owns an
 /// in-memory dictionary of every mineable item — all ore (<c>is_ore = 1</c>,
-/// covering asteroid + moon + ice as a single bucket per
-/// <c>MEMORY.md → feedback_ore_is_just_ore</c>) and all gas
+/// covering asteroid + moon + ice as a single undifferentiated bucket:
+/// ore is just ore, there is no per-category split) and all gas
 /// (<c>group_id = 711</c>, "Harvestable Cloud") — keyed by both EVE display
 /// name (case-insensitive) and EVE type id.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 09's deliverable. The interface lives in <c>EveDashboard.Core.Lookup</c>
-/// (relocated by plan 10 — see TODO.md "Amendments to completed plans") so
-/// peer projects (notably <c>EveDashboard.Mining</c>) can consume it without taking
+/// The interface lives in <c>EveDashboard.Core.Lookup</c> so peer projects
+/// (notably <c>EveDashboard.Mining</c>) can consume it without taking
 /// a peer dependency on <c>EveDashboard.Sde</c>; the implementation
-/// <c>SqliteSdeLookup</c> still lives in <c>EveDashboard.Sde.Lookup</c>.
+/// <c>SqliteSdeLookup</c> lives in <c>EveDashboard.Sde.Lookup</c>.
 /// Refined outputs (Tritanium, moon materials, ice products) are intentionally
 /// NOT cached here — the parser only ever encounters ore/gas names from
 /// gamelog lines, and the recursive ISK pipeline queries
 /// <c>type_materials</c> and <c>portion_size</c> for refined outputs directly
-/// from the SDE SQLite at math time
-/// (see <c>MEMORY.md → project_isk_calculation</c>).
+/// from the SDE SQLite at math time.
 /// </para>
 /// <para>
 /// <b>Wiring (App-driven, not self-subscribing).</b> The lookup does not take
-/// <c>ISdeUpdater</c> in its constructor. Plan 16's <c>App.xaml.cs OnStartup</c>
+/// <c>ISdeUpdater</c> in its constructor. The App's <c>App.xaml.cs OnStartup</c>
 /// runs the bootstrap sequence
 /// <c>storage.EnsureDatabaseExistsAsync</c> →
 /// <c>updater.CheckAndUpdateAsync</c> →
@@ -103,7 +101,7 @@ public interface ISdeLookup
 
     /// <summary>
     /// Resolve a refined-material type id (e.g. Tritanium) to its EVE display
-    /// name (plan 43). Covers the refined OUTPUTS of ore recipes — the same set
+    /// name. Covers the refined OUTPUTS of ore recipes — the same set
     /// as <see cref="GetRefinedMaterialTypeIds"/>.
     /// </summary>
     /// <param name="typeId">EVE type id of a refined material.</param>

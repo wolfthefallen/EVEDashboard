@@ -10,10 +10,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Mining.Tests.Realtime;
 
 /// <summary>
-/// Plan 12 watcher tests - exercises the real-time tail pipeline against a
+/// Watcher tests - exercises the real-time tail pipeline against a
 /// temp directory with synthetic gamelog files. Uses a real
 /// <see cref="GamelogLineParser"/> over a fake <see cref="ISdeLookup"/>;
-/// the parser shape itself is covered by plan 10's tests.
+/// the parser shape itself is covered by the parser's own tests.
 /// </summary>
 public class RealtimeLogWatcherTests
 {
@@ -116,7 +116,7 @@ public class RealtimeLogWatcherTests
         await rig.Watcher.StartAsync("sess-1", new[] { rig.Pilot }, CancellationToken.None);
         await Task.Delay(500);
         rig.Sink.Events.Should().BeEmpty(
-            "pre-existing log content is not replayed on Start (decision 9.1=A)");
+            "pre-existing log content is not replayed on Start");
 
         AppendBytes(rig.PilotLogPath, TickLine + "\r\n");
         await rig.Sink.WaitForCountAsync(1, TimeSpan.FromSeconds(2));
@@ -232,7 +232,7 @@ public class RealtimeLogWatcherTests
 
     /// <summary>
     /// Fake SDE lookup: resolves "Nocxite II-Grade" to the real type id; null
-    /// otherwise. Plan 10's parser tests cover the parser-SDE integration with
+    /// otherwise. The parser's own tests cover the parser-SDE integration with
     /// real fixtures; the watcher tests just need a known mapping.
     /// </summary>
     private sealed class FakeSdeLookup : ISdeLookup

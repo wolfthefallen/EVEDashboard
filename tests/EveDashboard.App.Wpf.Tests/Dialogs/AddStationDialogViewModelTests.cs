@@ -4,8 +4,8 @@ using EveDashboard.App.Wpf.Dialogs;
 using FluentAssertions;
 
 /// <summary>
-/// Unit tests for <see cref="AddStationDialogViewModel"/> (plan 22.1
-/// decision 22.D). Covers required-field validation, station_id parsing
+/// Unit tests for <see cref="AddStationDialogViewModel"/>.
+/// Covers required-field validation, station_id parsing
 /// rules (positive long), optional region fields, and BuildStation projection.
 /// </summary>
 public class AddStationDialogViewModelTests

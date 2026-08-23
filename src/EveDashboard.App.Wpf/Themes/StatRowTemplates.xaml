@@ -5,7 +5,7 @@
     xmlns:settings="clr-namespace:EveDashboard.Core.Settings.WidgetStats;assembly=EveDashboard.Core">
 
     <!--
-        Plan 20: implicit DataTemplate for StatRowViewModel. ONE template handles
+        Implicit DataTemplate for StatRowViewModel. ONE template handles
         all 5 emphasis levels via DataTriggers on the Emphasis property:
         - None    -> 2-column "Label : right-aligned value" (the original numeric stat row).
         - Header0 -> 14pt Bold, full-width single line, value only (no label prefix).

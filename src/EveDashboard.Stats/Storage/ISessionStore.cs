@@ -11,8 +11,8 @@ using EveDashboard.Core.Storage;
 /// the database itself — the consumer constructs an <see cref="ISqliteDatabase"/>
 /// from <see cref="DatabasePath"/> and passes it into
 /// <see cref="EnsureSchemaAsync(ISqliteDatabase, CancellationToken)"/>. This
-/// keeps the store ignorant of the singleton-connection pattern that plan 12's
-/// writer + notifier depend on; the wiring lives in <c>App.xaml.cs OnStartup</c>.
+/// keeps the store ignorant of the singleton-connection pattern that the
+/// session writer + notifier depend on; the wiring lives in <c>App.xaml.cs OnStartup</c>.
 /// <para>
 /// Filesystem prep is the caller's responsibility: before constructing the
 /// SQLite wrapper against <see cref="DatabasePath"/>, the caller must ensure

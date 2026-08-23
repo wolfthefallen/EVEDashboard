@@ -13,9 +13,10 @@ public enum NameMismatchKind
 }
 
 /// <summary>
-/// One name mismatch surfaced during import: an existing row was kept (per the
-/// plan-29 alignment 2.1 / 2.2 = B "skip + Warning" policy), but the imported
-/// row carried a different display name and the user is informed.
+/// One name mismatch surfaced during import: an existing row was kept (the
+/// "skip + Warning" collision policy — the destination row wins and the import
+/// never overwrites it), but the imported row carried a different display name
+/// and the user is informed.
 /// </summary>
 /// <param name="Kind">Which table the mismatch is on.</param>
 /// <param name="Id">EVE-side stable id of the row (<c>pilot_id</c> or <c>station_id</c>).</param>

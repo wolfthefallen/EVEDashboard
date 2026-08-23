@@ -9,10 +9,11 @@ using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 25 base class for widget VMs that own a stat-config popup. Owns the
-/// duplicated stat-config plumbing flagged in <c>CLEANUP.md</c> 2.2 — popup
+/// Base class for widget VMs that own a stat-config popup. Owns the
+/// stat-config plumbing shared by every stat-list widget — popup
 /// wiring, settings subscription, <c>RebuildStatsAsync</c>, <c>FindHidden</c>,
-/// and dispose orchestration. Concrete widgets provide the
+/// and dispose orchestration — so it is written once instead of being
+/// duplicated per widget. Concrete widgets provide the
 /// <c>[StatRow]</c>-decorated properties, the data flow, and any extra
 /// hide-only flags via <see cref="OnAdditionalHideOnlyResolved"/>.
 /// </summary>
@@ -37,7 +38,7 @@ using Microsoft.Extensions.Logging;
 public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewModel, IDisposable
 {
     /// <summary>
-    /// Plan 35 (decision 2.6 cross = B): protected so subclasses can subscribe
+    /// Protected so subclasses can subscribe
     /// to <see cref="ISettingsRepository.SettingChanged"/> for cross-cutting
     /// concerns (e.g. theme reactivity in <c>PerPilotWidgetViewModel</c>).
     /// </summary>
@@ -50,7 +51,7 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     private readonly ILogger? _log;
     private bool _disposed;
 
-    /// <summary>Plan 20: bound stat rows in user-defined order. Filtered to visible rows only.</summary>
+    /// <summary>Bound stat rows in user-defined order. Filtered to visible rows only.</summary>
     public System.Collections.ObjectModel.ObservableCollection<StatRowViewModel> Stats => _renderer.Stats;
 
     /// <inheritdoc />
@@ -110,9 +111,9 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
             _ = RebuildStatsAsync();
             return;
         }
-        // Plan 43: re-resolve the refined-output section on a global auto-show
-        // change or this widget's own visibility-override change. Plan 49 adds the
-        // per-pilot master toggle so the section live-updates on that change too.
+        // Re-resolve the refined-output section on a global auto-show
+        // change or this widget's own visibility-override change. The per-pilot
+        // master toggle is included so the section live-updates on that change too.
         if (_refinedScopeKey is not null
             && (string.Equals(e.Key, "auto_show_refined_materials", StringComparison.Ordinal)
                 || string.Equals(e.Key, "show_pilot_refined_output", StringComparison.Ordinal)
@@ -169,30 +170,30 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
         return false;
     }
 
-    /* ----- Plan 43: refined-output section (opt-in — live SessionStats + per-pilot widgets only) ----- */
+    /* ----- Refined-output section (opt-in — live SessionStats + per-pilot widgets only) ----- */
 
     private string? _refinedScopeKey;
     private bool _refinedAutoShow = true;
     private Dictionary<long, bool> _refinedOverrides = new();
-    // Plan 49 (issue #1): per-pilot master toggle for the refined-output section.
+    // Per-pilot master toggle for the refined-output section (GitHub issue #1).
     // Only meaningful for a per-pilot scope; Session scope ("") is never gated.
     private bool _pilotRefinedEnabled = true;
     // The materials currently in the section. Mirrors the latest snapshot exactly
     // (cleared + repopulated by MergeRefinedOutput each call) — NOT an ever-growing
-    // set. This is what lets a new session's empty snapshot reset the display
-    // (bug 1, 2026-06-18); see MergeRefinedOutput.
+    // set. This is what lets a new session's empty snapshot reset the display;
+    // see MergeRefinedOutput.
     private readonly Dictionary<long, RefinedMaterialAmount> _refinedSeen = new();
 
-    /// <summary>Plan 43: the visible refined-material rows (quantity desc). Empty unless <see cref="EnableRefinedOutput"/> was called.</summary>
+    /// <summary>The visible refined-material rows (quantity desc). Empty unless <see cref="EnableRefinedOutput"/> was called.</summary>
     public ObservableCollection<RefinedOutputRowViewModel> RefinedOutput { get; } = new();
 
-    /// <summary>Plan 43: true when this widget shows the "Refined output" section (live SessionStats + per-pilot widgets opt in; saved/reporting widgets do not).</summary>
+    /// <summary>True when this widget shows the "Refined output" section (live SessionStats + per-pilot widgets opt in; saved/reporting widgets do not).</summary>
     public bool HasRefinedOutput => _refinedScopeKey is not null;
 
     /// <summary>
-    /// Plan 49: true when this widget's refined-output section should render. The
+    /// True when this widget's refined-output section should render. The
     /// Session scope ("") is always enabled; a per-pilot scope is gated by the
-    /// `show_pilot_refined_output` setting (issue #1).
+    /// `show_pilot_refined_output` setting (GitHub issue #1).
     /// </summary>
     private bool RefinedSectionEnabled =>
         _refinedScopeKey is not null && (_refinedScopeKey.Length == 0 || _pilotRefinedEnabled);
@@ -202,7 +203,7 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
         scopeKey.Length == 0 ? "refined_materials_visibility" : $"refined_materials_visibility.{scopeKey}";
 
     /// <summary>
-    /// Plan 43 (decision 2.1 = C / 2.2 = A): enable the per-widget "Refined
+    /// Enable the per-widget "Refined
     /// output" section plus the cog-popup "Refined materials" subsection. Called
     /// from the live SessionStats / per-pilot widget ctors only.
     /// </summary>
@@ -226,7 +227,7 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     }
 
     /// <summary>
-    /// Plan 43: replace the section's contents with the latest refined-output
+    /// Replace the section's contents with the latest refined-output
     /// snapshot (called by subclasses on each refresh). The snapshot from
     /// <c>GetSessionStatsAsync</c> is ALREADY the complete cumulative refined
     /// output for the current session, so the section simply mirrors it:
@@ -234,7 +235,7 @@ public abstract partial class StatConfigurableWidgetViewModel : WidgetBaseViewMo
     /// session this is behaviour-identical to accumulating (snapshots are
     /// monotonic — a mined material stays in every later snapshot), but it also
     /// means an EMPTY snapshot clears the section, which is how a new session
-    /// resets the display (bug 1, 2026-06-18 — the singleton SessionStats VM's
+    /// resets the display (the singleton SessionStats VM's
     /// <see cref="_refinedSeen"/> previously survived across sessions and an
     /// empty merge was a no-op). No-op when refined output is not enabled.
     /// </summary>

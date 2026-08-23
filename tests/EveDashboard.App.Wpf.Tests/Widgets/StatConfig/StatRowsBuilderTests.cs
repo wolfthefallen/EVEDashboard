@@ -77,7 +77,7 @@ public class StatRowsBuilderTests
     public void Saved_missing_known_key_appends_after_saved_prefix_in_DefaultOrder()
     {
         // Saved has Alpha + Charlie. Bravo (missing) is appended AFTER the saved
-        // prefix (per decision 7.1 = B — saved order is preserved exactly; future-
+        // prefix (saved order is preserved exactly; future-
         // added stats slot in below the user's customised list, sorted by
         // DefaultOrder among themselves).
         var saved = new WidgetStatsConfig(new[]

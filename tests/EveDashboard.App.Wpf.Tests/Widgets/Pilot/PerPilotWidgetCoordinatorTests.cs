@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// </summary>
 public class PerPilotWidgetCoordinatorTests
 {
-    /// <summary>Plan 35: no-op callback for null-arg ctor tests.</summary>
+    /// <summary>No-op callback for null-arg ctor tests.</summary>
     private static readonly Func<long, PilotRole, CancellationToken, Task> NoOpCallback =
         (_, _, _) => Task.CompletedTask;
 
@@ -130,7 +130,7 @@ public class PerPilotWidgetCoordinatorTests
             e.Level == LogLevel.Warning && e.Message.Contains("session_pilot"));
     }
 
-    /* ---------- Session stop leaves widgets visible (decision 6.2 = A) ---------- */
+    /* ---------- Session stop leaves widgets visible ---------- */
 
     [Fact]
     public async Task Session_stop_does_not_clear_widgets()
@@ -146,7 +146,7 @@ public class PerPilotWidgetCoordinatorTests
         await coord.HandleActiveSessionChangedAsync();
         coord.Widgets.Should().HaveCount(2);
 
-        // Transition to None (Stop). Per decision 6.2 = A, widgets remain visible.
+        // Transition to None (Stop): widgets remain visible.
         f.ActiveSession.Set(null, SessionRunState.None);
         await coord.HandleActiveSessionChangedAsync();
         coord.Widgets.Should().HaveCount(2);

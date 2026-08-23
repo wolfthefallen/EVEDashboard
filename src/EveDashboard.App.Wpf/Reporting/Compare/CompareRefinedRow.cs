@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Reporting.Compare;
 
 /// <summary>
-/// Plan 45: one row in the compare-mode "Total Refined Output" table — a refined
+/// One row in the compare-mode "Total Refined Output" table — a refined
 /// material's display name plus its quantity and ISK value summed across the
 /// selected sessions. Raw numeric values (not pre-rendered strings, unlike
 /// <see cref="CompareRow"/>) so the DataGrid sorts them numerically and formats

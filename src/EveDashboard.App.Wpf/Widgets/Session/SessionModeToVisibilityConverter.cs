@@ -12,12 +12,9 @@ using System.Windows.Data;
 /// <remarks>
 /// Single-mode parameters keep working: <c>ConverterParameter=Config</c>
 /// matches only Config; <c>ConverterParameter=Running|Paused</c> matches
-/// Running OR Paused. Plan 23 added the <c>|</c>-separated form so a stat
-/// block could be visible in multiple modes from a single XAML declaration
-/// without duplicating the layout. Plan 24 extracted this converter from
-/// the deleted <c>SessionWidgetView.xaml.cs</c> host file into its own file
-/// so the chrome-bar XAML's <c>ModeToVis</c> resource declaration keeps
-/// resolving (same FQN, new file location). The chrome-bar's <c>Stop</c>
+/// Running OR Paused. The <c>|</c>-separated form exists so a stat
+/// block can be visible in multiple modes from a single XAML declaration
+/// without duplicating the layout. The chrome-bar's <c>Stop</c>
 /// button uses <c>ConverterParameter=Running|Paused</c>.
 /// </remarks>
 public sealed class SessionModeToVisibilityConverter : IValueConverter

@@ -9,7 +9,7 @@ using EveDashboard.Reporting.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 25 widget VM for the per-ore breakdown table — Type | m^3 | ISK
+/// Widget VM for the per-ore breakdown table — Type | m^3 | ISK
 /// columns, sortable. Reused at session-level (<c>pilotId == null</c>) and
 /// per-pilot-level (<c>pilotId == &lt;id&gt;</c>) inside the Reports window.
 /// </summary>
@@ -18,12 +18,12 @@ using Microsoft.Extensions.Logging;
 /// ore types are dynamic per session). Column-click sort is provided by the
 /// view's <c>DataGrid.CanUserSortColumns="True"</c>. Refresh is driven
 /// externally by <see cref="LoadAsync"/>; <see cref="WidgetBaseViewModel.RefreshAsync"/>
-/// is a no-op. Plan 47: inherits <see cref="TextSizeConfigurableWidgetViewModel"/>
+/// is a no-op. Inherits <see cref="TextSizeConfigurableWidgetViewModel"/>
 /// for the "Text size" cog + column-width persistence (widget-type key <c>"ore"</c>).
 /// </remarks>
 public sealed partial class PerOreBreakdownViewModel : TextSizeConfigurableWidgetViewModel
 {
-    /// <summary>Plan 47: sizeable elements + their default emphasis (Layout 1 — Title bold, table plain).</summary>
+    /// <summary>Sizeable elements + their default emphasis (Title bold, table plain).</summary>
     private static readonly IReadOnlyList<(string Key, string Label, StatEmphasis Default)> Elements = new[]
     {
         ("Title", "Title", StatEmphasis.Header0),
@@ -43,7 +43,7 @@ public sealed partial class PerOreBreakdownViewModel : TextSizeConfigurableWidge
 
     /// <summary>Construct the per-ore breakdown VM.</summary>
     /// <param name="queries">Reporting queries facade.</param>
-    /// <param name="settings">Settings repository (plan 47: text size + column widths).</param>
+    /// <param name="settings">Settings repository (text size + column widths).</param>
     /// <param name="log">Logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public PerOreBreakdownViewModel(

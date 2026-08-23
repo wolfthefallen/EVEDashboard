@@ -32,9 +32,10 @@ own Setup.
 - Launch from source: `dotnet run --project src/EveDashboard.App.Wpf`.
 
 App data lives under `%APPDATA%\EveDashboard\` (`config.yaml`,
-`session.sqlite`, `sde\eve.sqlite`, `logs\`). Per `MEMORY.md ->
-feedback_no_migrations_until_release`, deleting that folder between rounds
-is the canonical reset.
+`session.sqlite`, `sde\eve.sqlite`, `logs\`). The app log is
+`logs\EveDashboard_NNN.log` (size-rolled at 10 MB, one backup kept; the HIGHEST NNN is the current file - Serilog rolls the configured `EveDashboard.log` name). Deleting
+the whole folder is the full reset -- it also discards your saved sessions
+and config, so back it up first if you want to keep them.
 
 ---
 
@@ -42,8 +43,8 @@ is the canonical reset.
 
 Verifies the chain `BootstrapConfigLoader -> autodetect -> validate ->
 SDE schema-migrate + update -> session schema init` and its failure
-re-routes to the Settings dialog (decision 22.2-B). The SDE database is now
-forward-migrated in place on every launch (plan 52) so an SDE store predating
+re-routes to the Settings dialog. The SDE database is
+forward-migrated in place on every launch so an SDE store predating
 the `meta.last_modified` / `meta.etag` columns self-heals instead of losing
 auto-update.
 
@@ -94,11 +95,11 @@ so the recovery steps can restore your real path.
 7. **Close in failure mode = Shutdown(1).** Trigger any failure mode.
    Click Close / X / Alt-F4.
    - Expected: app exits silently with code 1, no "discard?" prompt
-     (suppressed per decision 22.S).
+     (the discard prompt is suppressed in failure mode).
 8. **Chain idempotency on retry.** After any successful retry, open the
    session SQLite and run
    `SELECT value FROM setting WHERE key='schema_version';` -- should
-   return `1` with no double-bump. App log should show exactly one
+   return `3` (the current schema version) with no double-bump. App log should show exactly one
    `everef.net` HEAD probe per launch (no double-fetch).
 9. **Window geometry persistence.** Resize MainWindow to ~900x700, move
    to top-left of the primary monitor, wait ~1 second, close. The
@@ -107,14 +108,14 @@ so the recovery steps can restore your real path.
    Relaunch -- window opens at exactly those bounds. Maximize, wait,
    close, relaunch -- opens maximized; Restore-down snaps back to the
    pre-maximize bounds.
-10. **SDE forward-migration is silent on an up-to-date store (plan 52).**
-    Launch normally. In the newest `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`,
+10. **SDE forward-migration is silent on an up-to-date store.**
+    Launch normally. In `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`,
     the SDE step must be clean between `EVE Dashboard starting up.` and
     `EVE Dashboard startup complete.` -- NO `duplicate column` and NO
     `no such column` ERROR lines. (The idempotent SDE schema-migrate now runs
     every launch; a pre-check means the already-present columns produce no throw
     and no log noise.)
-11. **SDE old-shape self-heal (plan 52; optional, heavier).** With the app
+11. **SDE old-shape self-heal (optional, heavier).** With the app
     closed, back up `%APPDATA%\EveDashboard\sde\eve.sqlite`, then with
     `tools\sqlite3.exe` run
     `ALTER TABLE meta DROP COLUMN etag; ALTER TABLE meta DROP COLUMN last_modified;`
@@ -123,13 +124,13 @@ so the recovery steps can restore your real path.
       (`SDE up-to-date` or an update), NOT a `no such column` ERROR.
       `PRAGMA table_info(meta);` now shows `last_modified` and `etag` re-added.
     Restore the backup when done.
-12. **App-wide unhandled-exception handler (plan 56).** Hard to force
+12. **App-wide unhandled-exception handler.** Hard to force
     deliberately; verified by unit tests (`GlobalExceptionHandlerTests`) and by
     normal use. What to know: if an unexpected error ever occurs, the app no
     longer vanishes silently — a UI-thread error logs its stack trace and shows an
     "EVE Dashboard - unexpected error" dialog **and keeps running**; a fatal
-    background error logs at Critical. The full stack trace is always in the newest
-    `%APPDATA%\EveDashboard\logs\EveDashboard_*.log`. If you hit the dialog, press
+    background error logs at Critical. The full stack trace is always in
+    `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`. If you hit the dialog, press
     Ctrl+C to copy its text for a bug report. Normal launches show NO such dialog
     and no ERROR/CRITICAL lines between "starting up" and "startup complete".
 
@@ -164,13 +165,13 @@ Launch the app. The chrome bar has a `Settings` button at the right.
    95)". Set to `abc` -> Apply -> MessageBox "Refining yield is not a
    valid number (you entered 'abc')". Set to `75.5` -> Apply -> no
    prompt, persisted. Close + reopen -> shows 75.5.
-3b. **Price source selection + official ESI pricing (plan 53).** In the
+3b. **Price source selection + official ESI pricing.** In the
     Pricing section the new "Price source:" ComboBox lists
     `GoonMetrics (third-party)` (default) and `Official ESI (CCP)`. Select
     `Official ESI (CCP)` -> Apply -> Close -> reopen: still Official ESI.
     Live check (optional): start a session and mine (or run
     `tools/fake-mining-session.ps1`); ISK still populates, and the app log
-    (`%APPDATA%\EveDashboard\logs\EveDashboard_*.log`) shows the fetch hitting
+    (`%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`) shows the fetch hitting
     `esi.evetech.net` instead of `goonmetrics`. Prices should match Jita in-game
     for the mined ores' refined minerals. Restore to `GoonMetrics (third-party)`
     -> Apply when done.
@@ -178,7 +179,7 @@ Launch the app. The chrome bar has a `Settings` button at the right.
    "Gamelog folder does not exist". Browse to `C:\Windows` -> Apply ->
    "Gamelog folder contains no EVE gamelog files". Browse to the real
    EVE Gamelogs path -> Apply -> no prompt.
-4a. **Auto-pause section validation + persistence (plan 37).** In the
+4a. **Auto-pause section validation + persistence.** In the
     Auto-pause section, set Idle minutes to `0` -> Apply -> MessageBox
     lists "Idle minutes must be between 1 and 60 (you entered 0)". Set
     to `abc` -> Apply -> MessageBox "Idle minutes is not a valid integer
@@ -193,14 +194,18 @@ Launch the app. The chrome bar has a `Settings` button at the right.
    dialog stays open with the dirty value. Click Close -> Yes -> dialog
    closes. Reopen -> the dirty edit was discarded.
 7. **Markets Add.** Click `Add station`. With all fields empty, OK ->
-   validation lists all required-field errors. Fill in: station_id
-   `60008494`, system_name `Amarr`, station_name `VIII - Oris - Emperor
-   Family Academy`, region_id `10000043`, region_name `Domain`. OK ->
-   sub-dialog closes, Amarr appears in the markets list. Apply -> Close
-   -> Reopen -> Amarr is persisted.
-8. **Markets Remove.** Select Amarr in the markets list -> Remove
-   station -> Amarr disappears from the list AND from the Selected
-   station ComboBox. Apply -> persisted.
+   validation lists all required-field errors. Use a station that is NOT
+   one of the seeded hubs (Jita, Amarr, Dodixie and Rens are re-seeded on
+   every launch, so they cannot be used for this test). Fill in: Station ID
+   `60005686`, System name `Hek`, Station name `VIII - Moon 12 - Boundless
+   Creation Factory`, Region ID `10000042`, Region name `Metropolis`. OK ->
+   sub-dialog closes, Hek appears in the markets list. Apply -> Close
+   -> Reopen -> Hek is persisted.
+8. **Markets Remove.** Select Hek in the markets list -> Remove
+   station -> Hek disappears from the list AND from the Selected
+   station ComboBox. Apply -> persisted (still gone after a relaunch;
+   removing one of the four seeded empire hubs instead only lasts until
+   the next launch, when it is re-seeded).
 9. **Markets pending discard.** Add a station, then Close without Apply
    and click Yes on the discard prompt. Reopen -> the added station is
    gone.
@@ -219,15 +224,16 @@ any test stations added during steps 7 and 9.
 
 ## 3. New Session (Fleets) + chrome bar lifecycle
 
-Verifies the plan-42 New Session window (saved Fleets are the only way to
+Verifies the New Session window (saved Fleets are the only way to
 start a session), the four-mode (`Config / Running / Paused / Stopped`)
 chrome-button surface, app-launch Paused detection, and template variables.
 
 ### Setup
 
 Delete `widget_layout` from the `setting` table (or the whole
-`session.sqlite` for a full layout reset). Launch the app. This first launch
-after plan 42 has NO saved fleets yet.
+`session.sqlite` for a full layout reset). Launch the app. The scenario
+assumes NO saved fleets yet (a fresh `session.sqlite`, or delete any existing
+fleets via right-click -> `Delete` in the New Session window first).
 
 ### 3a. Empty state + build a fleet
 
@@ -255,7 +261,7 @@ after plan 42 has NO saved fleets yet.
    - Expected: the picker/confirm panels hide; the Fleets list now shows
      `Moon crew` marked `(default)` and already selected; `Start` is ENABLED.
 
-### 3b. Start a session from a fleet (plan 37: lands in Paused)
+### 3b. Start a session from a fleet (lands in Paused)
 
 6. **Confirm + Start.** With `Moon crew` selected, type the session name
    `manual-{{$DATE}} with {{$CHARS}}` and click `Start`.
@@ -309,7 +315,7 @@ after plan 42 has NO saved fleets yet.
       it). If NONE of the fleet's pilots are logged in, Start is blocked and an
       inline error appears in the dialog (the dialog stays open).
 
-### 3d. App-launch Paused detection (unchanged by plan 42)
+### 3d. App-launch Paused detection
 
 17. **App-launch Paused detection.** Start a fresh session (let Continue bring
     it to Running), then close MainWindow without Stop. Relaunch.
@@ -475,7 +481,7 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
       themselves; then included.
     - Cyno: always excluded.
     - Combat: always excluded.
-    All three per-pilot widgets remain VISIBLE (decision 1.2 = A);
+    All three per-pilot widgets remain VISIBLE;
     Cyno + Combat widgets show 0s (filtered at the CTE level).
 11. **Mid-session role change is event-time stamped.** Set A back
     to Miner mid-session. A's border returns to default, header
@@ -483,7 +489,7 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
     retroactively -- the existing A-Booster rows keep their
     filter status; new events from A are stamped Miner and count
     immediately.
-12. **Fleet roles flow into a new session (plan 42).** Stop the
+12. **Fleet roles flow into a new session.** Stop the
     session. Click New Session, select a fleet whose pilots have
     assigned non-Miner roles (e.g. one Booster), confirm the name,
     Start.
@@ -509,7 +515,7 @@ yield = 90.6, Price mode = Buy. Note current values so you can restore.
       already has a usable price for (the old ~per-minute refetch is
       gone). Only a material that returned no price at Start may gain
       at most ONE extra row per 15 minutes.
-15. **Station change re-prices mid-session (decision 1.4).** With the
+15. **Station change re-prices mid-session.** With the
     session still Running, open Settings, change Selected station from
     Jita to C-J6MT (`1049588174021`), Apply.
     - Expected: a fresh `Prefetch complete: inserted N of N requested
@@ -531,10 +537,10 @@ clean slate next round.
 
 ## 6. Auto-pause / auto-resume
 
-Plan 37 / plan 50. Verifies that an idle session auto-pauses with a
+Verifies that an idle session auto-pauses with a
 notification sound, that the next mining event auto-resumes the session with
 the triggering event counted in the totals, and that the sound volume slider
-scales playback (plan 50).
+scales playback.
 
 ### Setup
 
@@ -595,7 +601,7 @@ events are flowing (TotalM3 advances).
      only the following Tick / Crit does. (Residue almost never
      arrives without a preceding Tick, so this is mainly a regression
      guard.)
-8. **Sound volume slider (plan 50).** Open Settings -> Auto-pause. A
+8. **Sound volume slider.** Open Settings -> Auto-pause. A
    **Volume** slider (default ~65%) sits under the sound checkbox.
    - It is ENABLED only while "Play sounds on auto-pause / auto-resume"
      is checked: uncheck the box -> the slider greys out; re-check it
@@ -640,7 +646,7 @@ listing the folder.
    shows its corresponding panel within one frame, no flicker.
 4. **FancyZones snap.** Drag-resize, then snap into a FancyZones
    zone smaller than 900x650. Image stretches `Uniform` in both
-   cases (regression check against the Bug 1 fix).
+   cases.
 5. **In-session persistence.** Leave the dropdown on
    `Mordunium (Pyerite)`. X-close the window. Click Crystal Diagram
    again. Expected: same size / position, dropdown still
@@ -679,7 +685,7 @@ fresh install).
    - Expected: window opens at default 460x560 centered, current theme.
 3. **Read each line.** Top to bottom:
    - `EVE Dashboard v<version>` (matches the running release, e.g.
-     `0.1.3`).
+     `0.1.4`).
    - A clickable GitHub link reading
      `https://github.com/wolfthefallen/EVEDashboard`.
    - `SDE data: <yyyy-MM-dd>` (a real date, not `unknown`).
@@ -704,7 +710,7 @@ to the default size, delete the `about_window_geometry` row from the
 
 ---
 
-## 7.6 Haul Value window (plan 55)
+## 7.6 Haul Value window
 
 Verifies the multi-hub Haul Value window: both input modes (paste + saved
 session), pricing across the market_stations catalog, and the results grids.
@@ -717,7 +723,7 @@ session uses GoonMetrics.
 
 Launch the app. Have at least one saved session (or run
 `tools/fake-mining-session.ps1` and stop a session). Settings -> Pricing has a
-price source (GoonMetrics default; ESI also works — plan 53).
+price source (GoonMetrics default; ESI also works).
 
 ### Steps
 
@@ -730,7 +736,8 @@ price source (GoonMetrics default; ESI also works — plan 53).
    - Expected: the "Where to sell" grid lists each catalog station with a total,
      **best first** — the four empire hubs (Jita, Amarr, Dodixie, Rens) are all
      seeded defaults, so all four appear (plus any you've added). The breakdown
-     header **names the winning station** (e.g. "Breakdown - Jita - 4-4"); the
+     header **names the winning station** (e.g. "Breakdown - Jita - IV - Moon 4 -
+     Caldari Navy Assembly Plant"); the
      grid lists Tritanium / Pyerite with quantity, unit price, and value; the
      status line says "Valued 2 item(s) at N station(s) using buy prices."
    - Numbers should match the in-game market at each hub (at the current price
@@ -780,8 +787,8 @@ short mining sessions and Stop them.
      MainWindow brings it to the front). NOT transparent. Default
      ~1100x700.
 2. **Sidebar shows saved sessions.** Columns: Name, Start,
-   Duration, Pilots, Total ISK. Newest session first (descending
-   `session_id` default sort).
+   Duration, Pilots, Total ISK. Newest session first (the default order
+   is by start time, newest first).
 3. **Column sort.** Click each column header in turn -> rows
    resort; click again -> direction reverses.
 4. **Click a row -> single-mode breakdown.** Click row 1 in the
@@ -822,19 +829,32 @@ short mining sessions and Stop them.
     pilot widgets for session 1; compare to the session-level Total
     ISK in SessionStats and the sidebar's Total ISK column.
     - Expected: the three agree exactly. Sum of per-ore ISK matches
-      the session-level total within sub-percent rounding (per
-      plan-25 R2; per-(input, material) floor accepted).
+      the session-level total within sub-percent rounding (the
+      per-(input, material) floor is accepted rounding).
+13. **Archived session is hidden everywhere.** Close the app. With
+    `tools\sqlite3.exe` open `%APPDATA%\EveDashboard\session.sqlite` and run
+    `UPDATE session SET archived = 1 WHERE name = '<name of session 2>';`
+    (`archived` is the column a combined session's sources get; `merged_into`
+    stays NULL here). Relaunch, open Reports, open `Lifetime Totals`, then
+    open `Haul Value` and look at its session picker.
+    - Expected: session 2 is absent from the Reports sidebar, absent from
+      the Haul Value session list, and its ISK / time are NOT part of the
+      Lifetime Totals figures (compare against the values noted before the
+      UPDATE). Session 1 is unaffected. The app log shows no errors.
+    - Restore: close the app, run
+      `UPDATE session SET archived = 0 WHERE name = '<name of session 2>';`,
+      relaunch, and confirm session 2 is back in all three places.
 
 ### Cleanup
 
 Close Reports via its X (window hides; singleton survives). No DB
-changes from viewing reports.
+changes from viewing reports (step 13's UPDATE is reverted inside the step).
 
 ---
 
 ## 9. Reports — Lifetime Totals window
 
-Verifies the all-time rollup (plan 51). An empty selection now leaves the
+Verifies the all-time rollup. An empty selection leaves the
 Reports content pane BLANK; the rollup lives in its OWN window, opened by a
 `Lifetime Totals` button in the Reports chrome strip (next to
 `Import Session...`). The window shows total active time tracked, total ISK, and
@@ -857,8 +877,8 @@ sums).
      placeholder. The chrome strip shows `Import Session...` and
      `Lifetime Totals` buttons.
 2. **Button opens the Lifetime Totals window.** Click `Lifetime Totals`.
-   - Expected: a SEPARATE window titled `Lifetime Totals` opens (modeless — the
-     Reports window stays usable behind it). It shows a `Lifetime Totals` header
+   - Expected: a SEPARATE window titled `Lifetime Totals - EVE Dashboard` opens
+     (modeless — the Reports window stays usable behind it). It shows a `Lifetime Totals` header
      with a separator rule; then `Time Tracked:` + an `HH:mm:ss` value and
      `Total ISK:` + an `N0` value; then a `Total Refined Output` header and a
      table with `Material | Quantity | Total ISK` columns.
@@ -897,9 +917,9 @@ sums).
     - Expected: the figures shrink to exclude the deleted session.
 11. **Text size cog.** In the Lifetime Totals window, click the `A` (text size)
     cog in the widget chrome.
-    - Expected: the popup lists `Title` / `Time Tracked` / `Total ISK` /
+    - Expected: the popup lists `Lifetime Totals` / `Time Tracked` / `Total ISK` /
       `Total Refined Output` / `Table`; raising a level enlarges that element.
-      (This is the `lifetime` text-size config, moved here from the pane.)
+      (This is the `lifetime` text-size config.)
 12. **Geometry persists across restart.** Resize / move the Lifetime Totals
     window, close it, fully close and relaunch the app, open Reports, click
     `Lifetime Totals`.
@@ -980,8 +1000,8 @@ for spinner / cancel-in-flight verification.
     smoothly OR is gone; never frozen mid-spin. The empty-pane gap
     between spinner-hide and widget-render is expected.
 11. **Spinner hides when not visible.** Uncheck everything. The right
-    pane is BLANK (plan 51 — Lifetime Totals is now a separate window
-    opened from the Reports chrome button, section 9); spinner subtree is
+    pane is BLANK (Lifetime Totals is a separate window opened from the
+    Reports chrome button, section 9); spinner subtree is
     Collapsed; CPU% idle.
 12. **Reopen Reports preserves checks AND skips spinner.** With
     (A, B) checked, X-close Reports. Click Reports again.
@@ -1012,7 +1032,7 @@ Untick all sessions. Close Reports.
 ## 11. Reports — compare-mode widget
 
 Verifies the single decluttered compare widget: stacked session-name
-subheader, the plan-45 `TOTAL TIME` / `TOTAL ISK` labels and the Total
+subheader, the `TOTAL TIME` / `TOTAL ISK` labels and the Total
 Refined Output table (`Material | Quantity | Total ISK`), a 4-row
 Cumulative table (`Stat | Avg | Total`) ending in `Crit ISK %`, and a
 2-row Rates table (`Stat | Avg`) using the corrected
@@ -1048,11 +1068,11 @@ crits`).
      ```
      No per-pilot widgets, no per-ore tables, no per-session columns,
      no Diff column, no em-dash cells.
-2. **Grand-total labels (plan 45).** The `TOTAL TIME` label equals
+2. **Grand-total labels.** The `TOTAL TIME` label equals
    the Cumulative `Time` row's `Total` cell, and `TOTAL ISK` equals
    the Cumulative `ISK` row's `Total` cell. The labels and the table
-   intentionally show the same two numbers (decision 1.2 = A).
-3. **Total Refined Output table (plan 45).** Three columns
+   intentionally show the same two numbers.
+3. **Total Refined Output table.** Three columns
    `Material | Quantity | Total ISK`; one row per refined material,
    summed across both sessions, default-sorted by Quantity
    descending. Click each header -> rows re-sort. Summing the
@@ -1086,7 +1106,7 @@ crits`).
     - Expected: same shape; subheader lists all five names.
 11. **Empty selection blanks the pane.** Untick everything ->
     the right pane is BLANK; Lifetime Totals is now a separate window
-    opened from the Reports chrome button (plan 51, section 9), no spinner.
+    opened from the Reports chrome button (section 9), no spinner.
 12. **Switch back to single.** Tick exactly one session -> single
     mode returns (per section 8); compare widget gone.
 
@@ -1106,7 +1126,7 @@ bogus-file rejection, and the delete flow with the cancel branch.
 ### Setup
 
 At least one finished session in the DB. Pick a working folder for
-artifacts, e.g. `D:\tmp\plan29\`. Open Reports.
+artifacts, e.g. `D:\tmp\evedash-export\`. Open Reports.
 
 ### Steps
 
@@ -1123,10 +1143,10 @@ artifacts, e.g. `D:\tmp\plan29\`. Open Reports.
    - Reports status line reads `Exported: <session-name>`.
 2. **Excel export.** Right-click -> `Export to Excel...`. Save +
    open. Expected:
-   - `Summary` is the FIRST tab. Cells: Name, Notes, Start UTC,
-     Stop UTC, Active duration, Paused duration, Pilot count,
-     Total m^3, Total ISK. Then a Per pilot block (with Role
-     column), a Per ore block, and a `Total Refined Output
+   - `Summary` is the FIRST tab. Cells: Name, Notes, Start time (UTC),
+     Stop time (UTC), Active duration, Paused duration, Pilot count,
+     Total m^3, Total ISK. Then a `Per pilot` block (with Role
+     column), a `Per ore (session)` block, and a `Total Refined Output
      (session)` block (`Material | Quantity | Total ISK`,
      summed across pilots, sorted by quantity descending).
    - One tab per DB table: `session`, `session_time`, `pilot`,
@@ -1159,8 +1179,8 @@ artifacts, e.g. `D:\tmp\plan29\`. Open Reports.
      names (the rename is discarded). App log has a Warning:
      `Pilot {PilotId} import name '<RenamedName>' differs from
      existing '<OriginalName>'; keeping existing.`
-6. **Pre-plan-35 JSON reimport.** If you have a pre-plan-35 JSON
-   file (no `role` field in `log` / `session_pilot`), import it.
+6. **Legacy JSON reimport (no `role` field).** If you have an older
+   export file (one with no `role` field in `log` / `session_pilot`), import it.
    - Expected: import succeeds (schema_version is still 1, no
      mismatch). Every pilot in the imported session has
      role = Miner (the JsonConverter defaulted missing roles to
@@ -1199,11 +1219,11 @@ session.sqlite` between rounds.
 
 ---
 
-## 12.5 Reports — resizable columns + per-element text sizing (plan 47)
+## 12.5 Reports — resizable columns + per-element text sizing
 
-Verifies the restored DataGrid column-resize grippers with per-grid-type
-width persistence (phase 1a), and the second "text size" chrome cog that
-sizes each Reports table widget's elements per emphasis level (phase 1b).
+Verifies the DataGrid column-resize grippers with per-grid-type
+width persistence, and the second "text size" chrome cog that
+sizes each Reports table widget's elements per emphasis level.
 
 ### Setup
 
@@ -1211,11 +1231,11 @@ sizes each Reports table widget's elements per emphasis level (phase 1b).
   (so the per-pilot ore/refined tables and the "Total Refined Output" table
   render). Open Reports (chrome-bar Reports button).
 
-### 12.5.1 Column resize + persistence (phase 1a)
+### 12.5.1 Column resize + persistence
 
 1. **All column text is left-aligned.** Glance at every Reports table (ore,
    refined, compare, sidebar) plus the refined table in the Lifetime Totals
-   window (plan 51 — opened from the Reports chrome button).
+   window (opened from the Reports chrome button).
    - Expected: every cell's text — including the numeric columns (m³, ISK,
      Quantity, Total ISK) — is left-aligned, matching the left-aligned headers.
 2. **Grippers exist.** Hover the boundary between two column headers in the
@@ -1241,13 +1261,15 @@ sizes each Reports table widget's elements per emphasis level (phase 1b).
    - Expected: the untouched stretchy column (e.g. ore "Type") keeps filling the
      width; only columns you explicitly dragged stay frozen at a fixed size.
 
-### 12.5.2 Text size cog (phase 1b)
+### 12.5.2 Text size cog
 
 The cog uses the SAME 5 emphasis levels as the live SessionStats / per-pilot cog
 (None / Header0 / Header1 / Header2 / Hero), and applies the FULL look — size +
 weight + accent — to labels (the tables size only). Each element starts at a
-sensible DEFAULT (Layout 1): every heading / total / section label defaults to
-Header0 (Bold 14), every table + data row defaults to None (plain).
+sensible DEFAULT: every heading / total / section label defaults to
+Header0 (Bold 14), every table + data row defaults to None (plain); the
+Lifetime Totals window's `Time Tracked` / `Total ISK` elements also default
+to None.
 
 1. **Cog appears on TABLE widgets only.** Select one session.
    - Expected: the ore / refined TABLE widgets each show an "A" (text size) cog
@@ -1255,8 +1277,8 @@ Header0 (Bold 14), every table + data row defaults to None (plain).
      keep their existing gear (stat-config) cog and do NOT gain an "A" cog.
 2. **Default look matches today.** Before touching anything, eyeball the ore /
    refined / compare widgets (and the lifetime widget in the Lifetime Totals
-   window, plan 51 — opened from the Reports chrome button).
-   - Expected: the same look as before plan 47 — the titles + "TOTAL TIME/ISK" +
+   window, opened from the Reports chrome button).
+   - Expected: the default look — the titles + "TOTAL TIME/ISK" +
      "Lifetime Totals" + the section labels render Bold ~14; the data rows + table
      cells render plain. (Internally those headings now default to Header0 and the
      data to None, but the on-screen result is today's look.)
@@ -1279,11 +1301,12 @@ Header0 (Bold 14), every table + data row defaults to None (plain).
    - Expected: every ore table (session + per-pilot) renders at Header1 — text
      sizing is per widget TYPE.
 8. **Compare + lifetime.** Check 2+ sessions (compare mode): the compare "A" cog
-   lists Header / TOTAL TIME / TOTAL ISK / the three section labels + tables; set a
-   few to bigger levels and Apply -> those labels take the full size+weight (+accent
-   on Hero), the tables size only. Open the Lifetime Totals window (plan 51 — the
-   Reports chrome button, section 9): its "A" cog lists Title / Time Tracked /
-   Total ISK / Total Refined Output / Table; verify the same.
+   lists Comparing sessions / TOTAL TIME / TOTAL ISK / the three section labels +
+   tables; set a few to bigger levels and Apply -> those labels take the full
+   size+weight (+accent on Hero), the tables size only. Open the Lifetime Totals
+   window (the Reports chrome button, section 9): its "A" cog lists Lifetime
+   Totals / Time Tracked / Total ISK / Total Refined Output / Table; verify the
+   same.
 
 ### Cleanup
 
@@ -1292,6 +1315,105 @@ Header0 (Bold 14), every table + data row defaults to None (plain).
   to clear the saved state wholesale, delete `%APPDATA%\EveDashboard\session.sqlite`
   (drops the `reports_column_widths.*` and `reports_text_size.*` settings rows —
   only if you don't mind losing saved sessions).
+
+---
+
+## 12.6 Reports — Build from history / Combine selected / Show archived
+
+Verifies the after-the-fact session builder: a session created from a past
+date/time window by reading the gamelogs, combining saved sessions, the
+overlap / union-fleet / exclusion prompts, the pricing notice, archived
+sessions hidden (and revealed on demand), and delete-as-undo.
+
+### Setup
+
+- No session Running or Paused (Stop any live session first).
+- At least one saved fleet (`Alpha`) whose pilots have gamelog files for a
+  recent day you actually mined. Note (EVE time) a window during which you
+  mined WITHOUT a session running, e.g. `2026-07-20 19:00`..`21:00`.
+- Two saved (Stopped) sessions that overlap each other in time with pilots
+  from `Alpha`, e.g. `Run A` and `Run B`. Note their start/stop times and
+  Total ISK from the sidebar.
+- Settings -> Pricing: note the selected station.
+
+### Steps
+
+1. **Blocked while live.** Start a session, open Reports, click
+   `Build from history...`.
+   - Expected: the dialog opens with a banner "A mining session is running or
+     paused. Stop it first..."; every input is disabled; `Check overlaps` does
+     nothing (no `Build` button is shown). Cancel, Stop the session.
+2. **Date-range mode: validation.** Click `Build from history...`. Leave the
+   dates empty and click `Check overlaps`.
+   - Expected: status "Pick both a start and a stop date." Enter the window
+     with stop before start -> "The stop must be after the start." Enter a
+     time like `25:00` -> "Start time must be HH:mm (EVE time)." A stop in the
+     future -> "The stop cannot be in the future."
+3. **Check overlaps.** Enter the untracked window from Setup, fleet `Alpha`,
+   click `Check overlaps`.
+   - Expected: status "No saved session overlaps this window for these
+     pilots." and the hint "No overlapping sessions - the whole window comes
+     from the gamelogs." The action button changes from `Check overlaps` to
+     `Build`. Edit the stop time -> it flips back to `Check overlaps` and the
+     list clears; check again.
+4. **Build from gamelogs.** The name defaults to
+   `{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history`; leave it and click `Build`.
+   - Expected: status cycles "Reading gamelogs..." / "Building the session..." /
+     "Pricing...", the dialog closes, the Reports status line shows
+     `Built '16Aug - 19Aug 2026 history' (your window's dates): 0 copied + N parsed mining rows, 0 session(s)
+     archived.` followed by the pricing notice - either "Prices averaged from
+     N market rows captured inside the window." (if a session was running at
+     that station during the window) or "No market prices were captured inside
+     this window at the selected station, so the session is valued with
+     TODAY's prices." The new session appears in the sidebar; click it: the
+     per-pilot widgets show the mined totals for that window, and the
+     Duration excludes idle stretches (pauses were synthesised using your
+     auto-pause idle minutes).
+5. **Overlap prompt + exclusion notice.** Click `Build from history...`, enter
+   a window that covers `Run A` and `Run B`, fleet `Alpha`, `Check overlaps`.
+   - Expected: both sessions are listed with a tick-box, their span, and
+     "Same pilots as the fleet" (or "Adds <name> - combining it creates a
+     union fleet" if a session has a pilot `Alpha` lacks). Nothing is ticked;
+     the notice under the list names each session and the pilots whose time
+     inside it will be excluded "so nothing is counted twice". Tick `Run A`:
+     it disappears from the notice.
+6. **Union fleet prompt.** If one listed session is a partial match, tick it
+   and click `Build`.
+   - Expected: confirm dialog "Create a union fleet?" naming the extra pilots
+     and the proposed fleet name `Alpha + <name>`. Choose `Leave them out` ->
+     the build proceeds WITHOUT that session (it is excluded instead). Repeat
+     and choose `Create fleet` -> the New Session dialog now lists the new
+     fleet; the built session's pilots include the extra pilot.
+7. **Combine selected.** In the sidebar tick `Run A` and `Run B`, right-click
+   a row -> `Combine selected...`.
+   - Expected: the dialog opens titled "Combine saved sessions" with the start
+     and stop pre-filled from the two sessions' span, both sessions listed and
+     already ticked, no exclusion notice, the `Build` button already showing
+     (the check ran on open), name `{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history`. Click
+     `Build` -> status `Built '...': N copied + 0 parsed mining rows,
+     2 session(s) archived.` The new session replaces both in the sidebar;
+     its Total ISK equals `Run A` + `Run B` (same prices, session-bound);
+     `Run A` / `Run B` are gone from the sidebar, the Haul Value picker, and
+     Lifetime Totals (which now counts the combined session once).
+8. **Show archived.** Tick the sidebar's `Show archived` checkbox.
+   - Expected: `Run A (archived)` and `Run B (archived)` reappear; clicking
+     one still shows its breakdown; the context menu still offers Export and
+     Delete. Lifetime Totals is unchanged. Untick -> they hide again.
+9. **Delete is the undo.** Right-click the combined session -> `Delete...` ->
+   confirm.
+   - Expected: the combined session is gone and `Run A` / `Run B` are back in
+     the sidebar as normal (un-archived) sessions with their original ISK.
+10. **Log check.** Open `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`.
+    - Expected: one `Historical gamelog read: ... events from ... file(s)` line
+      per date-range build, one `Built historical session ...` line per build,
+      one `Historical pricing for session ...` line per build, an
+      `Un-archived 2 source session(s)` line for step 9; no ERROR lines.
+
+### Cleanup
+
+Delete the sessions created in steps 4 and 6 (right-click -> Delete). Delete
+any `Alpha + <name>` fleet created in step 6 via the New Session dialog. No
+other state is touched: the original sessions were restored by step 9.
 
 ---
 
@@ -1353,21 +1475,21 @@ the `eve.sqlite.bak` you took in Setup.
 
 ---
 
-## 13. Session-bound pricing + sha256 migration (plan 38)
+## 13. Session-bound pricing + sha256 migration
 
 Verifies that a saved session's ISK is permanently reproducible: prices are
 bound to the session that fetched them and read **station-blind** (the selected
 station only controls where prices are fetched, never how a saved session is
 valued), Reports never call the market API, the session-start fetch is
-unconditional, re-import of a known session is a no-op, legacy (pre-plan-38,
-integer-id) export files still import, and a pre-plan-38 database upgrades
-itself on first launch.
+unconditional, re-import of a known session is a no-op, legacy (integer
+session-id) export files still import, and a pre-sha256 (integer session-id)
+database upgrades itself on first launch.
 
 ### Setup
 
-- For step 1 (migration) you need a **pre-plan-38 `session.sqlite`** — a copy
-  taken before this build (integer session ids, `market_data` with no
-  `session_id`). Keep a copy somewhere safe; you will place it at
+- For step 1 (migration) you need a **pre-sha256 `session.sqlite`** — a copy
+  taken before session ids became sha256 strings (integer session ids,
+  `market_data` with no `session_id`). Keep a copy somewhere safe; you will place it at
   `%APPDATA%\EveDashboard\session.sqlite` before launching.
 - For steps 2-5, a normal post-migration database (any sessions you have mined
   on this build).
@@ -1376,14 +1498,14 @@ itself on first launch.
 ### Steps
 
 1. **One-time migration on launch.** Close the app. Replace
-   `%APPDATA%\EveDashboard\session.sqlite` with your pre-plan-38 copy
+   `%APPDATA%\EveDashboard\session.sqlite` with your pre-sha256 copy
    (delete any `-wal` / `-shm` siblings). Launch the app.
    - Expected: a message box titled **"Updating local database"** appears once;
      after you click OK the app opens normally. A backup file
      `session.sqlite.pre-sha256-<timestamp>.bak` now sits next to the DB. Open
      Reports — every session from before is still listed, newest first by start
      time. Relaunching the app does NOT show the message box again.
-2. **ISK is stable across viewings (Bug 2).** Open Reports, pick a finished
+2. **ISK is stable across viewings.** Open Reports, pick a finished
    session, note its **Total ISK**. Close Reports. Start and fully finish a NEW
    mining session (so fresh prices are fetched). Re-open Reports and select the
    FIRST session again.
@@ -1392,7 +1514,7 @@ itself on first launch.
 3. **Reports never fetch.** Disconnect from the network (or block the app's
    internet). Open Reports and select any saved session.
    - Expected: the report renders with its captured ISK with no hang and no
-     change; the latest `logs\<date>.log` shows **no** GoonMetrics request while
+     change; `logs\EveDashboard_NNN.log` shows **no** GoonMetrics request while
      the report was open.
 4. **Start fetch is unconditional.** Reconnect. Finish a session, then within a
    few seconds Start another session and mine.
@@ -1405,7 +1527,7 @@ itself on first launch.
      if it is the one you exported); the second import shows a status like
      **"Already in your database: <name>"** and the sidebar gains **no**
      duplicate row.
-6. **ISK is station-blind (Bug 3).** Open Reports, pick a finished session, note
+6. **ISK is station-blind.** Open Reports, pick a finished session, note
    its **Total ISK**. Open Settings, change the **Selected station** (e.g. Jita
    -> C-J6MT), Apply. Reopen Reports and select the same session.
    - Expected: its Total ISK is **identical** — the selected station controls
@@ -1413,8 +1535,8 @@ itself on first launch.
      you have older sessions whose prices were captured under a different
      station than the one now selected, they still show their real ISK (not 0 /
      "no market data").
-7. **Legacy JSON import (Bug 4).** In Reports, Import one of your **older**
-   export files (a pre-plan-38 export with integer session ids — e.g. a file
+7. **Legacy JSON import.** In Reports, Import one of your **older**
+   export files (an export with integer session ids — e.g. a file
    from `D:\user_files\Documents\EVE\EVEDashboard\`).
    - Expected: the import succeeds (no "file is not a recognisable session
      export" error); the session appears in the list, ordered by its original
@@ -1434,7 +1556,7 @@ itself on first launch.
 
 ---
 
-## 14. Data-folder rename migration (plan 39)
+## 14. Data-folder rename migration
 
 Verifies the one-time move of the per-user data folder from the old
 `%APPDATA%\EveMiningDashboard` to `%APPDATA%\EveDashboard`, so an existing user
@@ -1471,7 +1593,7 @@ keeps all sessions / config / SDE cache / logs after the EveDashboard rename.
 
 ---
 
-## 15. Update check on launch (plan 41)
+## 15. Update check on launch
 
 Verifies the launch-time GitHub release check: a newer published release prompts a
 modal Yes/No dialog that opens the download page, the prompt is non-blocking and
@@ -1480,8 +1602,7 @@ re-appears every launch until updated, and a failure (offline) is silent.
 ### Setup
 
 - Build + run from source per Shared setup. The app version comes from `<Version>`
-  in `Directory.Build.props` (currently `0.1.0`, matching the published release
-  tag `v0.1.0`).
+  in `Directory.Build.props` (currently `0.1.4`; release tags are `v<Version>`).
 
 ### Steps
 
@@ -1489,12 +1610,12 @@ re-appears every launch until updated, and a failure (offline) is silent.
    BELOW the latest published release (e.g. `0.0.1`). Rebuild and launch
    (`dotnet run --project src/EveDashboard.App.Wpf`).
    - Expected: shortly after the main window appears, a modal dialog titled
-     "Update available" names the latest release (e.g. `v0.1.0`) and shows two
+     "Update available" names the latest release (e.g. `v0.1.4`) and shows two
      buttons, **Yes** and **No** (not "Cancel"). The main window finished showing
      first - the check did not block startup.
 2. **Yes opens the download page.** Click **Yes**.
    - Expected: your default browser opens the release page
-     (`https://github.com/wolfthefallen/EVEDashboard/releases/tag/v0.1.0`); the
+     (`https://github.com/wolfthefallen/EVEDashboard/releases/tag/<latest tag>`); the
      app keeps running.
 3. **Nag persists.** Close and relaunch (still on the low `<Version>`).
    - Expected: the "Update available" dialog appears again - there is no
@@ -1502,23 +1623,23 @@ re-appears every launch until updated, and a failure (offline) is silent.
 4. **No opens nothing.** Relaunch; click **No**.
    - Expected: the dialog closes, no browser opens, the app runs normally.
 5. **Up to date - no prompt.** Restore `<Version>` to match (or exceed) the latest
-   release tag (`0.1.0`). Rebuild and launch.
+   release tag (`0.1.4`). Rebuild and launch.
    - Expected: no dialog. The log shows an Information line that the running
      version is current with the latest release.
 6. **Offline - silent.** Disconnect the network (or block api.github.com). Launch.
    - Expected: no dialog, the app starts normally, and a single Warning is logged
-     to `%APPDATA%\EveDashboard\logs\<latest>.log` that the update check was
+     to `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log` that the update check was
      skipped. Startup is not delayed.
 
 ### Cleanup
 
-- Restore `<Version>` in `Directory.Build.props` to `0.1.0` (or the real current
+- Restore `<Version>` in `Directory.Build.props` to `0.1.4` (or the real current
   version) and rebuild.
 - Re-enable the network if you disabled it in step 6.
 
 ---
 
-## 16. Refined output (plan 43)
+## 16. Refined output
 
 Verifies the live "Refined output" section in the Session + per-pilot widgets
 (quantities of refined materials, tracked as they are mined), the Settings
@@ -1549,8 +1670,7 @@ Veldspar -> Tritanium; or Kylixium -> Tritanium / Pyerite / Mexallon).
    scroll to the "Refined materials" subsection; check the box next to the
    hidden material; Apply.
    - Expected: that material now shows in this widget's "Refined output" section.
-     (Per-widget: revealing it on one pilot does not reveal it on another —
-     decision 2.2 = A.)
+     (Per-widget: revealing it on one pilot does not reveal it on another.)
 4. **Sticky hide survives auto-show ON.** With a material currently visible,
    open the cog, UNCHECK that material, Apply -> it disappears from the section.
    Now re-enable auto-show in Settings (check the box, Apply).
@@ -1561,8 +1681,8 @@ Veldspar -> Tritanium; or Kylixium -> Tritanium / Pyerite / Mexallon).
    - Expected: a "Session refined output" breakdown (Material | Quantity,
      sortable) lists EVERY refined material for the session, plus a per-pilot
      "refined output" breakdown under each pilot — regardless of anything you
-     hid live (decision 1.3 = A). Quantities match the live totals.
-6. **A new session clears the refined output (bug 1 / issue #2).** After a
+     hid live. Quantities match the live totals.
+6. **A new session clears the refined output (issue #2).** After a
    session that produced refined output (above), Stop it, then start a brand-new
    session (New Session -> Start) and Continue it.
    - Expected: at the moment the new session starts, BOTH the Session widget's
@@ -1586,9 +1706,9 @@ default. Stop the session. To fully reset the per-widget hides, delete the
 
 ---
 
-## 17. Sustained-session stability (plan 44 — DB thread-safety + no silent failures)
+## 17. Sustained-session stability (DB thread-safety + no silent failures)
 
-This is the regression check for BUGS.md Bug 1: a shared SQLite connection used
+This is the regression check for a past defect: a shared SQLite connection used
 concurrently by the live consumer and the UI stat-refresh corrupted the driver,
 threw a non-`DbException`, and silently killed the mining-log insert pipeline —
 the live stats froze (with a ~5-minute auto-pause/resume flap) while the app kept
@@ -1622,7 +1742,7 @@ the consumer un-killable.
 
 ### Expected results
 
-No freeze, no silent stall, no crash. `%APPDATA%\EveDashboard\logs\EveDashboard.log`
+No freeze, no silent stall, no crash. `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`
 shows continuous activity with no unhandled-exception traces and no repeating
 5-minute idle auto-pause while you are actively mining.
 
@@ -1641,7 +1761,7 @@ If any scenario fails, capture:
 - What you saw vs what was expected.
 - Whether the issue is consistent or intermittent.
 - Any relevant log lines from
-  `%APPDATA%\EveDashboard\logs\<latest>.log`.
+  `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`.
 
 The implementer fixes the issue, re-runs the relevant section, and
 asks for a re-check.

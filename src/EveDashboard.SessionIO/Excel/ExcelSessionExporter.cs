@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Writes one session to an .xlsx workbook with a Summary tab + one tab per
 /// database table + one tab per pilot. Human-readable; not round-trippable.
-/// (Plan 29 alignment 4.1 = B / 4.2 = B / 7.2 = A.)
 /// </summary>
 public sealed class ExcelSessionExporter
 {
@@ -70,7 +69,7 @@ public sealed class ExcelSessionExporter
             perPilotOre[p.PilotId] = await _queries.GetOreBreakdownAsync(sessionId, p.PilotId, ct).ConfigureAwait(false);
         }
 
-        // Reuse the existing refined-with-ISK path (decisions 1.1 / 2.1): SessionStats
+        // Reuse the existing refined-with-ISK path: SessionStats
         // carries session-wide RefinedOutput and per-pilot ByCharacter[id].RefinedOutput,
         // both yield-applied + ISK-priced + sorted by quantity desc. This is the same data
         // the on-screen Lifetime Totals + compare tables consume — NOT a new query/aggregation.
@@ -138,7 +137,7 @@ public sealed class ExcelSessionExporter
         ws.Cell(row, 1).Value = "Total ISK";        ws.Cell(row, 2).Value = totalIsk; row++;
         row++;
 
-        // Per-pilot block (plan 35: Role column added per decision 2.2 cross = A).
+        // Per-pilot block (includes the pilot's fleet Role column).
         ws.Cell(row, 1).Value = "Per pilot"; row++;
         ws.Cell(row, 1).Value = "Pilot name";
         ws.Cell(row, 2).Value = "Role";
@@ -212,7 +211,7 @@ public sealed class ExcelSessionExporter
     private static string FormatHms(TimeSpan ts) =>
         ts.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
 
-    // ----- Per-table tabs (mirror the SQL DDL column order from docs/session-schema.md + market-schema.md) -----
+    // ----- Per-table tabs (mirror the session-DB SQL DDL column order of each table) -----
 
     private static void AppendSessionSheet(XLWorkbook wb, IReadOnlyList<SessionRow> rows)
     {
@@ -257,7 +256,7 @@ public sealed class ExcelSessionExporter
     private static void AppendSessionPilotSheet(XLWorkbook wb, IReadOnlyList<SessionPilotRow> rows)
     {
         var ws = wb.Worksheets.Add("session_pilot");
-        // Plan 35: role column.
+        // role column included.
         WriteHeader(ws, "session_id", "pilot_id", "role");
         for (var i = 0; i < rows.Count; i++)
         {
@@ -271,7 +270,7 @@ public sealed class ExcelSessionExporter
     private static void AppendLogSheet(XLWorkbook wb, IReadOnlyList<LogRow> rows)
     {
         var ws = wb.Worksheets.Add("log");
-        // Plan 35: role column.
+        // role column included.
         WriteHeader(ws, "log_id", "session_id", "pilot_id", "eve_timestamp", "event_kind", "type_id", "units", "volume_m3", "role");
         for (var i = 0; i < rows.Count; i++)
         {
@@ -352,7 +351,7 @@ public sealed class ExcelSessionExporter
 
         // Refined output table — one blank row after the ore data (rows 7..6+ore.Count),
         // then a label, a 4-col header, and the refined rows. Columns match the sibling
-        // ore table (decision 2.2 = A); data reused from CharacterStats.RefinedOutput
+        // ore table; data reused from CharacterStats.RefinedOutput
         // (quantity + ISK), the same path the on-screen tables use.
         var refinedLabelRow = 7 + ore.Count + 1;
         ws.Cell(refinedLabelRow, 1).Value = "Refined output";

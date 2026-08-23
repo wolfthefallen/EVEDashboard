@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Queries;
 
 /// <summary>
-/// Plan 43: <see cref="SqliteSessionStatsRepository.GetSessionStatsAsync"/> populates
+/// <see cref="SqliteSessionStatsRepository.GetSessionStatsAsync"/> populates
 /// the per-pilot and session-wide <c>RefinedOutput</c> from each pilot's
 /// <c>IskCalculationResult.RefinedQuantitiesByMaterial</c>, name-resolving via the
 /// SDE and summing element-wise across pilots for the session total.
@@ -63,7 +63,7 @@ public class SqliteSessionStatsRepositoryRefinedTests
     {
         public Func<IReadOnlyDictionary<long, long>, IReadOnlyDictionary<long, long>>? ComputeRefined { get; set; }
 
-        /// <summary>Plan 45: optional per-material ISK; when set, TotalIsk = sum of its values.</summary>
+        /// <summary>Optional per-material ISK; when set, TotalIsk = sum of its values.</summary>
         public Func<IReadOnlyDictionary<long, long>, IReadOnlyDictionary<long, double>>? ComputeIskByMaterial { get; set; }
 
         public Task<IskCalculationResult> ComputeAsync(

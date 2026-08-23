@@ -6,9 +6,9 @@
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
                     mc:Ignorable="d">
     <!--
-        Plan 43 reporting "Refined output" widget. Two columns (Material /
+        Reporting "Refined output" widget. Two columns (Material /
         Quantity), sortable; default sort by Quantity descending (SQL/VM
-        post-sort). Reporting shows ALL materials (decision 1.3 = A). Used at
+        post-sort). Reporting shows ALL materials. Used at
         session-level and per-pilot level inside the Reports window. Mirrors
         PerOreBreakdownView; chrome inherited from WidgetBase.
     -->

@@ -8,7 +8,6 @@ public class SmokeTest
     [Fact]
     public void TestPipeline_RunsAndPasses()
     {
-        // EveDashboard.Core has no production types yet (those arrive in plan 03).
         // This test exists only to verify dotnet test discovers and runs the
         // test pipeline. Once Core has real types, this file should be replaced
         // by real tests (or kept as a sanity smoke check, callee's choice).

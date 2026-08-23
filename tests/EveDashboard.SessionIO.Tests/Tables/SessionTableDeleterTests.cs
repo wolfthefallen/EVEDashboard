@@ -31,6 +31,25 @@ public sealed class SessionTableDeleterTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DeleteAsync_unarchives_the_sources_that_were_combined_into_the_deleted_session()
+    {
+        var combined = await SeedSessionAsync(name: "combined");
+        var source = await SeedSessionAsync(name: "source");
+        var unrelated = await SeedSessionAsync(name: "unrelated-archived");
+        await _db.ExecuteNonQueryAsync("UPDATE session SET archived = 1, merged_into = $into WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$into"] = combined, ["$sid"] = source });
+        await _db.ExecuteNonQueryAsync("UPDATE session SET archived = 1, merged_into = 'someone-else' WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$sid"] = unrelated });
+
+        await _deleter.DeleteAsync(combined);
+
+        var rows = await _db.QueryAsync(
+            "SELECT session_id, archived, merged_into FROM session ORDER BY name",
+            static r => (r.GetString(0), r.GetInt64(1), r.IsDBNull(2) ? null : r.GetString(2)));
+        rows.Should().Equal((source, 0L, null), (unrelated, 1L, "someone-else"));
+    }
+
+    [Fact]
     public async Task DeleteAsync_removes_session_and_its_fk_cascading_rows()
     {
         var sid = await SeedSessionAsync(name: "victim");
@@ -105,7 +124,7 @@ public sealed class SessionTableDeleterTests : IAsyncLifetime
 
     private async Task<string> SeedSessionAsync(string name)
     {
-        // Plan 38: content-addressed sha256 hex session id; distinct names hash distinct.
+        // Content-addressed sha256 hex session id; distinct names hash distinct.
         var sid = EveDashboard.Core.Sessions.SessionId.Compute(name, "2026-05-07T10:00:00.000Z");
         await _db.ExecuteNonQueryAsync(
             "INSERT INTO session (session_id, name, notes) VALUES ($sid, $n, NULL)",

@@ -6,7 +6,7 @@ using EveDashboard.Core.Domain;
 using FluentAssertions;
 
 /// <summary>
-/// Per plan 16 decision 16.R: exact-string-match replacement; no nesting;
+/// Template expansion is exact-string-match replacement; no nesting;
 /// unknown tokens left as literal.
 /// </summary>
 public class SessionNameTemplateExpanderTests
@@ -56,6 +56,37 @@ public class SessionNameTemplateExpanderTests
     {
         var result = SessionNameTemplateExpander.Expand("{{$DATETIME}} session", Pilots(), AsOf);
         result.Should().Be("2026-05-02 14:30 session");
+    }
+
+    [Fact]
+    public void Expand_window_tokens_render_day_month_and_year_from_the_window()
+    {
+        var start = new DateTimeOffset(2026, 8, 16, 19, 0, 0, TimeSpan.Zero);
+        var stop = new DateTimeOffset(2026, 8, 19, 21, 30, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand("{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history", Pilots(), AsOf, start, stop);
+
+        result.Should().Be("16Aug - 19Aug 2026 history");
+    }
+
+    [Fact]
+    public void Expand_window_tokens_fall_back_to_asOf_when_no_window_is_given()
+    {
+        var result = SessionNameTemplateExpander.Expand("{{$STARTDATE}}/{{$ENDDATE}}/{{$YYYY}}", Pilots(), AsOf);
+
+        result.Should().Be(AsOf.ToString("dMMM", System.Globalization.CultureInfo.InvariantCulture) + "/" +
+                           AsOf.ToString("dMMM", System.Globalization.CultureInfo.InvariantCulture) + "/" +
+                           AsOf.ToString("yyyy", System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void Expand_single_digit_day_has_no_leading_zero()
+    {
+        var start = new DateTimeOffset(2026, 5, 5, 0, 0, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand("{{$STARTDATE}}", Pilots(), AsOf, start, start);
+
+        result.Should().Be("5May");
     }
 
     [Fact]

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Settings;
 
 /// <summary>
-/// Plan 37 — auto-pause settings tests. Two new keys (one int + one bool)
+/// Auto-pause settings tests. Two keys (one int + one bool)
 /// behind <see cref="SqliteSettingsRepository.GetAutoPauseIdleMinutesAsync"/> /
 /// <see cref="SqliteSettingsRepository.SetAutoPauseIdleMinutesAsync"/> and
 /// <see cref="SqliteSettingsRepository.GetAutoPauseSoundEnabledAsync"/> /
@@ -187,7 +187,7 @@ public class SqliteSettingsRepositoryAutoPauseTests
         keys.Should().ContainSingle().Which.Should().Be("auto_pause_sound_enabled");
     }
 
-    // ---- Sound volume: defaults / clamp / malformed (plan 50) ----------------------
+    // ---- Sound volume: defaults / clamp / malformed --------------------------------
 
     [Fact]
     public async Task GetAutoPauseSoundVolumeAsync_returns_default_65_when_key_missing()

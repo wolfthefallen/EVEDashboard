@@ -1,8 +1,8 @@
 namespace EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// Marks a public property on a widget ViewModel as a customisable stat row
-/// (plan 20). Read by reflection at widget-construction time and on every
+/// Marks a public property on a widget ViewModel as a customisable stat row.
+/// Read by reflection at widget-construction time and on every
 /// <see cref="ISettingsRepository.SettingChanged"/> matching the widget's
 /// config key. Stats inherit the property name as their identity
 /// (<c>nameof(VM.PropertyName)</c>) — there is no separate mapping table.
@@ -61,11 +61,11 @@ public sealed class StatRowAttribute : Attribute
 
     /// <summary>
     /// Default visual emphasis for this row when no saved
-    /// <see cref="StatEntry.Emphasis"/> overrides it (plan 20 amendment A1).
+    /// <see cref="StatEntry.Emphasis"/> overrides it.
     /// Defaults to <see cref="StatEmphasis.None"/>; widget VMs explicitly set
     /// <see cref="StatEmphasis.Header0"/> / <see cref="StatEmphasis.Header1"/>
-    /// / <see cref="StatEmphasis.Hero"/> on header / hero properties to match
-    /// pre-plan-20 typography.
+    /// / <see cref="StatEmphasis.Hero"/> on header / hero properties so those
+    /// rows keep their established typography unless the user overrides it.
     /// </summary>
     public StatEmphasis DefaultEmphasis { get; init; } = StatEmphasis.None;
 }

@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
 /// Hand-rolled fake of <see cref="ISettingsRepository"/> for unit tests
-/// (plan 22.1 decision 22.M — no Moq / NSubstitute in this project).
+/// (no Moq / NSubstitute in this project).
 /// Stored values round-trip through <c>Get*Async</c> and <c>Set*Async</c>;
 /// each setter raises <see cref="SettingChanged"/> with the matching key
 /// and counts invocations on the test-side counters.
@@ -28,10 +28,10 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
     public string? SelectedCrystalAnomaly { get; set; }
     public double? ReportsSidebarWidth { get; set; }
 
-    /// <summary>Plan 20 — singleton SessionStats stat config (one slot).</summary>
+    /// <summary>Singleton SessionStats stat config (one slot).</summary>
     public WidgetStatsConfig? SessionStatsConfig { get; set; }
 
-    /// <summary>Plan 20 — per-pilot stat config (one row per pilot id).</summary>
+    /// <summary>Per-pilot stat config (one row per pilot id).</summary>
     public Dictionary<long, WidgetStatsConfig> PerPilotStatsConfigs { get; } = new();
 
     public int SetThemeCount { get; private set; }
@@ -196,13 +196,13 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
-    /// <summary>Plan 37 — auto-pause idle threshold in minutes.</summary>
+    /// <summary>Auto-pause idle threshold in minutes.</summary>
     public int AutoPauseIdleMinutes { get; set; } = 5;
 
-    /// <summary>Plan 37 — auto-pause / auto-resume notification sounds on/off.</summary>
+    /// <summary>Auto-pause / auto-resume notification sounds on/off.</summary>
     public bool AutoPauseSoundEnabled { get; set; } = true;
 
-    /// <summary>Plan 50 — auto-pause sound volume percent (default 65).</summary>
+    /// <summary>Auto-pause sound volume percent (default 65).</summary>
     public int AutoPauseSoundVolume { get; set; } = 65;
 
     public int SetAutoPauseIdleMinutesCount { get; private set; }
@@ -242,10 +242,10 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
-    /// <summary>Plan 42 — default fleet id (null = no default).</summary>
+    /// <summary>Default fleet id (null = no default).</summary>
     public string? DefaultFleetId { get; set; }
 
-    /// <summary>Plan 42 — persisted pilot-picker sort order.</summary>
+    /// <summary>Persisted pilot-picker sort order.</summary>
     public PilotSortOrder PilotSortOrder { get; set; } = PilotSortOrder.LastActiveNewest;
 
     public int SetDefaultFleetIdCount { get; private set; }
@@ -273,13 +273,13 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
-    /// <summary>Plan 43 — refined-output auto-show toggle (default on).</summary>
+    /// <summary>Refined-output auto-show toggle (default on).</summary>
     public bool AutoShowRefinedMaterials { get; set; } = true;
 
-    /// <summary>Plan 49 (issue #1) — per-pilot refined-output section toggle (default on).</summary>
+    /// <summary>Per-pilot refined-output section toggle (default on).</summary>
     public bool ShowPilotRefinedOutput { get; set; } = true;
 
-    /// <summary>Plan 43 — per-widget refined-materials visibility overrides, keyed by scope ("" or pilot id string).</summary>
+    /// <summary>Per-widget refined-materials visibility overrides, keyed by scope ("" or pilot id string).</summary>
     public Dictionary<string, IReadOnlyDictionary<long, bool>> RefinedMaterialsVisibility { get; } = new();
 
     public int SetAutoShowRefinedMaterialsCount { get; private set; }
@@ -316,10 +316,10 @@ internal sealed class FakeSettingsRepository : ISettingsRepository
         return Task.CompletedTask;
     }
 
-    /// <summary>Plan 47 — per-grid-type Reports column widths, keyed by gridKey.</summary>
+    /// <summary>Per-grid-type Reports column widths, keyed by gridKey.</summary>
     public Dictionary<string, IReadOnlyDictionary<int, double>> ReportsColumnWidths { get; } = new();
 
-    /// <summary>Plan 47 — per-widget-type Reports text-size emphasis, keyed by widgetTypeKey.</summary>
+    /// <summary>Per-widget-type Reports text-size emphasis, keyed by widgetTypeKey.</summary>
     public Dictionary<string, IReadOnlyDictionary<string, StatEmphasis>> ReportsTextSize { get; } = new();
 
     public int SetReportsColumnWidthsCount { get; private set; }

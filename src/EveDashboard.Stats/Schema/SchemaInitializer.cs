@@ -8,8 +8,8 @@ using EveDashboard.Core.Storage;
 /// Idempotent — safe to run on an existing database.
 /// </summary>
 /// <remarks>
-/// Schema is the canonical version captured in <c>docs/session-schema.md</c>. If
-/// you change the DDL here, update the doc in the same change.
+/// The <see cref="SchemaDdl"/> constant in this file is the canonical
+/// definition of the session schema.
 /// </remarks>
 public static class SchemaInitializer
 {
@@ -42,8 +42,8 @@ public static class SchemaInitializer
         // Version stamping. SchemaDdl always emits the LATEST schema, so a fresh
         // DB is already at the latest version and just needs stamping; an
         // existing DB runs only the migrations newer than its recorded version.
-        // (Pre-fix this loop stamped a fresh DB back to 1 after a real migration
-        // ran — harmless with zero migrations, wrong once v2 exists. Plan 42.)
+        // (An earlier version of this loop stamped a fresh DB back to 1 after a
+        // real migration ran — harmless with zero migrations, wrong once v2 exists.)
         var latest = Migrations.All.Count == 0 ? 1 : Migrations.All.Max(m => m.TargetVersion);
         var current = await GetCurrentSchemaVersionAsync(target, ct);
         if (current == 0)
@@ -77,14 +77,25 @@ public static class SchemaInitializer
             ct);
 
     /// <summary>
-    /// The canonical session-schema DDL. Mirrors <c>docs/session-schema.md</c>.
+    /// The canonical session-schema DDL.
     /// Every <c>CREATE</c> uses <c>IF NOT EXISTS</c> so the script is idempotent.
     /// </summary>
     private const string SchemaDdl = """
+        -- session.archived = 1 hides the session from every listing and report
+        -- (the sources of a combined session are archived, not deleted, so no
+        -- mining data is ever lost). merged_into is the session_id of the
+        -- combined session an archived source was folded into (NULL when it was
+        -- not merged). Plain text, NOT a foreign key: foreign_keys is ON and an
+        -- FK would block deleting a combined session while its archived sources
+        -- still point at it. Comments stay OUTSIDE the CREATE body on purpose:
+        -- SQLite stores the statement text and ALTER TABLE DROP COLUMN rewrites
+        -- it, which chokes on line comments inside the column list.
         CREATE TABLE IF NOT EXISTS session (
-            session_id TEXT PRIMARY KEY,
-            name       TEXT NOT NULL,
-            notes      TEXT
+            session_id  TEXT PRIMARY KEY,
+            name        TEXT NOT NULL,
+            notes       TEXT,
+            archived    INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),
+            merged_into TEXT
         );
 
         CREATE TABLE IF NOT EXISTS session_time (
@@ -108,8 +119,8 @@ public static class SchemaInitializer
                                CHECK (role IN ('Miner','Booster','Cyno','Combat')),
             PRIMARY KEY (session_id, pilot_id)
         );
-        -- Plan 35/38: per-pilot seek. The default-to-last-role lookup it backed
-        -- was removed in plan 42 (a fleet now supplies each pilot's role at
+        -- Per-pilot seek. The default-to-last-role lookup it originally backed
+        -- was removed when fleets arrived (a fleet now supplies each pilot's role at
         -- Start); the index is retained as a cheap generic per-pilot seek.
         CREATE INDEX IF NOT EXISTS idx_session_pilot_pilot
             ON session_pilot(pilot_id);
@@ -151,15 +162,15 @@ public static class SchemaInitializer
             isk_buy       REAL,
             isk_sell      REAL
         );
-        -- Plan 38 (amended): prices are session-bound and station-blind on read.
+        -- Prices are session-bound and station-blind on read.
         -- The lookup is "latest price for (session_id, type_id)"; station_id is
         -- fetch-only provenance, never a read filter, so it is NOT in this index.
         CREATE INDEX IF NOT EXISTS idx_market_data_lookup
             ON market_data(session_id, type_id, fetched_at DESC);
 
-        -- Plan 42 (schema v2): saved fleets. fleet_id is the app-computed
+        -- Schema v2: saved fleets. fleet_id is the app-computed
         -- content hash (sha256 of trimmed name + sorted "pilotId:role" list).
-        -- name is uniquely indexed (decision 2.4 = B). Pilot names are NOT
+        -- name is uniquely indexed. Pilot names are NOT
         -- duplicated here — fleet_pilot joins to the pilot table for the name.
         CREATE TABLE IF NOT EXISTS fleet (
             fleet_id   TEXT PRIMARY KEY,

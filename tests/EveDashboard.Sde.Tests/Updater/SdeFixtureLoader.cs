@@ -7,9 +7,9 @@ namespace EveDashboard.Sde.Tests.Updater;
 /// <remarks>
 /// The archive is built once via <c>tar -cJf</c> and committed — see
 /// <c>tests/EveDashboard.Sde.Tests/testdata/sde-fixtures.tar.xz.regen.md</c>
-/// for the regeneration command. Per plan 08 decision 8.26: SharpCompress
-/// 0.47.4 cannot write xz, so the original synthesise-at-test-time approach
-/// (decision 8.9) was replaced with a shipped binary fixture.
+/// for the regeneration command. SharpCompress 0.47.4 cannot write xz, so
+/// synthesising the archive at test time is not an option; a shipped binary
+/// fixture is used instead.
 /// </remarks>
 internal static class SdeFixtureLoader
 {

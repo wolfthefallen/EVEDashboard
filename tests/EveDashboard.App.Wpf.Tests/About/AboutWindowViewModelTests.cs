@@ -6,7 +6,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 52: unit tests for <see cref="AboutWindowViewModel"/>. Covers the SDE
+/// Unit tests for <see cref="AboutWindowViewModel"/>. Covers the SDE
 /// date formatting (present / unknown / read-failure). <c>VersionText</c> is NOT
 /// asserted — it depends on the test-host entry assembly, so it is covered by the
 /// manual test instead.

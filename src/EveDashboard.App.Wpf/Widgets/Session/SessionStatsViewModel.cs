@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Thin ViewModel behind the SessionStats widget (plan 24 split). Holds a
+/// Thin ViewModel behind the SessionStats widget. Holds a
 /// reference to the singleton <see cref="SessionController"/> and forwards
 /// every bound stat field the view renders:
 /// <see cref="DisplaySessionName"/>, <see cref="TotalTimeMined"/>,
@@ -19,12 +19,12 @@ using Microsoft.Extensions.Logging;
 /// to the controller's PropertyChanged for <c>LastUpdated</c>.
 /// </summary>
 /// <remarks>
-/// Plan 20: <see cref="StatRowAttribute"/> attributes attach to THIS VM's
+/// <see cref="StatRowAttribute"/> attributes attach to THIS VM's
 /// forwarding properties (NOT to <see cref="SessionController"/>'s backing
 /// fields) so reflection over <c>typeof(SessionStatsViewModel)</c> finds
-/// them uniformly with the per-pilot widget. Plan 25 retrofit: extends
-/// <see cref="StatConfigurableWidgetViewModel"/> which owns the duplicated
-/// stat-config plumbing flagged in <c>CLEANUP.md</c> 2.2.
+/// them uniformly with the per-pilot widget. Extends
+/// <see cref="StatConfigurableWidgetViewModel"/>, which owns the stat-config
+/// plumbing shared by every stat-list widget so it is not duplicated here.
 /// </remarks>
 public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
 {
@@ -42,11 +42,11 @@ public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
     [StatRow("m³/sec", Format = "N2", Reorderable = true, DefaultOrder = 1)]
     public double M3PerSecond => _controller.M3PerSecond;
 
-    /// <summary>Estimated ISK per hour, sourced from the plan-18 ISK pipeline via the session stats snapshot.</summary>
+    /// <summary>Estimated ISK per hour, sourced from the ISK pricing pipeline via the session stats snapshot.</summary>
     [StatRow("ISK/h", Format = "N0", Reorderable = true, DefaultOrder = 2)]
     public double IskPerHour => _controller.IskPerHour;
 
-    /// <summary>Estimated ISK mined this session, sourced from the plan-18 ISK pipeline via the session stats snapshot.</summary>
+    /// <summary>Estimated ISK mined this session, sourced from the ISK pricing pipeline via the session stats snapshot.</summary>
     [StatRow("Total ISK", Format = "N0", Reorderable = true, DefaultOrder = 3)]
     public double TotalIskMined => _controller.TotalIskMined;
 
@@ -66,7 +66,7 @@ public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
     [StatRow("Crit chance", Format = "P1", Reorderable = true, DefaultOrder = 7)]
     public double CritChance => _controller.CritChance;
 
-    /// <summary>Plan 36: percentage of <c>TotalIskMined</c> attributable to crit events; 0 when total ISK is 0.</summary>
+    /// <summary>Percentage of <c>TotalIskMined</c> attributable to crit events; 0 when total ISK is 0.</summary>
     [StatRow("Crit ISK %", Format = "P1", Reorderable = true, DefaultOrder = 8)]
     public double CritIskPercent => _controller.CritIskPercent;
 
@@ -91,7 +91,7 @@ public sealed class SessionStatsViewModel : StatConfigurableWidgetViewModel
         _controller = controller;
         _controller.PropertyChanged += OnControllerPropertyChanged;
 
-        // Plan 43: the Session widget owns the session-wide "Refined output"
+        // The Session widget owns the session-wide "Refined output"
         // section (scope key = "" — the singleton session widget).
         EnableRefinedOutput(string.Empty);
 

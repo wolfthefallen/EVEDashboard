@@ -9,7 +9,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 42 — <see cref="SessionConfigDialogViewModel"/> owns the fleet list
+/// <see cref="SessionConfigDialogViewModel"/> owns the fleet list
 /// (single-select), the Create-Fleet flow, and the Start command. A fleet is
 /// the only way to start a session; Start drives the controller's
 /// <see cref="SessionController.StartAsync(IReadOnlyList{FleetMember}, System.Threading.CancellationToken)"/>
@@ -194,7 +194,7 @@ public class SessionConfigDialogViewModelTests
 
         await vm.StartCommand.ExecuteAsync(null);
 
-        vm.ShouldClose.Should().BeFalse("Start is blocked when no fleet pilot is discoverable (decision 2.5 = A)");
+        vm.ShouldClose.Should().BeFalse("Start is blocked when no fleet pilot is discoverable");
         vm.StartError.Should().NotBeNullOrEmpty();
         controller.Mode.Should().Be(SessionWidgetMode.Config, "no session was started");
     }

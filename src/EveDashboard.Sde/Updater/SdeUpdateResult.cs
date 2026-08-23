@@ -8,7 +8,7 @@ namespace EveDashboard.Sde.Updater;
 /// <remarks>
 /// The private parameterless constructor is what makes the hierarchy closed:
 /// only nested types within <see cref="SdeUpdateResult"/> can call it, so
-/// external assemblies cannot introduce a fourth case. Per plan 08 decision 8.12.
+/// external assemblies cannot introduce a fourth case.
 /// </remarks>
 public abstract record SdeUpdateResult
 {
@@ -40,8 +40,7 @@ public abstract record SdeUpdateResult
     /// <summary>
     /// The update could not be applied because of a network, upstream, or
     /// import-time failure. The local SDE is untouched. The caller may
-    /// retry on the next launch (per plan 08 decision 8.6 — single attempt,
-    /// no in-process retry).
+    /// retry on the next launch (single attempt, no in-process retry).
     /// </summary>
     /// <param name="Reason">
     /// Human-readable explanation. Suitable for logs and a future status

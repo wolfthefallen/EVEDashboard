@@ -13,15 +13,14 @@ using EveDashboard.Core.Settings;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 19 single source of truth for the dashboard layout: the ordered,
+/// Single source of truth for the dashboard layout: the ordered,
 /// observable collection of <see cref="WidgetItem"/>s rendered by
 /// <c>MainWindow.xaml</c>'s unified <c>WrapPanel</c> flow, plus the
 /// hidden-flag flip for the chrome's <c>x</c> button + <c>Hidden widgets ▾</c>
 /// popup, plus persistence of order + hidden state to
-/// <see cref="ISettingsRepository.SetWidgetLayoutAsync"/>. Plan 24 split the
-/// singleton Session widget into a SessionConfig widget + a SessionStats
-/// widget; the post-plan-25 follow-up moved SessionConfig to a modal dialog
-/// (see <c>SessionConfigDialog</c>) so the dashboard layout now owns only
+/// <see cref="ISettingsRepository.SetWidgetLayoutAsync"/>. Session
+/// configuration lives in a modal dialog (see <c>SessionConfigDialog</c>),
+/// not in a widget, so the dashboard layout owns only
 /// <see cref="WidgetDescriptor.SessionStats"/> and <see cref="WidgetDescriptor.Pilot"/>
 /// kinds. SessionStats renderability is driven by the latching
 /// <c>_statsActivated</c> flag (set on first
@@ -36,7 +35,7 @@ using Microsoft.Extensions.Logging;
 /// to <see cref="PerPilotWidgetCoordinator.Widgets"/>' <c>CollectionChanged</c>
 /// at construction so a session start (which clears + repopulates that
 /// collection) triggers a rebuild of <see cref="Items"/> against the persisted
-/// order. Plan 24 added a third subscription — <c>SessionController.PropertyChanged</c>
+/// order. A third subscription — <c>SessionController.PropertyChanged</c>
 /// for <c>Mode</c> — so transitions between Config / Running / Paused /
 /// Stopped re-evaluate which Session-area descriptor renders. The
 /// <c>_statsActivated</c> flag latches true on the first observed
@@ -49,8 +48,8 @@ using Microsoft.Extensions.Logging;
 /// <para>
 /// Persistence shape: the JSON written to the <c>setting</c> table under key
 /// <c>widget_layout</c> contains the FULL persisted order — including
-/// "ghost" entries for pilots not currently in any active session (per
-/// decision 19.C they are preserved indefinitely so a pilot dragged to
+/// "ghost" entries for pilots not currently in any active session (they
+/// are preserved indefinitely so a pilot dragged to
 /// slot N reappears at slot N when re-selected). <see cref="Items"/>
 /// materialises only the renderable subset (Session + currently-active
 /// pilots).
@@ -63,7 +62,7 @@ using Microsoft.Extensions.Logging;
 /// dispatcher-free).
 /// </para>
 /// <para>
-/// Per <c>MEMORY.md → feedback_chrome_bar_buttons_only</c>: the coordinator
+/// The chrome bar holds buttons only, never status text, so the coordinator
 /// owns no chrome status text, only data. The chrome row in
 /// <c>MainWindow.xaml</c> binds to <see cref="HasHiddenWidgets"/> to
 /// conditionally show the popup-trigger button — that visibility flip is
@@ -93,14 +92,14 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
 
     private CancellationTokenSource? _saveDebounceCts;
     private Task? _inFlightSave;
-    /// <summary>Serialises every <see cref="SaveAsync"/> call so a slow in-flight debounced save can never overwrite a freshly-flushed snapshot. See Bug 1 (2026-05-04) in <c>plans/BUGS.md</c>.</summary>
+    /// <summary>Serialises every <see cref="SaveAsync"/> call so a slow in-flight debounced save can never overwrite a freshly-flushed snapshot (cancelling the debounce CTS cannot stop a save whose <c>Task.Delay</c> has already completed).</summary>
     private readonly SemaphoreSlim _saveLock = new(1, 1);
     private TimeSpan _saveDebounceInterval = DefaultSaveDebounceInterval;
     private bool _suppressSave;
     private bool _disposed;
 
     /// <summary>
-    /// Plan 24 lifecycle latch — true once the SessionController's Mode has
+    /// Lifecycle latch — true once the SessionController's Mode has
     /// been observed at <see cref="SessionWidgetMode.Running"/> OR
     /// <see cref="SessionWidgetMode.Paused"/> at any point in this app run.
     /// Stays true for the rest of the app run (no across-restart Stats
@@ -125,7 +124,7 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
     /// <summary>Construct a layout coordinator. Subscribes to <see cref="PerPilotWidgetCoordinator.Widgets"/>' <c>CollectionChanged</c>, to <see cref="Items"/>' own <c>CollectionChanged</c>, and to <paramref name="sessionController"/>'s <c>PropertyChanged</c> at construction.</summary>
     /// <param name="activeSession">Active-session context. Reserved for future use — currently the per-pilot coordinator's collection-change events are sufficient.</param>
     /// <param name="perPilots">Per-pilot widget coordinator. Its <see cref="PerPilotWidgetCoordinator.Widgets"/> collection drives renderable-subset merging.</param>
-    /// <param name="sessionController">The singleton session controller — drives <see cref="WidgetDescriptor.SessionStats"/> visibility through its Mode property (the SessionConfig widget moved to a modal dialog post-plan-25).</param>
+    /// <param name="sessionController">The singleton session controller — drives <see cref="WidgetDescriptor.SessionStats"/> visibility through its Mode property (session configuration lives in a modal dialog, not a widget).</param>
     /// <param name="sessionStatsVm">Thin VM for the SessionStats widget (forwards stat fields + DisplaySessionName + TotalTimeMined from the controller).</param>
     /// <param name="settings">Settings repository for layout load/save.</param>
     /// <param name="log">Logger.</param>
@@ -159,11 +158,10 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
     /// <summary>
     /// Read the persisted layout and materialise <see cref="Items"/>. Default
     /// layout when no saved layout exists is empty (SessionStats is added on
-    /// first activation per plan 24's lifecycle rules, and per-pilot widgets
-    /// are appended on first session start in
-    /// <see cref="PerPilotWidgetCoordinator.Widgets"/>' natural alphabetical
-    /// order). The post-plan-25 follow-up moved the SessionConfig widget to a
-    /// modal dialog, so no SessionConfig seeding happens here anymore.
+    /// first activation, and per-pilot widgets are appended on first session
+    /// start in <see cref="PerPilotWidgetCoordinator.Widgets"/>' natural
+    /// alphabetical order). Session configuration lives in a modal dialog,
+    /// so no SessionConfig seeding happens here.
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     public async Task LoadAsync(CancellationToken ct = default)
@@ -178,7 +176,7 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
         RebuildItems();
     }
 
-    /// <summary>Move the item at <paramref name="from"/> to <paramref name="to"/>. Called by the GongSolutions drop handler. Drop-on-self is a no-op (per decision 19.E).</summary>
+    /// <summary>Move the item at <paramref name="from"/> to <paramref name="to"/>. Called by the GongSolutions drop handler. Drop-on-self is a no-op.</summary>
     /// <param name="from">Source index in <see cref="Items"/>.</param>
     /// <param name="to">Target index in <see cref="Items"/>.</param>
     public void MoveItem(int from, int to)
@@ -241,7 +239,7 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
     /// arrived) finishes its <see cref="ISettingsRepository.SetWidgetLayoutAsync"/>
     /// write before this method's own write starts. The <c>_saveLock</c>
     /// SemaphoreSlim then serialises any save that is still running on a
-    /// thread the await chain doesn't see (defence in depth — see Bug 1).
+    /// thread the await chain doesn't see (defence in depth against the flush-vs-debounced-save race).
     /// </remarks>
     internal async Task FlushPendingSaveAsync()
     {
@@ -267,11 +265,11 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
     private void OnPerPilotsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => RebuildItems();
 
     /// <summary>
-    /// Plan 24 lifecycle handler: latches <see cref="_statsActivated"/> on
+    /// Lifecycle handler: latches <see cref="_statsActivated"/> on
     /// the first observed transition into <see cref="SessionWidgetMode.Running"/>
     /// or <see cref="SessionWidgetMode.Paused"/>, then triggers a rebuild
-    /// so the SessionConfig / SessionStats descriptor renderability
-    /// re-evaluates against the new Mode.
+    /// so the SessionStats descriptor renderability re-evaluates against
+    /// the new Mode.
     /// </summary>
     private void OnControllerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -296,7 +294,7 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
             }
             Items.Clear();
 
-            // Plan 24 first-activation rule: insert SessionStats at slot 0 of
+            // First-activation rule: insert SessionStats at slot 0 of
             // _persistedItems on the first activation if no SessionStats entry
             // exists yet. Subsequent activations use the saved slot.
             if (_statsActivated && !_persistedItems.Any(i => i.Descriptor is WidgetDescriptor.SessionStats))
@@ -479,7 +477,7 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
         var cts = new CancellationTokenSource();
         _saveDebounceCts = cts;
         // Track the latest in-flight task so FlushPendingSaveAsync can await
-        // it before issuing its own SaveAsync (Bug 1 fix).
+        // it before issuing its own SaveAsync (the flush-vs-debounce race guard).
         _inFlightSave = DebouncedSaveAsync(cts.Token);
     }
 
@@ -508,8 +506,8 @@ public sealed partial class LayoutCoordinator : ObservableObject, IDisposable
         if (_disposed) return;
         // Serialise concurrent SaveAsync calls so a slow in-flight debounced
         // save (one whose Task.Delay completed just before its CTS was
-        // cancelled) cannot overwrite a freshly-flushed snapshot. See Bug 1
-        // (2026-05-04) — without this, the test fixture's 1 ms debounce
+        // cancelled) cannot overwrite a freshly-flushed snapshot. Without
+        // this, the test fixture's 1 ms debounce
         // exposed a ~20% race in `Hide_flips_IsHidden_and_HasHiddenWidgets_and_persists`.
         await _saveLock.WaitAsync().ConfigureAwait(false);
         try

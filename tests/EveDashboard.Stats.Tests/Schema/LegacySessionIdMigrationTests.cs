@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 /// <summary>
-/// Tests for <see cref="LegacySessionIdMigration"/> (plan 38): detection,
+/// Tests for <see cref="LegacySessionIdMigration"/>: detection,
 /// sha256 id rewrite across the FK tables, and best-effort <c>market_data</c>
 /// association by parsed-timestamp containment (with the zero-sentinel for
 /// ambiguous / unowned rows).
@@ -18,7 +18,7 @@ public class LegacySessionIdMigrationTests
     private static SqliteDatabase OpenInMemory() =>
         new("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
 
-    /// <summary>The pre-plan-38 schema: integer session_id PKs, market_data with NO session_id.</summary>
+    /// <summary>The legacy pre-migration schema: integer session_id PKs, market_data with NO session_id.</summary>
     private const string LegacyDdl = """
         CREATE TABLE session (session_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, notes TEXT);
         CREATE TABLE session_time (session_time_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL REFERENCES session(session_id), start_time TEXT NOT NULL, stop_time TEXT, is_pause INTEGER NOT NULL CHECK (is_pause IN (0,1)));

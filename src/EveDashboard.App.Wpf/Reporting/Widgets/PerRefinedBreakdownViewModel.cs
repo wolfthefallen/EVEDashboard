@@ -9,23 +9,23 @@ using EveDashboard.Reporting.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 43 widget VM for the reporting "Refined output" table — Material |
+/// Widget VM for the reporting "Refined output" table — Material |
 /// Quantity columns, sortable. Reused at session-level (<c>pilotId == null</c>)
 /// and per-pilot-level (<c>pilotId == &lt;id&gt;</c>) inside the Reports window.
 /// </summary>
 /// <remarks>
 /// No stat-config popup and no auto-show / hide: reporting shows ALL refined
-/// materials for the saved session (decision 1.3 = A). Column-click sort is
+/// materials for the saved session. Column-click sort is
 /// provided by the view's <c>DataGrid.CanUserSortColumns="True"</c>; refresh is
 /// driven externally by <see cref="LoadAsync"/>;
 /// <see cref="WidgetBaseViewModel.RefreshAsync"/> is a no-op. Mirrors
-/// <see cref="PerOreBreakdownViewModel"/>. Plan 47: inherits
+/// <see cref="PerOreBreakdownViewModel"/>. Inherits
 /// <see cref="TextSizeConfigurableWidgetViewModel"/> for the "Text size" cog +
 /// column-width persistence (widget-type key <c>"refined"</c>).
 /// </remarks>
 public sealed partial class PerRefinedBreakdownViewModel : TextSizeConfigurableWidgetViewModel
 {
-    /// <summary>Plan 47: sizeable elements + their default emphasis (Layout 1 — Title bold, table plain).</summary>
+    /// <summary>Sizeable elements + their default emphasis (Title bold, table plain).</summary>
     private static readonly IReadOnlyList<(string Key, string Label, StatEmphasis Default)> Elements = new[]
     {
         ("Title", "Title", StatEmphasis.Header0),
@@ -45,7 +45,7 @@ public sealed partial class PerRefinedBreakdownViewModel : TextSizeConfigurableW
 
     /// <summary>Construct the per-refined breakdown VM.</summary>
     /// <param name="queries">Reporting queries facade.</param>
-    /// <param name="settings">Settings repository (plan 47: text size + column widths).</param>
+    /// <param name="settings">Settings repository (text size + column widths).</param>
     /// <param name="log">Logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public PerRefinedBreakdownViewModel(

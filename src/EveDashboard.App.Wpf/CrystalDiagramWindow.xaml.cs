@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Modeless reference-image window for the ore -> mineral cross-reference
-/// diagram. Plan 35: top of the content area holds a <c>ComboBox</c> letting
+/// diagram. The top of the content area holds a <c>ComboBox</c> letting
 /// the user pick "All / Full Chart" or any of the 7 nullsec SOV asteroid
 /// deposits; selection is persisted via
 /// <see cref="ISettingsRepository.SetSelectedCrystalAnomalyAsync(string, CancellationToken)"/>.
@@ -22,10 +22,13 @@ using Microsoft.Extensions.Logging;
 /// (<c>crystal_diagram_window_geometry</c> + <c>crystal_diagram_selected_anomaly</c>).
 /// </para>
 /// <para>
-/// The previous <c>SizeToContent="WidthAndHeight"</c> bug + fix is described
-/// in TODO.md's "Crystal Diagram window" feature entry; that work is the
-/// reason this window now uses <see cref="WindowGeometryService"/> and
-/// Stretch="Uniform" for the Image.
+/// The window deliberately does NOT use <c>SizeToContent="WidthAndHeight"</c>:
+/// that made it open too large, clip the image past the screen edges, and
+/// refuse to rescale when FancyZones snap-resized it (WPF only clears
+/// SizeToContent on a manual drag-resize). Instead the size comes from
+/// <see cref="WindowGeometryService"/> (900x650 centered default, persisted
+/// thereafter) and the Image uses Stretch="Uniform" so it scales inside
+/// whatever area the window allocates.
 /// </para>
 /// </remarks>
 public partial class CrystalDiagramWindow : Window

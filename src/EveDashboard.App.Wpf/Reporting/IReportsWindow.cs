@@ -3,7 +3,7 @@ namespace EveDashboard.App.Wpf.Reporting;
 /// <summary>
 /// Test seam for the Reports child window. Production wires
 /// <see cref="ReportsWindowAdapter"/>; the chrome Reports button on
-/// <c>MainWindow</c> calls <see cref="Show"/> with no argument. Plan 25.
+/// <c>MainWindow</c> calls <see cref="Show"/> with no argument.
 /// </summary>
 /// <remarks>
 /// Mirrors <see cref="EveDashboard.App.Wpf.Dialogs.ISettingsDialog"/> in shape

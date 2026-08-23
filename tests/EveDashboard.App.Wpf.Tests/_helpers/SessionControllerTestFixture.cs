@@ -22,8 +22,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// fake <see cref="EveDashboard.Mining.Parsing.IGamelogLineParser"/>, fake
 /// <see cref="EveDashboard.Core.Lookup.ISdeLookup"/>.
 ///
-/// Per plan-16 alignment 1.2 = A: writer + watcher have per-session lifecycle
-/// owned by the VM. Tests exercise the real Start/Stop calls.
+/// Writer + watcher have a per-session lifecycle owned by the VM. Tests
+/// exercise the real Start/Stop calls.
 /// </summary>
 internal sealed class SessionControllerTestFixture : IDisposable
 {
@@ -52,9 +52,9 @@ internal sealed class SessionControllerTestFixture : IDisposable
             new Character(2_000_000_002, "TestPilotTwo", Path.Combine(TempGamelogDir, "20260101_120000_2000000002.txt")),
         };
 
-        // Plan 42: the New Session start path resolves the fleet roster against a
+        // The New Session start path resolves the fleet roster against a
         // FRESH gamelog-discovery snapshot and skips pilots with no current
-        // gamelog (decision 2.5 = A). So discovery must actually find these
+        // gamelog. So discovery must actually find these
         // characters — write a minimal gamelog file (with the Listener: header
         // the discovery service reads) for each, where the file lives in an
         // existing directory.
@@ -84,7 +84,7 @@ internal sealed class SessionControllerTestFixture : IDisposable
         var parser = new FakeGamelogLineParser();
         Watcher = new RealtimeLogWatcher(parser, Writer, NullLogger<RealtimeLogWatcher>.Instance);
 
-        // Plan 37: a single shared FakeSettingsRepository so SessionController
+        // A single shared FakeSettingsRepository so SessionController
         // and SqliteSessionStatsRepository read the same auto-pause / yield /
         // station settings during a test.
         Settings = new FakeSettingsRepository();
@@ -104,7 +104,7 @@ internal sealed class SessionControllerTestFixture : IDisposable
 
     /// <summary>
     /// Build a fleet roster (all <see cref="PilotRole.Miner"/>) from the first
-    /// <paramref name="count"/> discovered characters — the plan-42 input to
+    /// <paramref name="count"/> discovered characters — the input to
     /// <see cref="SessionController.StartAsync(IReadOnlyList{FleetMember}, CancellationToken)"/>.
     /// </summary>
     public FleetMember[] Roster(int count = 1) =>

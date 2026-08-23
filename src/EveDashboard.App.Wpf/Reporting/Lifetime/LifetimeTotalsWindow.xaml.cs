@@ -7,7 +7,7 @@ using EveDashboard.Core.Settings;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 51: standalone Lifetime Totals window. Modeless, singleton, hide-on-close
+/// Standalone Lifetime Totals window. Modeless, singleton, hide-on-close
 /// (mirrors <see cref="ReportsWindow"/> / <see cref="CrystalDiagramWindow"/>) so
 /// the restored geometry survives in-session open/close cycles. Hosts the reused
 /// <see cref="LifetimeSummaryView"/> widget; the all-time rollup it shows is

@@ -3,8 +3,8 @@ namespace EveDashboard.App.Wpf.Reporting;
 using System.Globalization;
 
 /// <summary>
-/// Shared display formatting for the Reports window (plan 46). Extracted so the
-/// compare view and the empty-state lifetime view format active durations
+/// Shared display formatting for the Reports window. Extracted so the
+/// compare view and the Lifetime Totals view format active durations
 /// identically instead of each carrying its own copy.
 /// </summary>
 public static class ReportFormatting

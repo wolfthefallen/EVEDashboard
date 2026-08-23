@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 /// Regex shapes derive from real EVE gamelogs (see fixtures under
 /// <c>tests/EveDashboard.Mining.Tests/testdata/Gamelogs/</c>) and are inspired by
 /// the reference project at <c>../Mining-Dashboard/mining_dashboard.py:683-689</c>;
-/// every pattern was verified against the actual logs at plan-10 drafting time.
+/// every pattern was verified against the actual logs before being adopted.
 /// </remarks>
 public sealed class GamelogLineParser : IGamelogLineParser
 {

@@ -20,7 +20,7 @@ using SQLitePCL;
 /// prefetch, ...). Every operation therefore runs under a single
 /// <see cref="SemaphoreSlim"/> (<see cref="_gate"/>) so only one command ever
 /// touches the connection at a time. Without this, concurrent access corrupts
-/// the driver's internal state and throws (see BUGS.md Bug 1). The public
+/// the driver's internal state and throws. The public
 /// methods acquire the gate and delegate to the private un-gated
 /// <c>*CoreAsync</c> workers.
 /// </para>

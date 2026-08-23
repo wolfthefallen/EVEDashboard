@@ -167,7 +167,7 @@ public sealed class EsiMarketPriceClient : IMarketPriceClient
         }
 
         // Omit types with no order on this station at all (no NULL-only sentinel rows,
-        // matching the GoonMetrics client + plan 18 decision 5.1).
+        // matching the GoonMetrics client).
         if (bestBuy is null && bestSell is null)
         {
             return null;

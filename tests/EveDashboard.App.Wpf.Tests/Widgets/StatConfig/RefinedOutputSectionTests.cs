@@ -8,11 +8,11 @@ using EveDashboard.Stats.Queries;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 43: the opt-in "Refined output" section on
+/// The opt-in "Refined output" section on
 /// <see cref="StatConfigurableWidgetViewModel"/> — replace-from-snapshot (the
 /// section mirrors the latest snapshot exactly; within a session quantities grow
-/// because snapshots are cumulative, and an empty snapshot clears the section —
-/// bug 1, 2026-06-18; sorted by quantity desc) + visibility resolution (explicit
+/// because snapshots are cumulative, and an empty snapshot clears the section;
+/// sorted by quantity desc) + visibility resolution (explicit
 /// override wins, else the auto-show default). Exercised through a minimal
 /// concrete test widget.
 /// </summary>
@@ -108,7 +108,7 @@ public class RefinedOutputSectionTests
     [Fact]
     public void Empty_snapshot_clears_the_section()
     {
-        // Bug 1 (2026-06-18): a new session pushes an empty snapshot; the section
+        // Regression guard: a new session pushes an empty snapshot; the section
         // MUST reset. Before the fix the empty merge was a no-op and the prior
         // session's materials persisted in the singleton SessionStats widget.
         var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true };
@@ -141,7 +141,7 @@ public class RefinedOutputSectionTests
     [Fact]
     public void Pilot_scope_hides_section_when_toggle_off()
     {
-        // Plan 49 (issue #1): a per-pilot widget with the master toggle OFF never
+        // A per-pilot widget with the master toggle OFF never
         // shows the refined-output section, regardless of auto-show / overrides.
         var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };
         using var w = new TestWidget(settings, scopeKey: "123");
@@ -154,7 +154,7 @@ public class RefinedOutputSectionTests
     [Fact]
     public void Session_scope_unaffected_by_pilot_toggle()
     {
-        // Plan 49: the Session widget (scope "") is NEVER gated by the per-pilot toggle.
+        // The Session widget (scope "") is NEVER gated by the per-pilot toggle.
         var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };
         using var w = new TestWidget(settings, scopeKey: string.Empty);
 
@@ -166,7 +166,7 @@ public class RefinedOutputSectionTests
     [Fact]
     public async Task Pilot_scope_reshows_section_when_toggle_flipped_on()
     {
-        // Plan 49: flipping the per-pilot toggle ON live-updates the section via the
+        // Flipping the per-pilot toggle ON live-updates the section via the
         // SettingChanged -> HydrateRefinedAsync path (no restart). Mirrors the
         // SettingChanged async pattern in PerPilotWidgetViewModelStatsTests.
         var settings = new FakeSettingsRepository { AutoShowRefinedMaterials = true, ShowPilotRefinedOutput = false };

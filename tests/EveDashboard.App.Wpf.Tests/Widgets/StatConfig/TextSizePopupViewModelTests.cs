@@ -5,7 +5,7 @@ using EveDashboard.Core.Settings.WidgetStats;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 47: unit tests for the Reports "Text size" popup VM. Verifies Load builds
+/// Unit tests for the Reports "Text size" popup VM. Verifies Load builds
 /// one row per element resolving the saved emphasis against each element's DEFAULT
 /// (Header0 for a heading, None for the table), Apply stores only the rows that
 /// DEVIATE from their default (so an untouched element resolves back to its

@@ -13,7 +13,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 44 — the suspenders for BUGS.md Bug 1. The writer's background consumer
+/// Belt-and-suspenders for the connection-concurrency defect. The writer's background consumer
 /// loop must survive a NON-<c>DbException</c> thrown by a single insert and keep
 /// draining; pre-fix it caught only <c>DbException</c>, so the fault killed the
 /// consumer Task and silently lost every later event.
@@ -51,7 +51,7 @@ public class SessionEventWriterResilienceTests
         await writer.StartAsync(SessionId, CancellationToken.None);
 
         // Three valid Ticks. The FIRST log insert throws ArgumentOutOfRangeException
-        // (a non-DbException, modelling the Bug 1 driver fault). The consumer must
+        // (a non-DbException, modelling the shared-connection driver fault). The consumer must
         // log-and-continue so the remaining two still land.
         await writer.WriteAsync(Tick(10), CancellationToken.None);
         await writer.WriteAsync(Tick(20), CancellationToken.None);

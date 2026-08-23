@@ -30,8 +30,8 @@ public class SchemaInitializerTests
             "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
             r => r.GetString(0));
 
-        // The ten declared tables (plan 42 added fleet + fleet_pilot) plus
-        // sqlite_sequence (auto-created for AUTOINCREMENT tables).
+        // The ten declared tables plus sqlite_sequence (auto-created for
+        // AUTOINCREMENT tables).
         tables.Should().BeEquivalentTo(new[]
         {
             "fleet",
@@ -60,8 +60,8 @@ public class SchemaInitializerTests
 
         indexes.Should().BeEquivalentTo(new[]
         {
-            "idx_fleet_name",         // plan 42: unique fleet display name
-            "idx_fleet_pilot_fleet",  // plan 42: per-fleet member seek
+            "idx_fleet_name",         // unique fleet display name
+            "idx_fleet_pilot_fleet",  // per-fleet member seek
             "idx_log_session_pilot",
             "idx_log_session_typeid",
             "idx_market_data_lookup",
@@ -79,7 +79,7 @@ public class SchemaInitializerTests
 
         var tableCount = await db.QueryScalarAsync<long>(
             "SELECT COUNT(*) FROM sqlite_master WHERE type='table'");
-        // Ten declared tables + sqlite_sequence = 11 (plan 42 added fleet + fleet_pilot).
+        // Ten declared tables + sqlite_sequence = 11.
         tableCount.Should().Be(11);
     }
 
@@ -126,15 +126,15 @@ public class SchemaInitializerTests
         await using var db = OpenInMemory();
         await SchemaInitializer.EnsureSchemaAsync(db);
 
-        // Plan 42: the canonical SchemaDdl already emits the latest shape, so a
-        // fresh DB is stamped straight at the latest version (2), NOT 1.
+        // The canonical SchemaDdl already emits the latest shape, so a
+        // fresh DB is stamped straight at the latest version (3), NOT 1.
         var version = await db.QueryScalarAsync<string>(
             "SELECT value FROM setting WHERE key = 'schema_version'");
-        version.Should().Be("2");
+        version.Should().Be("3");
     }
 
     [Fact]
-    public async Task EnsureSchemaAsync_idempotent_schema_version_stays_2()
+    public async Task EnsureSchemaAsync_idempotent_schema_version_stays_3()
     {
         await using var db = OpenInMemory();
         await SchemaInitializer.EnsureSchemaAsync(db);
@@ -142,16 +142,84 @@ public class SchemaInitializerTests
 
         var version = await db.QueryScalarAsync<string>(
             "SELECT value FROM setting WHERE key = 'schema_version'");
-        version.Should().Be("2");
+        version.Should().Be("3");
     }
 
     [Fact]
-    public async Task EnsureSchemaAsync_upgrades_a_v1_store_to_v2_creating_fleet_tables_and_preserving_data()
+    public async Task EnsureSchemaAsync_fresh_db_has_session_archive_columns_with_defaults()
+    {
+        await using var db = OpenInMemory();
+        await SchemaInitializer.EnsureSchemaAsync(db);
+        await db.ExecuteNonQueryAsync(
+            "INSERT INTO session (session_id, name, notes) VALUES ('abc', 'Run', NULL)");
+
+        var archived = await db.QueryScalarAsync<long>("SELECT archived FROM session WHERE session_id = 'abc'");
+        var mergedInto = await db.QueryScalarAsync<string>("SELECT merged_into FROM session WHERE session_id = 'abc'");
+        archived.Should().Be(0, "a freshly created session is never archived");
+        mergedInto.Should().BeNull();
+
+        // The CHECK constraint rejects anything but 0 / 1.
+        var act = async () => await db.ExecuteNonQueryAsync(
+            "INSERT INTO session (session_id, name, notes, archived) VALUES ('bad', 'Run', NULL, 2)");
+        await act.Should().ThrowAsync<SqliteException>();
+    }
+
+    [Fact]
+    public async Task EnsureSchemaAsync_upgrades_a_v2_store_to_v3_adding_session_archive_columns_and_preserving_data()
+    {
+        // Simulate a live v2 store: the full schema minus the v3 session
+        // columns, with a session row and schema_version stamped at 2. The
+        // next EnsureSchemaAsync (an app upgrade) must ADD the two columns,
+        // bump the version to 3, and leave the existing row untouched with
+        // the column defaults (archived = 0, merged_into = NULL).
+        await using var db = OpenInMemory();
+        await SchemaInitializer.EnsureSchemaAsync(db);
+        await db.ExecuteNonQueryAsync(
+            "INSERT INTO session (session_id, name, notes) VALUES ('abc', 'Old Run', 'kept')");
+
+        // Roll the store back to the v2 shape: drop the v3 columns, stamp version 2.
+        await db.ExecuteScriptAsync(
+            "ALTER TABLE session DROP COLUMN merged_into; ALTER TABLE session DROP COLUMN archived;");
+        await db.ExecuteNonQueryAsync(
+            "UPDATE setting SET value = '2' WHERE key = 'schema_version'");
+        var before = await db.QueryAsync(
+            "SELECT name FROM pragma_table_info('session')", r => r.GetString(0));
+        before.Should().BeEquivalentTo(new[] { "session_id", "name", "notes" }, "the rollback must produce the real v2 shape");
+
+        // Upgrade.
+        await SchemaInitializer.EnsureSchemaAsync(db);
+
+        var version = await db.QueryScalarAsync<string>(
+            "SELECT value FROM setting WHERE key = 'schema_version'");
+        version.Should().Be("3");
+
+        var after = await db.QueryAsync(
+            "SELECT name FROM pragma_table_info('session')", r => r.GetString(0));
+        after.Should().BeEquivalentTo(new[] { "session_id", "name", "notes", "archived", "merged_into" });
+
+        var row = await db.QueryAsync(
+            "SELECT name, notes, archived, merged_into FROM session WHERE session_id = 'abc'",
+            r => (Name: r.GetString(0), Notes: r.GetString(1), Archived: r.GetInt64(2), MergedInto: r.IsDBNull(3) ? null : r.GetString(3)));
+        row.Should().ContainSingle();
+        row[0].Name.Should().Be("Old Run", "the additive migration must not touch existing rows");
+        row[0].Notes.Should().Be("kept");
+        row[0].Archived.Should().Be(0, "pre-existing sessions are not archived by the upgrade");
+        row[0].MergedInto.Should().BeNull();
+
+        // Re-running is a no-op (no duplicate-column throw, version unchanged).
+        await SchemaInitializer.EnsureSchemaAsync(db);
+        (await db.QueryScalarAsync<string>("SELECT value FROM setting WHERE key = 'schema_version'")).Should().Be("3");
+    }
+
+    [Fact]
+    public async Task EnsureSchemaAsync_upgrades_a_v1_store_through_the_whole_chain_creating_fleet_tables_and_preserving_data()
     {
         // Simulate a live v1 store: the full schema minus the v2 fleet tables,
         // with a session + pilot row and schema_version stamped at 1. The next
-        // EnsureSchemaAsync (an app upgrade) must add the fleet tables, bump the
-        // version to 2, and leave the existing rows untouched.
+        // EnsureSchemaAsync (an app upgrade) must run the whole chain: add the
+        // fleet tables (v2), then the session archive columns (v3 - already
+        // present here because the DDL emitted them, so that step is a no-op),
+        // stamp the latest version, and leave the existing rows untouched.
         await using var db = OpenInMemory();
         await SchemaInitializer.EnsureSchemaAsync(db);
 
@@ -171,7 +239,7 @@ public class SchemaInitializerTests
 
         var version = await db.QueryScalarAsync<string>(
             "SELECT value FROM setting WHERE key = 'schema_version'");
-        version.Should().Be("2");
+        version.Should().Be("3", "the chain runs every outstanding migration and stamps the latest version");
 
         var fleetTables = await db.QueryAsync(
             "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('fleet','fleet_pilot') ORDER BY name",

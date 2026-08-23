@@ -353,14 +353,14 @@ public class EverefSdeFormatConverterTests
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ImportToOpenTransactionAsync — caller-owns-tx variant (plan 08, decision 8.10)
+    // ImportToOpenTransactionAsync — caller-owns-tx variant
     // ─────────────────────────────────────────────────────────────────────────
 
     [Fact]
     public async Task ImportToOpenTransactionAsync_persists_when_caller_commits()
     {
         await using var db = OpenInMemory();
-        // Caller's responsibility per decision 8.22 — schema before transaction.
+        // Caller's responsibility — schema before transaction.
         await SchemaInitializer.EnsureSchemaAsync(db);
 
         await db.ExecuteNonQueryAsync("BEGIN TRANSACTION");

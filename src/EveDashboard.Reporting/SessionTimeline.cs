@@ -5,7 +5,7 @@ namespace EveDashboard.Reporting;
 /// started, how long the active intervals total to, and the list of completed
 /// pause windows. Returned by <see cref="Queries.IReportingQueries.GetSessionTimelineAsync"/>
 /// to drive the Excel-export Summary tab's active-vs-paused duration figures
-/// (plan 29 <c>ExcelSessionExporter</c>).
+/// (<c>ExcelSessionExporter</c>).
 /// </summary>
 /// <param name="SessionStart">Wall-clock UTC instant of the earliest active interval (<c>is_pause = 0</c>) for the session.</param>
 /// <param name="ActiveDuration">Sum of <c>(stop_time - start_time)</c> over every active interval. Pauses are excluded.</param>

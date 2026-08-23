@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
 /// <summary>
-/// Themed modal Settings dialog (plan 22.1). Glue between the View and the
+/// Themed modal Settings dialog. Glue between the View and the
 /// <see cref="SettingsDialogViewModel"/>: owns the WPF
 /// <see cref="OpenFolderDialog"/> invocation (UI-thread requirement) and the
 /// close-with-unsaved-changes confirm prompt.
@@ -18,7 +18,7 @@ using Microsoft.Win32;
 /// is the actual UI the adapter constructs from DI per <c>Show()</c> call.
 /// </para>
 /// <para>
-/// Plan 22.2: when the VM is in bootstrap-failure mode, the close-with-unsaved-
+/// When the VM is in bootstrap-failure mode, the close-with-unsaved-
 /// changes confirm prompt is suppressed and Cancel/X/Alt-F4 calls
 /// <see cref="Application.Shutdown(int)"/> with exit code <c>1</c>. Apply
 /// success raises <see cref="SettingsDialogViewModel.BootstrapApplySucceeded"/>
@@ -32,7 +32,7 @@ public partial class SettingsDialog : Window
     private readonly SettingsDialogViewModel _vm;
     private readonly ILogger<SettingsDialog> _log;
 
-    /// <summary>Plan 22.2: set to true after a successful bootstrap-chain re-run, so OnClosing closes cleanly instead of calling Shutdown(1).</summary>
+    /// <summary>Set to true after a successful bootstrap-chain re-run, so OnClosing closes cleanly instead of calling Shutdown(1).</summary>
     private bool _bootstrapApplyFinishedSuccessfully;
 
     /// <summary>Construct the dialog with its ViewModel. DI-resolved.</summary>
@@ -117,11 +117,11 @@ public partial class SettingsDialog : Window
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
-        // Plan 22.2: bootstrap-failure mode = no MainWindow exists yet to
-        // return to. Cancel/X/Alt-F4 means "give up, exit". The 22.1 dirty-
-        // prompt is suppressed in this mode (decision 22.S). If Apply has
-        // already succeeded for this session, the chain re-run opened MainWindow
-        // and the dialog closes cleanly.
+        // Bootstrap-failure mode = no MainWindow exists yet to return to.
+        // Cancel/X/Alt-F4 means "give up, exit". The normal-mode dirty-prompt
+        // is suppressed in this mode. If Apply has already succeeded for this
+        // session, the chain re-run opened MainWindow and the dialog closes
+        // cleanly.
         if (_vm.IsBootstrapFailureMode)
         {
             if (!_bootstrapApplyFinishedSuccessfully)
@@ -147,7 +147,7 @@ public partial class SettingsDialog : Window
     }
 
     /// <summary>
-    /// Plan 22.2: handler for <see cref="SettingsDialogViewModel.BootstrapApplySucceeded"/>.
+    /// Handler for <see cref="SettingsDialogViewModel.BootstrapApplySucceeded"/>.
     /// Re-runs the bootstrap chain via <see cref="App.RunBootstrapChainAsync"/>;
     /// on chain success, marks the flag and closes the dialog cleanly behind
     /// the now-open MainWindow. On chain failure (e.g. the new path is also

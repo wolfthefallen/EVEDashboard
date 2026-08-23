@@ -1,7 +1,7 @@
 namespace EveDashboard.SessionIO.Json;
 
 /// <summary>
-/// Version of the portable session-export JSON shape (plan 42 decision 4.1 = B).
+/// Version of the portable session-export JSON shape.
 /// This is the export <b>format</b> version, deliberately decoupled from the
 /// SQLite <c>schema_version</c>: a DB-schema migration that does not change the
 /// export shape must NOT bump this, so a user can always re-import an older

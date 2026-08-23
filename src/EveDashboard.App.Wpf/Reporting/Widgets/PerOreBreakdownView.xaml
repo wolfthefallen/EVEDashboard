@@ -6,7 +6,7 @@
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
                     mc:Ignorable="d">
     <!--
-        Plan 25 per-ore breakdown widget. Three columns (Type / m^3 / ISK),
+        Per-ore breakdown widget. Three columns (Type / m^3 / ISK),
         sortable; default sort by VolumeM3 descending (assigned by the SQL
         ORDER BY + the VM's post-sort). Used at session-level and per-pilot
         level inside the Reports window. Theming via the existing dynamic

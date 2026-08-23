@@ -27,7 +27,7 @@ public class PilotToggleViewModelTests
 
         sut.Character.Should().BeSameAs(character);
         sut.IsSelected.Should().BeFalse();
-        sut.Role.Should().Be(PilotRole.Miner, "the picker defaults each pilot to Miner (plan 42)");
+        sut.Role.Should().Be(PilotRole.Miner, "the picker defaults each pilot to Miner");
     }
 
     [Fact]

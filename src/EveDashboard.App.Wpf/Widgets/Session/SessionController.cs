@@ -21,51 +21,49 @@ using EveDashboard.Stats.Writer;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Controller behind the SessionConfig + SessionStats widget pair (plan 24
-/// split). Owns the four-mode state machine
+/// Controller behind the SessionConfig + SessionStats widget pair.
+/// Owns the four-mode state machine
 /// (<see cref="SessionWidgetMode.Config"/> / <see cref="SessionWidgetMode.Running"/> /
 /// <see cref="SessionWidgetMode.Paused"/> / <see cref="SessionWidgetMode.Stopped"/>),
 /// the lifecycle SQL transitions (Start / Pause / Resume / Stop, each as one
 /// transaction), the 1 Hz <see cref="DispatcherTimer"/> that drives both stats
 /// refresh and elapsed-time tick, the dirty-flag pattern fed by
 /// <see cref="ISessionEventNotifier.SessionEventAdded"/>, and all bound stat
-/// fields. The pilot picker moved to the New Session dialog (plan 42 — fleets).
+/// fields. The pilot picker lives in the New Session dialog, not here.
 /// The two thin VMs
 /// <c>SessionConfigViewModel</c> and <c>SessionStatsViewModel</c> hold a
 /// reference to this controller and forward the bound fields each view needs.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per plan 16 decisions 5.1 = B (1 Hz coalesced refresh, dirty-flag pattern)
-/// and 5.2 = B+C (single 1 Hz timer drives both stats refresh and elapsed-time
-/// tick; timer runs only while Running). ISK fields are populated by the
-/// plan-18 ISK pipeline that runs inside
+/// Stats refresh is a single 1 Hz coalesced tick driven by a dirty flag, not
+/// per-event updates; that one timer drives both stats refresh and the
+/// elapsed-time tick, and runs only while Running. ISK fields are populated by
+/// the ISK pricing pipeline that runs inside
 /// <c>SqliteSessionStatsRepository.GetSessionStatsAsync</c>.
 /// </para>
 /// <para>
-/// Lifecycle SQL transitions live here (round-6 Q1.1 = B). Per round-6 11.7,
-/// the widget never auto-resumes — the user must click Resume after
-/// <see cref="InitializeAsync"/> detects an open <c>session_time</c> row at
-/// app launch (Mode lands in <see cref="SessionWidgetMode.Paused"/> for that
-/// case, collapsed from the old "Resume mode" per plan 24). Per plan-16
-/// alignment 1.2 = A, both <see cref="SessionEventWriter"/> and
+/// Lifecycle SQL transitions live here, not in the VMs. The widget
+/// deliberately never auto-resumes at app launch — the user must click Resume
+/// after <see cref="InitializeAsync"/> detects an open <c>session_time</c> row
+/// (Mode lands in <see cref="SessionWidgetMode.Paused"/> for that
+/// case; there is no separate "Resume" mode). Both <see cref="SessionEventWriter"/> and
 /// <see cref="RealtimeLogWatcher"/> are started/stopped per-session; Pause
 /// and Resume buttons leave both alone (Pause merely flips
 /// <see cref="IActiveSessionContext"/> state to Paused, which the writer
 /// reads on every <c>WriteAsync</c> to drop events).
 /// </para>
 /// <para>
-/// Plan 24 collapses the old <c>Resume</c> mode value into
-/// <see cref="SessionWidgetMode.Paused"/>: app-launch-with-open-session-row
+/// App-launch-with-open-session-row shares the
+/// <see cref="SessionWidgetMode.Paused"/> mode value: it
 /// surfaces the same <c>[Resume, Stop]</c> chrome buttons as in-session
 /// pause does, and the dispatch between the two paths happens in
 /// <see cref="ResumeAsync"/> via the <c>_sessionStartUtc</c> null-check
-/// (null = app-launch heavy path; set = in-session light path). The
-/// <c>StartFreshCommand</c> and <c>StopFromResumeCommand</c> are deleted
-/// (one Stop covers both <see cref="SessionWidgetMode.Running"/> and
+/// (null = app-launch heavy path; set = in-session light path). A single
+/// Stop command covers both <see cref="SessionWidgetMode.Running"/> and
 /// <see cref="SessionWidgetMode.Paused"/> transitions to
 /// <see cref="SessionWidgetMode.Stopped"/>; discarding a paused session is
-/// Stop -> NewSession, two clicks not one).
+/// Stop -> NewSession, two clicks not one.
 /// </para>
 /// </remarks>
 public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
@@ -94,7 +92,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     private bool _disposed;
 
     /// <summary>
-    /// Plan 37 — wall-clock time of the most recent qualifying (Tick or Crit)
+    /// Wall-clock time of the most recent qualifying (Tick or Crit)
     /// event for the active session. Reset to <c>null</c> at Start / Stop;
     /// reset to <c>DateTimeOffset.UtcNow</c> when transitioning Paused -&gt;
     /// Running so the idle timer starts from the resume moment, not from the
@@ -103,7 +101,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     private DateTimeOffset? _lastQualifyingEventUtc;
 
     /// <summary>
-    /// Plan 37 — cached idle threshold in minutes. Hydrated from
+    /// Cached auto-pause idle threshold in minutes. Hydrated from
     /// <see cref="ISettingsRepository.GetAutoPauseIdleMinutesAsync"/> in
     /// <see cref="InitializeAsync"/>; refreshed via the
     /// <see cref="ISettingsRepository.SettingChanged"/> hook so user edits
@@ -144,11 +142,11 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     [ObservableProperty]
     private double _m3PerSecond;
 
-    /// <summary>Estimated session-wide ISK mined; sourced from the plan-18 ISK pipeline.</summary>
+    /// <summary>Estimated session-wide ISK mined; sourced from the ISK pricing pipeline.</summary>
     [ObservableProperty]
     private double _totalIskMined;
 
-    /// <summary>Estimated session-wide ISK per hour; sourced from the plan-18 ISK pipeline.</summary>
+    /// <summary>Estimated session-wide ISK per hour; sourced from the ISK pricing pipeline.</summary>
     [ObservableProperty]
     private double _iskPerHour;
 
@@ -164,29 +162,29 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     [ObservableProperty]
     private double _critChance;
 
-    /// <summary>Plan 36: <c>TotalIskFromCrits / TotalIskMined</c>; 0 when total ISK is 0 (divide-by-zero guard). Sourced from the snapshot.</summary>
+    /// <summary><c>TotalIskFromCrits / TotalIskMined</c>; 0 when total ISK is 0 (divide-by-zero guard). Sourced from the snapshot.</summary>
     [ObservableProperty]
     private double _critIskPercent;
 
-    /// <summary>Plan 43: session-wide refined-material output (yield-applied, quantity desc). Sourced from the stats snapshot; drives the SessionStats widget's "Refined output" section.</summary>
+    /// <summary>Session-wide refined-material output (yield-applied, quantity desc). Sourced from the stats snapshot; drives the SessionStats widget's "Refined output" section.</summary>
     [ObservableProperty]
     private IReadOnlyList<RefinedMaterialAmount> _sessionRefinedOutput = Array.Empty<RefinedMaterialAmount>();
 
     /// <summary>Construct the ViewModel. All dependencies are required.</summary>
     /// <param name="db">Singleton session SQLite wrapper.</param>
-    /// <param name="statsRepo">Session-stats query layer (plan 13).</param>
-    /// <param name="notifier">Session-event notifier (plan 12 — <see cref="SessionEventWriter"/> implements this).</param>
-    /// <param name="writer">Session-event writer (plan 12); per-session lifecycle managed here per plan 16 alignment 1.2 = A.</param>
-    /// <param name="watcher">Realtime log watcher (plan 12); per-session lifecycle managed here.</param>
+    /// <param name="statsRepo">Session-stats query layer.</param>
+    /// <param name="notifier">Session-event notifier (<see cref="SessionEventWriter"/> implements this).</param>
+    /// <param name="writer">Session-event writer; per-session lifecycle managed here.</param>
+    /// <param name="watcher">Realtime log watcher; per-session lifecycle managed here.</param>
     /// <param name="activeSession">Mutable active-session context (concrete type — only the widget mutates).</param>
-    /// <param name="confirmStop">Stop-confirmation dialog seam (plan 16 alignment 2.3 = A).</param>
+    /// <param name="confirmStop">Stop-confirmation dialog seam.</param>
     /// <param name="discovery">Gamelog discovery service. Re-invoked at Start time to refresh
     ///     each selected pilot's <c>LogFilePath</c> against the live filesystem — handles the
     ///     case where EVE created a newer log file for a pilot between app launch (when the
     ///     <paramref name="allCharacters"/> list was captured) and the user clicking Start.</param>
     /// <param name="allCharacters">All EVE characters discovered at app startup. Used as the fallback
     ///     snapshot when Start-time discovery throws (the per-pilot picker now lives in the New Session dialog).</param>
-    /// <param name="settings">Settings repository — used to read/refresh the plan-37 auto-pause idle threshold.</param>
+    /// <param name="settings">Settings repository — used to read/refresh the auto-pause idle threshold.</param>
     /// <param name="log">Logger for lifecycle / SQL / refresh diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public SessionController(
@@ -228,19 +226,19 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
         _notifier.SessionEventAdded += OnSessionEventAdded;
 
-        // Plan 37: live refresh of the cached idle-minutes threshold on
+        // Live refresh of the cached idle-minutes threshold on
         // Settings -> Apply.
         _settings.SettingChanged += OnSettingChanged;
     }
 
     /// <summary>
-    /// Plan 37: raised when the controller auto-pauses the session on idle.
+    /// Raised when the controller auto-pauses the session on idle.
     /// MainWindow subscribes and plays <c>Miners_have_stopped.wav</c>.
     /// </summary>
     public event EventHandler? AutoPauseSoundRequested;
 
     /// <summary>
-    /// Plan 37: raised when the controller auto-resumes the session on a
+    /// Raised when the controller auto-resumes the session on a
     /// Tick/Crit arrival during pause. MainWindow subscribes and plays
     /// <c>Mining_detected.wav</c>.
     /// </summary>
@@ -248,7 +246,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
     /// <summary>
     /// Refresh the widget's bound state. The Session widget refreshes via the
-    /// 1 Hz tick timer's dirty-flag pattern (decision 5.1 = B); this manual
+    /// 1 Hz tick timer's dirty-flag pattern; this manual
     /// hook from <see cref="WidgetBaseViewModel"/> is provided for parity but
     /// just forces an immediate stats re-query when the widget is in Running
     /// mode.
@@ -282,7 +280,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     /// <param name="ct">Cancellation token.</param>
     public async Task InitializeAsync(CancellationToken ct = default)
     {
-        // Plan 37: hydrate the auto-pause idle threshold once at startup. The
+        // Hydrate the auto-pause idle threshold once at startup. The
         // repo defaults to 5 / clamps to [1, 60] internally; we just cache.
         try
         {
@@ -329,20 +327,19 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     /* ----- Start (Config -> Paused), driven by the New Session dialog VM ----- */
 
     /// <summary>
-    /// Plan 42: start a session from a fleet roster. Resolves the roster against
+    /// Start a session from a fleet roster. Resolves the roster against
     /// a fresh gamelog-discovery snapshot, writes the session in one transaction
     /// with each pilot in the fleet's assigned role, and lands in
-    /// <see cref="SessionWidgetMode.Paused"/> (Start-as-paused, plan 37).
+    /// <see cref="SessionWidgetMode.Paused"/> (Start-as-paused).
     /// </summary>
     /// <param name="roster">The selected fleet's members. Only <see cref="FleetMember.PilotId"/>
     ///     and <see cref="FleetMember.Role"/> are consumed — the freshly-discovered name wins.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
     /// <see cref="SessionStartResult.Started"/> on success (or when a session was
-    /// already active — the defensive guard, decision 3.2 = A);
+    /// already active — the defensive guard);
     /// <see cref="SessionStartResult.NoDiscoverablePilots"/> when none of the
-    /// roster's pilots are discoverable, in which case nothing is written
-    /// (decision 2.5 = A).
+    /// roster's pilots are discoverable, in which case nothing is written.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="roster"/> is null.</exception>
     public async Task<SessionStartResult> StartAsync(IReadOnlyList<FleetMember> roster, CancellationToken ct = default)
@@ -351,11 +348,11 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
         // Bug-1 defence-in-depth: if a session is already active, refuse to start
         // a second one. A session genuinely is active, so the dialog closing is
-        // the correct outcome — report Started (decision 3.2 = A).
+        // the correct outcome — report Started.
         if (_activeSessionId is not null)
         {
             _log.LogWarning(
-                "SessionController.StartAsync invoked while session {SessionId} is already active; ignoring (defensive guard, bug 1 follow-up).",
+                "SessionController.StartAsync invoked while session {SessionId} is already active; ignoring (defensive guard).",
                 _activeSessionId);
             return SessionStartResult.Started;
         }
@@ -367,21 +364,21 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         // discovery throws) gives each resolved pilot its live LogFilePath, so
         // the watcher never tails a stale file. FleetRosterResolver pairs each
         // discoverable roster id with its fleet role and reports the rest as
-        // skipped (decision 2.5 = A).
+        // skipped.
         var discoveredById = await ResolveDiscoveredByIdAsync(ct);
         var (resolved, skipped) = FleetRosterResolver.Resolve(roster, discoveredById);
 
         if (resolved.Count == 0)
         {
             _log.LogWarning(
-                "Start blocked: none of the {Count} fleet pilot(s) are currently discoverable (decision 2.5 = A).",
+                "Start blocked: none of the {Count} fleet pilot(s) are currently discoverable.",
                 roster.Count);
             return SessionStartResult.NoDiscoverablePilots;
         }
         foreach (var skippedId in skipped)
         {
             _log.LogWarning(
-                "Fleet pilot {PilotId} has no current gamelog; skipping from this session (decision 2.5 = A).",
+                "Fleet pilot {PilotId} has no current gamelog; skipping from this session.",
                 skippedId);
         }
 
@@ -392,7 +389,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         var expandedName = SessionNameTemplateExpander.Expand(SessionName, resolvedCharacters, asOf);
         var tsIso = ToSqliteIso(asOf);
 
-        // Plan 38: session_id is the content-addressed sha256 of (name + 0x1F +
+        // session_id is the content-addressed sha256 of (name + 0x1F +
         // first start_time). Computed BEFORE the INSERT — no last_insert_rowid.
         // tsIso is the exact start_time persisted into the is_pause row below,
         // so the startup migration and import reproduce the identical id.
@@ -409,8 +406,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
                     "INSERT OR IGNORE INTO pilot (pilot_id, name) VALUES ($pid, $name)",
                     new Dictionary<string, object?> { ["$pid"] = pilot.CharacterId, ["$name"] = pilot.Name });
 
-                // Plan 42: the role comes straight from the fleet roster — the
-                // old default-to-last-role lookup is removed (decision 1.4 = A).
+                // The role comes straight from the fleet roster — there is no
+                // default-to-last-role lookup.
                 await tx.ExecuteNonQueryAsync(
                     "INSERT INTO session_pilot (session_id, pilot_id, role) VALUES ($sid, $pid, $role)",
                     new Dictionary<string, object?>
@@ -421,7 +418,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
                     });
             }
 
-            // Plan 37: the first session_time row is is_pause=1 — Start lands
+            // The first session_time row is is_pause=1 — Start lands
             // in Paused mode so the user can adjust pilot roles before mining
             // counts. The chrome bar's Continue button (formerly Resume) is
             // the user's first action; auto-resume on first Tick/Crit also
@@ -433,16 +430,16 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         });
 
         _activeSessionId = sessionId;
-        // Plan 35 decision 2.5 cross = A: SeedRoles BEFORE Set so ActiveSessionChanged
-        // consumers (PerPilotWidgetCoordinator) see a populated role map when they handle
+        // SeedRoles BEFORE Set so ActiveSessionChanged consumers
+        // (PerPilotWidgetCoordinator) see a populated role map when they handle
         // the event and read GetRole(pilotId) for each widget's initialRole.
         _activeSession.SeedRoles(roleByPilotId);
-        // Plan 37: land in Paused — Start-as-paused. ActiveSession.State must
+        // Land in Paused — Start-as-paused. ActiveSession.State must
         // be Paused so the writer's drop rules treat events correctly until
         // the user clicks Continue or a Tick/Crit auto-resumes.
         _activeSession.Set(sessionId, SessionRunState.Paused);
 
-        // Plan 37: wire the writer's auto-resume callback BEFORE starting the
+        // Wire the writer's auto-resume callback BEFORE starting the
         // writer + watcher, so the very first event arriving while paused can
         // trigger an auto-resume (with that event preserved into the log).
         _writer.SetAutoResumeCallback(AutoResumeAsync);
@@ -457,7 +454,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         DisplaySessionName = expandedName;
         _sessionStartUtc = asOf;
         _pausedDurationAccumulated = TimeSpan.Zero;
-        // Plan 37: set _currentPauseStartUtc=asOf so the user's Continue click
+        // Set _currentPauseStartUtc=asOf so the user's Continue click
         // takes the in-session ResumeAsync light path. The accumulator math
         // (now - sessionStart) - pausedAccumulated then evaluates to 0 at the
         // moment of Continue, so elapsed time begins ticking from 00:00:00.
@@ -465,11 +462,11 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         _lastQualifyingEventUtc = null;
         Mode = SessionWidgetMode.Paused;
         ResetStatFieldsToZero();
-        // Plan 24 Bug 2: SessionStats keeps the prior session's TotalTimeMined
+        // SessionStats keeps the prior session's TotalTimeMined
         // through Stop -> NewSession; reset it explicitly here so the moment
         // between Start and the first 1Hz tick doesn't render stale time.
         TotalTimeMined = "00:00:00";
-        // Plan 37: tick timer stays STOPPED while in Paused. It starts on
+        // The tick timer stays STOPPED while in Paused. It starts on
         // first Continue / auto-resume via TransitionPausedToRunningAsync.
 
         _log.LogInformation(
@@ -478,10 +475,10 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         return SessionStartResult.Started;
     }
 
-    /* ----- Plan 35: SetPilotRoleAsync (Running/Paused, any time) ----- */
+    /* ----- SetPilotRoleAsync (Running/Paused, any time) ----- */
 
     /// <summary>
-    /// Plan 35: update a pilot's role mid-session. UPDATE-s <c>session_pilot.role</c>
+    /// Update a pilot's role mid-session. UPDATE-s <c>session_pilot.role</c>
     /// in SQL, mirrors the change into the in-memory role map (which fires
     /// <see cref="IActiveSessionContext.RolesChanged"/>), and flips
     /// <c>_statsDirty</c> so the next 1Hz tick refreshes the bound widgets.
@@ -535,8 +532,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     }
 
     /// <summary>
-    /// Plan 37: shared SQL + in-memory transition Running -&gt; Paused. Used by
-    /// the manual <see cref="PauseAsync"/> command, the new
+    /// Shared SQL + in-memory transition Running -&gt; Paused. Used by
+    /// the manual <see cref="PauseAsync"/> command, the
     /// <see cref="AutoPauseAsync"/> idle-driven path, and any future caller
     /// that needs the same atomic close-active + open-pause + state-flip.
     /// Does not log or play any notification — those are caller concerns.
@@ -567,7 +564,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     }
 
     /// <summary>
-    /// Plan 37: idle-driven auto-pause path. Invoked from <see cref="OnTickAsync"/>
+    /// Idle-driven auto-pause path. Invoked from <see cref="OnTickAsync"/>
     /// when <see cref="ShouldAutoPause"/> returns true. Performs the same
     /// transition as the manual Pause command, then raises
     /// <see cref="AutoPauseSoundRequested"/> so the MainWindow code-behind can
@@ -586,7 +583,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     }
 
     /// <summary>
-    /// Plan 37: idle-decision helper. Returns true iff
+    /// Idle-decision helper. Returns true iff
     /// <paramref name="lastQualifying"/> is non-null and at least
     /// <paramref name="thresholdMinutes"/> minutes elapsed between it and
     /// <paramref name="now"/>. Internal so the test project (which has
@@ -635,13 +632,13 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
         // Light path: in-session resume from pause (manual Continue click).
         // Writer/watcher already running; the same path is used for
-        // Start-as-paused (plan 37) because StartAsync sets _sessionStartUtc.
+        // Start-as-paused because StartAsync sets _sessionStartUtc.
         await TransitionPausedToRunningAsync(DateTimeOffset.UtcNow);
         _log.LogInformation("SessionController resumed session {SessionId} from in-session pause (manual Continue).", _activeSessionId);
     }
 
     /// <summary>
-    /// Plan 37: shared SQL + in-memory transition Paused -&gt; Running. Used by
+    /// Shared SQL + in-memory transition Paused -&gt; Running. Used by
     /// the manual <see cref="ResumeAsync"/> light path and by
     /// <see cref="AutoResumeAsync"/>. Caller is responsible for ensuring this
     /// runs on the UI dispatcher (Mode + StartTickTimer + bound props).
@@ -673,14 +670,14 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
             _currentPauseStartUtc = null;
         }
         Mode = SessionWidgetMode.Running;
-        // Plan 37: baseline the idle timer to the resume moment so the next
+        // Baseline the idle timer to the resume moment so the next
         // auto-pause is measured from here, not from an old pre-pause Tick.
         _lastQualifyingEventUtc = nowUtc;
         StartTickTimer();
     }
 
     /// <summary>
-    /// Plan 37: invoked by <see cref="SessionEventWriter"/>'s callback when a
+    /// Invoked by <see cref="SessionEventWriter"/>'s callback when a
     /// Tick/Crit arrives during pause. Marshals to the UI dispatcher, runs the
     /// shared Paused -&gt; Running transition, and raises
     /// <see cref="AutoResumeSoundRequested"/> so MainWindow plays the WAV.
@@ -771,7 +768,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         ApplyStatsSnapshot(stats);
 
         // Pilots for this session — needed by the watcher.
-        // Plan 35: also read role here so we can re-seed the in-memory role map. The
+        // Also read role here so we can re-seed the in-memory role map. The
         // map was empty (app just launched); without this seed, the writer's GetRole
         // calls would default every event to Miner.
         var pilotRows = await _db.QueryAsync(
@@ -786,7 +783,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         _activeSession.SeedRoles(roleByPilotId);
 
         _activeSession.Set(sid, SessionRunState.Running);
-        // Plan 37: wire the auto-resume callback for the rest of this session's
+        // Wire the auto-resume callback for the rest of this session's
         // lifetime — any subsequent manual Pause + Tick/Crit during it will
         // auto-resume. Match the same ordering as StartAsync (callback wired
         // BEFORE writer/watcher start).
@@ -805,7 +802,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         }
 
         Mode = SessionWidgetMode.Running;
-        // Plan 37: baseline so the idle timer doesn't immediately auto-pause
+        // Baseline so the idle timer doesn't immediately auto-pause
         // a freshly app-launch-resumed session.
         _lastQualifyingEventUtc = nowUtc;
         StartTickTimer();
@@ -821,8 +818,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     /// SQL state is changed. Covers both <see cref="SessionWidgetMode.Running"/>
     /// -> <see cref="SessionWidgetMode.Stopped"/> AND
     /// <see cref="SessionWidgetMode.Paused"/> -> <see cref="SessionWidgetMode.Stopped"/>
-    /// transitions (plan 24 collapsed the old <c>StopFromResumeCommand</c>
-    /// in here; the chrome <c>Stop</c> button is visible for both Running
+    /// transitions (the chrome <c>Stop</c> button is visible for both Running
     /// and Paused).
     /// </summary>
     [RelayCommand]
@@ -830,8 +826,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     {
         if (_activeSessionId is not { } sid) return;
 
-        // Per plan-16 alignment 2.3 = A: extract dialog behind interface for testability.
-        // Plan 29 generalised the seam to IConfirmDialog with caller-supplied strings.
+        // The dialog sits behind the IConfirmDialog seam (caller-supplied
+        // strings) so tests can substitute a fake instead of showing a window.
         if (!_confirmStop.Show(
                 title:        "Stop session?",
                 body:         "This will stop the current session and it cannot be started again. If you are taking a break please pause.",
@@ -862,8 +858,8 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         catch (Exception ex) { _log.LogWarning(ex, "Writer StopAsync threw during session stop; continuing."); }
 
         _activeSession.Set(null, SessionRunState.None);
-        // Plan 35: clear the role map so the next session's SeedRoles starts from empty
-        // (the per-pilot defaults come from a fresh prior-session lookup, not from
+        // Clear the role map so the next session's SeedRoles starts from empty
+        // (the next session's roles come from its fleet roster, not from
         // whatever happened to be in the map at stop time).
         _activeSession.ClearRoles();
         StopTickTimer();
@@ -873,18 +869,15 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         _sessionStartUtc = null;
         _pausedDurationAccumulated = TimeSpan.Zero;
         _currentPauseStartUtc = null;
-        // Plan 37: reset the idle baseline so the next session starts clean.
+        // Reset the idle baseline so the next session starts clean.
         // The writer's own StopAsync clears the auto-resume callback, but be
         // explicit here too — defence in depth against any future caller order.
         _lastQualifyingEventUtc = null;
         _writer.SetAutoResumeCallback(null);
 
-        // Plan 23 decision 1.1 = A: bound display props (DisplaySessionName,
-        // SessionName, TotalTimeMined, the seven stat fields) and pilot
-        // IsSelected flags are PRESERVED so the Stopped-mode view shows the
-        // just-ended session and New Session can re-use the prior pilot pick.
-        // ResetToCleanConfig (called from NewSession) clears the display
-        // props when the user is ready to move on.
+        // Bound display props (DisplaySessionName, SessionName, TotalTimeMined,
+        // the stat fields) are PRESERVED so the Stopped-mode view shows the
+        // just-ended session; the next StartAsync overwrites them.
         Mode = SessionWidgetMode.Stopped;
         _log.LogInformation("SessionController stopped session {SessionId}; transitioned to Stopped mode.", sid);
     }
@@ -896,9 +889,9 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
         // Cheap: just flip the bit; the next tick reads it.
         _statsDirty = true;
 
-        // Plan 37: only Tick and Crit count as "mining activity" (alignment
-        // decision 1.3 = C — matches the existing definition used by the
-        // volume/ISK pipelines, session totals, and per-pilot widgets).
+        // Only Tick and Crit count as "mining activity" — matches the
+        // definition used by the volume/ISK pipelines, session totals, and
+        // per-pilot widgets.
         // Residue and Depleted do not reset the idle timer.
         if (e.Kind == MiningEventKind.Tick || e.Kind == MiningEventKind.Crit)
         {
@@ -907,7 +900,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
     }
 
     /// <summary>
-    /// Plan 37: refresh the cached auto-pause idle threshold when the user
+    /// Refresh the cached auto-pause idle threshold when the user
     /// changes it in Settings. Async because the repo call is async; the void
     /// return is fine here because failures only result in a stale cached
     /// value (next tick still uses the previous threshold).
@@ -973,7 +966,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
             LastUpdated = DateTimeOffset.UtcNow;
         }
 
-        // Plan 37: idle auto-pause check. Fires only in Running mode; the
+        // Idle auto-pause check. Fires only in Running mode; the
         // transition stops the tick timer so we will not re-enter this tick
         // until the next Continue / auto-resume restarts it.
         if (Mode == SessionWidgetMode.Running
@@ -1030,7 +1023,7 @@ public sealed partial class SessionController : WidgetBaseViewModel, IDisposable
 
 
     /// <summary>
-    /// Plan 42: take a fresh gamelog-discovery snapshot keyed by character id,
+    /// Take a fresh gamelog-discovery snapshot keyed by character id,
     /// for resolving a fleet roster at Start (each entry carries its live
     /// <c>LogFilePath</c>). Falls back to the launch-time <c>_allCharacters</c>
     /// if discovery throws — the same warn-and-fallback as

@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.Core.Sessions;
 
 /// <summary>
-/// One row in the New Session dialog's fleet list (plan 42): a saved fleet with
+/// One row in the New Session dialog's fleet list: a saved fleet with
 /// a togglable <see cref="IsSelected"/> (single-select enforced by the parent
 /// VM), an <see cref="IsExpanded"/> caret, and an <see cref="IsDefault"/> flag.
 /// </summary>

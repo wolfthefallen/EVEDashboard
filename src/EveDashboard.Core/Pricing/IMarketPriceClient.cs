@@ -7,7 +7,7 @@ namespace EveDashboard.Core.Pricing;
 /// <remarks>
 /// Caller is responsible for de-duplication and the gaps-only fetch policy (fetch
 /// only a type id with no usable price for the active mode, at most once per 15
-/// minutes per session — see <c>docs/market-schema.md</c>); the client just issues
+/// minutes per session); the client just issues
 /// the HTTP request and parses the response.
 /// </remarks>
 public interface IMarketPriceClient
@@ -18,8 +18,8 @@ public interface IMarketPriceClient
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
     /// One <see cref="MarketPrice"/> per type id the upstream service returned
-    /// data for. Type ids the upstream omitted are absent from the result
-    /// (per plan 18 decision 5.1 — no NULL-only sentinel rows).
+    /// data for. Type ids the upstream omitted are absent from the result —
+    /// deliberately no NULL-only sentinel rows.
     /// </returns>
     /// <exception cref="System.ArgumentNullException">
     /// Thrown if <paramref name="typeIds"/> is null.

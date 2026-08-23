@@ -5,7 +5,7 @@ using EveDashboard.Core.Settings;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Plan 35 VM for <see cref="CrystalDiagramWindow"/>. Owns the static
+/// VM for <see cref="CrystalDiagramWindow"/>. Owns the static
 /// <see cref="Entries"/> list (8 entries: <c>all</c> + 7 nullsec SOV asteroid
 /// deposits), the currently-selected entry, and the persistence write-back
 /// to <see cref="ISettingsRepository.SetSelectedCrystalAnomalyAsync"/>.
@@ -35,8 +35,8 @@ public sealed partial class CrystalDiagramWindowViewModel : ObservableObject
     private bool _suppressPersist;
 
     /// <summary>
-    /// The 8 dropdown entries. Order matches plan 35 (All first, then the
-    /// 7 deposits in visual reading order of the source PNG).
+    /// The 8 dropdown entries. Order is All first, then the 7 deposits in
+    /// visual reading order of the source PNG.
     /// </summary>
     public IReadOnlyList<CrystalAnomalyEntry> Entries { get; } = new[]
     {

@@ -6,10 +6,10 @@ using System.Text.Json.Serialization;
 using EveDashboard.SessionIO.Tables;
 
 /// <summary>
-/// Custom JSON converter for <see cref="LogRow"/>. Plan 35 decision 2.1 cross = B:
-/// reads each property by name; defaults missing <c>role</c> to <c>"Miner"</c>
-/// so pre-plan-35 JSON files (which did not carry the <c>role</c> field) round-trip
-/// cleanly into a post-plan-35 destination DB.
+/// Custom JSON converter for <see cref="LogRow"/>. Reads each property by name;
+/// defaults missing <c>role</c> to <c>"Miner"</c> so older JSON files (which did
+/// not carry the <c>role</c> field) round-trip cleanly into a destination DB
+/// whose <c>log</c> table requires it.
 /// </summary>
 /// <remarks>
 /// Writing always emits every field including <c>role</c>; reading tolerates a
@@ -32,14 +32,14 @@ public sealed class LogRowJsonConverter : JsonConverter<LogRow>
         }
 
         long    logId        = 0;
-        string  sessionId    = string.Empty;   // plan 38: sha256 string (rewritten on import regardless)
+        string  sessionId    = string.Empty;   // sha256 string (rewritten on import regardless)
         long    pilotId      = 0;
         string  eveTimestamp = string.Empty;
         string  eventKind    = string.Empty;
         long?   typeId       = null;
         long?   units        = null;
         double? volumeM3     = null;
-        string  role         = "Miner";   // plan 35: default if absent in pre-35 files
+        string  role         = "Miner";   // default if absent (files written before the role field existed)
 
         while (reader.Read())
         {

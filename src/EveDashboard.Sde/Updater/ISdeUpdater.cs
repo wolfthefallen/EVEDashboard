@@ -5,14 +5,14 @@ namespace EveDashboard.Sde.Updater;
 /// <see href="https://data.everef.net/reference-data/reference-data-latest.tar.xz"/>
 /// for a newer snapshot than the locally-stored one and, if found, downloads
 /// it, decompresses (xz → tar), and imports it into the live SDE database
-/// in-place. WAL mode (enabled at SDE creation by plan 07's
+/// in-place. WAL mode (enabled at SDE creation by the SDE
 /// <c>SchemaInitializer</c>) lets concurrent readers keep working throughout.
 /// </summary>
 /// <remarks>
-/// Plan 08's deliverable. Call site (plan 14, <c>App.xaml.cs OnStartup</c>)
+/// The call site (<c>App.xaml.cs OnStartup</c>)
 /// is expected to invoke <see cref="CheckAndUpdateAsync"/> exactly once at
 /// application startup, on a background thread, without blocking UI.
-/// Subscribers to <see cref="Updated"/> (plan 09's <c>ISdeLookup</c>) rebuild
+/// Subscribers to <see cref="Updated"/> (e.g. <c>ISdeLookup</c>) rebuild
 /// in-memory caches when a new payload commits.
 /// </remarks>
 public interface ISdeUpdater
@@ -32,7 +32,7 @@ public interface ISdeUpdater
     /// payload, validation-threshold tripped).
     /// </returns>
     /// <remarks>
-    /// Single attempt — no retry. Per plan 08 decision 8.6: callers wanting
+    /// Single attempt — no retry; callers wanting
     /// to retry can reinvoke. Throws only on programmer errors. All transient
     /// failures are reported via <see cref="SdeUpdateResult.Unreachable"/>.
     /// </remarks>
@@ -45,7 +45,7 @@ public interface ISdeUpdater
     /// <remarks>
     /// Subscriber invocation is isolated per-handler — if one subscriber
     /// throws, the exception is logged at <c>Warning</c> and remaining
-    /// subscribers still observe the event. Per plan 08 decision 8.20.
+    /// subscribers still observe the event.
     /// </remarks>
     event EventHandler<SdeUpdatedEventArgs>? Updated;
 }

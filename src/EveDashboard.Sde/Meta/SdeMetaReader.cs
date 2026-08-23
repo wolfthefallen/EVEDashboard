@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Reads the SDE snapshot build time from the live SDE database's
-/// <c>meta</c> table. Plan 52: feeds the About window's "SDE data" line.
+/// <c>meta</c> table; feeds the About window's "SDE data" line.
 /// </summary>
 /// <remarks>
 /// <para>

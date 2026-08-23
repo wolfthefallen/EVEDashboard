@@ -1,5 +1,7 @@
 namespace EveDashboard.App.Wpf.Reporting;
 
+using System.IO;
+using System.Data.Common;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -51,7 +53,7 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
     /// Optional callback for surfacing one-line status updates ("Exported: ..."
     /// / "Export failed: ..."). The Reports root VM wires this to its own
     /// <c>StatusMessage</c> property so the sidebar VM stays free of XAML
-    /// coupling. Plan 29 alignment 7.1 = B.
+    /// coupling.
     /// </summary>
     public Action<string>? StatusReporter { get; set; }
 
@@ -71,6 +73,29 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
     /// <summary>Sidebar's width in device-independent pixels. Persisted to <c>reports_sidebar_width</c>. Default 280.</summary>
     [ObservableProperty]
     private double _expandedWidth = 280;
+
+    /// <summary>
+    /// When true the sidebar also lists archived sessions (the sources of a combine),
+    /// tagged "(archived)", so they can be inspected, exported, or deleted. Lifetime
+    /// Totals never include them either way.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showArchived;
+
+    partial void OnShowArchivedChanged(bool value) => _ = ReloadForArchivedToggleAsync();
+
+    private async Task ReloadForArchivedToggleAsync()
+    {
+        try
+        {
+            await LoadAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is DbException or IOException)
+        {
+            _log.LogWarning(ex, "Reloading the sessions sidebar after toggling Show archived failed.");
+            StatusReporter?.Invoke("Could not reload sessions: " + ex.Message);
+        }
+    }
 
     /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, double>?> LoadColumnWidthsAsync(string gridKey, CancellationToken ct = default)
@@ -105,11 +130,11 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
     /// <summary>Construct the sidebar VM.</summary>
     /// <param name="queries">Reporting queries facade.</param>
     /// <param name="settings">Settings repository for sidebar geometry persistence.</param>
-    /// <param name="jsonExporter">Plan 29 — JSON exporter, wired to the Export to JSON context-menu command.</param>
-    /// <param name="excelExporter">Plan 29 — Excel exporter, wired to the Export to Excel context-menu command.</param>
-    /// <param name="deleter">Plan 29 follow-up — session deleter, wired to the Delete... context-menu command.</param>
-    /// <param name="fileDialog">Plan 29 — file dialog seam for save-path selection.</param>
-    /// <param name="confirmDialog">Plan 29 follow-up — confirm-dialog seam used by the Delete... command.</param>
+    /// <param name="jsonExporter">JSON exporter, wired to the Export to JSON context-menu command.</param>
+    /// <param name="excelExporter">Excel exporter, wired to the Export to Excel context-menu command.</param>
+    /// <param name="deleter">Session deleter, wired to the Delete... context-menu command.</param>
+    /// <param name="fileDialog">File dialog seam for save-path selection.</param>
+    /// <param name="confirmDialog">Confirm-dialog seam used by the Delete... command.</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public SessionsSidebarViewModel(
@@ -175,7 +200,7 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
             }
             _tracker.Clear();
 
-            var report = await _queries.GetAllSessionSummariesAsync(ct).ConfigureAwait(true);
+            var report = await _queries.GetAllSessionSummariesAsync(includeArchived: ShowArchived, ct: ct).ConfigureAwait(true);
             var dataRows = report.Sessions;
             var wrappers = new List<SessionRowViewModel>(dataRows.Count);
             foreach (var data in dataRows)
@@ -262,7 +287,7 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
         catch (Exception ex) { _log.LogWarning(ex, "Persisting reports_sidebar_width failed."); }
     }
 
-    /// <summary>Plan 29 — export the right-clicked session to a user-chosen JSON file.</summary>
+    /// <summary>Export the right-clicked session to a user-chosen JSON file.</summary>
     /// <param name="row">Session row from the sidebar DataGrid context menu.</param>
     [RelayCommand]
     private async Task ExportJsonAsync(SessionSummaryRow? row)
@@ -282,7 +307,7 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
         }
     }
 
-    /// <summary>Plan 29 — export the right-clicked session to a user-chosen Excel workbook.</summary>
+    /// <summary>Export the right-clicked session to a user-chosen Excel workbook.</summary>
     /// <param name="row">Session row from the sidebar DataGrid context menu.</param>
     [RelayCommand]
     private async Task ExportExcelAsync(SessionSummaryRow? row)
@@ -314,7 +339,7 @@ public sealed partial class SessionsSidebarViewModel : ObservableObject, IColumn
     }
 
     /// <summary>
-    /// Plan 29 follow-up — delete the right-clicked session and its FK-cascading
+    /// Delete the right-clicked session and its FK-cascading
     /// rows after the user confirms. Pilots, market_data, and market_stations
     /// are deliberately untouched (no direct session FK; same rule the user
     /// stated for market_data). After the delete commits, <see cref="LoadAsync"/>

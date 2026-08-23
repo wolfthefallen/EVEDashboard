@@ -2,7 +2,7 @@ namespace EveDashboard.Sde.Meta;
 
 /// <summary>Reads version/build metadata from the live SDE database.</summary>
 /// <remarks>
-/// Plan 52: the About window surfaces the SDE snapshot's build time as a single
+/// The About window surfaces the SDE snapshot's build time as a single
 /// "SDE data: yyyy-MM-dd" line. The reader is deliberately null-tolerant — a
 /// missing or unparseable value yields <c>null</c> rather than an exception so a
 /// degraded SDE never breaks the About window.

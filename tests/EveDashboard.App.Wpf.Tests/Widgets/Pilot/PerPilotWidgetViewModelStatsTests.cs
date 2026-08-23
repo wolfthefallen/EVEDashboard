@@ -8,7 +8,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 20: integration tests over the per-pilot VM's Stats collection +
+/// Integration tests over the per-pilot VM's Stats collection +
 /// visibility flags + SettingChanged-driven rebuild. Verifies the wiring
 /// from the [StatRow] attributes through StatRowsBuilder /
 /// StatRowsRenderer / SettingChanged into the renderable Stats.

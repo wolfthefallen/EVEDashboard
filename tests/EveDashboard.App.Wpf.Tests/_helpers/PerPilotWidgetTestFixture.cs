@@ -56,7 +56,7 @@ internal sealed class PerPilotWidgetTestFixture : IDisposable
     }
 
     /// <summary>
-    /// Plan 35: tracks SetPilotRoleAsync calls forwarded by per-pilot widgets.
+    /// Tracks SetPilotRoleAsync calls forwarded by per-pilot widgets.
     /// Tests inspect this list to verify role-change commands fire correctly.
     /// Default behavior is no-op (does not update DB or context — tests do that
     /// directly when needed).
@@ -80,7 +80,7 @@ internal sealed class PerPilotWidgetTestFixture : IDisposable
     /// <summary>Insert a session row and return its <c>session_id</c>.</summary>
     public async Task<string> InsertSessionAsync(string name = "Test session")
     {
-        // Plan 38: session ids are sha256 hex strings. Mix in a per-call GUID so
+        // Session ids are sha256 hex strings. Mix in a per-call GUID so
         // repeated inserts (even with the same name) get distinct, well-formed ids
         // and never collide on the session_id PRIMARY KEY.
         var id = SessionId.Compute(name, Guid.NewGuid().ToString("N"));
@@ -90,7 +90,7 @@ internal sealed class PerPilotWidgetTestFixture : IDisposable
         return id;
     }
 
-    /// <summary>Insert a pilot and link it to the session via <c>session_pilot</c>. Defaults role to Miner (plan 35).</summary>
+    /// <summary>Insert a pilot and link it to the session via <c>session_pilot</c>. Defaults role to Miner.</summary>
     public async Task InsertSessionPilotAsync(string sessionId, long pilotId, string pilotName, string role = "Miner")
     {
         await Db.ExecuteNonQueryAsync(

@@ -7,8 +7,7 @@ namespace EveDashboard.App.Wpf.Dialogs;
 /// confirm and cancel branches without invoking WPF.
 /// </summary>
 /// <remarks>
-/// Generalised in plan 29 from the original <c>IConfirmStopDialog</c> seam.
-/// One dialog now serves every "are you sure?" flow in the app — caller
+/// One dialog serves every "are you sure?" flow in the app — caller
 /// supplies the title, body, and confirm-button label.
 /// </remarks>
 public interface IConfirmDialog

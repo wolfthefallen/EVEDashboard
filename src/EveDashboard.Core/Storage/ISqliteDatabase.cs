@@ -71,7 +71,7 @@ public interface ISqliteDatabase : IDisposable, IAsyncDisposable
     /// <exception cref="System.Data.Common.DbException">Rethrown after logging on SQL error.</exception>
     /// <exception cref="ObjectDisposedException">Thrown if the database has been disposed.</exception>
     /// <remarks>
-    /// Plan 05 only commits tests for <see cref="int"/>, <see cref="long"/>, and <see cref="string"/>
+    /// Tests currently cover only <see cref="int"/>, <see cref="long"/>, and <see cref="string"/>
     /// scalars. Future consumers needing <see cref="DateTimeOffset"/>, <see cref="Guid"/>, or
     /// <c>byte[]</c> scalars should add explicit handling and tests.
     /// </remarks>
@@ -122,7 +122,7 @@ public interface ISqliteDatabase : IDisposable, IAsyncDisposable
 
     /// <summary>
     /// Raised on every INSERT / UPDATE / DELETE through the underlying SQLite
-    /// connection. Consumers (e.g. plan 12's session-event notifier) filter on
+    /// connection. Consumers (e.g. the session-event notifier) filter on
     /// <see cref="SqliteRowChangedEventArgs.Table"/> and translate to higher-level
     /// events.
     /// </summary>
@@ -131,9 +131,9 @@ public interface ISqliteDatabase : IDisposable, IAsyncDisposable
     /// Backed natively by <c>sqlite3_update_hook</c> via
     /// <c>Microsoft.Data.Sqlite.SqliteConnection.Update</c>. The hook fires only
     /// on writes performed through THIS connection - other connections to the
-    /// same database file do not trigger it. With the SQL-substrate architecture
-    /// (see <c>MEMORY.md -&gt; project_sql_substrate</c>) this is by design: the
-    /// singleton write connection is the truth signal.
+    /// same database file do not trigger it. This is by design under the
+    /// SQL-substrate architecture: all app writes go through the one singleton
+    /// write connection, so that connection is the truth signal.
     /// </para>
     /// <para>
     /// The event argument carries only the table name, the affected

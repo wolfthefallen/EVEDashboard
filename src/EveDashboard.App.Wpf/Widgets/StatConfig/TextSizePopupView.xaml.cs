@@ -3,7 +3,7 @@ namespace EveDashboard.App.Wpf.Widgets.StatConfig;
 using System.Windows.Controls;
 
 /// <summary>
-/// Plan 47: code-behind for the Reports "Text size" popup view. Container has no
+/// Code-behind for the Reports "Text size" popup view. Container has no
 /// logic of its own — every interaction binds to <see cref="TextSizePopupViewModel"/>.
 /// On <c>Loaded</c> we kick the popup VM's <c>LoadAsync</c> so the working-copy
 /// rows are populated each time the popup opens (mirrors

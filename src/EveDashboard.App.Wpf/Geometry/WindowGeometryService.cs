@@ -8,20 +8,20 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Wraps a WPF <see cref="Window"/>'s lifecycle for window-geometry persistence.
 /// Reads the saved geometry on startup (or applies the configured default when
-/// no setting exists), debounces size/move events to a 500 ms save (per plan 16
-/// decision 3.2 = B), and writes one final save on <see cref="Window.Closing"/>.
+/// no setting exists), debounces size/move events to a 500 ms save, and
+/// writes one final save on <see cref="Window.Closing"/>.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Plan 25 refactor: the service is parameterized with read/write delegates and
-/// a default size, instead of taking <see cref="ISettingsRepository"/> directly.
-/// This lets a second instance manage the Reports child window with different
-/// settings methods. Two DI factories register the MainWindow-flavoured and
-/// Reports-flavoured services.
+/// The service is parameterized with read/write delegates and a default size,
+/// instead of taking <see cref="ISettingsRepository"/> directly. This lets one
+/// instance per managed window (MainWindow, Reports, Crystal Diagram, Lifetime
+/// Totals, About) wire to that window's own settings methods and default size;
+/// the DI window factories construct each flavour inline.
 /// </para>
 /// <para>
-/// Per plan 16 decision 3.1 = B and decision 16.S: persisted shape is the
-/// <see cref="WindowGeometry"/> record from <see cref="EveDashboard.Core.Settings"/>
+/// The persisted shape is the <see cref="WindowGeometry"/> record from
+/// <see cref="EveDashboard.Core.Settings"/>
 /// (<c>Width</c>, <c>Height</c>, <c>Left</c>, <c>Top</c>, <c>IsMaximized</c>).
 /// First-launch defaults come from the ctor parameters. Minimized window state
 /// clamps to <c>IsMaximized = false</c> on save.
@@ -149,7 +149,7 @@ public sealed class WindowGeometryService : IDisposable
         // Final flush on close. Window.Closing is synchronous; an async-void
         // handler would let the close complete before the save commits and
         // race the dispose of the underlying SQLite connection. The blocking
-        // call is the plan-16 risk #6 documented exception to CLAUDE.md's
+        // call is the one deliberate exception to the project's
         // "no .GetAwaiter().GetResult() in production paths" rule: at Closing
         // there is no remaining async path, the save is one tiny SQL UPDATE,
         // and the user has chosen to close.

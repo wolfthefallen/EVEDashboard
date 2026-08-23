@@ -11,14 +11,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// <summary>
 /// Real-network smoke test against <c>https://data.everef.net/...</c>. Default
 /// state is <see cref="FactAttribute.Skip"/>'d; an operator un-skips, runs locally,
-/// and re-skips before commit per the procedure documented in
-/// <c>tests/manual/manual-tests.md</c> (Section 11 — "SDE updater against live everef.net").
+/// and re-skips before commit (see the note above the test method).
 /// </summary>
 public sealed class EverefSdeUpdaterRealNetworkTests
 {
     // If manually testing comment out the line with the skip and uncomment the fact one.
     // Switch back when done.
-    [Fact(Skip = "Run manually per tests/manual/manual-tests.md Section 11")]
+    [Fact(Skip = "Hits the live everef.net endpoint; run manually on demand")]
     //[Fact]
     public async Task CheckAndUpdateAsync_against_live_everef_succeeds()
     {

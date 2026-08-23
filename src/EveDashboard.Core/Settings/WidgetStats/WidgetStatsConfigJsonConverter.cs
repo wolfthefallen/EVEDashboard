@@ -4,8 +4,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// <see cref="System.Text.Json"/> converter for <see cref="WidgetStatsConfig"/>
-/// (plan 20). Reads / writes a flat JSON array of entries:
+/// <see cref="System.Text.Json"/> converter for <see cref="WidgetStatsConfig"/>.
+/// Reads / writes a flat JSON array of entries:
 /// <code>
 /// [
 ///   { "stat": "M3PerSecond", "hidden": false, "emphasis": "None" },
@@ -15,8 +15,8 @@ using System.Text.Json.Serialization;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per <c>MEMORY.md -&gt; feedback_no_migrations_until_release</c>, this converter
-/// is forgiving of missing fields (writes the default), but strict on shape:
+/// This converter is forgiving of missing fields (each falls back to its
+/// default), but strict on shape:
 /// missing <c>"stat"</c> throws <see cref="JsonException"/> (and the repo
 /// layer catches and falls back to <c>null</c> = use default order). Missing
 /// <c>"emphasis"</c> defaults to <see cref="StatEmphasis.None"/> — the
@@ -26,7 +26,7 @@ using System.Text.Json.Serialization;
 /// </para>
 /// <para>
 /// Mirrors the structural pattern of <c>WidgetLayoutItemJsonConverter</c>
-/// (plan 19) so a reader familiar with one can read the other.
+/// so a reader familiar with one can read the other.
 /// </para>
 /// </remarks>
 public sealed class WidgetStatsConfigJsonConverter : JsonConverter<WidgetStatsConfig>

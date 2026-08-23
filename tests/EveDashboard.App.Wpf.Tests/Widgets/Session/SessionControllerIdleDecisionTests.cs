@@ -4,7 +4,7 @@ using EveDashboard.App.Wpf.Widgets.Session;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 37 — pure-logic tests for the internal idle-decision helper
+/// Pure-logic tests for the internal idle-decision helper
 /// <see cref="SessionController.ShouldAutoPause"/>. Exposed via
 /// <c>InternalsVisibleTo</c> so the test project can drive it without
 /// instantiating a SessionController.

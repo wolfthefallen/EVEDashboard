@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Reporting.HaulValue;
 
 /// <summary>
-/// Test seam for the Haul Value window (plan 55). Production wires
+/// Test seam for the Haul Value window. Production wires
 /// <see cref="HaulValueWindowAdapter"/>; a chrome button on
 /// <see cref="MainWindow"/> calls <see cref="Show"/> with no argument.
 /// </summary>

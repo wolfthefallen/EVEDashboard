@@ -3,8 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Light theme. Keys mirror Themes/Dark.xaml exactly so theme swap
-        (plan 17's Settings UI) is a one-dictionary-replace operation.
+        Light theme. Keys mirror Themes/Dark.xaml exactly so the theme swap
+        (ThemeService, fired from the Settings dialog) is a one-dictionary-replace
+        operation.
 
         Palette (user-supplied 2026-05-03):
           background      #F4F6F9    soft neutral page background

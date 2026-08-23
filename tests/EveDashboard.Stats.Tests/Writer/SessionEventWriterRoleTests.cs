@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace EveDashboard.Stats.Tests.Writer;
 
 /// <summary>
-/// Plan 35: <see cref="SessionEventWriter.InsertLogRowAsync"/> stamps the
+/// <see cref="SessionEventWriter.InsertLogRowAsync"/> stamps the
 /// pilot's CURRENT role (read from <c>ActiveSessionContext</c>'s in-memory
 /// role map) onto every <c>log</c> INSERT.
 /// </summary>

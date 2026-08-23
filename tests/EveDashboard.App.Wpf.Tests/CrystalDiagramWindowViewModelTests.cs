@@ -6,7 +6,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 35 unit tests for <see cref="CrystalDiagramWindowViewModel"/>. Covers
+/// Unit tests for <see cref="CrystalDiagramWindowViewModel"/>. Covers
 /// the initialize-from-settings flow, the unknown-id fallback, and the
 /// persistence write-back on user pick.
 /// </summary>

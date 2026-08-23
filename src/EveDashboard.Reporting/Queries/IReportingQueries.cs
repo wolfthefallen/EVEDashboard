@@ -2,7 +2,7 @@ namespace EveDashboard.Reporting.Queries;
 
 /// <summary>
 /// Read-only queries materializing the Reports-window data shapes from the
-/// session SQLite database. Plan 25's reporting layer entry point.
+/// session SQLite database. The reporting layer's entry point.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -23,23 +23,29 @@ public interface IReportingQueries
     /// Enumerate every saved session with metadata for the Reports sidebar
     /// (name, start time, active duration, pilot count, total ISK) AND the
     /// all-time <see cref="LifetimeSummary"/> rollup across those same sessions
-    /// (plan 46), both built in one pass. Sidebar rows are ordered by descending
-    /// start time (newest first) — plan 38, since sha256 session ids are not
+    /// both built in one pass. Sidebar rows are ordered by descending
+    /// start time (newest first), since sha256 session ids are not
     /// chronological.
     /// </summary>
+    /// <param name="includeArchived">When <c>false</c> (the default) archived sessions
+    ///     (<c>session.archived = 1</c>) are omitted entirely — this is what the Reports
+    ///     sidebar, Lifetime Totals, and the Haul Value session picker all rely on. When
+    ///     <c>true</c> they are returned as rows flagged <see cref="SessionSummaryRow.Archived"/>
+    ///     so a "show archived" view can list them; the lifetime aggregate still excludes
+    ///     them either way, so archived data is never double-counted.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>A <see cref="SessionsReport"/> carrying one row per session in
-    ///     the session SQLite <c>session</c> table plus the lifetime aggregate
+    /// <returns>A <see cref="SessionsReport"/> carrying one row per (non-archived, or all)
+    ///     session in the session SQLite <c>session</c> table plus the lifetime aggregate
     ///     (<see cref="LifetimeSummary.Empty"/> when there are no sessions).</returns>
     /// <remarks>
     /// Per-session <c>TotalIskMined</c> (and the lifetime totals) are computed by
     /// reusing <c>ISessionStatsRepository.GetSessionStatsAsync</c> for each
     /// session at query time. The lifetime rollup is summed from the very same
-    /// per-session snapshots — no second pass, no cross-session pricing. Lazy /
-    /// on-demand for plan 25; a pre-computed cache is plan 26+ work if real
+    /// per-session snapshots — no second pass, no cross-session pricing. Computed
+    /// lazily / on-demand; a pre-computed cache is future work if real
     /// session counts make this perceptibly slow.
     /// </remarks>
-    Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default);
+    Task<SessionsReport> GetAllSessionSummariesAsync(bool includeArchived = false, CancellationToken ct = default);
 
     /// <summary>
     /// Enumerate the pilots associated with a saved session, with display
@@ -64,16 +70,15 @@ public interface IReportingQueries
     /// <returns>One row per source <c>type_id</c> mined in the scoped slice; empty when no matching events.</returns>
     /// <remarks>
     /// ISK per type is sourced from <c>IIskCalculator.ComputeAsync(...)</c>'s
-    /// per-input-type breakdown (plan 25 algorithm refactor — see
-    /// <c>IskCalculationResult.IskByInputType</c>).
+    /// per-input-type breakdown (see <c>IskCalculationResult.IskByInputType</c>).
     /// </remarks>
     Task<IReadOnlyList<OreBreakdownRow>> GetOreBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default);
 
     /// <summary>
     /// Enumerate the per-refined-material breakdown for a saved session,
-    /// optionally scoped to one pilot (plan 43). Returns rows ordered by
-    /// quantity descending, showing ALL refined materials (decision 1.3 = A —
-    /// reporting ignores the live auto-show / hide). Used by the Reports
+    /// optionally scoped to one pilot. Returns rows ordered by
+    /// quantity descending, showing ALL refined materials (reporting ignores
+    /// the live auto-show / hide). Used by the Reports
     /// "Refined output" widget at session- and per-pilot-level.
     /// </summary>
     /// <param name="sessionId">Session id to query against.</param>
@@ -92,7 +97,7 @@ public interface IReportingQueries
     /// <see cref="SessionTimeline"/>: session start (earliest active interval),
     /// total active duration, and the ordered list of completed pause windows.
     /// Drives the active-vs-paused duration computation on the Excel export's
-    /// Summary tab (plan 29 <c>ExcelSessionExporter</c>).
+    /// Summary tab (<c>ExcelSessionExporter</c>).
     /// </summary>
     /// <param name="sessionId">Session id to query against.</param>
     /// <param name="ct">Cancellation token.</param>

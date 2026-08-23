@@ -7,7 +7,7 @@ using System.Windows;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Themed modal New-Session dialog (plan 42). Body hosts the saved-fleet list +
+/// Themed modal New-Session dialog. Body hosts the saved-fleet list +
 /// Create-Fleet flow + session-name editor; bottom row hosts Start (default) and
 /// Cancel. A fleet is the only way to start a session.
 /// </summary>
@@ -44,12 +44,11 @@ public partial class SessionConfigDialog : Window
     }
 
     /// <summary>
-    /// Hydrate the fleet list once the dialog is shown. Decision 3.3 = A/C: the
-    /// <c>InitializeAsync</c> await is wrapped in a narrow try/catch because
-    /// there is no app-wide unhandled-exception handler — an unobserved throw on
-    /// this <c>async void</c> would crash WPF. On a DB/IO failure we log at
-    /// Warning and let the dialog open with an empty fleet list (Start stays
-    /// disabled — its default state).
+    /// Hydrate the fleet list once the dialog is shown. The
+    /// <c>InitializeAsync</c> await is wrapped in a narrow try/catch so a DB/IO
+    /// failure never escapes this <c>async void</c> handler as an unhandled
+    /// dispatcher exception: we log at Warning and let the dialog open with an
+    /// empty fleet list (Start stays disabled — its default state).
     /// </summary>
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {

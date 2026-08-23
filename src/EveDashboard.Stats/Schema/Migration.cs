@@ -16,9 +16,10 @@ using EveDashboard.Core.Storage;
 /// state risks subtle bugs when migrations are applied at app startup.
 /// </param>
 /// <remarks>
-/// v1 ships zero migrations; the framework is plumbing for v2+. When the first
-/// real migration lands, the plan that introduces it will revisit transaction
-/// wrapping (deferred per plan 11 Q4.2 = C; expected to land on transaction-per-migration).
+/// Migrations currently run without explicit transaction wrapping — every
+/// registered migration so far is additive and idempotent, so a mid-migration
+/// failure is safely re-runnable. If a destructive multi-statement migration
+/// ever lands, transaction-per-migration is the expected shape.
 /// </remarks>
 public sealed record Migration(
     int TargetVersion,

@@ -9,7 +9,7 @@ using EveDashboard.MarketData.Pricing;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Constructs the three plan-18 pricing singletons (<see cref="GoonMetricsPriceClient"/>,
+/// Constructs the three market-pricing pipeline singletons (<see cref="GoonMetricsPriceClient"/>,
 /// <see cref="MarketPriceFetcher"/>, <see cref="IskCalculator"/>) for use in
 /// <c>ServiceRegistrationTests</c> calls to <c>BuildServiceProvider</c>.
 /// </summary>
@@ -20,7 +20,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 /// <see cref="FakeSdeLookup"/>). The HttpClient still must be non-null per the
 /// ctor's null-arg check.
 /// </remarks>
-internal static class Plan18PricingFactory
+internal static class PricingPipelineFactory
 {
     public static (GoonMetricsPriceClient Client, MarketPriceFetcher Fetcher, IskCalculator Calculator) Build(
         ISqliteDatabase       sessionDb,

@@ -120,7 +120,7 @@ public class SqliteSettingsRepositoryFleetTests
         keys.Should().ContainSingle().Which.Should().Be("pilot_sort_order");
     }
 
-    // ---- Plan 43: AutoShowRefinedMaterials ----------------------------------------
+    // ---- AutoShowRefinedMaterials -------------------------------------------------
 
     [Fact]
     public async Task GetAutoShowRefinedMaterialsAsync_returns_true_when_key_missing()
@@ -158,7 +158,7 @@ public class SqliteSettingsRepositoryFleetTests
         keys.Should().ContainSingle().Which.Should().Be("auto_show_refined_materials");
     }
 
-    // ---- Plan 43: RefinedMaterialsVisibility (session scope, scopeKey "") ----------
+    // ---- RefinedMaterialsVisibility (session scope, scopeKey "") -------------------
 
     [Fact]
     public async Task GetRefinedMaterialsVisibilityAsync_returns_empty_when_key_missing()
@@ -197,7 +197,7 @@ public class SqliteSettingsRepositoryFleetTests
         keys.Should().ContainSingle().Which.Should().Be("refined_materials_visibility");
     }
 
-    // ---- Plan 43: RefinedMaterialsVisibility (per-pilot scope) ---------------------
+    // ---- RefinedMaterialsVisibility (per-pilot scope) ------------------------------
 
     [Fact]
     public async Task SetRefinedMaterialsVisibilityAsync_per_pilot_scope_raises_SettingChanged_with_composed_key()

@@ -9,14 +9,14 @@
                     xmlns:sessions="clr-namespace:EveDashboard.Core.Sessions;assembly=EveDashboard.Core"
                     mc:Ignorable="d">
     <!--
-        Plan 20: replaced the hard-coded 7-row Grid with one ItemsControl bound to
-        Stats. PilotName + the 7 numeric stats now flow as StatRowViewModel rows
+        The body is one ItemsControl bound to Stats (no hard-coded stat rows):
+        PilotName + the numeric stats flow as StatRowViewModel rows
         via the implicit DataTemplate in Themes/StatRowTemplates.xaml. The
         "Last event" footer line stays as a dedicated TextBlock with Visibility
         bound to IsLastEventAtVisible (hide-only; the popup's hide-only zone
         controls it).
 
-        Plan 35: the right-click ContextMenu drives role changes (Miner/Booster/
+        The right-click ContextMenu drives role changes (Miner/Booster/
         Cyno/Combat). BorderBrush and BorderThickness override the default
         WidgetBase chrome to encode the role visually. The Style BasedOn the
         default WidgetBase style inherits all other chrome setters (Background,
@@ -68,7 +68,7 @@
 
         <StackPanel Grid.Row="0">
             <ItemsControl ItemsSource="{Binding Stats}" />
-            <!-- Plan 43: this pilot's "Refined output" section. -->
+            <!-- This pilot's "Refined output" section. -->
             <statconfig:RefinedOutputSectionView />
         </StackPanel>
 

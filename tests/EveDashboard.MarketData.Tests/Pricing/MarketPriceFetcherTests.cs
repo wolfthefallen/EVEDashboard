@@ -401,7 +401,7 @@ public class MarketPriceFetcherTests
     [Fact]
     public async Task StationChange_during_running_session_refetches_all_at_new_station()
     {
-        // Decision 1.4: changing selected_station_id while Running triggers a full
+        // Changing selected_station_id while Running triggers a full
         // unconditional re-fetch of all refined materials at the new station.
         await using var db = await SeededDbAsync();
         const long OtherStation = 99999999L;
@@ -454,7 +454,7 @@ public class MarketPriceFetcherTests
     public async Task StationChange_while_paused_does_not_fetch()
     {
         // Running-only gate: a station change while Paused does not fetch (the next
-        // Resume re-fetches unconditionally — decision 1.3 = B).
+        // Resume re-fetches unconditionally).
         await using var db = await SeededDbAsync();
         var sde = new StubSdeLookup { RefinedTypeIds = new long[] { 34 } };
         var client = new StubPriceClient();

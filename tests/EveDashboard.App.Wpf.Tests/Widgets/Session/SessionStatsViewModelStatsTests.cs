@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
-/// Plan 20: integration tests over <see cref="SessionStatsViewModel"/>'s
+/// Integration tests over <see cref="SessionStatsViewModel"/>'s
 /// Stats collection + visibility flag + SettingChanged rebuild path. Mirrors
 /// the per-pilot tests at one widget level up (singleton key, no pilot id
 /// suffix).

@@ -14,16 +14,17 @@ using EveDashboard.Mining.Gamelogs;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// ViewModel for the Settings dialog (plan 22.1). Owns every editable user
-/// setting from plans 14 + 15: theme, refining yield, price mode,
-/// selected station, market-stations list, gamelog path. Apply/Close pattern
+/// ViewModel for the Settings dialog. Owns every editable user
+/// setting: theme, refining yield, price mode / source, selected station,
+/// market-stations list, gamelog path, auto-pause, and refined-output
+/// display options. Apply/Close pattern
 /// with deferred validation: <see cref="ApplyAsync"/> validates first and only
 /// persists when every field passes; on validation failure the caller surfaces
 /// the error list and the dialog stays open.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Markets pending model (plan 22.1 decision 22.K): the catalog is NOT mutated
+/// Markets pending model: the catalog is NOT mutated
 /// while the user clicks Add or Remove. Edits accumulate in
 /// <c>_pendingAdds</c> / <c>_pendingRemovals</c>; the displayed
 /// <see cref="Stations"/> view is the union of <c>persisted - removals + adds</c>.
@@ -32,13 +33,12 @@ using Microsoft.Extensions.Logging;
 /// </para>
 /// <para>
 /// Subscriber wiring for <c>refining_yield_percent</c> / <c>price_mode</c> /
-/// <c>selected_station_id</c> is intentionally out of scope here (plan 22.1
-/// decision 1.2 = C). Plan 18's ISK pipeline owns those subscriptions when its
-/// recalc path is real. Theme reapplies live on Apply via the existing
-/// <c>ThemeService</c> subscription (plan 16).
+/// <c>selected_station_id</c> is intentionally out of scope here: the ISK
+/// pricing pipeline owns those subscriptions. Theme reapplies live on Apply
+/// via the existing <c>ThemeService</c> subscription.
 /// </para>
 /// <para>
-/// Bootstrap-failure mode (plan 22.2 decisions 22.O / 22.T / 22.U): when the
+/// Bootstrap-failure mode: when the
 /// optional <c>bootstrapFailure</c> ctor parameter is non-null, the VM is in
 /// "fix your gamelog path or exit" mode. <see cref="LoadAsync"/> reads only
 /// <c>gamelog_path</c> via <see cref="IBootstrapConfigLoader"/>; the Settings /
@@ -47,7 +47,7 @@ using Microsoft.Extensions.Logging;
 /// raises <see cref="BootstrapApplySucceeded"/>; the dialog code-behind re-runs
 /// <c>App.RunBootstrapChainAsync</c>. On a second consecutive
 /// <see cref="IBootstrapConfigLoader.SaveAsync"/> failure the VM falls back to
-/// <see cref="IBootstrapErrorReporter.ReportAndShutdown"/> per decision 2.4 = B.
+/// <see cref="IBootstrapErrorReporter.ReportAndShutdown"/>.
 /// </para>
 /// </remarks>
 public sealed class SettingsDialogViewModel : INotifyPropertyChanged
@@ -58,10 +58,10 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     /// <summary>Inclusive upper bound of acceptable refining-yield input, in percent.</summary>
     public const double YieldMax = 90.6;
 
-    /// <summary>Plan 37 — inclusive lower bound of acceptable idle-minutes input.</summary>
+    /// <summary>Inclusive lower bound of acceptable idle-minutes input.</summary>
     public const int IdleMinutesMin = 1;
 
-    /// <summary>Plan 37 — inclusive upper bound of acceptable idle-minutes input.</summary>
+    /// <summary>Inclusive upper bound of acceptable idle-minutes input.</summary>
     public const int IdleMinutesMax = 60;
 
     private readonly ISettingsRepository _settings;
@@ -94,13 +94,13 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     private readonly HashSet<long> _pendingRemovals = new();
 
     /// <summary>Construct the ViewModel. Required dependencies are DI-resolved; the optional <paramref name="bootstrapFailure"/> selects bootstrap-failure mode.</summary>
-    /// <param name="settings">Typed settings repository (plan 14). May be a throwing stub when <paramref name="bootstrapFailure"/> is non-null.</param>
-    /// <param name="stations">Market-stations catalog (plan 14). May be a throwing stub when <paramref name="bootstrapFailure"/> is non-null.</param>
-    /// <param name="config">Bootstrap config loader (plan 15) for <c>gamelog_path</c> read/write.</param>
+    /// <param name="settings">Typed settings repository. May be a throwing stub when <paramref name="bootstrapFailure"/> is non-null.</param>
+    /// <param name="stations">Market-stations catalog. May be a throwing stub when <paramref name="bootstrapFailure"/> is non-null.</param>
+    /// <param name="config">Bootstrap config loader for <c>gamelog_path</c> read/write.</param>
     /// <param name="addStationDialog">Test seam for the Add-station sub-dialog. May be a throwing stub when <paramref name="bootstrapFailure"/> is non-null.</param>
-    /// <param name="errorReporter">Bootstrap-error reporter test seam (plan 22.2) — used as the second-consecutive-save-failure fallback per decision 2.4 = B.</param>
+    /// <param name="errorReporter">Bootstrap-error reporter test seam — the fallback after a second consecutive save failure in bootstrap-failure mode.</param>
     /// <param name="loggerFactory">Logger factory; used to construct the gamelog-path validator's logger and this VM's logger.</param>
-    /// <param name="bootstrapFailure">Plan 22.2: non-null = bootstrap-failure mode (banner shown; only the gamelog-path section visible; <see cref="ApplyAsync"/> writes only <c>gamelog_path</c>). Null = normal chrome-button mode.</param>
+    /// <param name="bootstrapFailure">Non-null = bootstrap-failure mode (banner shown; only the gamelog-path section visible; <see cref="ApplyAsync"/> writes only <c>gamelog_path</c>). Null = normal chrome-button mode.</param>
     /// <exception cref="ArgumentNullException">Thrown if any required argument is null.</exception>
     public SettingsDialogViewModel(
         ISettingsRepository settings,
@@ -169,7 +169,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         set => SetField(ref _refiningYieldText, value ?? string.Empty);
     }
 
-    /// <summary>Currently selected station id (drives plan 18 ISK calc).</summary>
+    /// <summary>Currently selected station id (drives the ISK pricing pipeline).</summary>
     public long SelectedStationId
     {
         get => _selectedStationId;
@@ -184,7 +184,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 37 — user-typed idle-minutes threshold (string for input + validation,
+    /// User-typed idle-minutes threshold (string for input + validation,
     /// parsed to an int in <see cref="ApplyAsync"/>). Setter marks the VM dirty.
     /// </summary>
     public string AutoPauseIdleMinutesText
@@ -194,7 +194,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 37 — master on/off for the auto-pause / auto-resume notification
+    /// Master on/off for the auto-pause / auto-resume notification
     /// sounds. Setter marks the VM dirty.
     /// </summary>
     public bool AutoPauseSoundEnabled
@@ -204,7 +204,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 50 — auto-pause / auto-resume notification volume percent (0-100).
+    /// Auto-pause / auto-resume notification volume percent (0-100).
     /// Bound to the Settings slider; setter marks the VM dirty. The repository
     /// clamps to range on persist.
     /// </summary>
@@ -215,7 +215,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 43: whether newly-produced refined materials auto-show in the live
+    /// Whether newly-produced refined materials auto-show in the live
     /// widgets' "Refined output" section. Setter marks the VM dirty.
     /// </summary>
     public bool AutoShowRefinedMaterials
@@ -224,7 +224,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         set => SetField(ref _autoShowRefinedMaterials, value);
     }
 
-    /// <summary>Plan 49 (issue #1): whether the "Refined output" section shows on the per-pilot widgets. Setter marks the VM dirty.</summary>
+    /// <summary>Whether the "Refined output" section shows on the per-pilot widgets (GitHub issue #1). Setter marks the VM dirty.</summary>
     public bool ShowPilotRefinedOutput
     {
         get => _showPilotRefinedOutput;
@@ -256,7 +256,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     public bool IsDirty => _dirty;
 
     /// <summary>
-    /// Plan 22.2: <c>true</c> iff the dialog was constructed with a
+    /// <c>true</c> iff the dialog was constructed with a
     /// <see cref="BootstrapFailureContext"/>. Drives section visibility (only
     /// the gamelog-path section is visible) and the close-without-Apply =
     /// <c>Application.Shutdown(1)</c> behavior in the dialog code-behind.
@@ -264,7 +264,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     public bool IsBootstrapFailureMode => _failure is not null;
 
     /// <summary>
-    /// Plan 22.2: banner text rendered at the top of the dialog when
+    /// Banner text rendered at the top of the dialog when
     /// <see cref="IsBootstrapFailureMode"/> is <c>true</c>. Initialised from
     /// the <see cref="BootstrapFailureContext.Message"/>; mutated by
     /// <see cref="ApplyAsync"/> on save failures to surface the underlying
@@ -282,7 +282,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 22.2: raised after a successful <see cref="ApplyAsync"/> in
+    /// Raised after a successful <see cref="ApplyAsync"/> in
     /// bootstrap-failure mode. The dialog code-behind subscribes to this and
     /// re-runs the bootstrap chain via <c>App.RunBootstrapChainAsync</c>; on
     /// chain success the dialog closes cleanly behind the now-open MainWindow.
@@ -317,7 +317,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     {
         if (IsBootstrapFailureMode)
         {
-            // Plan 22.2 decision 22.T: read only gamelog_path. _settings and
+            // Read only gamelog_path. _settings and
             // _stations are throwing stubs at this point — the bootstrap chain
             // hasn't constructed the real services yet (failure fired before
             // chain step 7).
@@ -336,13 +336,13 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         var selectedStationId = await _settings.GetSelectedStationIdAsync(ct).ConfigureAwait(true);
         var gamelogPath = await ReadCurrentGamelogPathAsync(ct).ConfigureAwait(true);
         var persisted = await _stations.GetAllAsync(ct).ConfigureAwait(true);
-        // Plan 37 — auto-pause section.
+        // Auto-pause section.
         var idleMinutes = await _settings.GetAutoPauseIdleMinutesAsync(ct).ConfigureAwait(true);
         var soundEnabled = await _settings.GetAutoPauseSoundEnabledAsync(ct).ConfigureAwait(true);
         var soundVolume = await _settings.GetAutoPauseSoundVolumeAsync(ct).ConfigureAwait(true);
-        // Plan 43 — refined-output auto-show.
+        // Refined-output auto-show.
         var autoShowRefined = await _settings.GetAutoShowRefinedMaterialsAsync(ct).ConfigureAwait(true);
-        // Plan 49 — per-pilot refined-output toggle.
+        // Per-pilot refined-output toggle.
         var showPilotRefined = await _settings.GetShowPilotRefinedOutputAsync(ct).ConfigureAwait(true);
 
         // Populate Stations BEFORE assigning _selectedStationId. The ComboBox's
@@ -350,7 +350,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         // ItemsSource at notification time; if items are empty when SelectedValue
         // re-resolves, the binding may write 0 back to the source via TwoWay
         // and the selection ends up blank even after OnPropertyChanged fires.
-        // Bug 1: ordering invariant — items first, selection last, then notify.
+        // Ordering invariant — items first, selection last, then notify.
         _persistedStations = persisted;
         _pendingAdds.Clear();
         _pendingRemovals.Clear();
@@ -362,7 +362,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         _refiningYieldText = yield.ToString("R", CultureInfo.InvariantCulture);
         _gamelogPath = gamelogPath;
         _selectedStationId = selectedStationId;
-        // Plan 37 — populate the auto-pause fields.
+        // Populate the auto-pause fields.
         _autoPauseIdleMinutesText = idleMinutes.ToString(CultureInfo.InvariantCulture);
         _autoPauseSoundEnabled = soundEnabled;
         _autoPauseSoundVolume = soundVolume;
@@ -404,7 +404,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
         var yieldValue = double.Parse(_refiningYieldText, NumberStyles.Float, CultureInfo.InvariantCulture);
         await _settings.SetRefiningYieldPercentAsync(yieldValue, ct).ConfigureAwait(true);
 
-        // Plan 37 — auto-pause section. ValidateAsync has already ensured the
+        // Auto-pause section. ValidateAsync has already ensured the
         // int parse succeeds and the value is in range.
         var idleValue = int.Parse(_autoPauseIdleMinutesText, NumberStyles.Integer, CultureInfo.InvariantCulture);
         await _settings.SetAutoPauseIdleMinutesAsync(idleValue, ct).ConfigureAwait(true);
@@ -432,8 +432,8 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
 
         // Snapshot SelectedStationId before RebuildStationsView. Stations.Clear()
         // briefly empties the ComboBox's ItemsSource and the TwoWay SelectedValue
-        // binding writes 0 back into the source — same root cause as Bug 1
-        // (LoadAsync), different code path. Restore + notify after the rebuild
+        // binding writes 0 back into the source — same root cause as the
+        // LoadAsync ordering invariant, different code path. Restore + notify after the rebuild
         // so the ComboBox re-resolves the selection against the populated items.
         var selectionToPreserve = _selectedStationId;
         RebuildStationsView();
@@ -467,7 +467,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
             errors.Add($"Refining yield must be between {YieldMin} and {YieldMax} (you entered {yield}).");
         }
 
-        // Plan 37 — auto-pause idle threshold: int parse + range [1, 60].
+        // Auto-pause idle threshold: int parse + range [1, 60].
         if (!int.TryParse(_autoPauseIdleMinutesText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var idleMin))
         {
             errors.Add($"Idle minutes is not a valid integer (you entered '{_autoPauseIdleMinutesText}').");
@@ -537,13 +537,12 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Plan 22.2 / decision 22.U: Apply path for bootstrap-failure mode.
+    /// Apply path for bootstrap-failure mode.
     /// Validates only <see cref="GamelogPath"/>, calls
     /// <see cref="IBootstrapConfigLoader.SaveAsync"/>, and on success raises
     /// <see cref="BootstrapApplySucceeded"/> for the dialog code-behind to
     /// re-run the bootstrap chain. Two consecutive save failures escalate
-    /// to <see cref="IBootstrapErrorReporter.ReportAndShutdown"/> per
-    /// decision 2.4 = B.
+    /// to <see cref="IBootstrapErrorReporter.ReportAndShutdown"/>.
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An <see cref="ApplyResult"/> mirroring the normal-mode shape.</returns>
@@ -567,7 +566,7 @@ public sealed class SettingsDialogViewModel : INotifyPropertyChanged
 
             if (_consecutiveSaveFailures >= 2)
             {
-                // Per decision 2.4 = B: second consecutive failure -> escalate
+                // Second consecutive failure -> escalate
                 // to the BootstrapErrorReporter shutdown path. Test seam runs
                 // a fake; production runs the real BootstrapErrorReporter.
                 _errorReporter.ReportAndShutdown(

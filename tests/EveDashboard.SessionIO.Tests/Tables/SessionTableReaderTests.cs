@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 /// <summary>
 /// Verifies <see cref="SessionTableReader"/> produces the right rows and
-/// applies the plan-29 alignment 3.1 = B filter for <c>market_data</c>.
+/// exports only the <c>market_data</c> rows stamped with the session's own id.
 /// </summary>
 public sealed class SessionTableReaderTests : IAsyncLifetime
 {
@@ -87,7 +87,7 @@ public sealed class SessionTableReaderTests : IAsyncLifetime
     [Fact]
     public async Task ReadAsync_market_data_returns_only_rows_owned_by_the_session()
     {
-        // Plan 38: prices are session-bound. The export carries exactly the
+        // Prices are session-bound. The export carries exactly the
         // session's own market_data rows (WHERE session_id = $sid) — rows owned
         // by another session or by the zero-sentinel are never selected.
         var sid = await InsertSessionAsync("Pricing test");
@@ -131,7 +131,7 @@ public sealed class SessionTableReaderTests : IAsyncLifetime
 
     private async Task<string> InsertSessionAsync(string name, string? notes = null)
     {
-        // Plan 38: content-addressed sha256 hex session id; distinct names hash distinct.
+        // Content-addressed sha256 hex session id; distinct names hash distinct.
         var sid = EveDashboard.Core.Sessions.SessionId.Compute(name, "2026-05-07T10:00:00.000Z");
         await _db.ExecuteNonQueryAsync(
             "INSERT INTO session (session_id, name, notes) VALUES ($sid, $n, $notes)",

@@ -5,7 +5,7 @@ using EveDashboard.Core.Configuration;
 /// <summary>
 /// Test seam — returns a configurable <see cref="BootstrapConfigResult"/> from
 /// <see cref="LoadAsync"/> and records the last <see cref="SaveAsync"/> path.
-/// Used by Settings dialog VM tests (plan 22.1) and ServiceRegistration DI tests.
+/// Used by Settings dialog VM tests and ServiceRegistration DI tests.
 /// </summary>
 internal sealed class FakeBootstrapConfigLoader : IBootstrapConfigLoader
 {
@@ -19,10 +19,10 @@ internal sealed class FakeBootstrapConfigLoader : IBootstrapConfigLoader
     public string? LastSavedPath { get; private set; }
     public int SaveCount { get; private set; }
 
-    /// <summary>Plan 22.2: when set, SaveAsync throws this exception on every call.</summary>
+    /// <summary>When set, SaveAsync throws this exception on every call.</summary>
     public Exception? SaveExceptionToThrow { get; set; }
 
-    /// <summary>Plan 22.2: when set, the next SaveAsync call throws this then clears it (so the second attempt succeeds).</summary>
+    /// <summary>When set, the next SaveAsync call throws this then clears it (so the second attempt succeeds).</summary>
     public Exception? SaveExceptionToThrowOnce { get; set; }
 
     public Task<BootstrapConfigResult> LoadAsync(CancellationToken ct = default)

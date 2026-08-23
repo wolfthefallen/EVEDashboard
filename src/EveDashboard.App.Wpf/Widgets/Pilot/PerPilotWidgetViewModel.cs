@@ -10,7 +10,7 @@ using EveDashboard.Stats.Queries;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// ViewModel for one per-pilot widget (plan 17). One instance per pilot in
+/// ViewModel for one per-pilot widget. One instance per pilot in
 /// the active session; the bound stats are repopulated by
 /// <c>PerPilotWidgetCoordinator</c> on every dirty tick via
 /// <see cref="ApplyStats"/>.
@@ -25,17 +25,17 @@ using Microsoft.Extensions.Logging;
 /// The inherited abstract <see cref="WidgetBaseViewModel.RefreshAsync"/> is a
 /// no-op here; the coordinator drives refresh by invoking
 /// <see cref="ApplyStats"/> with the latest <see cref="CharacterStats"/>
-/// snapshot. ISK fields are populated by the plan-18 ISK pipeline that runs
+/// snapshot. ISK fields are populated by the ISK pricing pipeline that runs
 /// inside <c>SqliteSessionStatsRepository.GetSessionStatsAsync</c>.
 /// </para>
 /// <para>
-/// Plan 25 retrofit: extends <see cref="StatConfigurableWidgetViewModel"/>
-/// which owns the duplicated stat-config plumbing flagged in
-/// <c>CLEANUP.md</c> 2.2. The per-pilot-only <see cref="IsLastEventAtVisible"/>
+/// Extends <see cref="StatConfigurableWidgetViewModel"/>,
+/// which owns the stat-config plumbing shared by every stat-list widget.
+/// The per-pilot-only <see cref="IsLastEventAtVisible"/>
 /// flag is wired via the <see cref="OnAdditionalHideOnlyResolved"/> hook.
 /// </para>
 /// <para>
-/// Plan 35: per-pilot fleet role (Miner / Booster / Cyno / Combat). The VM
+/// Per-pilot fleet role (Miner / Booster / Cyno / Combat): the VM
 /// subscribes to <see cref="IActiveSessionContext.RolesChanged"/> for live
 /// updates from <c>SessionController.SetPilotRoleAsync</c>, and to
 /// <see cref="ISettingsRepository.SettingChanged"/> filtered by <c>"theme"</c>
@@ -55,7 +55,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     public string PilotName { get; }
 
     /// <summary>
-    /// Plan 35: human-readable header text. <c>"PilotName"</c> for Miner;
+    /// Human-readable header text. <c>"PilotName"</c> for Miner;
     /// <c>"PilotName [Booster]"</c> etc for non-Miner. Recomputed when
     /// <see cref="Role"/> changes.
     /// </summary>
@@ -63,7 +63,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     public string DisplayName =>
         Role == PilotRole.Miner ? PilotName : $"{PilotName} [{Role}]";
 
-    /// <summary>Plan 35: this pilot's current fleet role. Drives the role border, the DisplayName tag, and the context-menu checkmark.</summary>
+    /// <summary>This pilot's current fleet role. Drives the role border, the DisplayName tag, and the context-menu checkmark.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayName))]
     private PilotRole _role;
@@ -78,12 +78,12 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     [property: StatRow("m³/sec", Format = "N2", Reorderable = true, DefaultOrder = 1)]
     private double _m3PerSecond;
 
-    /// <summary>Estimated ISK earned per hour, sourced from the plan-18 ISK pipeline via the per-pilot stats snapshot.</summary>
+    /// <summary>Estimated ISK earned per hour, sourced from the ISK pricing pipeline via the per-pilot stats snapshot.</summary>
     [ObservableProperty]
     [property: StatRow("ISK/h", Format = "N0", Reorderable = true, DefaultOrder = 2)]
     private double _iskPerHour;
 
-    /// <summary>Estimated total ISK earned by this pilot, sourced from the plan-18 ISK pipeline via the per-pilot stats snapshot.</summary>
+    /// <summary>Estimated total ISK earned by this pilot, sourced from the ISK pricing pipeline via the per-pilot stats snapshot.</summary>
     [ObservableProperty]
     [property: StatRow("Total ISK", Format = "N0", Reorderable = true, DefaultOrder = 3)]
     private double _totalIskMined;
@@ -108,12 +108,12 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     [property: StatRow("Crit chance", Format = "P1", Reorderable = true, DefaultOrder = 7)]
     private double _critChance;
 
-    /// <summary>Plan 20: drives the footer <c>Last event</c> TextBlock visibility. True (default) = visible.</summary>
+    /// <summary>Drives the footer <c>Last event</c> TextBlock visibility. True (default) = visible.</summary>
     [ObservableProperty]
     private bool _isLastEventAtVisible = true;
 
     /// <summary>
-    /// Plan 35: invokes the constructor-injected role-change callback. Bound
+    /// Invokes the constructor-injected role-change callback. Bound
     /// to each MenuItem in the right-click context menu via
     /// <c>CommandParameter="{x:Static sessions:PilotRole.X}"</c>.
     /// </summary>
@@ -122,10 +122,10 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     /// <summary>Construct a per-pilot widget VM.</summary>
     /// <param name="pilotId">EVE character id (from <c>session_pilot.pilot_id</c>).</param>
     /// <param name="pilotName">EVE character name; rendered as the widget header.</param>
-    /// <param name="initialRole">Plan 35: pilot's role at widget-create time (read from <c>session_pilot.role</c> by the coordinator).</param>
+    /// <param name="initialRole">Pilot's role at widget-create time (read from <c>session_pilot.role</c> by the coordinator).</param>
     /// <param name="settings">Settings repository for stat-config persistence + change events.</param>
-    /// <param name="activeSession">Plan 35: read view of the active session; subscribed to for <see cref="IActiveSessionContext.RolesChanged"/>.</param>
-    /// <param name="setRoleCallback">Plan 35: forwarded to <c>SessionController.SetPilotRoleAsync</c> by DI factory.</param>
+    /// <param name="activeSession">Read view of the active session; subscribed to for <see cref="IActiveSessionContext.RolesChanged"/>.</param>
+    /// <param name="setRoleCallback">Forwarded to <c>SessionController.SetPilotRoleAsync</c> by DI factory.</param>
     /// <param name="log">Logger; reserved for future per-widget diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any required argument is null.</exception>
     public PerPilotWidgetViewModel(
@@ -160,7 +160,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
         _activeSession.RolesChanged += OnRolesChanged;
         Settings.SettingChanged += OnSettingChanged;
 
-        // Plan 43: this pilot's per-widget "Refined output" section (scope key =
+        // This pilot's per-widget "Refined output" section (scope key =
         // the pilot id, matching the per_pilot_stats_config keying).
         EnableRefinedOutput(pilotId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
@@ -196,10 +196,10 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
         TotalM3FromCrits = stats.TotalM3FromCrits;
         CritCount        = stats.CritCount;
         CritChance       = stats.CritChance;
-        // Plan 35: also propagate role from the snapshot (RolesChanged is the
+        // Also propagate role from the snapshot (RolesChanged is the
         // immediate signal; this is the redundant catch-all).
         Role             = stats.Role;
-        // Plan 43: merge this pilot's refined output into the section.
+        // Merge this pilot's refined output into the section.
         MergeRefinedOutput(stats.RefinedOutput);
         LastUpdated      = DateTimeOffset.UtcNow;
     }
@@ -211,7 +211,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     }
 
     /// <summary>
-    /// Plan 35: forward the chosen role to the controller via the injected
+    /// Forward the chosen role to the controller via the injected
     /// callback. The controller does the SQL UPDATE + in-memory map update +
     /// <c>RolesChanged</c> raise; <see cref="OnRolesChanged"/> then sees the
     /// event and updates this VM's <see cref="Role"/> property.
@@ -220,7 +220,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
         _setRoleCallback(PilotId, role, CancellationToken.None);
 
     /// <summary>
-    /// Plan 35: handle a mid-session role change from
+    /// Handle a mid-session role change from
     /// <c>ActiveSessionContext.SetRole</c>. Only acts when the event pertains
     /// to this widget's pilot.
     /// </summary>
@@ -231,7 +231,7 @@ public sealed partial class PerPilotWidgetViewModel : StatConfigurableWidgetView
     }
 
     /// <summary>
-    /// Plan 35: handle a theme swap. The role border brush is resolved via
+    /// Handle a theme swap. The role border brush is resolved via
     /// <c>RoleToBorderBrushConverter</c> against
     /// <c>Application.Current.Resources</c>; when the merged theme dictionary
     /// changes, the binding does NOT re-run automatically. Re-raise

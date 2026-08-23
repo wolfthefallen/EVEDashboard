@@ -6,9 +6,9 @@
                     xmlns:widgets="clr-namespace:EveDashboard.App.Wpf.Widgets"
                     mc:Ignorable="d">
     <!--
-        Plan 36: the single compare-mode widget. Replaces the prior
-        CompareSessionStatsView + ComparePerOreBreakdownView + per-pilot stack
-        with one stacked subheader and two static-column DataGrids.
+        The single compare-mode widget: one stacked session-name subheader,
+        grand-total labels, and three static-column DataGrids (Total Refined
+        Output / Cumulative / Rates). No per-pilot stack, no per-ore tables.
     -->
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Comparing sessions:"
@@ -25,8 +25,8 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- Plan 45 (decision 1.1 = C): grand-total labels + Total Refined Output
-             table, shown ABOVE the Cumulative / Rates tables. -->
+        <!-- Grand-total labels + Total Refined Output table, shown ABOVE the
+             Cumulative / Rates tables. -->
         <TextBlock Text="{Binding TotalTimeDisplay, StringFormat='TOTAL TIME:  {0}'}"
                    Tag="{Binding [TotalTime]}"
                    Style="{StaticResource ReportsEmphasisLabel}"

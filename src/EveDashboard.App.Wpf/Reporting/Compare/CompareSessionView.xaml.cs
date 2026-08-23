@@ -6,11 +6,11 @@ using EveDashboard.App.Wpf.Reporting;
 using EveDashboard.App.Wpf.Widgets;
 
 /// <summary>
-/// Plan 36: code-behind for the decluttered compare-mode widget. Static
+/// Code-behind for the decluttered compare-mode widget. Static
 /// columns (declared in XAML) — no dynamic column generation, no
 /// DataContextChanged hook. Wheel-forwarding is shared with the single-mode
-/// per-ore widget via <see cref="DataGridWheelForwarder"/>. Plan 47 wires
-/// column-width persistence on all three grids (per type, keys
+/// per-ore widget via <see cref="DataGridWheelForwarder"/>. Column-width
+/// persistence is wired on all three grids (per type, keys
 /// <c>compare.refined</c> / <c>compare.cumulative</c> / <c>compare.rates</c>).
 /// </summary>
 public partial class CompareSessionView : WidgetBase

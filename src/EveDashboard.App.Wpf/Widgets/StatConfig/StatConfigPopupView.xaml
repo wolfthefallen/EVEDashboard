@@ -14,7 +14,7 @@
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
 
         <!--
-            Plan 20 popup row template: drag-handle on the right (Reorderable
+            Popup row template: drag-handle on the right (Reorderable
             rows only), checkbox on the left, label in the middle (preview-styled
             via Emphasis), emphasis ComboBox on Reorderable rows.
         -->
@@ -111,7 +111,7 @@
             </Grid>
         </DataTemplate>
 
-        <!-- Plan 43 (decision 2.1 = C): refined-material row — a Visible checkbox + name. -->
+        <!-- Refined-material row — a Visible checkbox + name. -->
         <DataTemplate x:Key="RefinedMaterialRowTemplate">
             <Grid Margin="0,2">
                 <Grid.ColumnDefinitions>
@@ -182,7 +182,7 @@
                           ItemTemplate="{StaticResource HideOnlyRowTemplate}" />
         </Border>
 
-        <!-- Plan 43 (decision 2.1 = C): refined-materials subsection. Visible only
+        <!-- Refined-materials subsection. Visible only
              when there are seen materials to toggle. -->
         <Border Grid.Row="4"
                 Margin="0,8,0,0"

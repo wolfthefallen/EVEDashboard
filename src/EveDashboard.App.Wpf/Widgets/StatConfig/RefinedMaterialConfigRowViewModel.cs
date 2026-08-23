@@ -3,7 +3,7 @@ namespace EveDashboard.App.Wpf.Widgets.StatConfig;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 /// <summary>
-/// Plan 43 (decision 2.1 = C): one row in the stat-config cog popup's "Refined
+/// One row in the stat-config cog popup's "Refined
 /// materials" subsection — a seen material's name and an editable
 /// <see cref="Visible"/> checkbox. On Apply the popup turns the checkbox into a
 /// per-widget visibility override (or drops the override when it matches the

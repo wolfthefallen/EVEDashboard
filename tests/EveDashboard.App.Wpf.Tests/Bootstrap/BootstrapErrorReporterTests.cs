@@ -4,9 +4,9 @@ using EveDashboard.App.Wpf.Bootstrap;
 using FluentAssertions;
 
 /// <summary>
-/// Per plan 16 alignment 2.2 = B: only null-arg checks are automated; the
-/// MessageBox + Application.Shutdown side effects are exercised via the
-/// manual test doc (<c>tests/manual/manual-tests.md</c> Section 1, steps 2-7).
+/// Only null-arg checks are automated; the MessageBox + Application.Shutdown
+/// side effects need a live WPF application, so they are exercised by manual
+/// verification instead.
 /// </summary>
 public class BootstrapErrorReporterTests
 {

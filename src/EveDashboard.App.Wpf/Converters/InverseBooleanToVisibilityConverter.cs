@@ -7,7 +7,7 @@ using System.Windows.Data;
 /// <summary>
 /// Inverse of WPF's BCL <see cref="System.Windows.Controls.BooleanToVisibilityConverter"/>:
 /// maps <c>true</c> to <see cref="Visibility.Collapsed"/> and <c>false</c> to
-/// <see cref="Visibility.Visible"/>. Used by plan 22.2's Settings dialog to
+/// <see cref="Visibility.Visible"/>. Used by the Settings dialog to
 /// hide the Display / Pricing / Markets sections when the dialog is opened in
 /// bootstrap-failure mode (driven by
 /// <c>SettingsDialogViewModel.IsBootstrapFailureMode</c>).

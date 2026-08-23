@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Writes parsed <see cref="MiningEvent"/> records to the session
 /// <c>log</c> table and raises <see cref="ISessionEventNotifier.SessionEventAdded"/>
-/// once each row is INSERTed. Plan 12's Stats-side deliverable.
+/// once each row is INSERTed.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -25,7 +25,7 @@ using Microsoft.Extensions.Logging;
 /// the <see cref="IMiningEventSink"/> entry point used by the watcher.
 /// </para>
 /// <para>
-/// Drop rules (decisions 3.1, 4.1, 4.3 from plan 12):
+/// Drop rules:
 /// </para>
 /// <list type="bullet">
 ///   <item><description>No active session (<see cref="IActiveSessionContext.ActiveSessionId"/> is null) -&gt; drop.</description></item>
@@ -61,7 +61,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
     private MiningEventKind? _currentInsertKind;
 
     /// <summary>
-    /// Plan 37 — async callback registered by the session controller (UI
+    /// Auto-resume callback registered by the session controller (UI
     /// layer) at session start. When a <see cref="MiningEventKind.Tick"/> or
     /// <see cref="MiningEventKind.Crit"/> arrives while the session is
     /// <see cref="SessionRunState.Paused"/>, <see cref="WriteAsync"/> awaits
@@ -75,7 +75,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
     private Func<CancellationToken, Task>? _onAutoResumeRequested;
 
     /// <summary>
-    /// Plan 37 — single-flight cache for an in-flight auto-resume invocation.
+    /// Single-flight cache for an in-flight auto-resume invocation.
     /// Concurrent paused Tick/Crit callers await the same Task so the resume
     /// SQL runs exactly once per burst. Cleared (allowed to be re-invoked) once
     /// the Task completes; a faulted Task re-invokes on the next paused event.
@@ -172,7 +172,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
         _consumer = null;
         _startedSessionId = null;
 
-        // Plan 37: clear the auto-resume hook so a stale callback from the
+        // Clear the auto-resume hook so a stale callback from the
         // just-stopped session can never fire on a Tick/Crit that races into
         // the next session's startup window.
         _onAutoResumeRequested = null;
@@ -182,7 +182,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
     }
 
     /// <summary>
-    /// Plan 37: register (or clear with <c>null</c>) the callback invoked
+    /// Register (or clear with <c>null</c>) the callback invoked
     /// inline inside <see cref="WriteAsync"/> when a Tick/Crit arrives while
     /// the session is paused. The callback is expected to perform the
     /// Paused -&gt; Running transition; <see cref="WriteAsync"/> awaits it,
@@ -197,7 +197,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
     /// <inheritdoc />
     /// <remarks>
     /// <para>
-    /// Plan 37: when <see cref="IActiveSessionContext.State"/> is
+    /// Auto-resume: when <see cref="IActiveSessionContext.State"/> is
     /// <see cref="SessionRunState.Paused"/> and the incoming event is a
     /// <see cref="MiningEventKind.Tick"/> or <see cref="MiningEventKind.Crit"/>
     /// AND <see cref="SetAutoResumeCallback"/> has been called with a non-null
@@ -221,7 +221,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
 
         if (_activeSession.State == SessionRunState.Paused)
         {
-            // Plan 37 auto-resume path: only Tick/Crit (the qualifying events)
+            // Auto-resume path: only Tick/Crit (the qualifying events)
             // and only when a callback is registered. Everything else drops
             // silently like before.
             if ((ev.Kind == MiningEventKind.Tick || ev.Kind == MiningEventKind.Crit)
@@ -302,7 +302,7 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
             }
             catch (Exception ex)
             {
-                // Belt-and-suspenders (BUGS.md Bug 1): a NON-DbException (e.g. a
+                // Belt-and-suspenders: a NON-DbException (e.g. a
                 // driver-internal ArgumentOutOfRangeException raised by concurrent
                 // connection access) must NOT escape this loop. If it did, the
                 // background consumer Task would fault and die unobserved, and
@@ -322,19 +322,11 @@ public sealed class SessionEventWriter : IMiningEventSink, ISessionEventNotifier
         // For Tick / Crit / Depleted with a known TypeId, denormalise volume_m3.
         // For Residue (TypeId always null) and any kind without a known type,
         // volume_m3 stays null in the row.
-        double? volumeM3 = null;
-        if (ev.TypeId is { } typeId)
-        {
-            var product = _sde.TryGetProduct(typeId);
-            if (product is not null)
-            {
-                volumeM3 = ev.Amount * product.VolumePerUnitM3;
-            }
-        }
+        var volumeM3 = MiningEventRow.VolumeFor(_sde, ev.TypeId, ev.Amount);
 
-        var ts = ev.EveTimestamp.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
+        var ts = MiningEventRow.FormatTimestamp(ev.EveTimestamp);
 
-        // Plan 35: stamp the pilot's CURRENT role on this row. GetRole returns
+        // Stamp the pilot's CURRENT role on this row. GetRole returns
         // the role from the in-memory map seeded by SessionController.StartAsync
         // (or SetPilotRoleAsync for mid-session changes).
         var role = _activeSession.GetRole(ev.CharacterId);

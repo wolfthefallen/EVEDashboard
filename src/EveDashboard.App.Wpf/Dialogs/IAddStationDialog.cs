@@ -9,10 +9,10 @@ using EveDashboard.Core.Settings;
 /// or <c>null</c> to drive both the OK and Cancel branches without invoking WPF.
 /// </summary>
 /// <remarks>
-/// Per plan 22.1 decision 22.D: parent <see cref="SettingsDialogViewModel"/>
+/// The parent <see cref="SettingsDialogViewModel"/>
 /// must be unit-testable in xUnit; routing the sub-dialog through this
 /// interface keeps the WPF Window out of the test path. Same shape as
-/// <see cref="IConfirmDialog"/> (plan 16, generalised plan 29) but returns a payload on
+/// <see cref="IConfirmDialog"/> but returns a payload on
 /// confirm instead of a <see cref="bool"/>.
 /// </remarks>
 public interface IAddStationDialog

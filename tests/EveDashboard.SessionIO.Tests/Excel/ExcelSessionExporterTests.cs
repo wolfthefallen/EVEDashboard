@@ -221,7 +221,7 @@ public sealed class ExcelSessionExporterTests : IAsyncLifetime, IDisposable
         public IReadOnlyDictionary<long, IReadOnlyList<OreBreakdownRow>> PerPilotOre { get; init; } =
             new Dictionary<long, IReadOnlyList<OreBreakdownRow>>();
 
-        public Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default) =>
+        public Task<SessionsReport> GetAllSessionSummariesAsync(bool includeArchived = false, CancellationToken ct = default) =>
             Task.FromResult(new SessionsReport(Array.Empty<SessionSummaryRow>(), LifetimeSummary.Empty));
 
         public Task<IReadOnlyList<PilotSummaryRow>> GetPilotsForSessionAsync(string sessionId, CancellationToken ct = default) =>

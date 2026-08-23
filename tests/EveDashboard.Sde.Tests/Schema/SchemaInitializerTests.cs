@@ -163,7 +163,7 @@ public class SchemaInitializerTests
     {
         // Build a v1-shape meta table (no last_modified, no etag) to simulate a
         // database created before the migration columns existed — this is the
-        // shape of the shipped fallback before plan 07.
+        // shape of older shipped fallbacks.
         await using var db = OpenInMemory();
         await db.ExecuteScriptAsync(
             """

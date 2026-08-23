@@ -24,9 +24,6 @@ using Microsoft.Extensions.Logging;
 /// <c>StatRowsBuilder.Resolve</c> reflection target matches the runtime
 /// instance the renderer reads via PropertyInfo.
 /// </para>
-/// <para>
-/// Plan 25.
-/// </para>
 /// </remarks>
 public sealed partial class SavedSessionStatsViewModel : StatConfigurableWidgetViewModel
 {
@@ -78,7 +75,7 @@ public sealed partial class SavedSessionStatsViewModel : StatConfigurableWidgetV
     [property: StatRow("Crit chance", Format = "P1", Reorderable = true, DefaultOrder = 7)]
     private double _critChance;
 
-    /// <summary>Plan 36: percentage of <c>TotalIskMined</c> attributable to crit events; 0 when total ISK is 0.</summary>
+    /// <summary>Percentage of <c>TotalIskMined</c> attributable to crit events; 0 when total ISK is 0.</summary>
     [ObservableProperty]
     [property: StatRow("Crit ISK %", Format = "P1", Reorderable = true, DefaultOrder = 8)]
     private double _critIskPercent;

@@ -1,8 +1,8 @@
 namespace EveDashboard.Core.Sessions;
 
 /// <summary>
-/// Event payload for the <c>IActiveSessionContext.RolesChanged</c> event
-/// (added by plan 35 step 3). Fires when a pilot's role changes mid-session
+/// Event payload for the <c>IActiveSessionContext.RolesChanged</c> event.
+/// Fires when a pilot's role changes mid-session
 /// via <c>ActiveSessionContext.SetRole</c> (which mirrors
 /// <c>SessionController.SetPilotRoleAsync</c>'s SQL UPDATE into the in-memory
 /// role map).
@@ -12,7 +12,6 @@ namespace EveDashboard.Core.Sessions;
 /// does NOT raise this event — seeding is initial setup, not a user-facing
 /// role change. Per-pilot widget VMs subscribe to this event and update their
 /// bound <c>Role</c> property when <see cref="PilotId"/> matches their own.
-/// Plan 35.
 /// </remarks>
 public sealed class PilotRoleChangedEventArgs : EventArgs
 {

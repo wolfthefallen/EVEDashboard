@@ -5,7 +5,7 @@ using EveDashboard.Core.Sessions;
 
 /// <summary>
 /// Pure resolver that pairs a fleet roster against a discovered-character
-/// snapshot at Start (plan 42, decision 2.5 = A). Each roster member whose
+/// snapshot at Start. Each roster member whose
 /// pilot id is present in the snapshot is resolved to its live
 /// <see cref="Character"/> + fleet role; members with no current gamelog are
 /// reported as skipped. No I/O — the caller supplies the snapshot — so this is

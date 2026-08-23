@@ -13,21 +13,22 @@ The shape of the SQLite database that holds EVE Static Data Export information a
 ```
 ┌─────────────────────────────────┐         meta is single-row (id always = 1).
 │ meta                            │         No FK relationships. Carries the
-│─────────────────────────────────│         everef build context — useful for
-│ id              INTEGER  PK     │         "SDE updated 3h ago" UI later, and
-│ build_time      TEXT  NOT NULL  │         the 3 SHAs document the upstream
-│ esi_sha256      TEXT            │         state for debugging "did anything
-│ sde_sha256      TEXT            │         actually change?".
+│─────────────────────────────────│         everef build context: build_time
+│ id              INTEGER  PK     │         feeds the About window's "SDE data"
+│ build_time      TEXT  NOT NULL  │         line, and the 3 SHAs document the
+│ esi_sha256      TEXT            │         upstream state for debugging "did
+│ sde_sha256      TEXT            │         anything actually change?".
 │ hoboleaks_sha256 TEXT           │
 │ last_modified   TEXT            │         last_modified / etag are populated
 │ etag            TEXT            │         by the updater from the HTTP
 └─────────────────────────────────┘         response headers of the most recent
-                                            successful download. Used to drive
-                                            conditional GET (If-Modified-Since,
-                                            If-None-Match) on subsequent checks.
-                                            NULL on the shipped fallback and on
-                                            any DB that has not yet been updated
-                                            from upstream.
+                                            successful download. On the next
+                                            launch they are compared against a
+                                            HEAD probe, then sent as conditional
+                                            GET headers (If-Modified-Since,
+                                            If-None-Match). NULL on the shipped
+                                            fallback and on any DB that has not
+                                            yet been updated from upstream.
 
 ┌────────────────────────────────┐
 │ categories                     │
@@ -55,7 +56,7 @@ The shape of the SQLite database that holds EVE Static Data Export information a
 │ portion_size INTEGER  NOT NULL    -- units per refining batch  │     │
 │ is_ore       INTEGER  NOT NULL    -- 0 or 1                    │     │
 │ icon_id      INTEGER  NULL        -- nullable; future widgets  │     │
-│ IDX(name)                  ◄── name → type_id (parser hot path)│     │ FK
+│ IDX(name)        ◄── name → type_id (Haul Value paste resolver)│     │ FK
 │ IDX(group_id)                                                  │     │ (twice — see below)
 │ IDX(is_ore)                ◄── lookup-startup filter           │     │
 └────────────────────────────────────────────────────────────────┘     │
@@ -124,6 +125,8 @@ CREATE TABLE type_materials (
 CREATE INDEX idx_type_materials_material_type_id ON type_materials(material_type_id);
 ```
 
+`EveDashboard.Sde.Schema.SchemaInitializer.EnsureSchemaAsync` runs the DDL above on every launch (every `CREATE` is `IF NOT EXISTS`), then adds `meta.last_modified` and `meta.etag` via `ALTER TABLE ... ADD COLUMN` on any store created before those columns existed (the shipped fallback included) — the column list is pre-checked so an already-migrated store is a no-op.
+
 ---
 
 ## Refining math example (the math we never pre-compute)
@@ -143,7 +146,7 @@ WHERE m.type_id = 1230;
 
 One JOIN-and-multiply per query. No pre-computed refining table to maintain.
 
-**Plan 43 — refined-material names are cached at load.** `SqliteSdeLookup.LoadAsync` now also reads each refined output's `types.name` (via the recipe JOIN above) into a small `type_id -> name` cache, exposed through `ISdeLookup.TryGetRefinedMaterialName`. This is needed because the ore/gas `MiningProduct` cache deliberately does NOT include refined outputs (Tritanium etc.), and the live + reporting "Refined output" widgets need their display names. No schema change — the names already live in `types`.
+**Refined-material names are cached at load.** `SqliteSdeLookup.LoadAsync` also reads each refined output's `types.name` (via the recipe JOIN above) into a small `type_id -> name` cache, exposed through `ISdeLookup.TryGetRefinedMaterialName`. This is needed because the ore/gas `MiningProduct` cache deliberately does NOT include refined outputs (Tritanium etc.), and the live + reporting "Refined output" widgets need their display names. No schema change — the names already live in `types`.
 
 ---
 
@@ -154,10 +157,10 @@ The dashboard only persists what it actually reads or computes against. Everythi
 **Skipped fields on `types`:**
 - `description` (multilingual paragraphs, never displayed)
 - `mass`, `packaged_volume`, `capacity`, `radius` (no current use case)
-- `ore_variations` (names resolve directly via the `name → type_id` index; variants are just other types)
+- `ore_variations` (names resolve directly by `types.name` — the parser through the in-memory ore/gas cache, the Haul Value paste box through `idx_types_name`; variants are just other types)
 - `required_skills` (gameplay info we don't display or use)
 - `dogma_attributes` (game-mechanics attributes; not relevant to mining stats)
-- `base_price` (real market prices come from GoonMetrics, not the SDE base price)
+- `base_price` (real market prices come from the selected market source — GoonMetrics or ESI — not the SDE base price)
 - `market_group_id` (UI hierarchy info; not used)
 - `description` localisations beyond English
 
@@ -173,4 +176,5 @@ The dashboard only persists what it actually reads or computes against. Everythi
 ## Filtering rules
 
 - **`published = false` rows are skipped at import.** The `published` flag exists on every `categories`, `groups`, and `types` JSON record. Filtering happens at convert-time and the column is not carried into SQLite — every row in the database is a published EVE item by construction.
+- **Rows whose parent was filtered are dropped too.** A published group under an unpublished category, a published type under a filtered group, and a `type_materials` entry whose material type was filtered are all skipped at convert-time (each kind is counted in one Warning log line), so every foreign key in the store resolves.
 - **Multilingual `name` dicts are reduced to `name.en` only.** EVE log lines are English regardless of client locale.

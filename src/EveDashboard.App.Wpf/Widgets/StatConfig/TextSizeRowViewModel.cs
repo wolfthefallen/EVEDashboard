@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using EveDashboard.Core.Settings.WidgetStats;
 
 /// <summary>
-/// Plan 47: one editable row inside the Reports "Text size" popup. Carries the
+/// One editable row inside the Reports "Text size" popup. Carries the
 /// user's chosen <see cref="StatEmphasis"/> for one named element of a table
 /// widget (a label line, or the table itself) until they click <c>Apply</c>;
 /// the popup VM then projects the rows into an element-key -&gt; emphasis map and

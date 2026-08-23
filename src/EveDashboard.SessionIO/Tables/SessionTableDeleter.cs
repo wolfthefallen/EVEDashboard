@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Deletes one session and every row that has a direct <c>session_id</c> FK
 /// back to it: <c>session_time</c>, <c>session_pilot</c>, <c>log</c>, then the
-/// <c>session</c> row itself. Atomic via raw <c>BEGIN IMMEDIATE</c> /
+/// <c>session</c> row itself. If the session was the result of a combine, the
+/// sources archived into it (<c>merged_into</c> = this id) are un-archived first,
+/// so deleting a combined session restores the originals. Atomic via raw <c>BEGIN IMMEDIATE</c> /
 /// <c>COMMIT</c> / <c>ROLLBACK</c> SQL since <see cref="ISqliteDatabase"/>
 /// exposes no transaction API.
 /// </summary>
@@ -15,7 +17,7 @@ using Microsoft.Extensions.Logging;
 /// leave alone"):
 /// <list type="bullet">
 ///   <item><c>pilot</c> rows — EVE-stable ids reused across sessions; reachable only via the <c>session_pilot</c> join, not a direct FK.</item>
-///   <item><c>market_data</c> rows — the <c>session_id</c> column (added by plan 38) is a plain TEXT column, NOT an enforced FK, so deleting a session intentionally leaves harmless orphan price rows behind (see <c>docs/market-schema.md</c>).</item>
+///   <item><c>market_data</c> rows — the <c>session_id</c> column is a plain TEXT column, NOT an enforced FK, so deleting a session intentionally leaves harmless orphan price rows behind.</item>
 ///   <item><c>market_stations</c> rows — same reason, plus they are the user-configurable catalog.</item>
 ///   <item><c>setting</c> rows — settings are user-global, not session-scoped.</item>
 /// </list>
@@ -39,7 +41,8 @@ public sealed class SessionTableDeleter
 
     /// <summary>
     /// Delete the session at <paramref name="sessionId"/> and every row whose
-    /// table carries a direct FK to it. Atomic — any failure rolls back to the
+    /// table carries a direct FK to it, after un-archiving any sources that were
+    /// combined into it. Atomic — any failure rolls back to the
     /// pre-delete state.
     /// </summary>
     /// <param name="sessionId">Session id to delete.</param>
@@ -57,6 +60,17 @@ public sealed class SessionTableDeleter
             // refuse to delete the session row while session_time / log / etc.
             // still reference it.
             var parameters = new Dictionary<string, object?> { ["$sid"] = sessionId };
+
+            // Deleting a COMBINED session restores its sources: the sessions that
+            // were archived with merged_into = this id come back into view, so a
+            // combine can always be undone by deleting its result and no mining
+            // data becomes unreachable.
+            var unarchived = await tx.ExecuteNonQueryAsync(
+                "UPDATE session SET archived = 0, merged_into = NULL WHERE merged_into = $sid", parameters, ct).ConfigureAwait(false);
+            if (unarchived > 0)
+            {
+                _log.LogInformation("Un-archived {Count} source session(s) that had been combined into #{SessionId}.", unarchived, sessionId);
+            }
 
             var logsDeleted = await tx.ExecuteNonQueryAsync(
                 "DELETE FROM log WHERE session_id = $sid", parameters, ct).ConfigureAwait(false);

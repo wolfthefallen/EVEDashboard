@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using EveDashboard.SessionIO.Tables;
 
 /// <summary>
-/// Custom JSON converter for <see cref="SessionPilotRow"/>. Plan 35 decision
-/// 2.1 cross = B: reads each property by name; defaults missing <c>role</c>
-/// to <c>"Miner"</c> so pre-plan-35 JSON files round-trip cleanly.
+/// Custom JSON converter for <see cref="SessionPilotRow"/>. Reads each property
+/// by name; defaults missing <c>role</c> to <c>"Miner"</c> so JSON files written
+/// before the field existed round-trip cleanly.
 /// </summary>
 /// <remarks>
 /// Same pattern as <see cref="LogRowJsonConverter"/> — writing emits every
@@ -25,9 +25,9 @@ public sealed class SessionPilotRowJsonConverter : JsonConverter<SessionPilotRow
             throw new JsonException($"Expected StartObject for SessionPilotRow, got {reader.TokenType}.");
         }
 
-        string sessionId = string.Empty;   // plan 38: sha256 string (rewritten on import regardless)
+        string sessionId = string.Empty;   // sha256 string (rewritten on import regardless)
         long   pilotId   = 0;
-        string role      = "Miner";   // plan 35: default if absent in pre-35 files
+        string role      = "Miner";   // default if absent (files written before the role field existed)
 
         while (reader.Read())
         {

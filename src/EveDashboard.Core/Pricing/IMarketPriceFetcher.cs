@@ -19,7 +19,7 @@ public interface IMarketPriceFetcher
     /// for the configured selected station and INSERT returned rows into
     /// <c>market_data</c>.
     /// </summary>
-    /// <param name="sessionId">Plan 38: the starting session's sha256 id; every inserted <c>market_data</c> row is stamped with it.</param>
+    /// <param name="sessionId">The starting session's sha256 id; every inserted <c>market_data</c> row is stamped with it.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <remarks>
     /// Called via <see cref="EveDashboard.Core.Sessions.IActiveSessionContext.ActiveSessionChanged"/>

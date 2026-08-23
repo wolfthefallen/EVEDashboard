@@ -4,7 +4,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Plan 51: production <see cref="ILifetimeTotalsWindow"/> implementation. Holds
+/// Production <see cref="ILifetimeTotalsWindow"/> implementation. Holds
 /// a single <see cref="LifetimeTotalsWindow"/> for the app lifetime; subsequent
 /// <see cref="Show"/> calls re-show / bring-to-front the same instance so
 /// geometry survives in-session open/close cycles.

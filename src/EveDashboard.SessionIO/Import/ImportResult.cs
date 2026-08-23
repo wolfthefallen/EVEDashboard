@@ -20,11 +20,11 @@ public sealed record ImportRowCounts(
 /// <summary>
 /// Returned from <c>SessionTableWriter.WriteAsync</c> on a successful import.
 /// </summary>
-/// <param name="NewSessionId">Plan 38: the content-addressed <c>session.session_id</c> (sha256 hex) of the imported session — taken from the file when already a sha256, else recomputed from name + first start_time.</param>
+/// <param name="NewSessionId">The content-addressed <c>session.session_id</c> (sha256 hex) of the imported session — taken from the file when already a sha256, else recomputed from name + first start_time.</param>
 /// <param name="SessionName">Name of the imported session (echoed for the UI status line).</param>
 /// <param name="Warnings">Pilot / station name mismatches surfaced by the collision policy. Empty when no clashes.</param>
 /// <param name="RowCounts">Per-table insert counts (informational; useful for log summaries). All zero when <paramref name="AlreadyPresent"/> is true.</param>
-/// <param name="AlreadyPresent">Plan 38 (decision 3.1 = A): true when a session with this <see cref="NewSessionId"/> already existed, so the import was a skip-with-warning no-op (nothing written).</param>
+/// <param name="AlreadyPresent">True when a session with this <see cref="NewSessionId"/> already existed, so the import was a skip-with-warning no-op (nothing written).</param>
 public sealed record ImportResult(
     string                              NewSessionId,
     string                              SessionName,

@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per plan 22.1 decision 22.L: this adapter takes <see cref="IServiceProvider"/>
+/// This adapter takes <see cref="IServiceProvider"/>
 /// (a deviation from <see cref="ConfirmDialogAdapter"/>'s parameterless
 /// shape) because <see cref="SettingsDialog"/> has a transitive dependency
 /// graph (VM, sub-dialog, repos) and hand-wiring it in the adapter would
@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging;
 /// pattern at a UI boundary, not a general convention.
 /// </para>
 /// <para>
-/// Plan 22.2: in bootstrap-failure mode (<c>failure</c> non-null) the adapter
+/// In bootstrap-failure mode (<c>failure</c> non-null) the adapter
 /// constructs the <see cref="SettingsDialogViewModel"/> by hand instead of via
 /// DI, falling back to <see cref="NoOpSettingsRepository"/> /
 /// <see cref="NoOpMarketStationCatalog"/> / <see cref="NoOpAddStationDialog"/>
@@ -54,10 +54,9 @@ public sealed class SettingsDialogAdapter : ISettingsDialog
         // the first instantiated Window to Application.MainWindow; in
         // bootstrap-failure mode no other Window has been shown yet, so a
         // post-construction read of Application.MainWindow returns the dialog
-        // itself, and `Owner = self` throws ArgumentException (Bug 1, plan
-        // 22.2 manual verification 2026-05-03). Capturing first preserves the
-        // pre-existing MainWindow (if any), and we only set Owner when there
-        // is a real candidate that is not the dialog.
+        // itself, and `Owner = self` throws ArgumentException. Capturing first
+        // preserves the pre-existing MainWindow (if any), and we only set
+        // Owner when there is a real candidate that is not the dialog.
         var ownerCandidate = Application.Current?.MainWindow;
 
         SettingsDialog dialog;

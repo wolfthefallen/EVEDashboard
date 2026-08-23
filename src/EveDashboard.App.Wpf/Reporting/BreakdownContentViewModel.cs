@@ -25,7 +25,7 @@ public enum BreakdownContentMode
 /// <summary>Triple of (per-pilot-stats, per-pilot-ore, per-pilot-refined) widgets for one pilot in the saved session — single mode.</summary>
 /// <param name="Pilot">Saved-data per-pilot stats VM.</param>
 /// <param name="Ore">Saved-data per-pilot per-ore breakdown VM.</param>
-/// <param name="Refined">Saved-data per-pilot refined-output breakdown VM (plan 43).</param>
+/// <param name="Refined">Saved-data per-pilot refined-output breakdown VM.</param>
 public sealed record PerPilotEntry(
     SavedPerPilotWidgetViewModel Pilot,
     PerOreBreakdownViewModel     Ore,
@@ -39,13 +39,12 @@ public sealed record PerPilotEntry(
 /// </summary>
 /// <remarks>
 /// <para>
-/// Single mode mirrors the original Plan-25 flow: build
-/// <see cref="SavedSessionStatsViewModel"/> + session-level
-/// <see cref="PerOreBreakdownViewModel"/> + per-pilot
-/// <see cref="PerPilotEntry"/> instances. Compare mode (2+ sessions, Plan 36)
-/// instead builds a single <see cref="CompareSessionViewModel"/> with two
-/// inner tables (Cumulative + Rates) — per-pilot widgets and per-ore tables
-/// are intentionally dropped in compare mode.
+/// Single mode builds a <see cref="SavedSessionStatsViewModel"/> + session-level
+/// <see cref="PerOreBreakdownViewModel"/> / <see cref="PerRefinedBreakdownViewModel"/>
+/// + per-pilot <see cref="PerPilotEntry"/> instances. Compare mode (2+ sessions)
+/// instead builds a single <see cref="CompareSessionViewModel"/> with three
+/// inner tables (Total Refined Output + Cumulative + Rates) — per-pilot widgets
+/// and per-ore tables are intentionally dropped in compare mode.
 /// </para>
 /// <para>
 /// Disposes prior widgets before rebuilding so settings invocation lists do
@@ -76,7 +75,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     [ObservableProperty]
     private PerOreBreakdownViewModel? _sessionOreBreakdown;
 
-    /// <summary>Single-mode session-level refined-output VM (plan 43), or null when compare mode / empty selection.</summary>
+    /// <summary>Single-mode session-level refined-output VM, or null when compare mode / empty selection.</summary>
     [ObservableProperty]
     private PerRefinedBreakdownViewModel? _sessionRefinedBreakdown;
 
@@ -86,16 +85,16 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
     // ---- Compare-mode bound properties ----------------------------------
 
-    /// <summary>Plan 36: the single compare-mode widget VM, or null when single mode / empty selection.</summary>
+    /// <summary>The single compare-mode widget VM, or null when single mode / empty selection.</summary>
     [ObservableProperty]
     private CompareSessionViewModel? _compareSession;
 
     // ---- Shared chrome --------------------------------------------------
 
     /// <summary>
-    /// True while a <see cref="LoadAsync"/> chain is running. Plan 34: bound
-    /// by the Reports right pane to swap the breakdown widgets for the
-    /// sprite-atlas loading spinner. Stays <c>true</c> across rapid bursts of
+    /// True while a <see cref="LoadAsync"/> chain is running. Bound by the
+    /// Reports right pane to swap the breakdown widgets for the orbital
+    /// loading spinner. Stays <c>true</c> across rapid bursts of
     /// queued loads — only the last-queued task clears it (see the
     /// <c>ContinueWith</c> in <see cref="LoadAsync"/>).
     /// </summary>
@@ -103,7 +102,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     private bool _isLoading;
 
     /// <summary>
-    /// Plan 34 — head of the serialization chain of in-flight load tasks.
+    /// Head of the serialization chain of in-flight load tasks.
     /// Each call to <see cref="LoadAsync"/> appends a new continuation onto
     /// this task; the new continuation only runs after the previous one
     /// completes. Rapid checkbox toggles thus run in arrival order without
@@ -113,7 +112,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     private Task _loadChain = Task.CompletedTask;
 
     /// <summary>
-    /// Plan 34 (cancel-in-flight) — CTS for whatever load is currently active
+    /// Cancel-in-flight CTS for whatever load is currently active
     /// (in-flight or about to start). Each new <see cref="LoadAsync"/> call
     /// cancels this CTS and replaces it with a fresh one. Cancelled loads
     /// abort at their next <c>await</c> via <see cref="OperationCanceledException"/>;
@@ -150,14 +149,14 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
     /// Load the breakdown for the supplied selection of sessions, in selection
     /// (click) order. Disposes prior widgets, picks single-mode or compare-
     /// mode based on the count, and publishes new VM instances to the bound
-    /// properties. Plan 34: flips <see cref="IsLoading"/> on synchronously
+    /// properties. Flips <see cref="IsLoading"/> on synchronously
     /// before any work, yields to the dispatcher so the spinner paints first,
     /// then chains onto any in-flight load so concurrent calls run in arrival
     /// order without racing on bound properties. Only the LAST-queued call
     /// clears <see cref="IsLoading"/> so the spinner stays visible across a
     /// burst of rapid checkbox toggles.
     /// </summary>
-    /// <param name="sessionsInOrder">Selected sidebar rows, ordered by user click sequence. Empty list = blank pane (plan 51); 1 entry = single mode; 2+ entries = compare mode.</param>
+    /// <param name="sessionsInOrder">Selected sidebar rows, ordered by user click sequence. Empty list = blank pane; 1 entry = single mode; 2+ entries = compare mode.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="sessionsInOrder"/> is null.</exception>
     public Task LoadAsync(IReadOnlyList<SessionSummaryRow> sessionsInOrder, CancellationToken ct = default)
@@ -235,9 +234,9 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
             if (sessionsInOrder.Count == 0)
             {
-                // Plan 51: empty selection leaves the pane blank. Single mode with
-                // all bound props null renders nothing; the all-time rollup moved
-                // to its own window (the Reports "Lifetime Totals" button).
+                // Empty selection leaves the pane blank. Single mode with all
+                // bound props null renders nothing; the all-time rollup lives in
+                // its own window (the Reports "Lifetime Totals" button).
                 Mode = BreakdownContentMode.Single;
                 return;
             }
@@ -266,13 +265,13 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
     private async Task LoadSingleAsync(SessionSummaryRow row, CancellationToken ct)
     {
-        // Plan 34 bug 2: SQLite's "async" calls sync-complete and block the UI
-        // thread. Push the entire fetch + VM-build phase onto the thread pool
-        // via Task.Run so the dispatcher stays free and the sprite-atlas
-        // spinner keeps animating throughout the load. We ConfigureAwait(true)
-        // when awaiting the Run so the FINAL property assignments below come
-        // back to the UI thread (those assignments raise PropertyChanged
-        // against bound properties, which must be on the dispatcher).
+        // SQLite's "async" calls sync-complete and block the UI thread. Push
+        // the entire fetch + VM-build phase onto the thread pool via Task.Run
+        // so the dispatcher stays free and the loading spinner keeps animating
+        // throughout the load. We ConfigureAwait(true) when awaiting the Run
+        // so the FINAL property assignments below come back to the UI thread
+        // (those assignments raise PropertyChanged against bound properties,
+        // which must be on the dispatcher).
         //
         // Cancel-in-flight (2026-05-17): if `ct` fires mid-load, the next
         // `await` throws OperationCanceledException. Transient IDisposable VMs
@@ -302,7 +301,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                     statsVm.ApplyStats(snapshot);
                     statsVm.SetSessionName(row.Name);
 
-                    // Plan 47: now IDisposable (settings subscription for text size) — MUST be
+                    // IDisposable (settings subscription for text size) — MUST be
                     // tracked in `transient` so cancel/failure disposes it before the throw.
                     var oreVm = new PerOreBreakdownViewModel(
                         _queries, _settings, _loggerFactory.CreateLogger<PerOreBreakdownViewModel>())
@@ -312,7 +311,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
                     transient.Add(oreVm);
                     await oreVm.LoadAsync(sessionId, pilotId: null, ct).ConfigureAwait(false);
 
-                    // Plan 43: session-level refined-output breakdown (plan 47: also IDisposable).
+                    // Session-level refined-output breakdown (also IDisposable — same rule).
                     var refinedVm = new PerRefinedBreakdownViewModel(
                         _queries, _settings, _loggerFactory.CreateLogger<PerRefinedBreakdownViewModel>())
                     {
@@ -373,8 +372,8 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
         // Cancel observed between Task.Run completion and this point: dispose
         // the VMs we built (their settings subscriptions would otherwise leak)
-        // and bail without publishing. Plan 47: the ore/refined VMs are now
-        // IDisposable too, so dispose them alongside the stats + pilot VMs.
+        // and bail without publishing. The ore/refined VMs are IDisposable
+        // too, so dispose them alongside the stats + pilot VMs.
         if (ct.IsCancellationRequested)
         {
             try { sessionStatsVm.Dispose(); } catch { /* defensive */ }
@@ -389,7 +388,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
             return;
         }
 
-        // Plan 34 (revised 2026-05-17): hide the spinner BEFORE publishing
+        // Hide the spinner BEFORE publishing
         // the widget VMs. Without this, the spinner stays visible through the
         // heavy widget render pass (5-session compare = 15-20 DataGrids
         // worth of layout + render) — and because that render pass saturates
@@ -411,8 +410,8 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
     private async Task LoadCompareAsync(IReadOnlyList<SessionSummaryRow> sessions, CancellationToken ct)
     {
-        // Plan 36: compare mode now needs only per-session SessionStats; per-pilot
-        // and per-ore queries are dropped along with the widgets they fed. Same
+        // Compare mode needs only per-session SessionStats; there are no per-pilot
+        // or per-ore widgets in compare mode, so those queries are skipped. Same
         // dispatcher pattern as LoadSingleAsync — push the SQLite-blocking phase
         // onto the thread pool so the spinner keeps animating, ConfigureAwait(true)
         // back for the final bound-property assignment.
@@ -466,8 +465,8 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
 
     private void DisposePriorWidgets()
     {
-        // Single-mode VMs. Plan 47: the ore/refined VMs are now IDisposable
-        // (text-size settings subscription) and MUST be disposed here too, along
+        // Single-mode VMs. The ore/refined VMs are IDisposable (text-size
+        // settings subscription) and MUST be disposed here too, along
         // with each per-pilot entry's Ore + Refined — otherwise a SettingChanged
         // handler leaks on every selection switch.
         try { SessionStats?.Dispose(); } catch { /* defensive */ }
@@ -484,7 +483,7 @@ public sealed partial class BreakdownContentViewModel : ObservableObject
         SessionRefinedBreakdown = null;
         PerPilotEntries = Array.Empty<PerPilotEntry>();
 
-        // Plan 36: compare-mode subtree collapsed to a single VM.
+        // Compare-mode subtree is a single VM.
         try { CompareSession?.Dispose(); } catch { /* defensive */ }
         CompareSession = null;
     }

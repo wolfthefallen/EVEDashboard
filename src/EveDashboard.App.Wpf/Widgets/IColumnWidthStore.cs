@@ -1,7 +1,7 @@
 namespace EveDashboard.App.Wpf.Widgets;
 
 /// <summary>
-/// Plan 47 (phase 1a-B): a VM that can load + persist its grid's per-grid-type
+/// A VM that can load + persist its grid's per-grid-type
 /// column widths. Implemented by <see cref="TextSizeConfigurableWidgetViewModel"/>
 /// (the Reports table widgets) and by the Reports sidebar VM, so a view's
 /// code-behind can drive column-width persistence uniformly via

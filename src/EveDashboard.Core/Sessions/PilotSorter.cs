@@ -3,8 +3,8 @@ namespace EveDashboard.Core.Sessions;
 using EveDashboard.Core.Domain;
 
 /// <summary>
-/// Pure sort over a discovered-pilot list for the fleet-builder picker
-/// (plan 42). Stateless and I/O-free, so it is unit-testable in isolation.
+/// Pure sort over a discovered-pilot list for the fleet-builder picker.
+/// Stateless and I/O-free, so it is unit-testable in isolation.
 /// </summary>
 public static class PilotSorter
 {

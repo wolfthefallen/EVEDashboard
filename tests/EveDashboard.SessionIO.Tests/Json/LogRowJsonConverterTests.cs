@@ -5,9 +5,9 @@ using EveDashboard.SessionIO.Tables;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 35: <see cref="EveDashboard.SessionIO.Json.LogRowJsonConverter"/> defaults
-/// missing <c>role</c> to <c>"Miner"</c> so pre-plan-35 JSON files reimport
-/// cleanly. Post-plan-35 files round-trip lossless.
+/// <see cref="EveDashboard.SessionIO.Json.LogRowJsonConverter"/> defaults
+/// missing <c>role</c> to <c>"Miner"</c> so JSON files exported before pilot
+/// roles existed reimport cleanly. Role-carrying files round-trip lossless.
 /// </summary>
 public class LogRowJsonConverterTests
 {

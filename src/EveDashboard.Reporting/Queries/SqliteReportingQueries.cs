@@ -32,7 +32,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
     /// <param name="db">Session SQLite wrapper.</param>
     /// <param name="statsRepo">Session-stats repository — reused per saved session for total-ISK + active-duration.</param>
     /// <param name="sdeLookup">SDE lookup — for resolving <c>type_id</c> to display name.</param>
-    /// <param name="iskCalculator">Plan-18 ISK pipeline; called once per <see cref="GetOreBreakdownAsync"/> with the full per-(type_id) units dict.</param>
+    /// <param name="iskCalculator">ISK pipeline; called once per <see cref="GetOreBreakdownAsync"/> with the full per-(type_id) units dict.</param>
     /// <param name="settings">Settings repository — read once per <see cref="GetOreBreakdownAsync"/> for refining yield, price mode, and selected station.</param>
     /// <param name="log">Logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
@@ -59,14 +59,17 @@ public sealed class SqliteReportingQueries : IReportingQueries
     }
 
     /// <inheritdoc />
-    public async Task<SessionsReport> GetAllSessionSummariesAsync(CancellationToken ct = default)
+    public async Task<SessionsReport> GetAllSessionSummariesAsync(bool includeArchived = false, CancellationToken ct = default)
     {
-        // Step 1: enumerate sessions. Plan 38: sha256 ids are not chronological,
-        // so the newest-first ordering is applied below by StartTime (decision
-        // 3.2 = A), not by ORDER BY session_id.
+        // Step 1: enumerate sessions. sha256 ids are not chronological, so the
+        // newest-first ordering is applied below by StartTime, not by
+        // ORDER BY session_id. Archived sessions are skipped unless asked for;
+        // even then they never contribute to the lifetime rollup below.
         var sessions = await _db.QueryAsync(
-            "SELECT session_id, name FROM session",
-            static r => (Id: r.GetString(0), Name: r.GetString(1)),
+            includeArchived
+                ? "SELECT session_id, name, archived, merged_into FROM session"
+                : "SELECT session_id, name, archived, merged_into FROM session WHERE archived = 0",
+            static r => (Id: r.GetString(0), Name: r.GetString(1), Archived: r.GetInt64(2) != 0, MergedInto: r.IsDBNull(3) ? null : r.GetString(3)),
             ct: ct).ConfigureAwait(false);
 
         if (sessions.Count == 0)
@@ -74,7 +77,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
             return new SessionsReport(Array.Empty<SessionSummaryRow>(), LifetimeSummary.Empty);
         }
 
-        // Plan 46: accumulate the lifetime rollup as we go — each per-session
+        // Accumulate the lifetime rollup as we go — each per-session
         // snapshot below is summed into these, so the all-time aggregate costs
         // no extra per-session work and is bound to the same per-session pricing.
         var asOf = DateTimeOffset.UtcNow;
@@ -108,12 +111,17 @@ public sealed class SqliteReportingQueries : IReportingQueries
                 .GetSessionStatsAsync(session.Id, asOf, allowLazyFetch: false, ct)
                 .ConfigureAwait(false);
 
-            // Plan 46: fold this session into the lifetime rollup. The snapshot
+            // Fold this session into the lifetime rollup. The snapshot
             // already carries TotalTimeMined / TotalIskMined / RefinedOutput, so
-            // this is pure accumulation — no additional query.
-            totalTime += snapshot.TotalTimeMined;
-            totalIsk += snapshot.TotalIskMined;
-            perSessionRefined.Add(snapshot.RefinedOutput);
+            // this is pure accumulation — no additional query. Archived sessions
+            // are listed (when asked for) but never summed: their data lives on
+            // in the combined session they were folded into.
+            if (!session.Archived)
+            {
+                totalTime += snapshot.TotalTimeMined;
+                totalIsk += snapshot.TotalIskMined;
+                perSessionRefined.Add(snapshot.RefinedOutput);
+            }
 
             rows.Add(new SessionSummaryRow(
                 SessionId:      session.Id,
@@ -121,14 +129,16 @@ public sealed class SqliteReportingQueries : IReportingQueries
                 StartTime:      startTime,
                 ActiveDuration: snapshot.TotalTimeMined,
                 PilotCount:     pilotCount,
-                TotalIskMined:  snapshot.TotalIskMined));
+                TotalIskMined:  snapshot.TotalIskMined,
+                Archived:       session.Archived,
+                MergedInto:     session.MergedInto));
         }
 
-        // Plan 38 (decision 3.2 = A): present newest-first by mining start time.
+        // Present newest-first by mining start time.
         rows.Sort((a, b) => b.StartTime.CompareTo(a.StartTime));
 
-        // Plan 46: the refined sum+sort is shared with the compare view via the
-        // single aggregator (decision 2.1 = A reuse).
+        // The refined sum+sort is shared with the compare view via the
+        // single aggregator.
         var refined = RefinedOutputAggregator.SumAcross(perSessionRefined);
         return new SessionsReport(rows, new LifetimeSummary(totalTime, totalIsk, refined));
     }
@@ -203,7 +213,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
     /// <inheritdoc />
     public async Task<IReadOnlyList<RefineMatBreakdownRow>> GetRefinedMatBreakdownAsync(string sessionId, long? pilotId, CancellationToken ct = default)
     {
-        // Plan 43: reuse the same per-(type_id) mined-units queries the per-ore
+        // Reuse the same per-(type_id) mined-units queries the per-ore
         // breakdown uses (3 cols: type_id, m3, units — we read type_id + units).
         var sql = pilotId is null ? OreBreakdownSessionSql : OreBreakdownPerPilotSql;
         var parameters = new Dictionary<string, object?> { ["$sid"] = sessionId };
@@ -258,7 +268,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
 
     // Mirrors PerPilotWidgetCoordinator.EnumerateSessionPilotsSql so live and
     // saved coordinators see the same name + ordering.
-    // Plan 35: adds sp.role so PilotSummaryRow carries the current role into Excel Summary.
+    // sp.role is included so PilotSummaryRow carries the current role into Excel Summary.
     private const string EnumerateSessionPilotsSql = """
         SELECT sp.pilot_id, p.name, sp.role
         FROM session_pilot sp
@@ -267,7 +277,7 @@ public sealed class SqliteReportingQueries : IReportingQueries
         ORDER BY p.name COLLATE NOCASE ASC
         """;
 
-    // Plan 35: ore breakdown queries read from eligible_log (the CTE filters by role
+    // Ore breakdown queries read from eligible_log (the CTE filters by role
     // per RoleEligibilityCte.Sql). The $sid parameter is consumed by the CTE.
     private const string OreBreakdownSessionSql = RoleEligibilityCte.Sql + """
 

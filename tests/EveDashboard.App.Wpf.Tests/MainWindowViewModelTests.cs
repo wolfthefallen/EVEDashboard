@@ -5,7 +5,7 @@ using EveDashboard.App.Wpf.Tests.Helpers;
 using FluentAssertions;
 
 /// <summary>
-/// Plan 19 retrofit: trivial composition-class tests for
+/// Trivial composition-class tests for
 /// <see cref="MainWindowViewModel"/>. Ctor null-arg + property routing through
 /// the <see cref="EveDashboard.App.Wpf.Layout.LayoutCoordinator"/>.
 /// </summary>

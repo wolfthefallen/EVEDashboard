@@ -20,11 +20,11 @@ using Microsoft.Extensions.Logging;
 /// <para>
 /// Holds no mutable state beyond the <see cref="ISettingsRepository.SettingChanged"/>
 /// event subscriptions — safe to register as a singleton in DI alongside the
-/// singleton <see cref="ISqliteDatabase"/> (plan 16 wires both up at
+/// singleton <see cref="ISqliteDatabase"/> (both are wired up at
 /// <c>App.xaml.cs OnStartup</c>).
 /// </para>
 /// <para>
-/// Validation policy mirrors plan 14 round-2 5.1: out-of-range numeric values
+/// Validation policy: out-of-range numeric values
 /// are clamped, unrecognised enum strings return the default with a Warning
 /// log, malformed JSON returns <c>null</c> with a Warning log.
 /// </para>
@@ -36,12 +36,12 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
     private const double YieldDefault = 90.6;
     private const long DefaultStationId = 60003760L; // Jita
 
-    // Plan 37 — auto-pause idle threshold bounds + default.
+    // Auto-pause idle threshold bounds + default.
     private const int IdleMinutesMin = 1;
     private const int IdleMinutesMax = 60;
     private const int IdleMinutesDefault = 5;
 
-    // Plan 50 — auto-pause sound volume bounds + default (percent).
+    // Auto-pause sound volume bounds + default (percent).
     private const int VolumeMin = 0;
     private const int VolumeMax = 100;
     private const int VolumeDefault = 65;
@@ -518,7 +518,7 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
 
     private static readonly IReadOnlyDictionary<long, bool> EmptyVisibility = new Dictionary<long, bool>();
 
-    /// <summary>Compose the per-widget refined-materials visibility setting key (plan 43).</summary>
+    /// <summary>Compose the per-widget refined-materials visibility setting key.</summary>
     internal static string RefinedMaterialsVisibilityKey(string scopeKey) =>
         scopeKey.Length == 0
             ? "refined_materials_visibility"
@@ -721,10 +721,10 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
         return opts;
     }
 
-    /// <summary>Compose the per-grid-type Reports column-widths setting key (plan 47).</summary>
+    /// <summary>Compose the per-grid-type Reports column-widths setting key.</summary>
     internal static string ReportsColumnWidthsKey(string gridKey) => $"reports_column_widths.{gridKey}";
 
-    /// <summary>Compose the per-widget-type Reports text-size setting key (plan 47).</summary>
+    /// <summary>Compose the per-widget-type Reports text-size setting key.</summary>
     internal static string ReportsTextSizeKey(string widgetTypeKey) => $"reports_text_size.{widgetTypeKey}";
 
     /// <inheritdoc />
@@ -799,31 +799,31 @@ public sealed class SqliteSettingsRepository : ISettingsRepository
             YieldDefault.ToString("R", CultureInfo.InvariantCulture), ct);
         await SeedAsync("selected_station_id",
             DefaultStationId.ToString(CultureInfo.InvariantCulture), ct);
-        // Plan 37 — auto-pause defaults.
+        // Auto-pause defaults.
         await SeedAsync("auto_pause_idle_minutes",
             IdleMinutesDefault.ToString(CultureInfo.InvariantCulture), ct);
         await SeedAsync("auto_pause_sound_enabled", "true", ct);
-        // Plan 50 — auto-pause sound volume default 65%.
+        // Auto-pause sound volume default 65%.
         await SeedAsync("auto_pause_sound_volume",
             VolumeDefault.ToString(CultureInfo.InvariantCulture), ct);
-        // Plan 43 — refined-output auto-show default on.
+        // Refined-output auto-show default on.
         await SeedAsync("auto_show_refined_materials", "true", ct);
-        // Plan 49 (issue #1) — per-pilot refined-output toggle default on.
+        // Per-pilot refined-output toggle default on (GitHub issue #1).
         await SeedAsync("show_pilot_refined_output", "true", ct);
         // refined_materials_visibility[.<pilot_id>]  intentionally NOT seeded (null sentinel = no explicit overrides)
-        // window_geometry         intentionally NOT seeded (round-2 3.1 = B - null sentinel)
-        // widget_layout           intentionally NOT seeded (plan 19 - null sentinel = use default layout)
-        // session_stats_config    intentionally NOT seeded (plan 20 - null sentinel = use default order/emphasis)
-        // per_pilot_stats_config.<pilot_id>  intentionally NOT seeded (plan 20 - null sentinel; rows added on first user customisation)
-        // reports_window_geometry intentionally NOT seeded (plan 25 - null sentinel = use Reports default 1100x700 centered)
-        // reports_sidebar_width   intentionally NOT seeded (plan 25 - null sentinel = use Reports default 280 px)
-        // reports_column_widths.<gridKey> intentionally NOT seeded (plan 47 - null sentinel = use XAML default column widths)
-        // reports_text_size.<widgetTypeKey> intentionally NOT seeded (plan 47 - null sentinel = all elements at StatEmphasis.None)
+        // window_geometry         intentionally NOT seeded (null sentinel = OS default placement)
+        // widget_layout           intentionally NOT seeded (null sentinel = use default layout)
+        // session_stats_config    intentionally NOT seeded (null sentinel = use default order/emphasis)
+        // per_pilot_stats_config.<pilot_id>  intentionally NOT seeded (null sentinel; rows added on first user customisation)
+        // reports_window_geometry intentionally NOT seeded (null sentinel = use Reports default 1100x700 centered)
+        // reports_sidebar_width   intentionally NOT seeded (null sentinel = use Reports default 280 px)
+        // reports_column_widths.<gridKey> intentionally NOT seeded (null sentinel = use XAML default column widths)
+        // reports_text_size.<widgetTypeKey> intentionally NOT seeded (null sentinel = all elements at StatEmphasis.None)
         // crystal_diagram_window_geometry intentionally NOT seeded (null sentinel = use Crystal default 900x650 centered)
-        // lifetime_totals_window_geometry intentionally NOT seeded (plan 51 - null sentinel = use Lifetime default 700x640 centered)
-        // about_window_geometry   intentionally NOT seeded (plan 52 - null sentinel = use About default 460x560 centered)
-        // crystal_diagram_selected_anomaly intentionally NOT seeded (plan 35 - null sentinel = default to 'all' entry)
-        // schema_version          owned by plan 11
+        // lifetime_totals_window_geometry intentionally NOT seeded (null sentinel = use Lifetime default 700x640 centered)
+        // about_window_geometry   intentionally NOT seeded (null sentinel = use About default 460x560 centered)
+        // crystal_diagram_selected_anomaly intentionally NOT seeded (null sentinel = default to 'all' entry)
+        // schema_version          owned by the schema initializer / migrations
         // non_sticky_station_defaults_seeded owned by SqliteMarketStationCatalog
     }
 

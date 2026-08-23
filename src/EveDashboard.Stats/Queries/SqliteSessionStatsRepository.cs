@@ -19,11 +19,10 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 /// <remarks>
 /// Holds no mutable state — safe to register as a singleton in DI alongside
-/// the singleton <see cref="ISqliteDatabase"/> (plan 16 wires both up at
-/// <c>App.xaml.cs OnStartup</c>). Plan 18 replaced the previous <c>0.0</c>
-/// ISK literals with real values computed via <see cref="IIskCalculator"/>;
-/// the <c>EmptySnapshot</c> fallback (8.1 = B) keeps its <c>0.0</c> literals
-/// because no session means no ISK.
+/// the singleton <see cref="ISqliteDatabase"/> (both are wired up at
+/// <c>App.xaml.cs OnStartup</c>). ISK figures are computed via
+/// <see cref="IIskCalculator"/>; the <c>EmptySnapshot</c> fallback keeps its
+/// <c>0.0</c> literals because no session means no ISK.
 /// </remarks>
 public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
 {
@@ -39,9 +38,9 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
     /// <param name="db">SQLite database wrapper. Typically the singleton
     ///     <c>SqliteDatabase</c> registered at app startup against the
     ///     session SQLite file.</param>
-    /// <param name="iskCalculator">Calculator that turns per-pilot mined units into ISK (plan 18).</param>
+    /// <param name="iskCalculator">Calculator that turns per-pilot mined units into ISK.</param>
     /// <param name="settings">Settings repository — read once per snapshot for refining yield, price mode, and selected station.</param>
-    /// <param name="sdeLookup">SDE lookup — resolves refined-material type ids to display names for the plan-43 "Refined output" section.</param>
+    /// <param name="sdeLookup">SDE lookup — resolves refined-material type ids to display names for the "Refined output" section.</param>
     /// <param name="log">Logger for diagnostics — Debug per call, Warning
     ///     when called with a missing <c>sessionId</c>.</param>
     /// <exception cref="ArgumentNullException">
@@ -74,7 +73,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(sessionId);
-        // Query 0: existence check (decision 8.1 = B - log Warning, return empty SessionStats)
+        // Query 0: existence check - on a missing session, log Warning and return empty SessionStats.
         var sidOnly = new Dictionary<string, object?> { ["$sid"] = sessionId };
         var exists = await _db.QueryScalarAsync<long>(SessionExistsSql, sidOnly, ct);
         if (exists == 0)
@@ -92,8 +91,8 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
             ["$asOf"] = asOfIso,
         };
 
-        // Query 1: active duration in seconds (decision 1.2 = B - QueryAsync<double> with
-        // explicit mapper, since QueryScalarAsync<double> is not in plan 05's tested-types set)
+        // Query 1: active duration in seconds (QueryAsync<double> with an explicit
+        // mapper, since QueryScalarAsync<double> is not in the wrapper's tested scalar-type set)
         var activeRows = await _db.QueryAsync(
             ActiveDurationSql,
             static reader => reader.GetDouble(0),
@@ -110,7 +109,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
             ct);
         var sessionRow = sessionRows[0];
 
-        // 8.2 = A: rates default to 0 when denominator is 0
+        // Rates default to 0 when the denominator is 0.
         var sessionM3PerSec = activeSeconds > 0
             ? sessionRow.TotalM3 / activeSeconds
             : 0.0;
@@ -125,8 +124,8 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
             p,
             ct);
 
-        // Query 4 (plan 18, plan 36): per-(pilot, type_id) units totals — drives ISK calc.
-        // Plan 36: single query now returns BOTH total_units and crit_units per
+        // Query 4: per-(pilot, type_id) units totals — drives ISK calc.
+        // A single query returns BOTH total_units and crit_units per
         // (pilot, type_id) so the two-dict IIskCalculator overload can derive Total
         // ISK and Crit ISK in one pass per pilot (shared price-cache, exact math).
         var perPilotPerType = await _db.QueryAsync(
@@ -146,12 +145,12 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
 
         var pilotIsk     = new Dictionary<long, double>();
         var pilotCritIsk = new Dictionary<long, double>();
-        // Plan 43: per-pilot refined output (name-resolved, sorted) + the
+        // Per-pilot refined output (name-resolved, sorted) + the
         // session-wide sum of every pilot's refined map (mirrors how session ISK
         // is the sum of per-pilot ISK — no second ISK call).
         var pilotRefined     = new Dictionary<long, IReadOnlyList<RefinedMaterialAmount>>();
         var sessionRefinedMap = new Dictionary<long, long>();
-        // Plan 45: per-material ISK summed across pilots, parallel to the quantity
+        // Per-material ISK summed across pilots, parallel to the quantity
         // map, so the session-wide refined list carries ISK alongside quantity.
         var sessionRefinedIskMap = new Dictionary<long, double>();
         foreach (var pilotGroup in perPilotPerType.GroupBy(r => r.PilotId))
@@ -248,15 +247,15 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
     }
 
     /// <summary>
-    /// Plan 43/45: turn a refined-material quantity map into a display list — name
+    /// Turn a refined-material quantity map into a display list — name
     /// resolved via the SDE (falling back to <c>#&lt;typeId&gt;</c>), sorted by
     /// quantity descending. Each row's <see cref="RefinedMaterialAmount.Isk"/> is
-    /// taken from <paramref name="iskMap"/> (plan 45), defaulting to <c>0</c> for a
+    /// taken from <paramref name="iskMap"/>, defaulting to <c>0</c> for a
     /// material with no captured price. Returns an empty list for an empty
     /// <paramref name="qtyMap"/>.
     /// </summary>
     /// <param name="qtyMap">Refined-material type id -> yield-applied quantity.</param>
-    /// <param name="iskMap">Refined-material type id -> yield-applied ISK value (plan 45); a material absent here values at 0.</param>
+    /// <param name="iskMap">Refined-material type id -> yield-applied ISK value; a material absent here values at 0.</param>
     private IReadOnlyList<RefinedMaterialAmount> BuildRefinedList(
         IReadOnlyDictionary<long, long> qtyMap,
         IReadOnlyDictionary<long, double> iskMap)
@@ -284,7 +283,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         return list;
     }
 
-    /// <summary>Empty snapshot returned when the requested session id is not found (8.1 = B).</summary>
+    /// <summary>Empty snapshot returned when the requested session id is not found.</summary>
     private static SessionStats EmptySnapshot(string sessionId, DateTimeOffset asOf) =>
         new(
             SessionId:          sessionId,
@@ -321,7 +320,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
                     reader.GetString(5),
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal),
-            Role:       reader.GetString(6));   // Plan 35: sp.role appended to PerPilotSql SELECT.
+            Role:       reader.GetString(6));   // sp.role is appended to the PerPilotSql SELECT.
 
     private const string SessionExistsSql =
         "SELECT 1 FROM session WHERE session_id = $sid LIMIT 1";
@@ -334,7 +333,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         WHERE session_id = $sid AND is_pause = 0
         """;
 
-    // Plan 35: log-reading aggregate queries read from eligible_log (the CTE filters
+    // Log-reading aggregate queries read from eligible_log (the CTE filters
     // by role per RoleEligibilityCte.Sql). The $sid parameter is consumed by the CTE;
     // the outer SELECT no longer needs its own WHERE session_id = $sid clause.
     private const string SessionAggregatesSql = RoleEligibilityCte.Sql + """
@@ -347,7 +346,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         FROM eligible_log
         """;
 
-    // Plan 36: returns per-(pilot, type_id) BOTH the total mined units and the
+    // Returns per-(pilot, type_id) BOTH the total mined units and the
     // crit-only subset in a single query so the repository can call the two-dict
     // IIskCalculator overload once per pilot (shared price-cache; exact crit
     // ISK with no proportional rounding drift).
@@ -363,7 +362,7 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         GROUP BY pilot_id, type_id
         """;
 
-    // Plan 35: outer LEFT JOIN keeps Cyno/Combat pilots visible in byCharacter
+    // The outer LEFT JOIN keeps Cyno/Combat pilots visible in byCharacter
     // (their stats are all zeros because eligible_log filtered their rows out),
     // and the SELECT carries sp.role so CharacterStats.Role can be populated.
     private const string PerPilotSql = RoleEligibilityCte.Sql + """
@@ -396,5 +395,5 @@ public sealed class SqliteSessionStatsRepository : ISessionStatsRepository
         long             CritCount,
         long             TickCount,
         DateTimeOffset?  LastEventAt,
-        string           Role);   // Plan 35: source role string from session_pilot.role.
+        string           Role);   // Source role string from session_pilot.role.
 }

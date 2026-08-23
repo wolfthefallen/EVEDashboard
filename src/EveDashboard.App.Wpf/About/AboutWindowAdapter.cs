@@ -4,7 +4,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Plan 52: production <see cref="IAboutWindow"/> implementation. Holds a single
+/// Production <see cref="IAboutWindow"/> implementation. Holds a single
 /// <see cref="AboutWindow"/> for the app lifetime; subsequent <see cref="Show"/>
 /// calls re-show / bring-to-front the same instance so geometry survives
 /// in-session open/close cycles.

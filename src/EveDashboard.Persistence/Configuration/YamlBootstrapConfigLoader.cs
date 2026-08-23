@@ -18,8 +18,8 @@ namespace EveDashboard.Persistence.Configuration;
 /// environment variables in the <c>gamelog_path</c> value, and returns a
 /// <see cref="BootstrapConfigResult"/>. It does NOT validate that the
 /// returned path exists on disk; downstream consumers
-/// (<c>EveDashboard.Mining.Gamelogs.GamelogDiscoveryService</c> or plan 16's
-/// startup) handle that and surface a popup if the path is missing.
+/// (<c>EveDashboard.Mining.Gamelogs.GamelogDiscoveryService</c> or the WPF
+/// app's startup sequence) handle that and surface a popup if the path is missing.
 /// </para>
 /// <para>
 /// Single-threaded usage assumed: <see cref="LoadAsync"/> runs once at

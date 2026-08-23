@@ -50,7 +50,7 @@ public class SqliteReportingQueriesTests
 
     private static async Task<string> InsertSessionAsync(SqliteDatabase db, string name)
     {
-        // Plan 38: session ids are content-addressed sha256 hex strings. Each
+        // Session ids are content-addressed sha256 hex strings. Each
         // distinct name within a test's DB hashes to a distinct id; that is
         // enough to keep FKs and per-session assertions unambiguous here.
         var sessionId = EveDashboard.Core.Sessions.SessionId.Compute(name, ToIso(T0));
@@ -120,6 +120,71 @@ public class SqliteReportingQueriesTests
     // ---- GetAllSessionSummariesAsync ----------------------------------------------
 
     [Fact]
+    public async Task GetAllSessionSummariesAsync_omits_archived_sessions_by_default()
+    {
+        // An archived session (the source of a combine) must vanish from the
+        // sidebar / Haul Value picker and never count toward the lifetime rollup.
+        await using var db = await NewSchemaAsync();
+        var live = await InsertSessionAsync(db, "Live Run");
+        await InsertSessionTimeAsync(db, live, T0, T0.AddMinutes(30));
+        var archived = await InsertSessionAsync(db, "Old Run");
+        await InsertSessionTimeAsync(db, archived, T0.AddDays(-1), T0.AddDays(-1).AddMinutes(45));
+        await db.ExecuteNonQueryAsync(
+            "UPDATE session SET archived = 1, merged_into = $into WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$into"] = live, ["$sid"] = archived });
+        var statsRepo = new StubStatsRepo
+        {
+            ByIdSnapshots =
+            {
+                [live]     = MakeSnapshot(live,     TimeSpan.FromMinutes(30), totalIsk: 100_000.0),
+                [archived] = MakeSnapshot(archived, TimeSpan.FromMinutes(45), totalIsk: 250_000.0),
+            },
+        };
+        var queries = NewQueries(db, statsRepo);
+
+        var result = await queries.GetAllSessionSummariesAsync();
+
+        result.Sessions.Should().ContainSingle().Which.SessionId.Should().Be(live);
+        result.Sessions[0].Archived.Should().BeFalse();
+        result.Sessions[0].MergedInto.Should().BeNull();
+        result.Lifetime.TotalTime.Should().Be(TimeSpan.FromMinutes(30), "archived sessions are not summed");
+        result.Lifetime.TotalIsk.Should().Be(100_000.0);
+    }
+
+    [Fact]
+    public async Task GetAllSessionSummariesAsync_includeArchived_lists_them_flagged_but_still_excludes_them_from_lifetime()
+    {
+        await using var db = await NewSchemaAsync();
+        var live = await InsertSessionAsync(db, "Live Run");
+        await InsertSessionTimeAsync(db, live, T0, T0.AddMinutes(30));
+        var archived = await InsertSessionAsync(db, "Old Run");
+        await InsertSessionTimeAsync(db, archived, T0.AddDays(-1), T0.AddDays(-1).AddMinutes(45));
+        await db.ExecuteNonQueryAsync(
+            "UPDATE session SET archived = 1, merged_into = $into WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$into"] = live, ["$sid"] = archived });
+        var statsRepo = new StubStatsRepo
+        {
+            ByIdSnapshots =
+            {
+                [live]     = MakeSnapshot(live,     TimeSpan.FromMinutes(30), totalIsk: 100_000.0),
+                [archived] = MakeSnapshot(archived, TimeSpan.FromMinutes(45), totalIsk: 250_000.0),
+            },
+        };
+        var queries = NewQueries(db, statsRepo);
+
+        var result = await queries.GetAllSessionSummariesAsync(includeArchived: true);
+
+        result.Sessions.Should().HaveCount(2);
+        var archivedRow = result.Sessions.Single(r => r.SessionId == archived);
+        archivedRow.Archived.Should().BeTrue();
+        archivedRow.MergedInto.Should().Be(live);
+        archivedRow.TotalIskMined.Should().Be(250_000.0, "the row still carries its own stats for inspection");
+        result.Sessions.Single(r => r.SessionId == live).Archived.Should().BeFalse();
+        result.Lifetime.TotalTime.Should().Be(TimeSpan.FromMinutes(30), "listing archived rows never adds them to the rollup");
+        result.Lifetime.TotalIsk.Should().Be(100_000.0);
+    }
+
+    [Fact]
     public async Task GetAllSessionSummariesAsync_returns_empty_list_for_empty_database()
     {
         await using var db = await NewSchemaAsync();
@@ -156,7 +221,7 @@ public class SqliteReportingQueriesTests
         var result = await queries.GetAllSessionSummariesAsync();
 
         result.Sessions.Should().HaveCount(2);
-        // Plan 38: ordered by start_time DESC -> newest first (sha256 ids are not chronological).
+        // Ordered by start_time DESC -> newest first (sha256 ids are not chronological).
         result.Sessions[0].SessionId.Should().Be(s2);
         result.Sessions[0].Name.Should().Be("Second Run");
         result.Sessions[0].PilotCount.Should().Be(2);
@@ -228,7 +293,7 @@ public class SqliteReportingQueriesTests
     [Fact]
     public async Task GetAllSessionSummariesAsync_lifetime_sums_time_isk_and_refined_across_sessions()
     {
-        // Plan 46: the lifetime rollup sums each session's active duration, total
+        // The lifetime rollup sums each session's active duration, total
         // ISK, and per-material refined output (qty + ISK), sorted by qty desc.
         await using var db = await NewSchemaAsync();
         var s1 = await InsertSessionAsync(db, "First Run");
@@ -429,7 +494,7 @@ public class SqliteReportingQueriesTests
         result.Single().TypeName.Should().Be("#99999");
     }
 
-    // ---- GetRefinedMatBreakdownAsync (plan 43) ----------------------------------
+    // ---- GetRefinedMatBreakdownAsync --------------------------------------------
 
     private const long TritaniumTypeId = 34L;
     private const long PyeriteTypeId = 35L;
@@ -617,7 +682,7 @@ public class SqliteReportingQueriesTests
     private sealed class StubIskCalculator : IIskCalculator
     {
         /// <summary>
-        /// Plan 43: optional refined-quantity map (refined-material type_id -> units)
+        /// Optional refined-quantity map (refined-material type_id -> units)
         /// returned on every <c>ComputeAsync</c>. Empty by default so the m^3 / ISK
         /// tests above are unaffected; set it to drive the refined-breakdown test.
         /// </summary>

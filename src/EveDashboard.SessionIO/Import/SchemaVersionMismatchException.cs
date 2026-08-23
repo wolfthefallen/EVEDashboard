@@ -3,10 +3,10 @@ namespace EveDashboard.SessionIO.Import;
 /// <summary>
 /// Thrown when an import file's export-FORMAT version (its
 /// <c>_manifest.schema_version</c> wire field) is newer than this app's
-/// supported export format (<c>SessionExportFormat.CurrentVersion</c>). Plan 42
-/// decision 4.1 = B decoupled the export-format version from the DB
-/// <c>schema_version</c>, so an additive schema migration no longer blocks
-/// import of an older backup — only a genuinely newer export shape is refused.
+/// supported export format (<c>SessionExportFormat.CurrentVersion</c>). The
+/// export-format version is decoupled from the DB <c>schema_version</c>, so an
+/// additive schema migration never blocks import of an older backup — only a
+/// genuinely newer export shape is refused.
 /// </summary>
 public sealed class SchemaVersionMismatchException : Exception
 {
