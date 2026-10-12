@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 using EveDashboard.Core.Domain;
 using Microsoft.Extensions.Logging;
@@ -28,14 +27,6 @@ public sealed class GamelogDiscoveryService
     internal static readonly Regex FilenameRegex = new(
         @"^(\d{8})_(\d{6})_(\d+)\.txt$",
         RegexOptions.Compiled);
-
-    private static readonly Regex ListenerRegex = new(
-        @"^\s*Listener:\s*(.+)$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    /// <summary>How many lines from the top of a log we scan looking for the Listener line.</summary>
-    /// <remarks>The Listener line is at line 3 in real EVE logs; 15 is defensive headroom.</remarks>
-    private const int ListenerSearchLineLimit = 15;
 
     private readonly string _directory;
     private readonly ILogger<GamelogDiscoveryService> _logger;
@@ -132,7 +123,7 @@ public sealed class GamelogDiscoveryService
             string? listenerName;
             try
             {
-                listenerName = await ReadListenerNameAsync(entry.FilePath, ct);
+                listenerName = await GamelogFiles.TryReadListenerAsync(entry.FilePath, ct);
             }
             catch (IOException ex)
             {
@@ -151,7 +142,7 @@ public sealed class GamelogDiscoveryService
                     "Gamelog {Filename} for character {CharacterId} has no Listener: line in the first {LineLimit} lines. " +
                     "The file may still be opening, may have been truncated by an EVE crash, or may be corrupt; " +
                     "skipping. The next discovery run may pick it up if the situation was transient.",
-                    entry.Filename, charId, ListenerSearchLineLimit);
+                    entry.Filename, charId, GamelogFiles.ListenerSearchLineLimit);
                 continue;
             }
 
@@ -162,8 +153,8 @@ public sealed class GamelogDiscoveryService
         // Drives the Config-mode pilot list "newest first" ordering.
         result.Sort((a, b) =>
         {
-            var aTime = SafeMtime(a.LogFilePath);
-            var bTime = SafeMtime(b.LogFilePath);
+            var aTime = GamelogFiles.LastWriteUtcOrMin(a.LogFilePath);
+            var bTime = GamelogFiles.LastWriteUtcOrMin(b.LogFilePath);
             var cmp = bTime.CompareTo(aTime);
             return cmp != 0 ? cmp : StringComparer.OrdinalIgnoreCase.Compare(a.Name, b.Name);
         });
@@ -172,39 +163,12 @@ public sealed class GamelogDiscoveryService
         {
             _logger.LogDebug(
                 "Pilots ordered by last-active mtime: top={TopName}@{TopMtime:O}, bottom={BottomName}@{BottomMtime:O}, count={Count}",
-                result[0].Name, SafeMtime(result[0].LogFilePath),
-                result[^1].Name, SafeMtime(result[^1].LogFilePath),
+                result[0].Name, GamelogFiles.LastWriteUtcOrMin(result[0].LogFilePath),
+                result[^1].Name, GamelogFiles.LastWriteUtcOrMin(result[^1].LogFilePath),
                 result.Count);
         }
 
         return result;
     }
 
-    private static DateTime SafeMtime(string path) =>
-        File.Exists(path) ? File.GetLastWriteTimeUtc(path) : DateTime.MinValue;
-
-    private async Task<string?> ReadListenerNameAsync(string filepath, CancellationToken ct)
-    {
-        await using var stream = new FileStream(
-            filepath,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite | FileShare.Delete);
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-
-        for (int i = 0; i < ListenerSearchLineLimit; i++)
-        {
-            ct.ThrowIfCancellationRequested();
-            var line = await reader.ReadLineAsync(ct);
-            if (line is null) break;
-
-            var match = ListenerRegex.Match(line);
-            if (match.Success)
-            {
-                return match.Groups[1].Value.Trim();
-            }
-        }
-
-        return null;
-    }
 }

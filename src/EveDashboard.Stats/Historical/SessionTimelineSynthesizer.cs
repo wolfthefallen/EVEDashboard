@@ -1,9 +1,6 @@
 namespace EveDashboard.Stats.Historical;
 
-/// <summary>A closed time interval (UTC).</summary>
-/// <param name="Start">Inclusive start.</param>
-/// <param name="Stop">Inclusive end; never earlier than <paramref name="Start"/>.</param>
-public sealed record TimeInterval(DateTimeOffset Start, DateTimeOffset Stop);
+using EveDashboard.Core.Sessions.Historical;
 
 /// <summary>One <c>session_time</c> row to write.</summary>
 /// <param name="Start">Row <c>start_time</c>.</param>
@@ -21,11 +18,12 @@ public sealed record SessionTimeRowSpec(DateTimeOffset Start, DateTimeOffset Sto
 /// Merged sources are authoritative for their own spans: their active intervals
 /// are taken as-is (unioned, so two sources that ran concurrently cannot double
 /// count wall-clock time). Every part of the window NOT covered by a source is
-/// treated the way the live session controller treats time: paused until the
-/// first qualifying (Tick / Crit) event, active from there, a pause synthesised
-/// after any gap longer than the idle threshold - starting <c>idle</c> after the
-/// last event, exactly when the live auto-pause would have fired - and paused
-/// again <c>idle</c> after the last event of the gap.
+/// handed to <see cref="ActivityClusters.FromEventTimes"/>, which applies the
+/// rule the live session controller applies: paused until the first qualifying
+/// (Tick / Crit) event, active from there, a pause synthesised after any gap
+/// longer than the idle threshold - starting <c>idle</c> after the last event,
+/// exactly when the live auto-pause would have fired - and paused again
+/// <c>idle</c> after the last event of the gap.
 /// </para>
 /// <para>
 /// Only events inside uncovered gaps drive the idle rule; an event inside a
@@ -66,7 +64,8 @@ public static class SessionTimelineSynthesizer
         var events = qualifyingEventTimes.Where(t => t >= windowStart && t <= windowStop).OrderBy(t => t).ToList();
         foreach (var gap in Complement(windowStart, windowStop, covered))
         {
-            active.AddRange(IdleRule(gap, events.Where(t => t >= gap.Start && t <= gap.Stop).ToList(), idle));
+            active.AddRange(ActivityClusters.FromEventTimes(
+                events.Where(t => t >= gap.Start && t <= gap.Stop).ToList(), idle, gap.Stop));
         }
 
         var activeMerged = Merge(active);
@@ -74,28 +73,6 @@ public static class SessionTimelineSynthesizer
         foreach (var a in activeMerged) rows.Add(new SessionTimeRowSpec(a.Start, a.Stop, IsPause: false));
         foreach (var p in Complement(windowStart, windowStop, activeMerged)) rows.Add(new SessionTimeRowSpec(p.Start, p.Stop, IsPause: true));
         return rows.Where(r => r.Stop > r.Start).OrderBy(r => r.Start).ToList();
-    }
-
-    /// <summary>Active segments inside one uncovered gap, per the live idle rule.</summary>
-    private static IEnumerable<TimeInterval> IdleRule(TimeInterval gap, IReadOnlyList<DateTimeOffset> events, TimeSpan idle)
-    {
-        if (events.Count == 0) yield break;
-
-        var segmentStart = events[0];
-        for (var i = 0; i < events.Count; i++)
-        {
-            var last = i == events.Count - 1;
-            if (last)
-            {
-                var end = events[i] + idle;
-                yield return new TimeInterval(segmentStart, end < gap.Stop ? end : gap.Stop);
-            }
-            else if (events[i + 1] - events[i] > idle)
-            {
-                yield return new TimeInterval(segmentStart, events[i] + idle);
-                segmentStart = events[i + 1];
-            }
-        }
     }
 
     private static TimeInterval? Clip(TimeInterval i, DateTimeOffset lo, DateTimeOffset hi)

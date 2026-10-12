@@ -25,6 +25,9 @@ automation, no account login, no interaction with the game client.
 - **Build from history** - forgot to press Start? Build a session from a past date/time window
   straight from your gamelogs, or combine saved sessions into one. The originals are archived,
   never deleted, and nothing is ever counted twice.
+- **A session for every day you mined** - point it at a date range (or at every log you have) and
+  it works out which days you were out, who was out with you, and where the breaks were, then
+  builds one session per day named for that day. No fleet to pick: the roster comes from the logs.
 - **A normal window** - size and dock it however you like (works great with FancyZones on an
   ultrawide). It is not an overlay and is never forced on top.
 

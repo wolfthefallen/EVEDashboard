@@ -14,6 +14,6 @@ public interface IHistoricalSessionDialog
     /// from these sessions' spans, they are pre-ticked to combine, and no gamelog
     /// parsing happens. Null or empty opens the date-range mode.
     /// </param>
-    /// <returns>The outcome when a session was built; <c>null</c> when the user cancelled.</returns>
-    HistoricalBuildOutcome? Show(IReadOnlyList<string>? preselectedSessionIds);
+    /// <returns>The outcome when at least one session was built; <c>null</c> when the user cancelled or nothing was written.</returns>
+    HistoricalBatchOutcome? Show(IReadOnlyList<string>? preselectedSessionIds);
 }

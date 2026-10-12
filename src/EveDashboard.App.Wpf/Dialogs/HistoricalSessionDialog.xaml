@@ -12,6 +12,7 @@
         Foreground="{DynamicResource ForegroundBrush}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
         <converters:StringEmptyToVisibilityConverter x:Key="StringEmptyToVis" />
     </Window.Resources>
@@ -59,6 +60,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Start (EVE time)" VerticalAlignment="Center" Margin="0,0,8,4"
@@ -73,30 +77,91 @@
                 <TextBox Grid.Row="1" Grid.Column="2" Width="64" Text="{Binding StopTimeText, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
                          ToolTip="HH:mm, EVE time (UTC)" />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Fleet" VerticalAlignment="Center" Margin="0,0,8,4"
+                <!-- Everything the gamelogs cover, in one click; the notice says what that is. -->
+                <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"
+                        Content="Use all available logs"
+                        Command="{Binding UseAllAvailableLogsCommand}"
+                        Visibility="{Binding IsCombineMode, Converter={StaticResource InverseBoolToVis}}"
+                        Padding="10,3" Margin="0,2,0,4"
+                        ToolTip="Fill the range with everything the EVE log folder holds" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+                           Text="{Binding InventoryNotice}"
+                           Visibility="{Binding InventoryNotice, Converter={StaticResource StringEmptyToVis}}"
+                           TextWrapping="Wrap" FontSize="11" Opacity="0.8" Margin="0,0,0,6"
                            Foreground="{DynamicResource ForegroundBrush}" />
-                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+
+                <!-- Per-day mode discovers its own roster, so a fleet is only asked
+                     for when building ONE session across the whole window. -->
+                <CheckBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                          IsChecked="{Binding SplitByDay}"
+                          Visibility="{Binding IsCombineMode, Converter={StaticResource InverseBoolToVis}}"
+                          Content="Make a new session for each day in the range"
+                          Margin="0,0,0,4"
+                          Foreground="{DynamicResource ForegroundBrush}"
+                          ToolTip="Who was mining is worked out from the logs for each day, so no fleet is needed" />
+                <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                          IsChecked="{Binding MergeSameDaySessions}"
+                          Visibility="{Binding IsDailyMode, Converter={StaticResource BoolToVis}}"
+                          Content="Combine saved sessions found on the same day"
+                          Margin="0,0,0,6"
+                          Foreground="{DynamicResource ForegroundBrush}"
+                          ToolTip="Unticked, their time is left out instead so nothing is counted twice" />
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Fleet" VerticalAlignment="Center" Margin="0,0,8,4"
+                           Visibility="{Binding IsFleetVisible, Converter={StaticResource BoolToVis}}"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+                <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2"
                           ItemsSource="{Binding Fleets}" DisplayMemberPath="Name"
+                          Visibility="{Binding IsFleetVisible, Converter={StaticResource BoolToVis}}"
                           SelectedItem="{Binding SelectedFleet}" Margin="0,0,0,4" />
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Name" VerticalAlignment="Center" Margin="0,0,8,4"
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Name" VerticalAlignment="Center" Margin="0,0,8,4"
                            Foreground="{DynamicResource ForegroundBrush}" />
-                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding SessionName, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
-                         ToolTip="Use {{$STARTDATE}}, {{$ENDDATE}}, {{$YYYY}}, {{$DATE}}, {{$TIME}}, {{$DATETIME}}, {{$CHARS}}" />
+                <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding SessionName, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" Margin="0,0,0,4"
+                         ToolTip="Use {{$DATE}}, {{$DOW}}, {{$OVERNIGHT}}, {{$STARTDATE}}, {{$ENDDATE}}, {{$YYYY}}, {{$TIME}}, {{$DATETIME}}, {{$CHARS}}" />
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes" VerticalAlignment="Top" Margin="0,4,8,4"
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Notes" VerticalAlignment="Top" Margin="0,4,8,4"
                            Foreground="{DynamicResource ForegroundBrush}" />
-                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True" MinHeight="40" MaxHeight="80" VerticalScrollBarVisibility="Auto" Padding="4,2" Margin="0,0,0,4" />
             </Grid>
 
             <TextBlock Grid.Row="3"
                        Text="Saved sessions that overlap this window (tick the ones to combine into the new session):"
+                       Visibility="{Binding IsDailyMode, Converter={StaticResource InverseBoolToVis}}"
+                       TextWrapping="Wrap" Margin="0,0,0,4"
+                       Foreground="{DynamicResource ForegroundBrush}" />
+            <TextBlock Grid.Row="3"
+                       Text="The sessions that will be created, one per mining day:"
+                       Visibility="{Binding IsDailyMode, Converter={StaticResource BoolToVis}}"
                        TextWrapping="Wrap" Margin="0,0,0,4"
                        Foreground="{DynamicResource ForegroundBrush}" />
 
+            <!-- Per-day plan: what one press of Build is about to create. -->
+            <Border Grid.Row="4" BorderBrush="{DynamicResource WidgetBorderBrush}" BorderThickness="1" MinHeight="80"
+                    Visibility="{Binding IsDailyMode, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding DayRows}" Margin="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,3">
+                                    <TextBlock Foreground="{DynamicResource ForegroundBrush}">
+                                        <Run Text="{Binding DayText, Mode=OneWay}" FontWeight="Bold" />
+                                        <Run Text="  " />
+                                        <Run Text="{Binding Name, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Detail}" FontSize="11" Opacity="0.8" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource ForegroundBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
             <!-- Overlap list -->
-            <Border Grid.Row="4" BorderBrush="{DynamicResource WidgetBorderBrush}" BorderThickness="1" MinHeight="80">
+            <Border Grid.Row="4" BorderBrush="{DynamicResource WidgetBorderBrush}" BorderThickness="1" MinHeight="80"
+                    Visibility="{Binding IsDailyMode, Converter={StaticResource InverseBoolToVis}}">
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Overlaps}" Margin="4">
@@ -130,34 +195,49 @@
                 </Grid>
             </Border>
 
-            <!-- Exclusion notice (spec 3.b) -->
+            <!-- Spells out whose time is left out when a session is not combined,
+                 so an unticked row never silently changes the result. -->
             <TextBlock Grid.Row="5"
                        Text="{Binding ExclusionNotice}"
                        Visibility="{Binding ExclusionNotice, Converter={StaticResource StringEmptyToVis}}"
                        TextWrapping="Wrap" FontSize="11" Margin="0,6,0,0"
                        Foreground="{DynamicResource ForegroundBrush}" />
 
-            <TextBlock Grid.Row="6"
-                       Text="{Binding StatusMessage}"
-                       Visibility="{Binding StatusMessage, Converter={StaticResource StringEmptyToVis}}"
-                       TextWrapping="Wrap" Margin="0,6,0,0"
-                       Foreground="{DynamicResource ForegroundBrush}" />
+            <StackPanel Grid.Row="6">
+                <TextBlock Text="{Binding StatusMessage}"
+                           Visibility="{Binding StatusMessage, Converter={StaticResource StringEmptyToVis}}"
+                           TextWrapping="Wrap" Margin="0,6,0,0"
+                           Foreground="{DynamicResource ForegroundBrush}" />
+
+                <!-- Sweeps while surveying / reading / pricing, then fills day by
+                     day once there is a count. Building a year of history is
+                     minutes of work; without this the window looks hung. -->
+                <ProgressBar Height="6" Margin="0,6,0,0"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"
+                             IsIndeterminate="{Binding IsProgressIndeterminate}"
+                             Minimum="0"
+                             Maximum="{Binding ProgressMaximum}"
+                             Value="{Binding ProgressValue, Mode=OneWay}" />
+            </StackPanel>
 
             <!-- One action slot that walks the user through the workflow: "Check overlaps"
                  until the current inputs have been checked, then "Build". Editing any
                  input flips it back (HasChecked clears), so Build can never sit there
                  disabled with no explanation. -->
             <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                <Button Content="Check overlaps"
+                <Button Content="{Binding ActionButtonText}"
                         Command="{Binding CheckOverlapsCommand}"
                         Visibility="{Binding HasChecked, Converter={StaticResource InverseBoolToVis}}"
-                        ToolTip="Find saved sessions that overlap this window before building"
+                        ToolTip="Work out what this range holds before anything is written"
                         Padding="14,4" Margin="0,0,8,0" />
-                <Button Content="Build"
+                <Button Content="{Binding ActionButtonText}"
                         Command="{Binding BuildCommand}"
                         Visibility="{Binding HasChecked, Converter={StaticResource BoolToVis}}"
                         Padding="14,4" Margin="0,0,8,0" />
-                <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="14,4" IsCancel="True" />
+                <!-- Closing mid-batch would leave the run going with nothing to
+                     report back to, so the way out is blocked while it works. -->
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="14,4" IsCancel="True"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" />
             </StackPanel>
         </Grid>
     </Border>

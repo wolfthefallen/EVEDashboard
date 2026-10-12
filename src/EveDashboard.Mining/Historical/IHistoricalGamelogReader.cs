@@ -25,4 +25,19 @@ public interface IHistoricalGamelogReader
         DateTimeOffset windowStart,
         DateTimeOffset windowStop,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Survey the gamelog folder (including its <c>old\</c> subfolder) without
+    /// parsing any mining lines: which pilots have logs, what they are called,
+    /// and how far back the logs reach.
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The pilots found and the overall span their logs cover; empty when the folder is missing or holds no gamelogs.</returns>
+    /// <exception cref="OperationCanceledException">Thrown if <paramref name="ct"/> is cancelled.</exception>
+    /// <remarks>
+    /// This is what lets a caller offer "every day I have logs for" without the
+    /// user naming pilots or dates. It reads only each pilot's newest log header,
+    /// so it stays cheap enough to run when a dialog opens.
+    /// </remarks>
+    Task<GamelogInventory> InventoryAsync(CancellationToken ct = default);
 }

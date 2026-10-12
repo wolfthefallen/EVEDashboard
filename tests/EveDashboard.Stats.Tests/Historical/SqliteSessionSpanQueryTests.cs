@@ -149,6 +149,48 @@ public class SqliteSessionSpanQueryTests
     }
 
     [Fact]
+    public async Task GetAllAsync_returns_every_non_archived_span_with_pilots_and_roles()
+    {
+        await using var db = await NewSchemaAsync();
+        var early = await SeedSessionAsync(db, "Early", new[] { (0, (int?)10, false) }, (1L, "Booster"));
+        var late = await SeedSessionAsync(db, "Late", new[] { (100, (int?)120, false) }, (2L, "Miner"));
+        var folded = await SeedSessionAsync(db, "Folded", new[] { (200, (int?)210, false) }, (1L, "Miner"));
+        await db.ExecuteNonQueryAsync(
+            "UPDATE session SET archived = 1 WHERE session_id = $sid",
+            new Dictionary<string, object?> { ["$sid"] = folded });
+        var query = new SqliteSessionSpanQuery(db, NullLogger<SqliteSessionSpanQuery>.Instance);
+
+        var spans = await query.GetAllAsync();
+
+        spans.Select(s => s.SessionId).Should().Equal(
+            new[] { early, late }, "archived sessions stay invisible");
+        spans[0].Start.Should().Be(T0);
+        spans[0].Pilots.Should().ContainSingle().Which.Role.Should().Be(PilotRole.Booster);
+        spans[1].Stop.Should().Be(T0.AddMinutes(120));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_extends_an_in_flight_session_to_the_asOf_instant()
+    {
+        await using var db = await NewSchemaAsync();
+        await SeedSessionAsync(db, "Running", new[] { (0, (int?)10, false), (10, null, false) }, (1L, "Miner"));
+        var query = new SqliteSessionSpanQuery(db, NullLogger<SqliteSessionSpanQuery>.Instance);
+
+        var spans = await query.GetAllAsync(asOf: T0.AddMinutes(90));
+
+        spans.Should().ContainSingle().Which.Stop.Should().Be(T0.AddMinutes(90));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_returns_nothing_for_an_empty_store()
+    {
+        await using var db = await NewSchemaAsync();
+        var query = new SqliteSessionSpanQuery(db, NullLogger<SqliteSessionSpanQuery>.Instance);
+
+        (await query.GetAllAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
     public void Constructor_rejects_nulls()
     {
         using var db = new SqliteDatabase(InMemory, NullLogger<SqliteDatabase>.Instance);

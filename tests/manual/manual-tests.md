@@ -1417,6 +1417,112 @@ other state is touched: the original sessions were restored by step 9.
 
 ---
 
+## 12.7 Reports — build a session for every day you mined
+
+Verifies the per-day batch: the gamelog survey, the day plan preview, a run
+that crosses midnight staying whole, merging versus excluding same-day saved
+sessions, skipped days, failure isolation on a re-run, and the generated names.
+
+### Setup
+
+- No session Running or Paused (Stop any live session first).
+- Gamelogs for several days you actually mined, including at least one day
+  where two or more of your pilots mined together. Note those dates (EVE
+  time). If you have an `old\` subfolder under `Gamelogs`, leave it in place -
+  it is meant to be included.
+- Note (EVE time) one day whose mining you ALREADY have a saved session for,
+  and that session's name and Total ISK from the sidebar.
+- Settings -> Pricing: note the selected station.
+- Reports open, `Show archived` unticked.
+
+### Steps
+
+1. **The survey.** Click `Build from history...`.
+   - Expected: `Make a new session for each day in the range` is already
+     ticked, `Combine saved sessions found on the same day` is ticked, and NO
+     Fleet dropdown is shown (the roster comes from the logs). Under the dates
+     a notice reads "Logs found for N pilot(s), <first date> to <last date>:
+     <names>" and lists every pilot you have logs for, including any that only
+     appear under `old\`. The name box reads
+     `{{$DATE}} {{$DOW}} history{{$OVERNIGHT}}`.
+2. **Use all available logs.** Click `Use all available logs`.
+   - Expected: the start date jumps to your oldest log's date at `00:00` and
+     the stop to today (time = now) or the last log's date at `23:59`. The
+     action button reads `Check the days`.
+3. **Narrow the range.** Set the range to cover two or three of your noted
+   mining days only, then click `Check the days`.
+   - Expected: while it works the status reads "Reading the gamelogs...". Then
+     one row per day appears, each showing `yyyy-MM-dd` in bold followed by the
+     name that session will get (e.g. `2026-10-12 Sun history`), and under it
+     the EVE-time span, the pilot count and the pilot names. The status reads
+     "N session(s) to build, M day(s) skipped." The button now reads
+     `Build N sessions`.
+4. **Multi-pilot day.** Find the row for the day two pilots mined together.
+   - Expected: its pilot count and names include BOTH pilots - you were never
+     asked which fleet that was.
+5. **The plan is invalidated by an edit.** Untick
+   `Combine saved sessions found on the same day`.
+   - Expected: the day list clears and the button flips back to
+     `Check the days`.
+6. **Merging off.** With the box still unticked, include your already-tracked
+   day in the range and click `Check the days`.
+   - Expected: that day either shows as `No session` with
+     "Skipped: every pilot's mining that day already belongs to '<your saved
+     session>'", or (if you also mined untracked that day) shows a shorter span
+     with "leaving out time owned by 1 saved session(s)". Your saved session is
+     untouched in the sidebar.
+7. **Merging on.** Re-tick the box and click `Check the days` again.
+   - Expected: that day's row now says "folding in '<your saved session>'" and
+     its span widens to cover it.
+8. **Build.** Click `Build N sessions`.
+   - Expected: a progress bar appears under the status line - sweeping while it
+     surveys and reads, then filling day by day - and the status counts through
+     the days ("2026-10-12 (1 of 3)...", then "Pricing"). The window stays
+     responsive throughout (you can drag it); `Cancel` is greyed out and the
+     window refuses to close until the batch finishes. The dialog then closes on
+     its own and the Reports status line reads
+     "Built N session(s) for <first> to <last>: X mining rows, Y saved
+     session(s) folded in." plus a prices sentence. The sidebar now lists one
+     new session per day, named `yyyy-MM-dd Ddd history`, and sorting by the
+     **Name** column puts them in date order.
+9. **An overnight run.** If one of your days' mining carried past midnight,
+   find its row.
+   - Expected: it is ONE session on the earlier day, with
+     `(ends <dMMM>)` on the end of its name, and the following day has no
+     session for that tail.
+10. **Honest time.** Open one of the new sessions.
+    - Expected: Duration is the time you actually spent mining, not the whole
+      day - a long break in the middle is paused out. The m³/sec and ISK/h look
+      like the numbers you would have seen live, not divided by 24 hours.
+11. **Folded-in originals are archived.** Tick `Show archived`.
+    - Expected: the saved session from step 7 is listed as
+      "<name> (archived)"; untick and it disappears again. Lifetime Totals do
+      not include it.
+12. **Re-run safety.** Open `Build from history...`, set the SAME range, check
+    and build again.
+    - Expected: every day reports a failure rather than producing duplicates -
+      the status says "N day(s) failed: A session named '...' already exists;
+      pick a different name." No new sessions appear in the sidebar.
+13. **Delete as undo.** Delete the new session that folded one in (right-click
+    -> Delete), then untick / re-tick `Show archived`.
+    - Expected: the session it absorbed is back as a normal, un-archived
+      session with its original Total ISK.
+14. **Log check.** Open `%APPDATA%\EveDashboard\logs\EveDashboard_NNN.log`.
+    - Expected: one `Gamelog inventory: N pilot(s) across ...` line per check,
+      one `Daily history plan for ...` line per check, one
+      `Built historical session ...` line per day built, ONE
+      `Historical pricing for session ...` line per day built, and a
+      `Daily history batch finished: ...` line. No ERROR lines.
+
+### Cleanup
+
+Delete every session created in step 8 (right-click -> Delete) - deleting the
+one that absorbed a saved session restores that session automatically, as step
+13 showed. Untick `Show archived`. No fleets are created by this flow, so the
+New Session dialog needs no cleanup.
+
+---
+
 ## 12. SDE updater against live everef.net (advanced, network)
 
 Verifies the real-network code path against `data.everef.net`. The

@@ -66,83 +66,208 @@ public sealed class HistoricalMarketPricer : IHistoricalMarketPricer
     {
         ArgumentNullException.ThrowIfNull(sessionId);
 
+        var results = await PriceBatchAsync(
+            new[] { new HistoricalPricingTarget(sessionId, windowStart, windowStop) }, ct).ConfigureAwait(false);
+        return results[0];
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<HistoricalPricingResult>> PriceBatchAsync(
+        IReadOnlyList<HistoricalPricingTarget> targets,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(targets);
+        foreach (var target in targets) ArgumentNullException.ThrowIfNull(target.SessionId);
+        if (targets.Select(t => t.SessionId).Distinct(StringComparer.Ordinal).Count() != targets.Count)
+        {
+            throw new ArgumentException("targets contains duplicate session ids.", nameof(targets));
+        }
+        if (targets.Count == 0) return Array.Empty<HistoricalPricingResult>();
+
         var stationId = await _settings.GetSelectedStationIdAsync(ct).ConfigureAwait(false);
         var priceMode = await _settings.GetPriceModeAsync(ct).ConfigureAwait(false);
         var typeIds = _sde.GetRefinedMaterialTypeIds().Distinct().ToList();
         var wanted = typeIds.ToHashSet();
+        var batchIds = targets.Select(t => t.SessionId).ToHashSet(StringComparer.Ordinal);
 
-        // ---- Step 1: average the window's captured rows at the selected station. ----
-        var captured = await _db.QueryAsync(
-            "SELECT type_id, fetched_at, isk_buy, isk_sell FROM market_data WHERE station_id = $st AND session_id <> $sid",
+        // ---- Step 1: average each window's captured rows at the selected station. ----
+        // Rows belonging to ANY session in the batch are ignored, not just the one
+        // being priced: the averages this method writes are derived data, and a
+        // later day must never average an earlier day's derived row.
+        var captured = (await _db.QueryAsync(
+            "SELECT type_id, session_id, fetched_at, isk_buy, isk_sell FROM market_data WHERE station_id = $st",
             static r => (
                 TypeId: r.GetInt64(0),
-                FetchedAt: r.GetString(1),
-                Buy: r.IsDBNull(2) ? (double?)null : r.GetDouble(2),
-                Sell: r.IsDBNull(3) ? (double?)null : r.GetDouble(3)),
-            new Dictionary<string, object?> { ["$st"] = stationId, ["$sid"] = sessionId },
-            ct).ConfigureAwait(false);
-
-        var inWindow = captured
-            .Where(r => wanted.Contains(r.TypeId))
+                SessionId: r.GetString(1),
+                FetchedAt: r.GetString(2),
+                Buy: r.IsDBNull(3) ? (double?)null : r.GetDouble(3),
+                Sell: r.IsDBNull(4) ? (double?)null : r.GetDouble(4)),
+            new Dictionary<string, object?> { ["$st"] = stationId },
+            ct).ConfigureAwait(false))
+            .Where(r => wanted.Contains(r.TypeId) && !batchIds.Contains(r.SessionId))
             .Select(r => (r.TypeId, At: ParseUtc(r.FetchedAt), r.Buy, r.Sell))
-            .Where(r => r.At >= windowStart && r.At <= windowStop)
             .ToList();
 
-        var averagedTypes = new HashSet<long>();
-        var stamp = windowStop.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
-        foreach (var group in inWindow.GroupBy(r => r.TypeId))
+        var states = new List<TargetState>();
+        foreach (var target in targets)
         {
-            var buys = group.Where(r => r.Buy is not null).Select(r => r.Buy!.Value).ToList();
-            var sells = group.Where(r => r.Sell is not null).Select(r => r.Sell!.Value).ToList();
-            double? avgBuy = buys.Count > 0 ? buys.Average() : null;
-            double? avgSell = sells.Count > 0 ? sells.Average() : null;
-            if (avgBuy is null && avgSell is null) continue; // nothing usable for this type
+            var inWindow = captured
+                .Where(r => r.At >= target.WindowStart && r.At <= target.WindowStop)
+                .ToList();
 
-            await _db.ExecuteNonQueryAsync(
-                "INSERT INTO market_data (type_id, station_id, session_id, fetched_at, isk_buy, isk_sell) VALUES ($tid, $st, $sid, $at, $buy, $sell)",
-                new Dictionary<string, object?>
-                {
-                    ["$tid"] = group.Key,
-                    ["$st"] = stationId,
-                    ["$sid"] = sessionId,
-                    ["$at"] = stamp,
-                    ["$buy"] = (object?)avgBuy ?? DBNull.Value,
-                    ["$sell"] = (object?)avgSell ?? DBNull.Value,
-                },
-                ct).ConfigureAwait(false);
-            averagedTypes.Add(group.Key);
+            var state = new TargetState(target, inWindow.Count);
+            var stamp = target.WindowStop.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
+            foreach (var group in inWindow.GroupBy(r => r.TypeId))
+            {
+                var buys = group.Where(r => r.Buy is not null).Select(r => r.Buy!.Value).ToList();
+                var sells = group.Where(r => r.Sell is not null).Select(r => r.Sell!.Value).ToList();
+                double? avgBuy = buys.Count > 0 ? buys.Average() : null;
+                double? avgSell = sells.Count > 0 ? sells.Average() : null;
+                if (avgBuy is null && avgSell is null) continue; // nothing usable for this type
+
+                await InsertRowAsync(group.Key, stationId, target.SessionId, stamp, avgBuy, avgSell, ct).ConfigureAwait(false);
+                state.AveragedTypes.Add(group.Key);
+                state.RowsAveragedByType[group.Key] = group.Count();
+                if (!PriceCoverage.Covers(avgBuy, avgSell, priceMode)) state.Gaps.Add(group.Key);
+            }
+
+            // A type with no averaged row at all is a gap too.
+            foreach (var id in typeIds)
+            {
+                if (!state.AveragedTypes.Contains(id)) state.Gaps.Add(id);
+            }
+
+            states.Add(state);
         }
 
-        // ---- Step 2: gap-fill at today's prices for whatever is still uncovered. ----
-        // Rows the fetcher adds are newer than anything averaged, so the ISK
-        // calculator will prefer them: a type the fetcher touched counts as
-        // "fetched today" even if an averaged row (lacking the side the price
-        // mode needs) was written for it. The id watermark tells the two apart.
-        var watermark = await _db.QueryScalarAsync<long>(
-            "SELECT COALESCE(MAX(marketdata_id), 0) FROM market_data", ct: ct).ConfigureAwait(false);
-        await _fetcher.EnsurePricesAsync(typeIds, stationId, sessionId, priceMode, ct).ConfigureAwait(false);
+        // ---- Step 2: gap-fill at today's prices, fetching each type ONCE for the batch. ----
+        await FillGapsAsync(states, stationId, priceMode, ct).ConfigureAwait(false);
 
-        var fetchedTypes = (await _db.QueryAsync(
-            "SELECT DISTINCT type_id FROM market_data WHERE session_id = $sid AND marketdata_id > $mark",
-            static r => r.GetInt64(0),
-            new Dictionary<string, object?> { ["$sid"] = sessionId, ["$mark"] = watermark },
-            ct).ConfigureAwait(false)).ToHashSet();
-        var averagedOnly = averagedTypes.Count(t => !fetchedTypes.Contains(t));
-        var rowsAveraged = inWindow.Count(r => averagedTypes.Contains(r.TypeId) && !fetchedTypes.Contains(r.TypeId));
-        var unpriced = typeIds.Count(t => !averagedTypes.Contains(t) && !fetchedTypes.Contains(t));
-
-        var basis = (averagedOnly, fetchedTypes.Count) switch
+        var results = new List<HistoricalPricingResult>();
+        foreach (var state in states)
         {
-            (> 0, 0) => HistoricalPriceBasis.AveragedFromWindow,
-            (> 0, > 0) => HistoricalPriceBasis.Mixed,
-            _ => HistoricalPriceBasis.FetchedToday,
-        };
+            // Rows the fetcher adds are newer than anything averaged, so the ISK
+            // calculator will prefer them: a type the fetcher touched counts as
+            // "fetched today" even if an averaged row (lacking the side the price
+            // mode needs) was written for it.
+            var averagedOnly = state.AveragedTypes.Count(t => !state.FetchedTypes.Contains(t));
+            var rowsAveraged = state.RowsAveragedByType
+                .Where(kv => !state.FetchedTypes.Contains(kv.Key))
+                .Sum(kv => kv.Value);
+            var unpriced = typeIds.Count(t => !state.AveragedTypes.Contains(t) && !state.FetchedTypes.Contains(t));
 
-        _log.LogInformation(
-            "Historical pricing for session {SessionId} at station {StationId}: {Averaged} type(s) averaged from {Rows} window row(s), {Fetched} fetched today, {Unpriced} unpriced ({Basis}).",
-            sessionId, stationId, averagedOnly, rowsAveraged, fetchedTypes.Count, unpriced, basis);
+            var basis = (averagedOnly, state.FetchedTypes.Count) switch
+            {
+                (> 0, 0) => HistoricalPriceBasis.AveragedFromWindow,
+                (> 0, > 0) => HistoricalPriceBasis.Mixed,
+                _ => HistoricalPriceBasis.FetchedToday,
+            };
 
-        return new HistoricalPricingResult(sessionId, stationId, basis, averagedOnly, rowsAveraged, fetchedTypes.Count, unpriced);
+            _log.LogInformation(
+                "Historical pricing for session {SessionId} at station {StationId}: {Averaged} type(s) averaged from {Rows} window row(s), {Fetched} fetched today, {Unpriced} unpriced ({Basis}).",
+                state.Target.SessionId, stationId, averagedOnly, rowsAveraged, state.FetchedTypes.Count, unpriced, basis);
+
+            results.Add(new HistoricalPricingResult(
+                state.Target.SessionId, stationId, basis, averagedOnly, rowsAveraged, state.FetchedTypes.Count, unpriced));
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Give every target today's price for the materials its window could not
+    /// cover, fetching each material at most once for the whole batch.
+    /// </summary>
+    /// <remarks>
+    /// The fetcher is session-scoped and skips whatever a session already has, so
+    /// a single carrier session cannot be made to fetch another session's gaps.
+    /// Instead each target fetches only the materials no earlier target has
+    /// fetched yet - so across the batch every material is pulled once - and then
+    /// copies the rest out of the pool those fetches filled. Copies are stamped
+    /// with the moment they were fetched, which is the same honest "this is
+    /// today's price" provenance the live gap-fill writes.
+    /// </remarks>
+    private async Task FillGapsAsync(List<TargetState> states, long stationId, PriceMode priceMode, CancellationToken ct)
+    {
+        var pool = new Dictionary<long, (double? Buy, double? Sell, string FetchedAt)>();
+
+        foreach (var state in states)
+        {
+            var unfetched = state.Gaps.Where(id => !pool.ContainsKey(id)).ToList();
+            if (unfetched.Count > 0)
+            {
+                var watermark = await _db.QueryScalarAsync<long>(
+                    "SELECT COALESCE(MAX(marketdata_id), 0) FROM market_data", ct: ct).ConfigureAwait(false);
+                await _fetcher.EnsurePricesAsync(unfetched, stationId, state.Target.SessionId, priceMode, ct).ConfigureAwait(false);
+
+                var inserted = await _db.QueryAsync(
+                    "SELECT type_id, fetched_at, isk_buy, isk_sell FROM market_data WHERE session_id = $sid AND marketdata_id > $mark",
+                    static r => (
+                        TypeId: r.GetInt64(0),
+                        FetchedAt: r.GetString(1),
+                        Buy: r.IsDBNull(2) ? (double?)null : r.GetDouble(2),
+                        Sell: r.IsDBNull(3) ? (double?)null : r.GetDouble(3)),
+                    new Dictionary<string, object?> { ["$sid"] = state.Target.SessionId, ["$mark"] = watermark },
+                    ct).ConfigureAwait(false);
+
+                foreach (var row in inserted)
+                {
+                    state.FetchedTypes.Add(row.TypeId);
+                    pool[row.TypeId] = (row.Buy, row.Sell, row.FetchedAt);
+                }
+            }
+
+            foreach (var id in state.Gaps)
+            {
+                if (state.FetchedTypes.Contains(id)) continue;      // just fetched for this session
+                if (!pool.TryGetValue(id, out var price)) continue; // the market had nothing for it
+                await InsertRowAsync(id, stationId, state.Target.SessionId, price.FetchedAt, price.Buy, price.Sell, ct)
+                    .ConfigureAwait(false);
+                state.FetchedTypes.Add(id);
+            }
+        }
+    }
+
+    private Task InsertRowAsync(
+        long typeId, long stationId, string sessionId, string fetchedAt, double? buy, double? sell, CancellationToken ct) =>
+        _db.ExecuteNonQueryAsync(
+            "INSERT INTO market_data (type_id, station_id, session_id, fetched_at, isk_buy, isk_sell) VALUES ($tid, $st, $sid, $at, $buy, $sell)",
+            new Dictionary<string, object?>
+            {
+                ["$tid"] = typeId,
+                ["$st"] = stationId,
+                ["$sid"] = sessionId,
+                ["$at"] = fetchedAt,
+                ["$buy"] = (object?)buy ?? DBNull.Value,
+                ["$sell"] = (object?)sell ?? DBNull.Value,
+            },
+            ct);
+
+    /// <summary>Per-target bookkeeping while the batch is being priced.</summary>
+    private sealed class TargetState
+    {
+        public TargetState(HistoricalPricingTarget target, int windowRowCount)
+        {
+            Target = target;
+            WindowRowCount = windowRowCount;
+        }
+
+        public HistoricalPricingTarget Target { get; }
+
+        /// <summary>How many captured rows fell inside this target's window, before grouping.</summary>
+        public int WindowRowCount { get; }
+
+        /// <summary>Types this target got an averaged row for.</summary>
+        public HashSet<long> AveragedTypes { get; } = new();
+
+        /// <summary>How many window rows each averaged type was built from.</summary>
+        public Dictionary<long, int> RowsAveragedByType { get; } = new();
+
+        /// <summary>Types whose averaged price does not answer the active mode, so they need today's value.</summary>
+        public HashSet<long> Gaps { get; } = new();
+
+        /// <summary>Types this target ended up holding a today-priced row for.</summary>
+        public HashSet<long> FetchedTypes { get; } = new();
     }
 
     private static DateTimeOffset ParseUtc(string iso) =>

@@ -39,3 +39,8 @@ CLAUDE.md
 # stores (session.sqlite, sde.sqlite) read-only when troubleshooting live bugs. See
 # tools/README.md.
 tools/
+
+# Google Drive sync staging. The repo folder is backed up to Drive, which parks
+# partial uploads here mid-sync; they are not project files and a `git add -A`
+# would otherwise sweep hundreds of them into a commit.
+.tmp.driveupload/

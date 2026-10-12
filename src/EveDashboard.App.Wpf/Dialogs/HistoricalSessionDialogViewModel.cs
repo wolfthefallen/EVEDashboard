@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EveDashboard.App.Wpf.Reporting;
 using EveDashboard.App.Wpf.Widgets.Session;
 using EveDashboard.Core.Domain;
 using EveDashboard.Core.Sessions;
@@ -52,9 +53,12 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     private readonly ISettingsRepository _settings;
     private readonly IActiveSessionContext _active;
     private readonly IConfirmDialog _confirm;
+    private readonly DailyHistorySessionRunner _runner;
     private readonly ILogger<HistoricalSessionDialogViewModel> _log;
 
     private IReadOnlyList<string> _preselectedIds = Array.Empty<string>();
+    private DailyHistoryPlan? _dayPlan;
+    private GamelogInventory? _inventory;
 
     /// <summary>Start date of the window (EVE time / UTC).</summary>
     [ObservableProperty] private DateTime? _startDate;
@@ -71,6 +75,22 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     /// <summary>Default session name template: the window's dates and year, e.g. <c>16Aug - 19Aug 2026 history</c>.</summary>
     public const string DefaultNameTemplate = "{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history";
 
+    /// <summary>
+    /// Default template when building one session per day, e.g.
+    /// <c>2026-10-12 Sun history</c>, or <c>2026-10-12 Sun history (ends 13Oct)</c>
+    /// for a run that carried past midnight.
+    /// </summary>
+    /// <remarks>
+    /// A batch drops dozens of names into the Reports sidebar at once, where the
+    /// Name column sorts as text and there is no stop column. An ISO date makes
+    /// name order match date order, the weekday is how a mining night is actually
+    /// remembered, and the overnight suffix discloses the one fact that grid
+    /// cannot show. Nothing time-of-build goes in the name on purpose: a session's
+    /// id is a hash of its name and start, so a name derived only from the day
+    /// makes rebuilding that day collide loudly instead of silently duplicating.
+    /// </remarks>
+    public const string DailyNameTemplate = "{{$DATE}} {{$DOW}} history{{$OVERNIGHT}}";
+
     /// <summary>Session name template (same tokens as New Session, plus the window tokens).</summary>
     [ObservableProperty] private string _sessionName = DefaultNameTemplate;
 
@@ -83,11 +103,44 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     /// <summary>True when opened from "Combine selected" (no gamelog parsing).</summary>
     [ObservableProperty] private bool _isCombineMode;
 
+    /// <summary>
+    /// Build one session for every mining day in the range instead of a single
+    /// session spanning it. Default for a date-range open; forced off in combine
+    /// mode, which is about specific saved sessions rather than days.
+    /// </summary>
+    [ObservableProperty] private bool _splitByDay = true;
+
+    /// <summary>
+    /// Fold saved sessions belonging to a day into that day's new session. When
+    /// off, their time is excluded instead, so nothing is ever counted twice
+    /// either way.
+    /// </summary>
+    [ObservableProperty] private bool _mergeSameDaySessions = true;
+
+    /// <summary>What the gamelog folder holds, for the "use everything" option.</summary>
+    [ObservableProperty] private string _inventoryNotice = string.Empty;
+
     /// <summary>Non-empty while a live session blocks the feature.</summary>
     [ObservableProperty] private string _blockedMessage = string.Empty;
 
     /// <summary>Validation / progress / error line.</summary>
     [ObservableProperty] private string _statusMessage = string.Empty;
+
+    /// <summary>
+    /// How many days of the batch are finished. Together with
+    /// <see cref="ProgressMaximum"/> this drives the bar; both are zero outside a
+    /// run.
+    /// </summary>
+    [ObservableProperty] private int _progressValue;
+
+    /// <summary>How many days the batch will attempt, or 0 before that is known.</summary>
+    [ObservableProperty] private int _progressMaximum;
+
+    /// <summary>
+    /// True while the work has no countable unit yet - surveying the logs,
+    /// reading them, pricing - so the bar sweeps instead of filling.
+    /// </summary>
+    [ObservableProperty] private bool _isProgressIndeterminate;
 
     /// <summary>Explains which pilots' time is excluded for unticked sessions.</summary>
     [ObservableProperty] private string _exclusionNotice = string.Empty;
@@ -113,7 +166,10 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     public ObservableCollection<OverlapRowViewModel> Overlaps { get; } = new();
 
     /// <summary>What was built, or <c>null</c> until the user completes the dialog.</summary>
-    public HistoricalBuildOutcome? Outcome { get; private set; }
+    public HistoricalBatchOutcome? Outcome { get; private set; }
+
+    /// <summary>The per-day plan from the last check, empty until one runs.</summary>
+    public ObservableCollection<DailyPlanRowViewModel> DayRows { get; } = new();
 
     /// <summary>Dialog heading.</summary>
     public string HeaderText => IsCombineMode ? "Combine saved sessions" : "Build a session from history";
@@ -122,7 +178,31 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     public bool IsEnabled => BlockedMessage.Length == 0;
 
     /// <summary>True when the check found no overlapping sessions (shown as a hint).</summary>
-    public bool HasNoOverlaps => HasChecked && Overlaps.Count == 0;
+    public bool HasNoOverlaps => HasChecked && Overlaps.Count == 0 && !SplitByDay;
+
+    /// <summary>True when the per-day controls and the day list apply.</summary>
+    public bool IsDailyMode => SplitByDay && !IsCombineMode;
+
+    /// <summary>False in per-day mode, where the roster comes from the logs rather than a fleet.</summary>
+    public bool IsFleetVisible => !IsDailyMode;
+
+    /// <summary>
+    /// Text of the single action button: the workflow is forced rather than
+    /// explained, so the button says what pressing it will do right now.
+    /// </summary>
+    public string ActionButtonText
+    {
+        get
+        {
+            if (!HasChecked) return IsDailyMode ? "Check the days" : "Check overlaps";
+            if (!IsDailyMode) return "Build";
+            var count = DayRows.Count(r => r.WillBuild);
+            return count == 1 ? "Build 1 session" : $"Build {count} sessions";
+        }
+    }
+
+    /// <summary>True when a checked per-day plan has at least one day to build.</summary>
+    public bool HasDaysToBuild => DayRows.Any(r => r.WillBuild);
 
     /// <summary>Construct the view-model.</summary>
     /// <param name="spans">Saved-session span query.</param>
@@ -133,6 +213,7 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     /// <param name="settings">Settings (default fleet, idle minutes).</param>
     /// <param name="active">Live-session state (blocks the dialog while a session is active).</param>
     /// <param name="confirm">Confirm dialog for the union-fleet question.</param>
+    /// <param name="runner">Per-day batch runner, used when building a session for every day of a range.</param>
     /// <param name="log">Logger.</param>
     /// <exception cref="ArgumentNullException">Thrown if any argument is null.</exception>
     public HistoricalSessionDialogViewModel(
@@ -144,8 +225,10 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         ISettingsRepository settings,
         IActiveSessionContext active,
         IConfirmDialog confirm,
+        DailyHistorySessionRunner runner,
         ILogger<HistoricalSessionDialogViewModel> log)
     {
+        _runner = runner ?? throw new ArgumentNullException(nameof(runner));
         _spans = spans ?? throw new ArgumentNullException(nameof(spans));
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _builder = builder ?? throw new ArgumentNullException(nameof(builder));
@@ -165,12 +248,17 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     public void ResetForOpen(IReadOnlyList<string>? preselectedSessionIds)
     {
         _preselectedIds = preselectedSessionIds ?? Array.Empty<string>();
+        _inventory = null;
         IsCombineMode = _preselectedIds.Count > 0;
+        // Combine mode is about specific saved sessions, not days.
+        SplitByDay = !IsCombineMode;
+        MergeSameDaySessions = true;
         StartDate = null; StartTimeText = "00:00"; StopDate = null; StopTimeText = "23:59";
-        SessionName = DefaultNameTemplate;
+        SessionName = SplitByDay ? DailyNameTemplate : DefaultNameTemplate;
         Notes = null;
         SelectedFleet = null;
         Fleets.Clear();
+        InventoryNotice = string.Empty;
         ClearCheck();
         StatusMessage = string.Empty;
         BlockedMessage = string.Empty;
@@ -179,6 +267,8 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         Outcome = null;
         OnPropertyChanged(nameof(HeaderText));
         OnPropertyChanged(nameof(IsEnabled));
+        OnPropertyChanged(nameof(IsDailyMode));
+        OnPropertyChanged(nameof(IsFleetVisible));
     }
 
     /// <summary>
@@ -202,6 +292,11 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         foreach (var f in fleets.OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)) Fleets.Add(f);
         SelectedFleet = Fleets.FirstOrDefault(f => f.FleetId == defaultId) ?? Fleets.FirstOrDefault();
 
+        if (!IsCombineMode)
+        {
+            await LoadInventoryAsync(ct).ConfigureAwait(true);
+        }
+
         if (IsCombineMode)
         {
             var spans = await _spans.GetSpansAsync(_preselectedIds, ct: ct).ConfigureAwait(true);
@@ -221,6 +316,55 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Survey the gamelog folder so the dialog can offer "everything I have logs
+    /// for" and say what that means. A folder that cannot be read is not fatal -
+    /// the user can still type a range by hand.
+    /// </summary>
+    private async Task LoadInventoryAsync(CancellationToken ct)
+    {
+        try
+        {
+            _inventory = await _reader.InventoryAsync(ct).ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _log.LogWarning(ex, "Could not survey the gamelog folder; the all-logs option will be unavailable.");
+            InventoryNotice = "The gamelog folder could not be read - type a range by hand.";
+            return;
+        }
+
+        InventoryNotice = _inventory.Pilots.Count == 0 || _inventory.EarliestLogStart is null
+            ? "No gamelogs were found in the EVE log folder."
+            : string.Create(
+                CultureInfo.InvariantCulture,
+                $"Logs found for {_inventory.Pilots.Count} pilot(s), {_inventory.EarliestLogStart:dMMM yyyy} to {_inventory.LatestActivity:dMMM yyyy}: {string.Join(", ", _inventory.Pilots.Select(p => p.Name))}");
+    }
+
+    /// <summary>Fill the window with everything the gamelogs cover.</summary>
+    [RelayCommand]
+    private void UseAllAvailableLogs()
+    {
+        if (_inventory?.EarliestLogStart is null)
+        {
+            StatusMessage = "No gamelogs were found to take a range from.";
+            return;
+        }
+
+        var start = _inventory.EarliestLogStart.Value;
+        // The stop can never be in the future (TryParseWindow refuses it) and the
+        // newest log's last write is only a lower bound on the final event.
+        var stop = _inventory.LatestActivity ?? DateTimeOffset.UtcNow;
+        if (stop > DateTimeOffset.UtcNow) stop = DateTimeOffset.UtcNow;
+
+        StartDate = start.UtcDateTime.Date;
+        StartTimeText = "00:00";
+        StopDate = stop.UtcDateTime.Date;
+        StopTimeText = stop.UtcDateTime.Date == DateTimeOffset.UtcNow.UtcDateTime.Date
+            ? DateTimeOffset.UtcNow.ToString("HH:mm", CultureInfo.InvariantCulture)
+            : "23:59";
+    }
+
     // Any input change invalidates the last check (the overlap list belongs to
     // specific inputs).
     partial void OnStartDateChanged(DateTime? value) => ClearCheck();
@@ -228,9 +372,24 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     partial void OnStopDateChanged(DateTime? value) => ClearCheck();
     partial void OnStopTimeTextChanged(string value) => ClearCheck();
     partial void OnSelectedFleetChanged(Fleet? value) => ClearCheck();
+    partial void OnMergeSameDaySessionsChanged(bool value) => ClearCheck();
+    partial void OnSplitByDayChanged(bool value)
+    {
+        // The two modes want different default names; a name the user has edited
+        // is theirs and is left alone.
+        if (SessionName is DefaultNameTemplate or DailyNameTemplate)
+        {
+            SessionName = value ? DailyNameTemplate : DefaultNameTemplate;
+        }
+        ClearCheck();
+        OnPropertyChanged(nameof(IsDailyMode));
+        OnPropertyChanged(nameof(IsFleetVisible));
+    }
     partial void OnHasCheckedChanged(bool value)
     {
         OnPropertyChanged(nameof(HasNoOverlaps));
+        OnPropertyChanged(nameof(ActionButtonText));
+        OnPropertyChanged(nameof(HasDaysToBuild));
         BuildCommand.NotifyCanExecuteChanged();
     }
     partial void OnIsBusyChanged(bool value)
@@ -244,9 +403,13 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     {
         foreach (var row in Overlaps) row.PropertyChanged -= OnOverlapRowChanged;
         Overlaps.Clear();
+        DayRows.Clear();
+        _dayPlan = null;
         ExclusionNotice = string.Empty;
         HasChecked = false;
         OnPropertyChanged(nameof(HasNoOverlaps));
+        OnPropertyChanged(nameof(ActionButtonText));
+        OnPropertyChanged(nameof(HasDaysToBuild));
     }
 
     /// <summary>Parse the four window fields into a UTC window. Returns an error message on failure.</summary>
@@ -285,6 +448,13 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     {
         var error = TryParseWindow(out var start, out var stop);
         if (error is not null) { StatusMessage = error; return; }
+
+        if (IsDailyMode)
+        {
+            await CheckDaysAsync(start, stop, ct).ConfigureAwait(true);
+            return;
+        }
+
         if (SelectedFleet is null) { StatusMessage = "Pick a fleet."; return; }
 
         IsBusy = true;
@@ -317,6 +487,115 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Work out one session per mining day for the range and show the user the
+    /// exact plan the Build button will then carry out.
+    /// </summary>
+    private async Task CheckDaysAsync(DateTimeOffset start, DateTimeOffset stop, CancellationToken ct)
+    {
+        BeginProgress();
+        try
+        {
+            StatusMessage = "Reading the gamelogs...";
+            var request = await BuildDailyRequestAsync(start, stop, ct).ConfigureAwait(true);
+            var progress = NewProgressSink();
+
+            // Off the UI thread on purpose. Parsing a long range is millions of
+            // log lines and the SQLite wrapper completes synchronously, so none
+            // of this ever yields - run it inline and the window freezes with no
+            // repaint until it finishes, which is indistinguishable from a hang.
+            var plan = await Task.Run(() => _runner.PlanAsync(request, progress, ct), ct).ConfigureAwait(true);
+
+            ClearCheck();
+            _dayPlan = plan;
+            foreach (var day in plan.Result.Plans)
+            {
+                DayRows.Add(DailyPlanRowViewModel.ForPlan(day, ExpandDayName(day)));
+            }
+            foreach (var skip in plan.Result.Skipped)
+            {
+                DayRows.Add(DailyPlanRowViewModel.ForSkip(skip));
+            }
+            SortDayRows();
+
+            HasChecked = true;
+            StatusMessage = plan.Note ?? (DayRows.Count == 0
+                ? "No mining was found in the gamelogs for this range."
+                : string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"{plan.Result.Plans.Count} session(s) to build, {plan.Result.Skipped.Count} day(s) skipped."));
+        }
+        catch (Exception ex) when (ex is DbException or IOException or UnauthorizedAccessException)
+        {
+            _log.LogWarning(ex, "Planning the per-day build failed.");
+            StatusMessage = "Could not plan the build: " + ex.Message;
+        }
+        finally
+        {
+            EndProgress();
+        }
+    }
+
+    /// <summary>
+    /// A progress sink for the batch, marshalled onto the UI thread.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Progress{T}"/> captures the UI synchronization context here, so
+    /// the runner can report from the background thread it actually runs on and
+    /// these properties still change on the thread WPF requires.
+    /// </remarks>
+    private Progress<DailyHistoryProgress> NewProgressSink() => new(p =>
+    {
+        ProgressMaximum = p.DaysTotal;
+        ProgressValue = p.DaysDone;
+        IsProgressIndeterminate = p.DaysTotal == 0;
+        StatusMessage = p.DaysTotal == 0
+            ? p.CurrentDay + "..."
+            : string.Create(CultureInfo.InvariantCulture, $"{p.CurrentDay} ({p.DaysDone + 1} of {p.DaysTotal})...");
+    });
+
+    /// <summary>Start a run: show the bar, sweeping until there is something to count.</summary>
+    private void BeginProgress()
+    {
+        IsBusy = true;
+        ProgressValue = 0;
+        ProgressMaximum = 0;
+        IsProgressIndeterminate = true;
+    }
+
+    /// <summary>End a run, whatever the outcome.</summary>
+    private void EndProgress()
+    {
+        IsBusy = false;
+        ProgressValue = 0;
+        ProgressMaximum = 0;
+        IsProgressIndeterminate = false;
+    }
+
+    /// <summary>Compose the batch request from the dialog's current inputs.</summary>
+    private async Task<DailyHistoryRunRequest> BuildDailyRequestAsync(DateTimeOffset start, DateTimeOffset stop, CancellationToken ct)
+    {
+        var idle = await _settings.GetAutoPauseIdleMinutesAsync(ct).ConfigureAwait(true);
+        return new DailyHistoryRunRequest(start, stop, SessionName, Notes, idle, MergeSameDaySessions);
+    }
+
+    /// <summary>The name a planned day's session will carry, for the preview and the build.</summary>
+    private string ExpandDayName(DailySessionPlan day) =>
+        SessionNameTemplateExpander.Expand(
+            SessionName,
+            day.Roster.Select(m => new Character(m.PilotId, m.Name, string.Empty)).ToList(),
+            day.WindowStart,
+            windowStart: day.WindowStart,
+            windowStop: day.WindowStop);
+
+    /// <summary>Days ascending, so the list reads like a calendar.</summary>
+    private void SortDayRows()
+    {
+        var ordered = DayRows.OrderBy(r => r.Day).ToList();
+        DayRows.Clear();
+        foreach (var row in ordered) DayRows.Add(row);
+    }
+
     private void OnOverlapRowChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(OverlapRowViewModel.IsChecked)) UpdateExclusionNotice();
@@ -331,7 +610,7 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         ExclusionNotice = string.Join(Environment.NewLine, lines);
     }
 
-    private bool CanBuild() => HasChecked && !IsBusy && IsEnabled;
+    private bool CanBuild() => HasChecked && !IsBusy && IsEnabled && (!IsDailyMode || HasDaysToBuild);
 
     /// <summary>Run the pipeline: union-fleet prompt, gamelog read, build, price.</summary>
     [RelayCommand(CanExecute = nameof(CanBuild))]
@@ -339,8 +618,15 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
     {
         var error = TryParseWindow(out var start, out var stop);
         if (error is not null) { StatusMessage = error; return; }
-        if (SelectedFleet is null) { StatusMessage = "Pick a fleet."; return; }
         if (string.IsNullOrWhiteSpace(SessionName)) { StatusMessage = "Give the session a name."; return; }
+
+        if (IsDailyMode)
+        {
+            await BuildDaysAsync(start, stop, ct).ConfigureAwait(true);
+            return;
+        }
+
+        if (SelectedFleet is null) { StatusMessage = "Pick a fleet."; return; }
 
         IsBusy = true;
         try
@@ -406,7 +692,11 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
             var pricing = await _pricer.PriceAsync(result.SessionId, result.EffectiveStart, result.EffectiveStop, ct).ConfigureAwait(true);
 
             var summary = BuildSummary(name, result, pricing, pilotsWithoutLogs, roster);
-            Outcome = new HistoricalBuildOutcome(result.SessionId, name, summary);
+            Outcome = new HistoricalBatchOutcome(
+                new[] { new HistoricalBuildOutcome(result.SessionId, name, summary) },
+                Array.Empty<string>(),
+                Array.Empty<string>(),
+                summary);
             _log.LogInformation("Historical session built from the dialog: {Summary}", summary);
             ShouldClose = true;
         }
@@ -421,6 +711,58 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Carry out the plan the user just checked - the same plan object, so what
+    /// was shown is exactly what gets built.
+    /// </summary>
+    private async Task BuildDaysAsync(DateTimeOffset start, DateTimeOffset stop, CancellationToken ct)
+    {
+        if (_dayPlan is null) { StatusMessage = "Check the days first."; return; }
+        if (_dayPlan.Result.Plans.Count == 0)
+        {
+            StatusMessage = _dayPlan.Note ?? "There is nothing to build for this range.";
+            return;
+        }
+
+        BeginProgress();
+        try
+        {
+            var request = await BuildDailyRequestAsync(start, stop, ct).ConfigureAwait(true);
+            var progress = NewProgressSink();
+
+            // Same reason as the check: hundreds of days of synchronous SQLite
+            // work would never let the window repaint if it ran inline.
+            var result = await Task.Run(
+                () => _runner.ExecuteAsync(_dayPlan, request, progress, ct), ct).ConfigureAwait(true);
+
+            Outcome = new HistoricalBatchOutcome(
+                result.Built.Select(b => new HistoricalBuildOutcome(b.SessionId, b.Name, b.Name)).ToList(),
+                result.Skipped.Select(s => HistoricalPricingSummary.Day(s.Day) + ": " + s.Reason).ToList(),
+                result.Failures.Select(f => HistoricalPricingSummary.Day(f.Day) + ": " + f.Message).ToList(),
+                result.Summary);
+
+            if (result.Built.Count == 0)
+            {
+                // Nothing was written, so keep the dialog open with the reason
+                // rather than closing on an empty success.
+                Outcome = null;
+                StatusMessage = result.Summary;
+                return;
+            }
+
+            ShouldClose = true;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or DbException or IOException)
+        {
+            _log.LogWarning(ex, "Building the per-day historical sessions failed.");
+            StatusMessage = "Build failed: " + ex.Message;
+        }
+        finally
+        {
+            EndProgress();
+        }
+    }
+
     /// <summary>Compose the one-line outcome summary, including the pricing notice the spec requires.</summary>
     internal static string BuildSummary(
         string name, HistoricalSessionResult result, HistoricalPricingResult pricing, IReadOnlyList<long> pilotsWithoutLogs, IReadOnlyList<FleetMember> roster)
@@ -428,13 +770,8 @@ public sealed partial class HistoricalSessionDialogViewModel : ObservableObject
         var parts = new List<string>
         {
             $"Built '{name}': {result.CopiedLogRows} copied + {result.ParsedLogRows} parsed mining rows, {result.ArchivedSessionIds.Count} session(s) archived.",
+            HistoricalPricingSummary.Describe(pricing),
         };
-        parts.Add(pricing.Basis switch
-        {
-            HistoricalPriceBasis.AveragedFromWindow => $"Prices averaged from {pricing.RowsAveraged} market rows captured inside the window.",
-            HistoricalPriceBasis.Mixed => $"Prices averaged from {pricing.RowsAveraged} window rows; {pricing.TypesFetchedNow} material(s) had no window data and use TODAY's prices.",
-            _ => "No market prices were captured inside this window at the selected station, so the session is valued with TODAY's prices.",
-        });
         if (pilotsWithoutLogs.Count > 0)
         {
             var names = pilotsWithoutLogs.Select(id => roster.FirstOrDefault(m => m.PilotId == id)?.Name ?? id.ToString(CultureInfo.InvariantCulture));

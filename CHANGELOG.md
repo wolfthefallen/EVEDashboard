@@ -11,6 +11,20 @@ publishes release `v<Version>` with the matching `## v<Version>` section of this
 To ship a version: bump `<Version>`, write its `## v<Version>` section here, merge to `master`.
 Inside a version section use `###` or lower for sub-headings - `##` marks the next version.
 
+## v0.1.5
+
+**New**
+- **A session for every day you mined** — `Build from history` can now do the work for you. Pick a date range, or press `Use all available logs` to take everything your gamelogs cover, and it builds one session per mining day. There is no fleet to choose: it reads the logs to find which days you were out, who was out with you, and where the breaks were, so m³/sec and ISK/h come out of time actually spent mining.
+- **Runs are never chopped at midnight** — a trip that starts at 22:00 and ends at 02:00 stays one session, named for the day it started. A day with a morning and an evening trip gets one session with the gap in between paused out.
+- **Combine saved sessions found on the same day** — a tick-box: on, a session you already saved for that day is folded into the new one; off, its time is left out instead. Either way nothing is counted twice.
+- **See it before it happens** — `Check the days` lists every day it will create, with the exact name each session will get, and says why any day is being skipped. The button then reads `Build 28 sessions` and does precisely what it showed you.
+- **New name tokens** — `{{$DOW}}` (the weekday) and `{{$OVERNIGHT}}` (which marks a session that ran past midnight). Per-day builds are named `2026-10-12 Sun history`, or `2026-10-12 Sun history (ends 13Oct)` for an overnight run — the ISO date first so the sidebar sorts by name in date order.
+
+**Improved**
+- **The window no longer looks hung while it works** — building hundreds of days now runs in the background with a progress bar that sweeps while it reads your logs and then fills day by day, so you can see it moving. `Cancel` is greyed out and the window stays put until the batch finishes, because closing it would not have stopped the work.
+- A day whose mining already belongs to a saved session is skipped with the reason, not written as an empty session, and one day failing no longer costs you the rest of the batch.
+- Building a month of days asks the market for today's prices once instead of once per day, while each session still keeps its own price rows.
+
 ## v0.1.4
 
 **New**

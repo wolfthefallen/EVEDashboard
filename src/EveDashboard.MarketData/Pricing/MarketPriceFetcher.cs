@@ -189,7 +189,7 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         {
             foreach (var id in distinct)
             {
-                if (latest.TryGetValue(id, out var price) && IsCovered(price.Buy, price.Sell, priceMode))
+                if (latest.TryGetValue(id, out var price) && PriceCoverage.Covers(price.Buy, price.Sell, priceMode))
                 {
                     continue;
                 }
@@ -211,24 +211,6 @@ public sealed class MarketPriceFetcher : IMarketPriceFetcher, IDisposable
         }
 
         await FetchInsertAndStampAsync(toFetch, stationId, sessionId, now, ct).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// True when the latest captured (buy, sell) pair is a usable price for
-    /// <paramref name="mode"/> -- i.e. the material is NOT a gap.
-    /// A price is "usable" only when it is non-null and strictly positive; null or
-    /// &lt;= 0 is treated as no price. For Split, the pair is covered if EITHER side
-    /// is usable, so a Split gap requires BOTH sides to be 0/null.
-    /// </summary>
-    private static bool IsCovered(double? buy, double? sell, PriceMode mode)
-    {
-        static bool Usable(double? v) => v is > 0;
-        return mode switch
-        {
-            PriceMode.Sell  => Usable(sell),
-            PriceMode.Split => Usable(buy) || Usable(sell),
-            _               => Usable(buy),   // Buy (default)
-        };
     }
 
     /// <summary>

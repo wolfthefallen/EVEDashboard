@@ -1,3 +1,4 @@
+using EveDashboard.Core.Sessions.Historical;
 using EveDashboard.Stats.Historical;
 using FluentAssertions;
 
