@@ -11,7 +11,8 @@ using Microsoft.Extensions.Logging;
 /// Default <see cref="IHistoricalGamelogReader"/>: enumerates the gamelog folder
 /// (top level plus every subfolder, so the user's <c>old\</c> archive counts),
 /// picks the files that can overlap the window, and streams their lines through
-/// the shared <see cref="IGamelogLineParser"/>.
+/// the shared <see cref="IGamelogLineParser"/>. The same enumeration backs
+/// <see cref="InventoryAsync"/>, which surveys the folder without parsing.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -112,12 +113,94 @@ public sealed class HistoricalGamelogReader : IHistoricalGamelogReader
         return new HistoricalReadResult(ordered, filesRead, pilotsWithoutLogs);
     }
 
+    /// <inheritdoc />
+    public async Task<GamelogInventory> InventoryAsync(CancellationToken ct = default)
+    {
+        var candidates = EnumerateCandidates(wanted: null);
+
+        var pilots = new List<GamelogInventoryEntry>();
+        foreach (var group in candidates.GroupBy(c => c.CharacterId).OrderBy(g => g.Key))
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var files = group.OrderBy(c => c.FileStart).ToList();
+            var newest = files[^1];
+
+            // Only the newest log's header is read: it carries the name the
+            // character answers to now, and one header read per pilot keeps this
+            // cheap enough for a dialog's Loaded handler.
+            string? name = null;
+            try
+            {
+                name = await GamelogFiles.TryReadListenerAsync(newest.Path, ct).ConfigureAwait(false);
+            }
+            catch (IOException ex)
+            {
+                _log.LogWarning(ex, "Failed to read the header of gamelog {Path}; listing pilot {PilotId} by id.", newest.Path, group.Key);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _log.LogWarning(ex, "Access denied reading the header of gamelog {Path}; listing pilot {PilotId} by id.", newest.Path, group.Key);
+            }
+
+            if (name is null)
+            {
+                _log.LogWarning(
+                    "Gamelog {Path} has no readable Listener: line; listing pilot {PilotId} by id so their logs stay selectable.",
+                    newest.Path, group.Key);
+            }
+
+            var lastWrite = files.Max(f => GamelogFiles.LastWriteUtcOrMin(f.Path));
+            pilots.Add(new GamelogInventoryEntry(
+                group.Key,
+                name ?? group.Key.ToString(CultureInfo.InvariantCulture),
+                files[0].FileStart,
+                new DateTimeOffset(lastWrite, TimeSpan.Zero),
+                files.Count));
+        }
+
+        var inventory = new GamelogInventory(
+            pilots,
+            pilots.Count == 0 ? null : pilots.Min(p => p.FirstLogStart),
+            pilots.Count == 0 ? null : pilots.Max(p => p.LastActivity));
+
+        _log.LogInformation(
+            "Gamelog inventory: {Pilots} pilot(s) across {Files} file(s), logs from {Earliest:O} to {Latest:O}.",
+            inventory.Pilots.Count, candidates.Count, inventory.EarliestLogStart, inventory.LatestActivity);
+
+        return inventory;
+    }
+
     /// <summary>
-    /// Enumerate every gamelog under the folder (all depths), keep the files for the
-    /// wanted pilots that can overlap the window, de-duplicate by filename, and
-    /// return them ordered by pilot then start time.
+    /// Keep the files for the wanted pilots that can overlap the window, ordered
+    /// by pilot then start time.
     /// </summary>
     private List<CandidateFile> SelectCandidateFiles(HashSet<long> wanted, DateTimeOffset windowStart, DateTimeOffset windowStop)
+    {
+        var selected = new List<CandidateFile>();
+        foreach (var group in EnumerateCandidates(wanted).GroupBy(c => c.CharacterId))
+        {
+            var files = group.OrderBy(c => c.FileStart).ToList();
+            for (var i = 0; i < files.Count; i++)
+            {
+                var file = files[i];
+                if (file.FileStart > windowStop) continue; // started after the window ended
+                var next = i + 1 < files.Count ? files[i + 1] : null;
+                if (next is not null && next.FileStart <= windowStart) continue; // superseded before the window began
+                selected.Add(file);
+            }
+        }
+
+        return selected.OrderBy(c => c.CharacterId).ThenBy(c => c.FileStart).ToList();
+    }
+
+    /// <summary>
+    /// Enumerate every gamelog under the folder (all depths) and de-duplicate by
+    /// filename, the top-level copy winning over any subfolder copy.
+    /// </summary>
+    /// <param name="wanted">Pilot ids to keep, or <c>null</c> to keep every pilot found.</param>
+    /// <returns>One candidate per distinct filename, in no particular order.</returns>
+    private List<CandidateFile> EnumerateCandidates(HashSet<long>? wanted)
     {
         if (!Directory.Exists(_directory))
         {
@@ -137,7 +220,7 @@ public sealed class HistoricalGamelogReader : IHistoricalGamelogReader
                 _log.LogWarning("Skipping gamelog file with an unparseable character id in its name: {Filename}", filename);
                 continue;
             }
-            if (!wanted.Contains(charId)) continue;
+            if (wanted is not null && !wanted.Contains(charId)) continue;
             if (!DateTimeOffset.TryParseExact(
                     match.Groups[1].Value + match.Groups[2].Value,
                     FilenameTimestampFormat,
@@ -160,21 +243,7 @@ public sealed class HistoricalGamelogReader : IHistoricalGamelogReader
             }
         }
 
-        var selected = new List<CandidateFile>();
-        foreach (var group in byName.Values.GroupBy(c => c.CharacterId))
-        {
-            var files = group.OrderBy(c => c.FileStart).ToList();
-            for (var i = 0; i < files.Count; i++)
-            {
-                var file = files[i];
-                if (file.FileStart > windowStop) continue; // started after the window ended
-                var next = i + 1 < files.Count ? files[i + 1] : null;
-                if (next is not null && next.FileStart <= windowStart) continue; // superseded before the window began
-                selected.Add(file);
-            }
-        }
-
-        return selected.OrderBy(c => c.CharacterId).ThenBy(c => c.FileStart).ToList();
+        return byName.Values.ToList();
     }
 
     /// <summary>

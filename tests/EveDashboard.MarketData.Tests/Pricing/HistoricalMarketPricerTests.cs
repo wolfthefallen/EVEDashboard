@@ -181,6 +181,149 @@ public class HistoricalMarketPricerTests
         ctor.Should().Throw<ArgumentNullException>();
     }
 
+    // ---- Batch pricing ---------------------------------------------------------
+
+    [Fact]
+    public async Task PriceBatchAsync_fetches_todays_prices_once_for_the_whole_batch()
+    {
+        await using var db = await SeededDbAsync();
+        var (pricer, client) = NewPricer(db, new long[] { 34, 35 });
+        var targets = new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(1440), M(1500)),
+            new HistoricalPricingTarget("day-3", M(2880), M(2940)),
+        };
+
+        var results = await pricer.PriceBatchAsync(targets);
+
+        client.Calls.Should().ContainSingle("three days of gaps must not mean three trips to the market")
+            .Which.TypeIds.Should().BeEquivalentTo(new long[] { 34, 35 });
+        results.Select(r => r.SessionId).Should().Equal(new[] { "day-1", "day-2", "day-3" });
+        results.Should().OnlyContain(r => r.Basis == HistoricalPriceBasis.FetchedToday);
+        results.Should().OnlyContain(r => r.TypesFetchedNow == 2);
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_still_gives_every_session_its_own_rows()
+    {
+        await using var db = await SeededDbAsync();
+        var (pricer, _) = NewPricer(db, new long[] { 34, 35 });
+
+        await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(1440), M(1500)),
+        });
+
+        (await RowsOfAsync(db, "day-1")).Select(r => (r.Type, r.Buy, r.Sell)).Should().BeEquivalentTo(
+            new[] { (34L, (double?)50.0, (double?)60.0), (35L, (double?)50.0, (double?)60.0) });
+        (await RowsOfAsync(db, "day-2")).Select(r => (r.Type, r.Buy, r.Sell)).Should().BeEquivalentTo(
+            new[] { (34L, (double?)50.0, (double?)60.0), (35L, (double?)50.0, (double?)60.0) });
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_keeps_each_window_on_its_own_captured_prices()
+    {
+        await using var db = await SeededDbAsync();
+        await SeedAsync(db, 34, Jita, M(10), buy: 10, sell: 20);        // inside day 1
+        await SeedAsync(db, 34, Jita, M(1450), buy: 30, sell: 40);      // inside day 2
+        var (pricer, client) = NewPricer(db, new long[] { 34 });
+
+        var results = await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(1440), M(1500)),
+        });
+
+        results.Should().OnlyContain(r => r.Basis == HistoricalPriceBasis.AveragedFromWindow);
+        client.Calls.Should().BeEmpty("both windows are fully covered");
+        (await RowsOfAsync(db, "day-1")).Should().Equal((34L, Jita, Iso(M(60)), 10.0, 20.0));
+        (await RowsOfAsync(db, "day-2")).Should().Equal((34L, Jita, Iso(M(1500)), 30.0, 40.0));
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_never_averages_an_earlier_days_own_averaged_row()
+    {
+        await using var db = await SeededDbAsync();
+        // Day 1 averages this to 10 and stamps its row at M(60) - which falls
+        // inside day 2's window. Day 2 must not treat that derived row as a
+        // captured price.
+        await SeedAsync(db, 34, Jita, M(10), buy: 10, sell: 20);
+        var (pricer, _) = NewPricer(db, new long[] { 34 });
+
+        var results = await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(55), M(120)),
+        });
+
+        results[0].Basis.Should().Be(HistoricalPriceBasis.AveragedFromWindow);
+        results[1].Basis.Should().Be(
+            HistoricalPriceBasis.FetchedToday,
+            "day 2's window holds no genuinely captured price, only day 1's derived one");
+        (await RowsOfAsync(db, "day-2")).Select(r => (r.Type, r.Buy, r.Sell)).Should().Equal(
+            (34L, (double?)50.0, (double?)60.0));
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_fills_a_later_days_gap_from_the_price_already_fetched()
+    {
+        await using var db = await SeededDbAsync();
+        // Day 1 covers type 34 from its window but needs 35; day 2 needs both.
+        await SeedAsync(db, 34, Jita, M(10), buy: 10, sell: 20);
+        var (pricer, client) = NewPricer(db, new long[] { 34, 35 });
+
+        var results = await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(1440), M(1500)),
+        });
+
+        results[0].Basis.Should().Be(HistoricalPriceBasis.Mixed);
+        results[1].Basis.Should().Be(HistoricalPriceBasis.FetchedToday);
+        client.Calls.Should().HaveCount(2, "day 1 fetches 35, then day 2 fetches only the 34 nobody has yet");
+        client.Calls[0].TypeIds.Should().BeEquivalentTo(new long[] { 35 });
+        client.Calls[1].TypeIds.Should().BeEquivalentTo(new long[] { 34 });
+        (await RowsOfAsync(db, "day-2")).Select(r => r.Type).Should().BeEquivalentTo(new long[] { 34, 35 });
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_leaves_a_material_the_market_cannot_price_unpriced()
+    {
+        await using var db = await SeededDbAsync();
+        var (pricer, _) = NewPricer(db, new long[] { 34, 35 }, respond: (station, ids) =>
+            ids.Where(id => id == 34).Select(id => new MarketPrice(id, station, 50.0, 60.0, DateTimeOffset.UtcNow)).ToList());
+
+        var results = await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("day-1", M(0), M(60)),
+            new HistoricalPricingTarget("day-2", M(1440), M(1500)),
+        });
+
+        results.Should().OnlyContain(r => r.TypesFetchedNow == 1 && r.TypesUnpriced == 1);
+        (await RowsOfAsync(db, "day-2")).Select(r => r.Type).Should().Equal(34L);
+    }
+
+    [Fact]
+    public async Task PriceBatchAsync_validates_its_input()
+    {
+        await using var db = await SeededDbAsync();
+        var (pricer, _) = NewPricer(db, new long[] { 34 });
+
+        var nullTargets = async () => await pricer.PriceBatchAsync(null!);
+        await nullTargets.Should().ThrowAsync<ArgumentNullException>();
+
+        var duplicates = async () => await pricer.PriceBatchAsync(new[]
+        {
+            new HistoricalPricingTarget("same", M(0), M(60)),
+            new HistoricalPricingTarget("same", M(60), M(120)),
+        });
+        await duplicates.Should().ThrowAsync<ArgumentException>();
+
+        (await pricer.PriceBatchAsync(Array.Empty<HistoricalPricingTarget>())).Should().BeEmpty();
+    }
+
     private sealed class StubPriceClient : IMarketPriceClient
     {
         public List<(long StationId, IReadOnlyList<long> TypeIds)> Calls { get; } = new();

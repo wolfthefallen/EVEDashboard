@@ -119,4 +119,69 @@ public class SessionNameTemplateExpanderTests
         var result = SessionNameTemplateExpander.Expand("{{$DATETIME}}", Pilots(), AsOf);
         result.Should().Be("2026-05-02 14:30");
     }
+
+    // ---- Tokens for names generated in bulk ------------------------------------
+
+    [Fact]
+    public void Expand_DOW_is_the_window_starts_weekday()
+    {
+        var start = new DateTimeOffset(2026, 10, 11, 22, 0, 0, TimeSpan.Zero);  // a Sunday
+
+        var result = SessionNameTemplateExpander.Expand("{{$DATE}} {{$DOW}}", Pilots(), start, start, start);
+
+        result.Should().Be("2026-10-11 Sun");
+    }
+
+    [Fact]
+    public void Expand_DOW_falls_back_to_asOf_when_no_window_is_given()
+    {
+        var result = SessionNameTemplateExpander.Expand("{{$DOW}}", Pilots(), AsOf);
+
+        result.Should().Be("Sat", "2026-05-02 is a Saturday");
+    }
+
+    [Fact]
+    public void Expand_OVERNIGHT_is_empty_when_the_window_stays_inside_one_day()
+    {
+        var start = new DateTimeOffset(2026, 10, 11, 14, 0, 0, TimeSpan.Zero);
+        var stop = new DateTimeOffset(2026, 10, 11, 18, 30, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand("{{$DATE}} history{{$OVERNIGHT}}", Pilots(), start, start, stop);
+
+        result.Should().Be("2026-10-11 history", "an ordinary day must leave no orphaned brackets behind");
+    }
+
+    [Fact]
+    public void Expand_OVERNIGHT_names_the_day_a_run_ended_on()
+    {
+        var start = new DateTimeOffset(2026, 10, 11, 22, 0, 0, TimeSpan.Zero);
+        var stop = new DateTimeOffset(2026, 10, 12, 2, 30, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand("{{$DATE}} history{{$OVERNIGHT}}", Pilots(), start, start, stop);
+
+        result.Should().Be("2026-10-11 history (ends 12Oct)");
+    }
+
+    [Fact]
+    public void Expand_OVERNIGHT_compares_dates_not_elapsed_hours()
+    {
+        var start = new DateTimeOffset(2026, 10, 11, 23, 55, 0, TimeSpan.Zero);
+        var stop = new DateTimeOffset(2026, 10, 12, 0, 5, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand("{{$OVERNIGHT}}", Pilots(), start, start, stop);
+
+        result.Should().Be(" (ends 12Oct)", "ten minutes either side of midnight is still two dates");
+    }
+
+    [Fact]
+    public void Expand_the_generated_daily_name_reads_as_intended()
+    {
+        var start = new DateTimeOffset(2026, 10, 11, 20, 0, 0, TimeSpan.Zero);
+        var stop = new DateTimeOffset(2026, 10, 11, 23, 0, 0, TimeSpan.Zero);
+
+        var result = SessionNameTemplateExpander.Expand(
+            "{{$DATE}} {{$DOW}} history{{$OVERNIGHT}}", Pilots(), start, start, stop);
+
+        result.Should().Be("2026-10-11 Sun history");
+    }
 }

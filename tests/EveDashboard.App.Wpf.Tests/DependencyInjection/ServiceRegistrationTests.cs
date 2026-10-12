@@ -259,6 +259,65 @@ public class ServiceRegistrationTests
     }
 
     [Fact]
+    public async Task Resolved_historical_dialog_and_daily_runner_are_fully_wired()
+    {
+        // The "Build from history" view-model is only resolved when the user opens
+        // the dialog, so a missing registration would not surface at startup - it
+        // would surface as a crash on the button. Resolve it here instead, and run
+        // its Loaded path, which touches fleets, settings and the gamelog survey.
+        await using var sessionDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
+        await SchemaInitializer.EnsureSchemaAsync(sessionDb);
+        await using var sdeDb = new SqliteDatabase("Data Source=:memory:", NullLogger<SqliteDatabase>.Instance);
+
+        var sessionStore = new SessionStore(NullLogger<SessionStore>.Instance);
+        var sdeStorage = new FakeSdeStorage(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".sqlite"));
+        var sdeUpdater = new FakeSdeUpdater();
+        var sdeLookup = new FakeSdeLookup();
+        var settingsRepo = new SqliteSettingsRepository(sessionDb, NullLogger<SqliteSettingsRepository>.Instance);
+        var stationCatalog = new SqliteMarketStationCatalog(sessionDb, NullLogger<SqliteMarketStationCatalog>.Instance);
+        await settingsRepo.EnsureSeedDefaultsAsync();
+        await stationCatalog.EnsureSeedDefaultsAsync();
+
+        using var fixture = new SessionControllerTestFixture();
+        var tempGamelogDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempGamelogDir);
+        try
+        {
+            var discovery = new GamelogDiscoveryService(tempGamelogDir, NullLogger<GamelogDiscoveryService>.Instance);
+            IReadOnlyList<Character> chars = new[] { new Character(1, "Pilot", Path.Combine(tempGamelogDir, "1.txt")) };
+
+            var (priceClient, priceFetcher, iskCalc) = PricingPipelineFactory.Build(
+                sessionDb, sdeLookup, settingsRepo, fixture.ActiveSession);
+            using var sp = ServiceRegistration.BuildServiceProvider(
+                NullLoggerFactory.Instance,
+                sessionDb, sessionStore,
+                sdeDb, sdeStorage, sdeUpdater, sdeLookup,
+                settingsRepo, stationCatalog,
+                fixture.ActiveSession, fixture.Writer, fixture.Watcher,
+                new FakeGamelogLineParser(), discovery, chars,
+                new FakeBootstrapConfigLoader(),
+                priceClient,
+                new EsiMarketPriceClient(new HttpClient(), stationCatalog, NullLogger<EsiMarketPriceClient>.Instance),
+                priceFetcher, iskCalc,
+                new GitHubReleaseClient(new HttpClient(), NullLogger<GitHubReleaseClient>.Instance));
+
+            var runner = sp.GetRequiredService<EveDashboard.App.Wpf.Reporting.DailyHistorySessionRunner>();
+            runner.Should().NotBeNull();
+
+            var vm = sp.GetRequiredService<EveDashboard.App.Wpf.Dialogs.HistoricalSessionDialogViewModel>();
+            vm.ResetForOpen(null);
+            Func<Task> act = async () => await vm.InitializeAsync();
+            await act.Should().NotThrowAsync("the dialog must be resolvable and able to hydrate");
+
+            vm.InventoryNotice.Should().NotBeEmpty("an empty gamelog folder is still reported, not left blank");
+        }
+        finally
+        {
+            if (Directory.Exists(tempGamelogDir)) Directory.Delete(tempGamelogDir, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task Resolved_SessionStatsRepository_also_uses_sessionDb()
     {
         // Same regression check as above, narrowed to the stats repo factory.

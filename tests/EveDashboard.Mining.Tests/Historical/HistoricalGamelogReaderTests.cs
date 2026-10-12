@@ -1,7 +1,6 @@
-using EveDashboard.Core.Domain;
-using EveDashboard.Core.Lookup;
 using EveDashboard.Mining.Historical;
 using EveDashboard.Mining.Parsing;
+using EveDashboard.Mining.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -190,18 +189,4 @@ public class HistoricalGamelogReaderTests
         c.Should().Throw<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Minimal <see cref="ISdeLookup"/>: resolves every product name to one type
-    /// id so the real parser emits a Tick/Crit for every mining line. The reader
-    /// under test only cares about timestamps and counts, not ore identity.
-    /// </summary>
-    private sealed class AnyOreLookup : ISdeLookup
-    {
-        public long? TryGetTypeId(string productName) => 1230L;
-        public MiningProduct? TryGetProduct(long typeId) => null;
-        public IReadOnlyList<TypeMaterial> GetTypeMaterials(long typeId) => Array.Empty<TypeMaterial>();
-        public IReadOnlyList<long> GetRefinedMaterialTypeIds() => Array.Empty<long>();
-        public string? TryGetRefinedMaterialName(long typeId) => null;
-        public Task LoadAsync(CancellationToken ct = default) => Task.CompletedTask;
-    }
 }

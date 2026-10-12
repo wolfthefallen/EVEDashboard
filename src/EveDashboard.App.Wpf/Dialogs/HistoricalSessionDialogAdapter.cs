@@ -22,7 +22,7 @@ public sealed class HistoricalSessionDialogAdapter : IHistoricalSessionDialog
     }
 
     /// <inheritdoc />
-    public HistoricalBuildOutcome? Show(IReadOnlyList<string>? preselectedSessionIds)
+    public HistoricalBatchOutcome? Show(IReadOnlyList<string>? preselectedSessionIds)
     {
         var vm = _services.GetRequiredService<HistoricalSessionDialogViewModel>();
         vm.ResetForOpen(preselectedSessionIds);

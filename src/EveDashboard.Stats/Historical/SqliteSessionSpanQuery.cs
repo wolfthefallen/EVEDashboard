@@ -71,6 +71,12 @@ public sealed class SqliteSessionSpanQuery : ISessionSpanQuery
         return LoadAsync(s => wanted.Contains(s.SessionId), asOf, ct);
     }
 
+    /// <inheritdoc />
+    public Task<IReadOnlyList<SessionSpan>> GetAllAsync(
+        DateTimeOffset? asOf = null,
+        CancellationToken ct = default) =>
+        LoadAsync(static _ => true, asOf, ct);
+
     /// <summary>Read every non-archived span, keep those <paramref name="keep"/> accepts, attach pilots.</summary>
     private async Task<IReadOnlyList<SessionSpan>> LoadAsync(
         Func<(string SessionId, DateTimeOffset Start, DateTimeOffset Stop), bool> keep,

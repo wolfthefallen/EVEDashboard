@@ -39,4 +39,24 @@ public interface ISessionSpanQuery
         IReadOnlyCollection<string> sessionIds,
         DateTimeOffset? asOf = null,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Return every non-archived session's span, with its pilots and their
+    /// recorded roles, in start order.
+    /// </summary>
+    /// <param name="asOf">The instant an in-flight session is assumed to run until; defaults to now.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Every span the store holds. Sessions with no <c>session_time</c> row are skipped (they have no span).</returns>
+    /// <remarks>
+    /// A batch build of many days needs the whole set once rather than a query
+    /// per day: <see cref="OverlapAnalyzer.Analyze"/> does its own window
+    /// filtering, so one result serves every day, and planning the batch before
+    /// anything is written keeps the sessions the batch itself creates out of its
+    /// own overlap candidates. The same result also answers "what role did this
+    /// pilot have last time" via <see cref="PilotRoleHistory.Resolve"/>, so no
+    /// second query is needed for that either.
+    /// </remarks>
+    Task<IReadOnlyList<SessionSpan>> GetAllAsync(
+        DateTimeOffset? asOf = null,
+        CancellationToken ct = default);
 }

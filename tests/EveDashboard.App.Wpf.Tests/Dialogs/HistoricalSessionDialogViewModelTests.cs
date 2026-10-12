@@ -1,6 +1,7 @@
 namespace EveDashboard.App.Wpf.Tests.Dialogs;
 
 using EveDashboard.App.Wpf.Dialogs;
+using EveDashboard.App.Wpf.Reporting;
 using EveDashboard.App.Wpf.Tests.Helpers;
 using EveDashboard.Core.Domain;
 using EveDashboard.Core.Sessions;
@@ -24,6 +25,9 @@ public class HistoricalSessionDialogViewModelTests
 
     private static SessionSpanPilot Pilot(long id, string name, PilotRole role = PilotRole.Miner) => new(id, name, role);
 
+    private static MiningEvent Tick(long pilot, DateTimeOffset at) =>
+        new(MiningEventKind.Tick, at, pilot, "Veldspar", 1230L, 100);
+
     private sealed class Harness
     {
         public FakeSpanQuery Spans { get; } = new();
@@ -34,6 +38,7 @@ public class HistoricalSessionDialogViewModelTests
         public FakeSettingsRepository Settings { get; } = new();
         public ActiveSessionContext Active { get; } = new();
         public FakeConfirmDialog Confirm { get; }
+        public DailyHistorySessionRunner Runner { get; }
         public HistoricalSessionDialogViewModel Vm { get; }
 
         public Harness(bool confirmResult = true)
@@ -42,8 +47,10 @@ public class HistoricalSessionDialogViewModelTests
             Fleets.Fleets.AddRange(new[] { FleetB, FleetA });
             Settings.DefaultFleetId = FleetA.FleetId;
             Settings.AutoPauseIdleMinutes = 7;
+            Runner = new DailyHistorySessionRunner(
+                Reader, Spans, Builder, Pricer, NullLogger<DailyHistorySessionRunner>.Instance);
             Vm = new HistoricalSessionDialogViewModel(Spans, Reader, Builder, Pricer, Fleets, Settings, Active, Confirm,
-                NullLogger<HistoricalSessionDialogViewModel>.Instance);
+                Runner, NullLogger<HistoricalSessionDialogViewModel>.Instance);
         }
 
         /// <summary>Open in date-range mode with a valid one-hour window on 2026-05-05 12:00..13:00 and fleet Alpha.</summary>
@@ -51,6 +58,9 @@ public class HistoricalSessionDialogViewModelTests
         {
             Vm.ResetForOpen(null);
             await Vm.InitializeAsync();
+            // These tests cover the single-window flow; the per-day batch has its
+            // own tests against the runner.
+            Vm.SplitByDay = false;
             Vm.StartDate = T0.UtcDateTime.Date; Vm.StartTimeText = "12:00";
             Vm.StopDate = T0.UtcDateTime.Date;  Vm.StopTimeText = "13:00";
             Vm.SelectedFleet = FleetA;
@@ -85,8 +95,171 @@ public class HistoricalSessionDialogViewModelTests
         h.Vm.SelectedFleet.Should().Be(FleetA);
         h.Vm.IsCombineMode.Should().BeFalse();
         h.Vm.HeaderText.Should().Be("Build a session from history");
+        h.Vm.SplitByDay.Should().BeTrue("a date-range open defaults to one session per mining day");
+        h.Vm.SessionName.Should().Be("{{$DATE}} {{$DOW}} history{{$OVERNIGHT}}");
+        h.Vm.IsFleetVisible.Should().BeFalse("per-day mode discovers its roster from the logs");
+        h.Vm.HasChecked.Should().BeFalse("the action slot shows the check until a check has run");
+
+        h.Vm.SplitByDay = false;
+
+        h.Vm.SessionName.Should().Be("{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history",
+            "the single-window mode names the whole window instead");
+        h.Vm.IsFleetVisible.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task A_name_the_user_edited_survives_switching_mode()
+    {
+        var h = new Harness();
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+
+        h.Vm.SessionName = "Hek belt grind";
+        h.Vm.SplitByDay = false;
+
+        h.Vm.SessionName.Should().Be("Hek belt grind");
+    }
+
+    [Fact]
+    public async Task Per_day_mode_needs_no_fleet()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Reader.Result = new HistoricalReadResult(
+            new[] { Tick(1, M(0)), Tick(1, M(2)) }, new[] { "log.txt" }, Array.Empty<long>());
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+        h.Vm.SelectedFleet = null;
+        h.Vm.StartDate = T0.UtcDateTime.Date; h.Vm.StartTimeText = "00:00";
+        h.Vm.StopDate = T0.UtcDateTime.Date; h.Vm.StopTimeText = "23:59";
+
+        await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
+
+        h.Vm.StatusMessage.Should().NotContain("Pick a fleet");
+        h.Vm.DayRows.Should().ContainSingle().Which.WillBuild.Should().BeTrue();
+        h.Vm.ActionButtonText.Should().Be("Build 1 session");
+    }
+
+    [Fact]
+    public async Task Per_day_mode_previews_the_names_and_then_builds_exactly_those_days()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Reader.Result = new HistoricalReadResult(
+            new[] { Tick(1, M(0)), Tick(1, M(1440)) }, new[] { "log.txt" }, Array.Empty<long>());
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+        h.Vm.StartDate = T0.UtcDateTime.Date; h.Vm.StartTimeText = "00:00";
+        h.Vm.StopDate = T0.AddDays(2).UtcDateTime.Date; h.Vm.StopTimeText = "23:59";
+
+        await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
+
+        h.Vm.DayRows.Select(r => r.Name).Should().Equal(
+            new[] { "2026-05-05 Tue history", "2026-05-06 Wed history" },
+            "the preview shows the exact names the build will use");
+        h.Vm.ActionButtonText.Should().Be("Build 2 sessions");
+
+        await h.Vm.BuildCommand.ExecuteAsync(null);
+
+        h.Builder.Requests.Select(r => r.Name).Should().Equal(
+            new[] { "2026-05-05 Tue history", "2026-05-06 Wed history" });
+        h.Vm.Outcome!.Sessions.Should().HaveCount(2);
+        h.Vm.ShouldClose.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task The_progress_bar_is_cleared_once_a_batch_finishes()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Reader.Result = new HistoricalReadResult(
+            new[] { Tick(1, M(0)), Tick(1, M(1440)) }, new[] { "log.txt" }, Array.Empty<long>());
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+        h.Vm.StartDate = T0.UtcDateTime.Date; h.Vm.StartTimeText = "00:00";
+        h.Vm.StopDate = T0.AddDays(2).UtcDateTime.Date; h.Vm.StopTimeText = "23:59";
+
+        await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
+
+        h.Vm.IsBusy.Should().BeFalse("the window must be usable again after the check");
+        h.Vm.ProgressMaximum.Should().Be(0);
+        h.Vm.IsProgressIndeterminate.Should().BeFalse();
+
+        await h.Vm.BuildCommand.ExecuteAsync(null);
+
+        h.Vm.IsBusy.Should().BeFalse("and after the build, so the dialog can close");
+        h.Vm.ProgressValue.Should().Be(0);
+        h.Vm.ProgressMaximum.Should().Be(0);
+        h.Vm.IsProgressIndeterminate.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task A_failed_build_still_clears_the_busy_state()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Reader.Result = new HistoricalReadResult(
+            new[] { Tick(1, M(0)) }, new[] { "log.txt" }, Array.Empty<long>());
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+        h.Vm.StartDate = T0.UtcDateTime.Date; h.Vm.StopDate = T0.UtcDateTime.Date; h.Vm.StopTimeText = "23:59";
+        await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
+        h.Builder.Throw = new InvalidOperationException("boom");
+
+        await h.Vm.BuildCommand.ExecuteAsync(null);
+
+        h.Vm.IsBusy.Should().BeFalse("a stuck busy flag would lock the dialog shut");
+        h.Vm.ShouldClose.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Toggling_the_merge_box_invalidates_the_checked_plan()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Reader.Result = new HistoricalReadResult(
+            new[] { Tick(1, M(0)) }, new[] { "log.txt" }, Array.Empty<long>());
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+        h.Vm.StartDate = T0.UtcDateTime.Date; h.Vm.StopDate = T0.UtcDateTime.Date; h.Vm.StopTimeText = "23:59";
+        await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
+        h.Vm.HasChecked.Should().BeTrue();
+
+        h.Vm.MergeSameDaySessions = false;
+
+        h.Vm.HasChecked.Should().BeFalse("the plan belonged to the old answer");
+        h.Vm.DayRows.Should().BeEmpty();
+        h.Vm.ActionButtonText.Should().Be("Check the days");
+    }
+
+    [Fact]
+    public async Task Use_all_available_logs_fills_the_range_and_never_runs_past_now()
+    {
+        var h = new Harness();
+        h.Reader.SetInventory((1L, "Asgar"));
+        h.Vm.ResetForOpen(null);
+        await h.Vm.InitializeAsync();
+
+        h.Vm.UseAllAvailableLogsCommand.Execute(null);
+
+        h.Vm.StartDate.Should().Be(FakeReader.InventoryAt.UtcDateTime.Date, "the range starts at the oldest log");
+        h.Vm.TryParseWindow(out var start, out var stop).Should().BeNull("the prefilled range must be valid");
+        stop.Should().BeOnOrBefore(DateTimeOffset.UtcNow, "a window ending in the future is refused");
+        start.Should().BeBefore(stop);
+    }
+
+    [Fact]
+    public void Combine_mode_never_builds_per_day()
+    {
+        var h = new Harness();
+
+        h.Vm.ResetForOpen(new[] { "s1", "s2" });
+
+        h.Vm.IsCombineMode.Should().BeTrue();
+        h.Vm.SplitByDay.Should().BeFalse("combining is about named sessions, not days");
+        h.Vm.IsDailyMode.Should().BeFalse();
+        h.Vm.IsFleetVisible.Should().BeTrue();
         h.Vm.SessionName.Should().Be("{{$STARTDATE}} - {{$ENDDATE}} {{$YYYY}} history");
-        h.Vm.HasChecked.Should().BeFalse("the action slot shows Check overlaps until a check has run");
     }
 
     [Fact]
@@ -95,6 +268,7 @@ public class HistoricalSessionDialogViewModelTests
         var h = new Harness();
         h.Vm.ResetForOpen(null);
         await h.Vm.InitializeAsync();
+        h.Vm.SplitByDay = false; // the fleet is only asked for in single-window mode
 
         await h.Vm.CheckOverlapsCommand.ExecuteAsync(null);
         h.Vm.StatusMessage.Should().Be("Pick both a start and a stop date.");
@@ -196,8 +370,9 @@ public class HistoricalSessionDialogViewModelTests
 
         h.Vm.ShouldClose.Should().BeTrue();
         h.Vm.Outcome.Should().NotBeNull();
-        h.Vm.Outcome!.SessionId.Should().Be("new-id");
-        h.Vm.Outcome.SessionName.Should().Be("2026-05-05 rebuilt");
+        var session = h.Vm.Outcome!.Sessions.Should().ContainSingle().Subject;
+        session.SessionId.Should().Be("new-id");
+        session.SessionName.Should().Be("2026-05-05 rebuilt");
         h.Vm.Outcome.Summary.Should().Contain("3 copied + 4 parsed mining rows, 1 session(s) archived")
             .And.Contain("valued with TODAY's prices")
             .And.Contain("No gamelog found for: Bjorn");
@@ -309,65 +484,6 @@ public class HistoricalSessionDialogViewModelTests
 
         h.Vm.ShouldClose.Should().BeTrue();
         h.Vm.Outcome.Should().BeNull();
-    }
-
-    // ---- fakes --------------------------------------------------------------------
-
-    private sealed class FakeSpanQuery : ISessionSpanQuery
-    {
-        public List<SessionSpan> Spans { get; } = new();
-        public int OverlapCalls { get; private set; }
-
-        public Task<IReadOnlyList<SessionSpan>> GetOverlappingAsync(DateTimeOffset windowStart, DateTimeOffset windowStop, DateTimeOffset? asOf = null, CancellationToken ct = default)
-        {
-            OverlapCalls++;
-            return Task.FromResult<IReadOnlyList<SessionSpan>>(Spans.Where(s => s.Start <= windowStop && s.Stop >= windowStart).OrderBy(s => s.Start).ToList());
-        }
-
-        public Task<IReadOnlyList<SessionSpan>> GetSpansAsync(IReadOnlyCollection<string> sessionIds, DateTimeOffset? asOf = null, CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<SessionSpan>>(Spans.Where(s => sessionIds.Contains(s.SessionId)).OrderBy(s => s.Start).ToList());
-    }
-
-    private sealed class FakeReader : IHistoricalGamelogReader
-    {
-        public HistoricalReadResult Result { get; set; } = new(Array.Empty<MiningEvent>(), Array.Empty<string>(), Array.Empty<long>());
-        public int Calls { get; private set; }
-        public IReadOnlyCollection<long>? LastPilotIds { get; private set; }
-        public DateTimeOffset LastStart { get; private set; }
-        public DateTimeOffset LastStop { get; private set; }
-
-        public Task<HistoricalReadResult> ReadAsync(IReadOnlyCollection<long> pilotIds, DateTimeOffset windowStart, DateTimeOffset windowStop, CancellationToken ct = default)
-        {
-            Calls++; LastPilotIds = pilotIds; LastStart = windowStart; LastStop = windowStop;
-            return Task.FromResult(Result);
-        }
-    }
-
-    private sealed class FakeBuilder : IHistoricalSessionBuilder
-    {
-        public HistoricalSessionRequest? LastRequest { get; private set; }
-        public Exception? Throw { get; set; }
-
-        public Task<HistoricalSessionResult> BuildAsync(HistoricalSessionRequest request, CancellationToken ct = default)
-        {
-            LastRequest = request;
-            if (Throw is not null) throw Throw;
-            return Task.FromResult(new HistoricalSessionResult("new-id", request.WindowStart, request.WindowStop, 3, 4, 0, 0, 0, 1, 2, request.SessionIdsToMerge));
-        }
-    }
-
-    private sealed class FakePricer : IHistoricalMarketPricer
-    {
-        public HistoricalPricingResult Result { get; set; } = new("new-id", 60003760, HistoricalPriceBasis.AveragedFromWindow, 1, 1, 0, 0);
-        public string? LastSessionId { get; private set; }
-        public DateTimeOffset LastStart { get; private set; }
-        public DateTimeOffset LastStop { get; private set; }
-
-        public Task<HistoricalPricingResult> PriceAsync(string sessionId, DateTimeOffset windowStart, DateTimeOffset windowStop, CancellationToken ct = default)
-        {
-            LastSessionId = sessionId; LastStart = windowStart; LastStop = windowStop;
-            return Task.FromResult(Result);
-        }
     }
 
     private sealed class FakeFleetRepository : IFleetRepository

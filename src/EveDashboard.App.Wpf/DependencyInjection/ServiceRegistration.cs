@@ -320,6 +320,12 @@ public static class ServiceRegistration
             settingsRepo,
             marketPriceFetcher,
             sp.GetRequiredService<ILogger<HistoricalMarketPricer>>()));
+        services.AddSingleton<DailyHistorySessionRunner>(sp => new DailyHistorySessionRunner(
+            sp.GetRequiredService<IHistoricalGamelogReader>(),
+            sp.GetRequiredService<ISessionSpanQuery>(),
+            sp.GetRequiredService<IHistoricalSessionBuilder>(),
+            sp.GetRequiredService<IHistoricalMarketPricer>(),
+            sp.GetRequiredService<ILogger<DailyHistorySessionRunner>>()));
         services.AddSingleton<HistoricalSessionDialogViewModel>();
         services.AddTransient<HistoricalSessionDialog>();
         services.AddSingleton<IHistoricalSessionDialog, HistoricalSessionDialogAdapter>();

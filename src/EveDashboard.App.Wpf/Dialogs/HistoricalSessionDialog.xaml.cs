@@ -29,6 +29,7 @@ public partial class HistoricalSessionDialog : Window
         DataContext = _vm;
         _vm.PropertyChanged += OnVmPropertyChanged;
         Loaded += OnLoaded;
+        Closing += OnClosing;
         Closed += OnClosed;
     }
 
@@ -48,6 +49,21 @@ public partial class HistoricalSessionDialog : Window
             _log.LogWarning(ex, "Failed to initialise the Build-from-history dialog.");
             _vm.StatusMessage = "Could not load: " + ex.Message;
         }
+    }
+
+    /// <summary>
+    /// Refuse to close while a batch is running.
+    /// </summary>
+    /// <remarks>
+    /// The work runs on a background thread, so closing the window would not stop
+    /// it - sessions would keep being written with nowhere to report the result,
+    /// and the user would be left unsure what had happened. The view-model asks
+    /// to close through <c>ShouldClose</c> once the run is finished, which is
+    /// allowed because it clears the busy flag first.
+    /// </remarks>
+    private void OnClosing(object? sender, CancelEventArgs e)
+    {
+        if (_vm.IsBusy) e.Cancel = true;
     }
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
